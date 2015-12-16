@@ -1,9 +1,6 @@
 /* opensslconf.h */
 /* WARNING: Generated automatically from opensslconf.h.in by Configure. */
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
 /* OpenSSL was configured with the following options: */
 #ifndef OPENSSL_SYSNAME_WIN32
 # define OPENSSL_SYSNAME_WIN32
@@ -11,8 +8,14 @@ extern "C" {
 #ifndef OPENSSL_DOING_MAKEDEPEND
 
 
-#ifndef OPENSSL_NO_EC_NISTP_64_GCC_128
-# define OPENSSL_NO_EC_NISTP_64_GCC_128
+#ifndef OPENSSL_NO_CAMELLIA
+# define OPENSSL_NO_CAMELLIA
+#endif
+#ifndef OPENSSL_NO_CAPIENG
+# define OPENSSL_NO_CAPIENG
+#endif
+#ifndef OPENSSL_NO_CMS
+# define OPENSSL_NO_CMS
 #endif
 #ifndef OPENSSL_NO_GMP
 # define OPENSSL_NO_GMP
@@ -23,11 +26,8 @@ extern "C" {
 #ifndef OPENSSL_NO_KRB5
 # define OPENSSL_NO_KRB5
 #endif
-#ifndef OPENSSL_NO_LIBUNBOUND
-# define OPENSSL_NO_LIBUNBOUND
-#endif
-#ifndef OPENSSL_NO_MD2
-# define OPENSSL_NO_MD2
+#ifndef OPENSSL_NO_MDC2
+# define OPENSSL_NO_MDC2
 #endif
 #ifndef OPENSSL_NO_RC5
 # define OPENSSL_NO_RC5
@@ -35,17 +35,8 @@ extern "C" {
 #ifndef OPENSSL_NO_RFC3779
 # define OPENSSL_NO_RFC3779
 #endif
-#ifndef OPENSSL_NO_SCTP
-# define OPENSSL_NO_SCTP
-#endif
-#ifndef OPENSSL_NO_SSL_TRACE
-# define OPENSSL_NO_SSL_TRACE
-#endif
-#ifndef OPENSSL_NO_STORE
-# define OPENSSL_NO_STORE
-#endif
-#ifndef OPENSSL_NO_UNIT_TEST
-# define OPENSSL_NO_UNIT_TEST
+#ifndef OPENSSL_NO_SEED
+# define OPENSSL_NO_SEED
 #endif
 
 #endif /* OPENSSL_DOING_MAKEDEPEND */
@@ -53,17 +44,20 @@ extern "C" {
 #ifndef OPENSSL_THREADS
 # define OPENSSL_THREADS
 #endif
-#ifndef OPENSSL_NO_ASM
-# define OPENSSL_NO_ASM
-#endif
 
 /* The OPENSSL_NO_* macros are also defined as NO_* if the application
    asks for it.  This is a transient feature that is provided for those
    who haven't had the time to do the appropriate changes in their
    applications.  */
 #ifdef OPENSSL_ALGORITHM_DEFINES
-# if defined(OPENSSL_NO_EC_NISTP_64_GCC_128) && !defined(NO_EC_NISTP_64_GCC_128)
-#  define NO_EC_NISTP_64_GCC_128
+# if defined(OPENSSL_NO_CAMELLIA) && !defined(NO_CAMELLIA)
+#  define NO_CAMELLIA
+# endif
+# if defined(OPENSSL_NO_CAPIENG) && !defined(NO_CAPIENG)
+#  define NO_CAPIENG
+# endif
+# if defined(OPENSSL_NO_CMS) && !defined(NO_CMS)
+#  define NO_CMS
 # endif
 # if defined(OPENSSL_NO_GMP) && !defined(NO_GMP)
 #  define NO_GMP
@@ -74,11 +68,8 @@ extern "C" {
 # if defined(OPENSSL_NO_KRB5) && !defined(NO_KRB5)
 #  define NO_KRB5
 # endif
-# if defined(OPENSSL_NO_LIBUNBOUND) && !defined(NO_LIBUNBOUND)
-#  define NO_LIBUNBOUND
-# endif
-# if defined(OPENSSL_NO_MD2) && !defined(NO_MD2)
-#  define NO_MD2
+# if defined(OPENSSL_NO_MDC2) && !defined(NO_MDC2)
+#  define NO_MDC2
 # endif
 # if defined(OPENSSL_NO_RC5) && !defined(NO_RC5)
 #  define NO_RC5
@@ -86,29 +77,35 @@ extern "C" {
 # if defined(OPENSSL_NO_RFC3779) && !defined(NO_RFC3779)
 #  define NO_RFC3779
 # endif
-# if defined(OPENSSL_NO_SCTP) && !defined(NO_SCTP)
-#  define NO_SCTP
-# endif
-# if defined(OPENSSL_NO_SSL_TRACE) && !defined(NO_SSL_TRACE)
-#  define NO_SSL_TRACE
-# endif
-# if defined(OPENSSL_NO_STORE) && !defined(NO_STORE)
-#  define NO_STORE
-# endif
-# if defined(OPENSSL_NO_UNIT_TEST) && !defined(NO_UNIT_TEST)
-#  define NO_UNIT_TEST
+# if defined(OPENSSL_NO_SEED) && !defined(NO_SEED)
+#  define NO_SEED
 # endif
 #endif
 
 /* crypto/opensslconf.h.in */
+
+#ifdef OPENSSL_DOING_MAKEDEPEND
+
+/* Include any symbols here that have to be explicitly set to enable a feature
+ * that should be visible to makedepend.
+ *
+ * [Our "make depend" doesn't actually look at this, we use actual build settings
+ * instead; we want to make it easy to remove subdirectories with disabled algorithms.]
+ */
+
+#ifndef OPENSSL_FIPS
+#define OPENSSL_FIPS
+#endif
+
+#endif
 
 /* Generate 80386 code? */
 #undef I386_ONLY
 
 #if !(defined(VMS) || defined(__VMS)) /* VMS uses logical names instead */
 #if defined(HEADER_CRYPTLIB_H) && !defined(OPENSSLDIR)
-#define ENGINESDIR "C:\\openssl/lib/engines"
-#define OPENSSLDIR "C:\\openssl/ssl"
+#define ENGINESDIR "D:\\openssl/lib/engines"
+#define OPENSSLDIR "D:\\openssl/ssl"
 #endif
 #endif
 
@@ -166,9 +163,14 @@ extern "C" {
 /* Should we define BN_DIV2W here? */
 
 /* Only one for the following should be defined */
+/* The prime number generation stuff may not work when
+ * EIGHT_BIT but I don't care since I've only used this mode
+ * for debuging the bignum libraries */
 #undef SIXTY_FOUR_BIT_LONG
 #undef SIXTY_FOUR_BIT
 #define THIRTY_TWO_BIT
+#undef SIXTEEN_BIT
+#undef EIGHT_BIT
 #endif
 
 #if defined(HEADER_RC4_LOCL_H) && !defined(CONFIG_HEADER_RC4_LOCL_H)
@@ -204,7 +206,7 @@ extern "C" {
 #endif
 
 #if defined(DES_RISC1) && defined(DES_RISC2)
-#error YOU SHOULD NOT HAVE BOTH DES_RISC1 AND DES_RISC2 DEFINED!!!!!
+YOU SHOULD NOT HAVE BOTH DES_RISC1 AND DES_RISC2 DEFINED!!!!!
 #endif
 
 /* Unroll the inner loop, this sometimes helps, sometimes hinders.
@@ -255,6 +257,3 @@ extern "C" {
 
 #endif /* DES_DEFAULT_OPTIONS */
 #endif /* HEADER_DES_LOCL_H */
-#ifdef  __cplusplus
-}
-#endif
