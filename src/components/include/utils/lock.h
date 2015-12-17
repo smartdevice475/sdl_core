@@ -73,7 +73,11 @@ class SpinMutex {
   ~SpinMutex() {
   }
  private:
+#ifdef OS_WINCE
+  volatile long state_;
+#else
   volatile unsigned int state_;
+#endif
 };
 
 /* Platform-indepenednt NON-RECURSIVE lock (mutex) wrapper

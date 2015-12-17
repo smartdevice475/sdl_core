@@ -23,8 +23,9 @@
  */
 
 #include <time.h>
+#ifndef OS_WINCE
 #include <signal.h>
-
+#endif
 #include "system.h"
 
 namespace System {

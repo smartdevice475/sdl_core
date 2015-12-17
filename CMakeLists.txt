@@ -258,8 +258,8 @@ ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
         ADD_DEFINITIONS(-DWINCE)
         ADD_DEFINITIONS(-D_WIN32)
         ADD_DEFINITIONS(-DLOG4CXX_STATIC)
-ADD_DEFINITIONS(-DAPR_DECLARE_STATIC)
-        SET(ENABLE_LOG ON)
+        ADD_DEFINITIONS(-DAPR_DECLARE_STATIC)
+        SET(ENABLE_LOG OFF)
         SET(BUILD_BT_SUPPORT ON)
         SET(BUILD_USB_SUPPORT ON)
         SET(BUILD_AVAHI_SUPPORT OFF)
@@ -324,6 +324,7 @@ IF(BUILD_BACKTRACE_SUPPORT)
 ENDIF()
 
 IF(ENABLE_LOG)
+	MESSAGE(STATUS "Add definition: " "ENABLE_LOG")
         ADD_DEFINITIONS(-DENABLE_LOG)
         SET(install-3rd_party_logger "install-3rd_party_logger")
 ENDIF()
@@ -840,20 +841,20 @@ ADD_SUBDIRECTORY(./src/3rd_party-static)
 
 
 # --- Components
-ADD_SUBDIRECTORY(./src/components)
+#ADD_SUBDIRECTORY(./src/components)
 
 # --- Main application
-ADD_SUBDIRECTORY(./src/appMain)
+#ADD_SUBDIRECTORY(./src/appMain)
 
 # --- Plugins
-ADD_SUBDIRECTORY(./src/plugins)
+#ADD_SUBDIRECTORY(./src/plugins)
 
 
 # Building tests
 IF(BUILD_TESTS)
-        # Directory test is deprecated. Use src/components/<name>/test
-        include(Dart)
-        ADD_SUBDIRECTORY(./test)
+    # Directory test is deprecated. Use src/components/<name>/test
+    include(Dart)
+    ADD_SUBDIRECTORY(./test)
 ENDIF()
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
 # Building documentation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
