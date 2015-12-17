@@ -1,44 +1,44 @@
-set(MESSAGE_BROKER_INCLUDE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include)
-set(MESSAGE_BROKER_INCLUDE_DIRECTORY ${MESSAGE_BROKER_INCLUDE_DIRECTORY} PARENT_SCOPE)
+SET(MESSAGE_BROKER_INCLUDE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include)
+SET(MESSAGE_BROKER_INCLUDE_DIRECTORY ${MESSAGE_BROKER_INCLUDE_DIRECTORY} PARENT_SCOPE)
 
-include_directories (
-  ./include/
-  ../jsoncpp/include
-  ../../components/utils/include
+INCLUDE_DIRECTORIES(
+    ./include/
+    ../jsoncpp/include
+    ../../components/utils/include
 )
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-	include_directories (
-		${CMAKE_SOURCE_DIR}/include/win32
-	)
-endif()
+IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    INCLUDE_DIRECTORIES(
+        ${CMAKE_SOURCE_DIR}/include/win32
+    )
+ENDIF()
 
-set (MESSAGE_BROKER_SOURCES
-  ./src/lib_messagebroker/CMessageBroker.cpp
-  ./src/lib_messagebroker/CMessageBrokerRegistry.cpp
-  ./src/lib_messagebroker/md5.cpp
-  ./src/lib_messagebroker/system.cpp
-  ./src/lib_messagebroker/websocket_handler.cpp
+SET(MESSAGE_BROKER_SOURCES
+    ./src/lib_messagebroker/CMessageBroker.cpp
+    ./src/lib_messagebroker/CMessageBrokerRegistry.cpp
+    ./src/lib_messagebroker/md5.cpp
+    ./src/lib_messagebroker/system.cpp
+    ./src/lib_messagebroker/websocket_handler.cpp
 )
 
-set (MESSAGE_BROKER_CLIENT_SOURCES
-  ./src/client/mb_client.cpp
-  ./src/client/mb_tcpclient.cpp
-  ./src/client/mb_controller.cpp
+SET(MESSAGE_BROKER_CLIENT_SOURCES
+    ./src/client/mb_client.cpp
+    ./src/client/mb_tcpclient.cpp
+    ./src/client/mb_controller.cpp
 )
 
-set (MESSAGE_BROKER_SERVER_SOURCES
-  ./src/server/mb_server.cpp
-  ./src/server/mb_tcpserver.cpp
-  ./src/server/networking.cpp
+SET(MESSAGE_BROKER_SERVER_SOURCES
+    ./src/server/mb_server.cpp
+    ./src/server/mb_tcpserver.cpp
+    ./src/server/networking.cpp
 )
 
-add_library("MessageBroker" ${MESSAGE_BROKER_SOURCES})
-target_link_libraries(MessageBroker Utils)
+ADD_LIBRARY("MessageBroker" ${MESSAGE_BROKER_SOURCES})
+TARGET_LINK_LIBRARIES(MessageBroker Utils)
 
 
-add_library("MessageBrokerClient" ${MESSAGE_BROKER_CLIENT_SOURCES})
-target_link_libraries("MessageBrokerClient" "MessageBroker")
+ADD_LIBRARY("MessageBrokerClient" ${MESSAGE_BROKER_CLIENT_SOURCES})
+TARGET_LINK_LIBRARIES("MessageBrokerClient" "MessageBroker")
 
-add_library("MessageBrokerServer" ${MESSAGE_BROKER_SERVER_SOURCES})
-target_link_libraries("MessageBrokerServer" "MessageBroker")
+ADD_LIBRARY("MessageBrokerServer" ${MESSAGE_BROKER_SERVER_SOURCES})
+TARGET_LINK_LIBRARIES("MessageBrokerServer" "MessageBroker")

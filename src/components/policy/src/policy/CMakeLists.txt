@@ -28,21 +28,21 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-set(target Policy)
-set(install_destination bin)
-set(copy_destination ${CMAKE_BINARY_DIR}/src/appMain)
-set(library_name ${CMAKE_SHARED_LIBRARY_PREFIX}${target}${CMAKE_SHARED_LIBRARY_SUFFIX})
+SET(target Policy)
+SET(install_destination bin)
+SET(copy_destination ${CMAKE_BINARY_DIR}/src/appMain)
+SET(library_name ${CMAKE_SHARED_LIBRARY_PREFIX}${target}${CMAKE_SHARED_LIBRARY_SUFFIX})
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-if (EXTENDED_POLICY_FLAG)
-  add_definitions(-DEXTENDED_POLICY)
-endif()
+IF(EXTENDED_POLICY_FLAG)
+  ADD_DEFINITIONS(-DEXTENDED_POLICY)
+ENDIF()
 
 #Generation of policy table interface...
 #include(${CMAKE_SOURCE_DIR}/tools/intergen/GenerateInterfaceLibrary.cmake)
 
-include_directories (
+INCLUDE_DIRECTORIES(
   ./include
   ./usage_statistics/include
   ${CMAKE_SOURCE_DIR}/src/components/rpc_base/include
@@ -54,13 +54,13 @@ include_directories (
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-	include_directories (
+IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	INCLUDE_DIRECTORIES(
 		${CMAKE_SOURCE_DIR}/include/win32
 	)
-endif()
+ENDIF()
 
-set(SOURCES
+SET(SOURCES
   ./src/policy_manager_impl.cc
   ./src/policy_helper.cc
   ./src/policy_table.cc
@@ -72,75 +72,75 @@ set(SOURCES
 )
 
 
-add_subdirectory(usage_statistics)
+ADD_SUBDIRECTORY(usage_statistics)
 
-include_directories(./policy_table/table_struct)
-add_subdirectory(policy_table/table_struct)
+INCLUDE_DIRECTORIES(./policy_table/table_struct)
+ADD_SUBDIRECTORY(policy_table/table_struct)
 
-set(LIBRARIES ConfigProfile policy_struct dbms jsoncpp Utils)
+SET(LIBRARIES ConfigProfile policy_struct dbms jsoncpp Utils)
 
-if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
+IF(CMAKE_SYSTEM_NAME STREQUAL "QNX")
   # --- QDB Wrapper 
-  include_directories (${COMPONENTS_DIR}/utils/include/utils)
-elseif (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  INCLUDE_DIRECTORIES(${COMPONENTS_DIR}/utils/include/utils)
+ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
   # --- SQLite Wrapper
-  include_directories (${COMPONENTS_DIR}/utils/include/utils)
-  list(APPEND LIBRARIES sqlite3)
-  list(APPEND LIBRARIES pthreadVC2)
-elseif (CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-  include_directories (sqlite_wrapper/include)
-  add_subdirectory(sqlite_wrapper)
-  list(APPEND LIBRARIES sqlite3)
-  list(APPEND LIBRARIES pthread)
-  list(APPEND LIBRARIES Utils)
-elseif (CMAKE_SYSTEM_NAME STREQUAL "Android")
-  include_directories (sqlite_wrapper/include)
-else ()
+  INCLUDE_DIRECTORIES(${COMPONENTS_DIR}/utils/include/utils)
+  LIST(APPEND LIBRARIES sqlite3)
+  LIST(APPEND LIBRARIES pthreadVC2)
+ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  INCLUDE_DIRECTORIES(sqlite_wrapper/include)
+  ADD_SUBDIRECTORY(sqlite_wrapper)
+  LIST(APPEND LIBRARIES sqlite3)
+  LIST(APPEND LIBRARIES pthread)
+  LIST(APPEND LIBRARIES Utils)
+ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Android")
+  INCLUDE_DIRECTORIES(sqlite_wrapper/include)
+ELSE()
   # --- SQLite Wrapper
-  include_directories (${COMPONENTS_DIR}/utils/include/utils)
-  list(APPEND LIBRARIES sqlite3)
-endif ()
+  INCLUDE_DIRECTORIES(${COMPONENTS_DIR}/utils/include/utils)
+  LIST(APPEND LIBRARIES sqlite3)
+ENDIF()
 
-if(MODIFY_FUNCTION_FLAGS)
-if(ENABLE_LOG)
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX" OR CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "Android" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-  list(APPEND LIBRARIES log4cxx)
-endif()
-endif()
-endif()
+IF(MODIFY_FUNCTION_FLAGS)
+IF(ENABLE_LOG)
+IF(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX" OR CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "Android" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  LIST(APPEND LIBRARIES log4cxx)
+ENDIF()
+ENDIF()
+ENDIF()
 
-add_library(${target} SHARED ${SOURCES})
-target_link_libraries(${target} ${LIBRARIES} )
+ADD_LIBRARY(${target} SHARED ${SOURCES})
+TARGET_LINK_LIBRARIES(${target} ${LIBRARIES} )
 
-if(ENABLE_LOG)
-if(MODIFY_FUNCTION_FLAGS)
-else()
-  add_dependencies(${target} liblog4cxx)
-  target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
-endif()
-endif()
+IF(ENABLE_LOG)
+IF(MODIFY_FUNCTION_FLAGS)
+ELSE()
+  ADD_DEPENDENCIES(${target} liblog4cxx)
+  TARGET_LINK_LIBRARIES(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+ENDIF()
+ENDIF()
 
-if(NOT CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-add_custom_target(copy_library_${target} ALL
+IF(NOT CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+IF(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+ADD_CUSTOM_TARGET(copy_library_${target} ALL
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${library_name}
     ${copy_destination}
     DEPENDS ${target}
     COMMENT "Copying library ${library_name}")
-else()
-add_custom_target(copy_library_${target} ALL
+ELSE()
+ADD_CUSTOM_TARGET(copy_library_${target} ALL
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${CMAKE_CURRENT_BINARY_DIR}/${library_name}
     ${copy_destination}
     DEPENDS ${target}
     COMMENT "Copying library ${library_name}")
-endif()
+ENDIF()
 
-install(TARGETS ${target}
+INSTALL(TARGETS ${target}
   DESTINATION ${install_destination}
   PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
     GROUP_READ GROUP_EXECUTE
     WORLD_READ WORLD_EXECUTE
 )
-endif()
+ENDIF()

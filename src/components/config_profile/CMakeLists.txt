@@ -29,22 +29,22 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-include_directories (
+INCLUDE_DIRECTORIES(
   include
   ${COMPONENTS_DIR}/utils/include/
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-	include_directories (
+IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	INCLUDE_DIRECTORIES(
 		${CMAKE_SOURCE_DIR}/include/win32
 	)
-endif()
+ENDIF()
 
-set (SOURCES
+SET(SOURCES
     ${COMPONENTS_DIR}/config_profile/src/profile.cc
     ${COMPONENTS_DIR}/config_profile/src/ini_file.cc
 )
 
-add_library("ConfigProfile" ${SOURCES})
-target_link_libraries("ConfigProfile" Utils)
+ADD_LIBRARY("ConfigProfile" ${SOURCES})
+TARGET_LINK_LIBRARIES("ConfigProfile" Utils)

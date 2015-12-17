@@ -28,15 +28,15 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-set(target policy_struct)
+SET(target policy_struct)
 
-include_directories(.)
+INCLUDE_DIRECTORIES(.)
 
-set(SOURCES
-  ./enums.cc
-  ./types.cc
-  ./validation.cc
+SET(SOURCES
+    ./enums.cc
+    ./types.cc
+    ./validation.cc
 )
 
-add_library(${target} ${SOURCES})
-target_link_libraries(${target} Utils)
+ADD_LIBRARY(${target} ${SOURCES})
+TARGET_LINK_LIBRARIES(${target} Utils)

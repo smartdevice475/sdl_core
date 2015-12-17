@@ -29,7 +29,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-include_directories(
+INCLUDE_DIRECTORIES(
   include
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/protocol_handler/include/
@@ -38,33 +38,33 @@ include_directories(
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-	include_directories (
+IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	INCLUDE_DIRECTORIES(
 		${CMAKE_SOURCE_DIR}/include/win32
 	)
-endif()
+ENDIF()
 
-set(SOURCES
+SET(SOURCES
     ${COMPONENTS_DIR}/protocol_handler/src/incoming_data_handler.cc
     ${COMPONENTS_DIR}/protocol_handler/src/protocol_handler_impl.cc
     ${COMPONENTS_DIR}/protocol_handler/src/protocol_packet.cc
     ${COMPONENTS_DIR}/protocol_handler/src/protocol_payload.cc
 )
 
-set(LIBRARIES
+SET(LIBRARIES
   ProtocolLibrary
   Utils
 )
 
 get_property(dirs DIRECTORY "" PROPERTY LIBRARIES)
-foreach(dir ${dirs})
-  message(STATUS "libraries='${dir}'")
-endforeach()
+FOREACH(dir ${dirs})
+  MESSAGE(STATUS "libraries='${dir}'")
+ENDFOREACH()
 
 
-add_library(ProtocolHandler ${SOURCES})
-target_link_libraries(ProtocolHandler ${LIBRARIES})
+ADD_LIBRARY(ProtocolHandler ${SOURCES})
+TARGET_LINK_LIBRARIES(ProtocolHandler ${LIBRARIES})
 
-if(BUILD_TESTS)
-  add_subdirectory(test)
-endif()
+IF(BUILD_TESTS)
+  ADD_SUBDIRECTORY(test)
+ENDIF()

@@ -29,7 +29,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-include_directories (
+INCLUDE_DIRECTORIES(
     include/
     ${COMPONENTS_DIR}/application_manager/include/
     ${COMPONENTS_DIR}/utils/include/
@@ -47,50 +47,50 @@ include_directories (
     ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-	include_directories (
+IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	INCLUDE_DIRECTORIES(
 		${CMAKE_SOURCE_DIR}/include/win32
 	)
-endif()
+ENDIF()
 
-IF (HMIADAPTER STREQUAL "dbus")
-    set (DBUS_SOURCE ./src/dbus_message_adapter.cc)
-    set (DBUS_ADAPTER DBus)
-ENDIF ()
+IF(HMIADAPTER STREQUAL "dbus")
+    SET(DBUS_SOURCE ./src/dbus_message_adapter.cc)
+    SET(DBUS_ADAPTER DBus)
+ENDIF()
 
-if(MODIFY_FUNCTION_FLAGS)
-set (SOURCES
+IF(MODIFY_FUNCTION_FLAGS)
+SET(SOURCES
     ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_handler_impl.cc
     ${COMPONENTS_DIR}/hmi_message_handler/src/messagebroker_adapter.cc
     ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_adapter.cc
     ${DBUS_SOURCE}
 )
-else()
-set (SOURCES
+ELSE()
+SET(SOURCES
     ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_handler_impl.cc
     ${COMPONENTS_DIR}/hmi_message_handler/src/messagebroker_adapter.cc
     ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_adapter.cc
 	${COMPONENTS_DIR}/hmi_message_handler/src/mqueue_adapter.cc
     ${DBUS_SOURCE}
 )
-endif()
+ENDIF()
 
-set(LIBRARIES
+SET(LIBRARIES
     Utils
     ${DBUS_ADAPTER}
     ${RTLIB}
 )
 
-add_library("HMIMessageHandler" ${SOURCES})
-target_link_libraries("HMIMessageHandler" ${LIBRARIES})
+ADD_LIBRARY("HMIMessageHandler" ${SOURCES})
+TARGET_LINK_LIBRARIES("HMIMessageHandler" ${LIBRARIES})
 
-if(ENABLE_LOG)
-    target_link_libraries("HMIMessageHandler" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
-endif()
+IF(ENABLE_LOG)
+    TARGET_LINK_LIBRARIES("HMIMessageHandler" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+ENDIF()
 
 # Tests temporary are inactivated. For details please check
 # Readme.txt in test directory of hmi_message_handler 
 
-#if(BUILD_TESTS)
-#  add_subdirectory(test)
-#endif()
+#IF(BUILD_TESTS)
+#  ADD_SUBDIRECTORY(test)
+#ENDIF()

@@ -29,14 +29,14 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-set(SMART_OBJECTS_SRC_DIR ${COMPONENTS_DIR}/smart_objects/src)
+SET(SMART_OBJECTS_SRC_DIR ${COMPONENTS_DIR}/smart_objects/src)
 
-include_directories (
+INCLUDE_DIRECTORIES(
   include
   ${COMPONENTS_DIR}/utils/include/
 )
 
-set (SOURCES
+SET(SOURCES
     ${SMART_OBJECTS_SRC_DIR}/smart_object.cc
     ${SMART_OBJECTS_SRC_DIR}/smart_schema.cc
     ${SMART_OBJECTS_SRC_DIR}/schema_item.cc
@@ -51,16 +51,16 @@ set (SOURCES
     ${SMART_OBJECTS_SRC_DIR}/array_schema_item.cc
 )
 
-add_library("SmartObjects" ${SOURCES})
+ADD_LIBRARY("SmartObjects" ${SOURCES})
 
-if(ENABLE_LOG)
-if(MODIFY_FUNCTION_FLAGS)
-else()
-  target_link_libraries("SmartObjects" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
-endif()
-endif()
+IF(ENABLE_LOG)
+IF(MODIFY_FUNCTION_FLAGS)
+ELSE()
+  TARGET_LINK_LIBRARIES("SmartObjects" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+ENDIF()
+ENDIF()
 
-if(BUILD_TESTS)
-  add_subdirectory(test)
-endif()
+IF(BUILD_TESTS)
+  ADD_SUBDIRECTORY(test)
+ENDIF()
 

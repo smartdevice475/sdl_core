@@ -29,7 +29,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-include_directories (
+INCLUDE_DIRECTORIES(
   include
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/config_profile/include/
@@ -37,14 +37,14 @@ include_directories (
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-	include_directories (
+IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	INCLUDE_DIRECTORIES(
 		${CMAKE_SOURCE_DIR}/include/win32
 	)
-endif()
+ENDIF()
 
-set (SOURCES
+SET(SOURCES
   ${COMPONENTS_DIR}/resumption/src/last_state.cc
 )
 
-add_library("Resumption" ${SOURCES})
+ADD_LIBRARY("Resumption" ${SOURCES})

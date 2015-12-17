@@ -28,10 +28,10 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-include_directories(include)
+INCLUDE_DIRECTORIES(include)
 
-set(SOURCES
-  src/counter.cc
+SET(SOURCES
+    src/counter.cc
 )
 
-add_library(UsageStatistics ${SOURCES})
+ADD_LIBRARY(UsageStatistics ${SOURCES})

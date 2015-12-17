@@ -29,17 +29,17 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-if (EXTENDED_MEDIA_MODE)
-find_package(Gstreamer-1.0 REQUIRED)
-find_package(Glib-2.0 REQUIRED)
-find_package(PkgConfig)
-pkg_check_modules(GLIB2 REQUIRED glib-2.0)
-add_definitions(${GLIB2_CFLAGS})
-set(default_includes
+IF(EXTENDED_MEDIA_MODE)
+FIND_PACKAGE(Gstreamer-1.0 REQUIRED)
+FIND_PACKAGE(Glib-2.0 REQUIRED)
+FIND_PACKAGE(PkgConfig)
+PKG_CHECK_MODULES(GLIB2 REQUIRED glib-2.0)
+ADD_DEFINITIONS(${GLIB2_CFLAGS})
+SET(default_includes
     ${GSTREAMER_gst_INCLUDE_DIR}
     ${GLIB_glib_2_INCLUDE_DIR}
 )
-set(default_sources
+SET(default_sources
     ${COMPONENTS_DIR}/media_manager/src/audio/a2dp_source_player_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/audio/from_mic_recorder_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/audio/from_mic_to_file_recorder_thread.cc
@@ -54,7 +54,7 @@ set(default_sources
     ${COMPONENTS_DIR}/media_manager/src/socket_streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/file_streamer_adapter.cc
 )
-set(LIBRARIES
+SET(LIBRARIES
     ${GSTREAMER_gstreamer_LIBRARY}
     ApplicationManager
     pulse-simple
@@ -62,15 +62,15 @@ set(LIBRARIES
     gobject-2.0
     glib-2.0
 )
-else(EXTENDED_MEDIA_MODE)
-set(default_includes
+ELSE(EXTENDED_MEDIA_MODE)
+SET(default_includes
 )
-if (CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-set(default_sources
+IF(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+SET(default_sources
   ./src/video/video_stream_to_file_adapter.cc
 )
-else()
-set(default_sources
+ELSE()
+SET(default_sources
     ${COMPONENTS_DIR}/media_manager/src/audio/socket_audio_streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/audio/pipe_audio_streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/audio/file_audio_streamer_adapter.cc
@@ -82,13 +82,13 @@ set(default_sources
     ${COMPONENTS_DIR}/media_manager/src/socket_streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/file_streamer_adapter.cc
 )
-endif()
-set(LIBRARIES
+ENDIF()
+SET(LIBRARIES
     ProtocolLibrary
 )
-endif()
+ENDIF()
 
-include_directories (
+INCLUDE_DIRECTORIES(
     include
     ${COMPONENTS_DIR}/media_manager/include/audio/
     ${COMPONENTS_DIR}/media_manager/include/video/
@@ -108,13 +108,13 @@ include_directories (
     ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-	include_directories (
+IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	INCLUDE_DIRECTORIES(
 		${CMAKE_SOURCE_DIR}/include/win32
 	)
-endif()
+ENDIF()
 
-set (SOURCES
+SET(SOURCES
     ${COMPONENTS_DIR}/media_manager/src/media_adapter_impl.cc
     ${COMPONENTS_DIR}/media_manager/src/audio/from_mic_recorder_listener.cc
     ${COMPONENTS_DIR}/media_manager/src/audio/audio_stream_sender_thread.cc
@@ -122,9 +122,9 @@ set (SOURCES
     ${COMPONENTS_DIR}/media_manager/src/media_manager_impl.cc
 )
 
-add_library("MediaManager" ${SOURCES} ${default_sources})
-target_link_libraries("MediaManager" ${LIBRARIES})
+ADD_LIBRARY("MediaManager" ${SOURCES} ${default_sources})
+TARGET_LINK_LIBRARIES("MediaManager" ${LIBRARIES})
 
-if(BUILD_TESTS)
-    add_subdirectory(test)
-endif()
+IF(BUILD_TESTS)
+    ADD_SUBDIRECTORY(test)
+ENDIF()

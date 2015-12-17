@@ -1,24 +1,24 @@
-set(ENCRYPTION_INCLUDE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include)
-set(ENCRYPTION_INCLUDE_DIRECTORY ${ENCRYPTION_INCLUDE_DIRECTORY} PARENT_SCOPE)
+SET(ENCRYPTION_INCLUDE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include)
+SET(ENCRYPTION_INCLUDE_DIRECTORY ${ENCRYPTION_INCLUDE_DIRECTORY} PARENT_SCOPE)
 
-include_directories (
-  ./include
+INCLUDE_DIRECTORIES (
+    ./include
 )
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    include_directories(${CMAKE_SOURCE_DIR}/include/win32/)
-endif()
+IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include/win32/)
+ENDIF()
 
-set (SOURCES
+SET(SOURCES
     ./src/Base64.cpp
     ./src/hashing.cc
 )
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-set (LIBRARIES ssleay32 libeay32)
-else()
-set (LIBRARIES crypto)
-endif()
+IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    SET(LIBRARIES ssleay32 libeay32)
+ELSE()
+    SET(LIBRARIES crypto)
+ENDIF()
 
-add_library("encryption" ${SOURCES})
-target_link_libraries("encryption" "${LIBRARIES}")
+ADD_LIBRARY("encryption" ${SOURCES})
+TARGET_LINK_LIBRARIES("encryption" "${LIBRARIES}")

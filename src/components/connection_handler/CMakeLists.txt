@@ -29,9 +29,9 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-set(CH_SRC_DIR ${COMPONENTS_DIR}/connection_handler/src)
+SET(CH_SRC_DIR ${COMPONENTS_DIR}/connection_handler/src)
 
-include_directories (
+INCLUDE_DIRECTORIES(
     include
     ${COMPONENTS_DIR}/protocol_handler/include/
     ${COMPONENTS_DIR}/config_profile/include/
@@ -40,27 +40,27 @@ include_directories (
     ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-	include_directories (
+IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	INCLUDE_DIRECTORIES(
 		${CMAKE_SOURCE_DIR}/include/win32
 	)
-endif()
+ENDIF()
 
-set (SOURCES
+SET(SOURCES
     ${CH_SRC_DIR}/connection_handler_impl.cc
     ${CH_SRC_DIR}/connection.cc
     ${CH_SRC_DIR}/device.cc
     ${CH_SRC_DIR}/heartbeat_monitor.cc
 )
 
-set(LIBRARIES
+SET(LIBRARIES
     ConfigProfile
     ProtocolLibrary
 )
 
-add_library(connectionHandler ${SOURCES})
-target_link_libraries(connectionHandler encryption)
+ADD_LIBRARY(connectionHandler ${SOURCES})
+TARGET_LINK_LIBRARIES(connectionHandler encryption)
 
-if(BUILD_TESTS)
-    add_subdirectory(test)
-endif()
+IF(BUILD_TESTS)
+    ADD_SUBDIRECTORY(test)
+ENDIF()
