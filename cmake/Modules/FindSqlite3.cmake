@@ -32,6 +32,14 @@ else (SQLITE3_LIBRARIES AND SQLITE3_INCLUDE_DIRS)
       ${_SQLITE3_INCLUDEDIR}
       ${CMAKE_SOURCE_DIR}/include/win32
   )
+  elseif (CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  find_path(SQLITE3_INCLUDE_DIR
+    NAMES
+      sqlite3.h
+    PATHS
+      ${_SQLITE3_INCLUDEDIR}
+      ${CMAKE_SOURCE_DIR}/include/wince
+  )
   else (CMAKE_SYSTEM_NAME STREQUAL "Windows")
   find_path(SQLITE3_INCLUDE_DIR
     NAMES
