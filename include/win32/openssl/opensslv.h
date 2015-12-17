@@ -1,10 +1,6 @@
 #ifndef HEADER_OPENSSLV_H
 # define HEADER_OPENSSLV_H
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
 /*-
  * Numeric release version identifier:
  * MNNFFPPS: major minor fix patch status
@@ -30,11 +26,11 @@ extern "C" {
  * (Prior to 0.9.5a beta1, a different scheme was used: MMNNFFRBB for
  *  major minor fix final patch/beta)
  */
-# define OPENSSL_VERSION_NUMBER  0x1000204fL
+# define OPENSSL_VERSION_NUMBER  0x0090820fL
 # ifdef OPENSSL_FIPS
-#  define OPENSSL_VERSION_TEXT    "OpenSSL 1.0.2d-fips 9 Jul 2015"
+#  define OPENSSL_VERSION_TEXT    "OpenSSL 0.9.8zg-fips 11 Jun 2015"
 # else
-#  define OPENSSL_VERSION_TEXT    "OpenSSL 1.0.2d 9 Jul 2015"
+#  define OPENSSL_VERSION_TEXT    "OpenSSL 0.9.8zg 11 Jun 2015"
 # endif
 # define OPENSSL_VERSION_PTEXT   " part of " OPENSSL_VERSION_TEXT
 
@@ -88,10 +84,6 @@ extern "C" {
  * should only keep the versions that are binary compatible with the current.
  */
 # define SHLIB_VERSION_HISTORY ""
-# define SHLIB_VERSION_NUMBER "1.0.0"
+# define SHLIB_VERSION_NUMBER "0.9.8"
 
-
-#ifdef  __cplusplus
-}
-#endif
 #endif                          /* HEADER_OPENSSLV_H */
