@@ -41,7 +41,7 @@
 #include <ctype.h>
 #include <limits.h>
 #include <stdint.h>
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include "utils/macro.h"
 #endif
 #ifndef _WIN32

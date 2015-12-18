@@ -32,7 +32,7 @@
 
 #include "utils/appenders_loader.h"
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include "unistd.h"
 #include "apr_arch_dso.h"
 #else

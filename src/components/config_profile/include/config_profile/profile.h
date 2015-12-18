@@ -740,7 +740,7 @@ private:
     std::string                     system_files_path_;
     uint16_t                        transport_manager_tcp_adapter_port_;
     std::string                     tts_delimiter_;
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	uint32_t                   audio_data_stopped_timeout_;
 	uint32_t                   video_data_stopped_timeout_;
 #else

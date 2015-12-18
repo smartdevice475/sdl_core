@@ -30,15 +30,21 @@
 
 
 INCLUDE_DIRECTORIES(
-  include
+  INCLUDE
   ${COMPONENTS_DIR}/utils/include/
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
 IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-	INCLUDE_DIRECTORIES(
-		${CMAKE_SOURCE_DIR}/include/win32
-	)
+    INCLUDE_DIRECTORIES(
+        ${CMAKE_SOURCE_DIR}/include/win32
+    )
+ENDIF()
+
+IF(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+    INCLUDE_DIRECTORIES(
+      ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
+    )
 ENDIF()
 
 SET(SOURCES

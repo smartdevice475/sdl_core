@@ -37,7 +37,7 @@
 typedef struct timeval TimevalStruct;
 #endif
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include <stdint.h>
 #include <pthread.h>
 #include <winsock.h>

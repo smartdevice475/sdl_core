@@ -35,10 +35,8 @@
 #if defined(OS_POSIX)
 #include <pthread.h>
 #else
-#ifdef OS_WIN32
 #include "pthread.h"
 //#error Please implement conditional variable for your OS
-#endif
 #endif
 #include <stdint.h>
 
@@ -52,7 +50,7 @@ namespace impl {
 #if defined(OS_POSIX)
 typedef pthread_cond_t PlatformConditionalVariable;
 #endif
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 typedef pthread_cond_t PlatformConditionalVariable;
 #endif
 } // namespace impl

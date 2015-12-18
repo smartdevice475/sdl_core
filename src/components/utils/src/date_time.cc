@@ -33,7 +33,7 @@
 #ifdef MODIFY_FUNCTION_SIGN
 #include <global_first.h>
 #endif
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include <time.h>
 #include <assert.h>
 #elif defined(OS_MAC)

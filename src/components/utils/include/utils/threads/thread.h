@@ -57,7 +57,7 @@ namespace impl {
 #if defined(OS_POSIX)
 typedef pthread_t PlatformThreadHandle;
 #else
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	typedef pthread_t PlatformThreadHandle;
 //#error Please implement thread for your OS'
 #endif

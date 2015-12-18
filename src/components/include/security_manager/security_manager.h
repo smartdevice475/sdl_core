@@ -57,7 +57,7 @@ class SecurityManager
    * Handle as binary data in Ford Protocol
    */
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #undef ERROR_SUCCESS
 #undef ERROR_NOT_SUPPORTED
 #undef ERROR_DECRYPTION_FAILED

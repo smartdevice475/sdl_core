@@ -40,7 +40,7 @@
 #ifndef OS_WINCE
 #  include <sys/types.h>
 #endif
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #else
 #  include <sys/wait.h>
 #endif
@@ -122,7 +122,7 @@ bool System::Execute(bool wait) {
 }
 
 #else  // __QNX__
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 bool System::Execute(bool wait) {
 	wait;
 	return true;

@@ -1366,11 +1366,13 @@ std::string ConvertPacketDataToString(const uint8_t *data,
   if (0 == data_size)
     return std::string();
   bool is_printable_array = true;
+#ifndef OS_WINCE
   std::locale loc;
+#endif
   const char *text = reinterpret_cast<const char*>(data);
   // Check data for printability
   for (size_t i = 0; i < data_size; ++i) {
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
     if (!isprint(text[i])){
 #else
     if (!std::isprint(text[i], loc)) {

@@ -14,7 +14,8 @@
 #else
 # define PRINTMSG
 #endif
-#ifndef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#else
 # define __FUNCTIONW__ __FUNCTION__
 #endif
 #endif // SRC_GLOBAL_FIRST_H

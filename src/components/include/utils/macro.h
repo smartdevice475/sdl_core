@@ -123,7 +123,7 @@
 #define OVERRIDE
 #define FINAL
 #endif
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #ifndef snprintf
 #define snprintf _snprintf
 #endif

@@ -28,69 +28,69 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-set(COMPONENTS_DIR ${CMAKE_SOURCE_DIR}/src/components)
+SET(COMPONENTS_DIR ${CMAKE_SOURCE_DIR}/src/components)
 
 # --- HMI_API interfaces
-add_subdirectory(./interfaces)
+#ADD_SUBDIRECTORY(./interfaces)
 
 # --- ProtocolHandler
-add_subdirectory(./protocol)
+ADD_SUBDIRECTORY(./protocol)
 
 # --- TransportManager
-add_subdirectory(./transport_manager)
+#ADD_SUBDIRECTORY(./transport_manager)
 
 # --- Policies
-add_subdirectory(./resumption)
+#ADD_SUBDIRECTORY(./resumption)
 
 # --- formatters
-add_subdirectory(./formatters)
+#ADD_SUBDIRECTORY(./formatters)
 
 # --- ProtocolHandler
-add_subdirectory(./protocol_handler)
+ADD_SUBDIRECTORY(./protocol_handler)
 
 # --- ConnectionHandler
-add_subdirectory(./connection_handler)
+#ADD_SUBDIRECTORY(./connection_handler)
 
 # --- Utils
-add_subdirectory(./utils)
+#ADD_SUBDIRECTORY(./utils)
 
 # --- Security manager
-if(ENABLE_SECURITY)
-  add_subdirectory(./security_manager)
-endif()
+IF(ENABLE_SECURITY)
+  ADD_SUBDIRECTORY(./security_manager)
+ENDIF()
 #
 # --- Policy_impl
-add_subdirectory(./policy)
+#ADD_SUBDIRECTORY(./policy)
 
 # --- Validated types
-add_subdirectory(./rpc_base)
+#ADD_SUBDIRECTORY(./rpc_base)
 
 # --- SmartObjects
-add_subdirectory(./smart_objects)
+ADD_SUBDIRECTORY(./smart_objects)
 
 # --- Application manager
-add_subdirectory(./application_manager)
+#ADD_SUBDIRECTORY(./application_manager)
 
 # --- HMI Message Handler
-add_subdirectory(./hmi_message_handler)
+#ADD_SUBDIRECTORY(./hmi_message_handler)
 
 # --- Config
-add_subdirectory(./config_profile)
+#ADD_SUBDIRECTORY(./config_profile)
 
 # --- AudioManager
-add_subdirectory(./media_manager)
+#ADD_SUBDIRECTORY(./media_manager)
 
 if (TIME_TESTER)
-    add_subdirectory(./time_tester)
-endif()
+    ADD_SUBDIRECTORY(./time_tester)
+ENDIF()
 
 
 if (${HMI_DBUS_API})
 # --- DBus
-    add_subdirectory(./dbus)
+    ADD_SUBDIRECTORY(./dbus)
 endif ()
 if (${QT_HMI})
 # --- Qt HMI
-    add_subdirectory(./qt_hmi)
+    ADD_SUBDIRECTORY(./qt_hmi)
 endif ()
 
