@@ -170,6 +170,7 @@ IF(SECURITY_OPTION)
     ENDIF()
 ENDIF()
 
+IF(NOT CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
 #Jenkins integration section end
 
 ADD_CUSTOM_TARGET(pasa-tarball
@@ -189,6 +190,7 @@ ADD_CUSTOM_TARGET(genivi-tarball
     COMMAND tar -cz -C /tmp/GENIVI -f ${CMAKE_BINARY_DIR}/genivi.tar.gz .
 )
 
+ENDIF()
 
 project (${PROJECT})
 
