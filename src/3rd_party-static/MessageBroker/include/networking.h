@@ -35,7 +35,7 @@
 #include <windows.h>
 
 #if _MSC_VER >= 1400 // VC++ 8.0
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include <stdint.h>
 #ifndef snprintf
 #define snprintf _snprintf

@@ -39,7 +39,7 @@ include_directories(
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/jsoncpp/include
   ${APR_INCLUDE_DIRECTORY}
-  ${CMAKE_SOURCE_DIR}/src/3rd_party/pthread-win32-2.9.1
+  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
 )
 
 set (SOURCES

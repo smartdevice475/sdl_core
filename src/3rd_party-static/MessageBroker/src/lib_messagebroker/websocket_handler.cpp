@@ -8,7 +8,8 @@
 
 #include <cstring>
 #include <sstream>
-#ifndef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#else
 #include <netinet/in.h>
 #endif
 
@@ -81,7 +82,7 @@ namespace NsMessageBroker
      unsigned char position = 0; // current buffer position
      unsigned int size = b_size;
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
      while (0 < size) {
 #else
 	 static uint32_t minimum_heade_size = 4;

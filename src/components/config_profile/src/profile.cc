@@ -260,9 +260,9 @@ const uint32_t kDefaultAppHmiLevelNoneRequestsTimeScale = 10;
 const uint32_t kDefaultPendingRequestsAmount = 0;
 const uint32_t kDefaultTransportManagerDisconnectTimeout = 0;
 const uint32_t kDefaultApplicationListUpdateTimeout = 1;
-const std::pair<uint32_t, uint32_t> kReadDIDFrequency = { 5, 1 };
-const std::pair<uint32_t, uint32_t> kGetVehicleDataFrequency = { 5, 1 };
-const std::pair<uint32_t, uint32_t> kStartStreamRetryAmount = { 3, 1 };
+const std::pair<uint32_t, uint32_t> kReadDIDFrequency(5, 1);
+const std::pair<uint32_t, uint32_t> kGetVehicleDataFrequency(5, 1);
+const std::pair<uint32_t, uint32_t> kStartStreamRetryAmount(3, 1);
 const uint32_t kDefaultMaxThreadPoolSize = 2;
 const int kDefaultIAP2HubConnectAttempts = 0;
 const int kDefaultIAPHubConnectionWaitTimeout = 10000;
@@ -1746,7 +1746,11 @@ bool Profile::StringToNumber(const std::string& input, uint64_t& output) const {
   char* endptr;
   const int8_t base = 10;
   errno = 0;
+#ifdef OS_WINCE
+  uint32_t user_value = strtoul(input_value, &endptr, base);
+#else
   uint64_t user_value = strtoull(input_value, &endptr, base);
+#endif
   bool is_real_zero_value =
       (!user_value && endptr != input_value && *endptr == '\0');
   if (!is_real_zero_value && (!user_value || errno == ERANGE)) {

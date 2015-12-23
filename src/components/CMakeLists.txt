@@ -31,28 +31,28 @@
 SET(COMPONENTS_DIR ${CMAKE_SOURCE_DIR}/src/components)
 
 # --- HMI_API interfaces
-#ADD_SUBDIRECTORY(./interfaces)
+ADD_SUBDIRECTORY(./interfaces)
 
 # --- ProtocolHandler
 ADD_SUBDIRECTORY(./protocol)
 
 # --- TransportManager
-#ADD_SUBDIRECTORY(./transport_manager)
+ADD_SUBDIRECTORY(./transport_manager)
 
 # --- Policies
-#ADD_SUBDIRECTORY(./resumption)
+ADD_SUBDIRECTORY(./resumption)
 
 # --- formatters
-#ADD_SUBDIRECTORY(./formatters)
+ADD_SUBDIRECTORY(./formatters)
 
 # --- ProtocolHandler
 ADD_SUBDIRECTORY(./protocol_handler)
 
 # --- ConnectionHandler
-#ADD_SUBDIRECTORY(./connection_handler)
+ADD_SUBDIRECTORY(./connection_handler)
 
 # --- Utils
-#ADD_SUBDIRECTORY(./utils)
+ADD_SUBDIRECTORY(./utils)
 
 # --- Security manager
 IF(ENABLE_SECURITY)
@@ -60,25 +60,25 @@ IF(ENABLE_SECURITY)
 ENDIF()
 #
 # --- Policy_impl
-#ADD_SUBDIRECTORY(./policy)
+ADD_SUBDIRECTORY(./policy)
 
 # --- Validated types
-#ADD_SUBDIRECTORY(./rpc_base)
+ADD_SUBDIRECTORY(./rpc_base)
 
 # --- SmartObjects
 ADD_SUBDIRECTORY(./smart_objects)
 
 # --- Application manager
-#ADD_SUBDIRECTORY(./application_manager)
+ADD_SUBDIRECTORY(./application_manager)
 
 # --- HMI Message Handler
-#ADD_SUBDIRECTORY(./hmi_message_handler)
+ADD_SUBDIRECTORY(./hmi_message_handler)
 
 # --- Config
-#ADD_SUBDIRECTORY(./config_profile)
+ADD_SUBDIRECTORY(./config_profile)
 
 # --- AudioManager
-#ADD_SUBDIRECTORY(./media_manager)
+ADD_SUBDIRECTORY(./media_manager)
 
 if (TIME_TESTER)
     ADD_SUBDIRECTORY(./time_tester)

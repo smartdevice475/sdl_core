@@ -47,7 +47,7 @@ ssize_t TcpServer::Send(int fd, const std::string& data) {
   int bytesToSend = rep.length();
   const char* ptrBuffer = rep.c_str();
   do {
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
     int retVal = send(fd, ptrBuffer, bytesToSend, 0);
 #else
 	int retVal = send(fd, ptrBuffer, bytesToSend, MSG_NOSIGNAL);

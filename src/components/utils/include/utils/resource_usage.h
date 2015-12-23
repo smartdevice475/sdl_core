@@ -66,7 +66,7 @@ public:
 #if defined(__QNXNTO__)
   typedef procfs_info PidStats;
 
-#elif defined(OS_LINUX) || defined(OS_WIN32)
+#elif defined(OS_LINUX) || defined(OS_WIN32) || defined(OS_WINCE)
 
   struct PidStats {
     int pid;

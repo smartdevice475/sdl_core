@@ -42,7 +42,7 @@
 #endif
 #include <stdint.h>
 #include "utils/date_time.h"
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include "os/poll_windows.h"
 #endif
 #ifdef OS_WINCE
@@ -90,7 +90,7 @@ int32_t const DateTime::MICROSECONDS_IN_MILLISECONDS;
 
 TimevalStruct DateTime::getCurrentTime() {
   TimevalStruct currentTime;
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
   timespec tm;
   clock_gettime(CLOCK_REALTIME, &tm);
   currentTime.tv_sec = (long)tm.tv_sec;

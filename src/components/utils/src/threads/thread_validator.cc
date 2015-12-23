@@ -84,13 +84,13 @@ void SingleThreadValidator::PassToThread(Thread::Id thread_id) const {
 }
 
 void SingleThreadValidator::AssertRunningOnValidThread() const {
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
   Thread::Id current_id = Thread::CurrentId();
 #else
 	PlatformThreadHandle current_id = Thread::CurrentId();
 #endif
 	if (owning_thread_id_ != current_id) {
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 		LOG4CXX_ERROR(logger_, "Single-threaded object owned by thread ");
 #else
 		LOG4CXX_ERROR(logger_, "Single-threaded object owned by thread "

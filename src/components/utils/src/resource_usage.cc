@@ -16,7 +16,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <sstream>
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include <process.h>
 #endif
 #include "utils/file_system.h"

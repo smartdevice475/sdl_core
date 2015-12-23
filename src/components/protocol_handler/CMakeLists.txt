@@ -30,22 +30,22 @@
 
 
 INCLUDE_DIRECTORIES(
-  include
-  ${COMPONENTS_DIR}/utils/include/
-  ${COMPONENTS_DIR}/protocol_handler/include/
-  ${COMPONENTS_DIR}/connection_handler/include/
-  ${COMPONENTS_DIR}/config_profile/include/
-  ${LOG4CXX_INCLUDE_DIRECTORY}
+    include
+    ${COMPONENTS_DIR}/utils/include/
+    ${COMPONENTS_DIR}/protocol_handler/include/
+    ${COMPONENTS_DIR}/connection_handler/include/
+    ${COMPONENTS_DIR}/config_profile/include/
+    ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
 IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-	INCLUDE_DIRECTORIES(
-		${CMAKE_SOURCE_DIR}/include/win32
-	)
+    INCLUDE_DIRECTORIES(
+        ${CMAKE_SOURCE_DIR}/include/win32
+    )
 ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-	INCLUDE_DIRECTORIES(
-		${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
-	)
+    INCLUDE_DIRECTORIES(
+        ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
+    )
 ENDIF()
 
 SET(SOURCES
@@ -56,13 +56,13 @@ SET(SOURCES
 )
 
 SET(LIBRARIES
-  ProtocolLibrary
-  Utils
+    ProtocolLibrary
+    Utils
 )
 
 get_property(dirs DIRECTORY "" PROPERTY LIBRARIES)
 FOREACH(dir ${dirs})
-  MESSAGE(STATUS "libraries='${dir}'")
+    MESSAGE(STATUS "libraries='${dir}'")
 ENDFOREACH()
 
 
@@ -70,5 +70,5 @@ ADD_LIBRARY(ProtocolHandler ${SOURCES})
 TARGET_LINK_LIBRARIES(ProtocolHandler ${LIBRARIES})
 
 IF(BUILD_TESTS)
-  ADD_SUBDIRECTORY(test)
+    ADD_SUBDIRECTORY(test)
 ENDIF()

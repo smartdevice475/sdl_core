@@ -36,7 +36,9 @@
 #include <errno.h>
 #include <limits.h>
 #include <stddef.h>
+#ifndef OS_WINCE
 #include <signal.h>
+#endif
 
 #ifdef BUILD_TESTS
 // Temporary fix for UnitTest until APPLINK-9987 is resolved

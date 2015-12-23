@@ -132,7 +132,7 @@
 
     #define INIT_LOGGER(file_name)
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	#define DEINIT_LOGGER()
 #else
     #define DEINIT_LOGGER(file_name)

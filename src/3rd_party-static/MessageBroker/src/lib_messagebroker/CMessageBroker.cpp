@@ -291,7 +291,7 @@ class CMessageBroker_Private {
      * \brief Binary semaphore that is used to notify the
      * messaging thread that a new message is available.
      */
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	HANDLE m_messageQueueSemaphore;
 #else
 	System::BinarySemaphore m_messageQueueSemaphore;
@@ -571,7 +571,7 @@ void CMessageBroker_Private::pushMessage(CMessage* pMessage) {
   }
   mMessagesQueueMutex.Unlock();
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
   ::SetEvent(m_messageQueueSemaphore);
 #else
   m_messageQueueSemaphore.Notify();
@@ -910,7 +910,7 @@ void* CMessageBroker::MethodForThread(void* arg) {
       }
     }
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	::WaitForSingleObject(p->m_messageQueueSemaphore, INFINITE);
 #else
 	p->m_messageQueueSemaphore.Wait();

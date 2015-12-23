@@ -63,7 +63,7 @@ ConditionalVariable::ConditionalVariable() {
   if (initialized != 0)
     LOG4CXX_ERROR(logger_, "Failed to initialize "
                             "conditional variable attributes");
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 //
 #elif defined(OS_MAC)
 //

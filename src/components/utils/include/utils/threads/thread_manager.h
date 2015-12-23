@@ -50,7 +50,7 @@
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include <vector>
 #include <stdint.h>
 #endif
@@ -99,7 +99,7 @@ class ThreadManager : public utils::Singleton<ThreadManager> {
     pthread_t handle;
     ThreadDelegate* delegate;
   };
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
   ThreadManager();
   ~ThreadManager();
 

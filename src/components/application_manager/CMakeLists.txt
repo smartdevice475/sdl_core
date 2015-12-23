@@ -68,6 +68,12 @@ IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     )
 ENDIF()
 
+IF(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+    INCLUDE_DIRECTORIES(
+        ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
+    )
+ENDIF()
+  
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 INCLUDE_DIRECTORIES(
     ${COMPONENTS_DIR}/utils/include/utils/sqlite_wrapper/

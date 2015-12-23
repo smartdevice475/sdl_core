@@ -66,7 +66,7 @@ namespace NsMessageBroker
 
    void Client::Close()
    {
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 		 // do nothing
 	   shutdown(m_sock, 2);
 	   closesocket(m_sock);

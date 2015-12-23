@@ -86,7 +86,11 @@
 #define APR_HAVE_PROCESS_H       0
 #define APR_HAVE_PTHREAD_H       1
 #define APR_HAVE_SEMAPHORE_H     1
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#define APR_HAVE_SIGNAL_H        0
+#else
 #define APR_HAVE_SIGNAL_H        1
+#endif
 #define APR_HAVE_STDARG_H        1
 #define APR_HAVE_STDINT_H        1
 #define APR_HAVE_STDIO_H         1
@@ -96,7 +100,7 @@
 #define APR_HAVE_SYS_IOCTL_H     1
 #define APR_HAVE_SYS_SENDFILE_H  1
 #define APR_HAVE_SYS_SIGNAL_H    1
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #define APR_HAVE_SYS_SOCKET_H    0
 #else
 #define APR_HAVE_SYS_SOCKET_H    1
@@ -104,10 +108,14 @@
 #define APR_HAVE_SYS_SOCKIO_H    0
 #define APR_HAVE_SYS_SYSLIMITS_H 0
 #define APR_HAVE_SYS_TIME_H      1
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#define APR_HAVE_SYS_TYPES_H     0
+#else
 #define APR_HAVE_SYS_TYPES_H     1
+#endif
 #define APR_HAVE_SYS_UIO_H       1
 #define APR_HAVE_SYS_UN_H        1
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #define APR_HAVE_SYS_WAIT_H      0
 #else
 #define APR_HAVE_SYS_WAIT_H      1
@@ -284,13 +292,13 @@ extern "C" {
 #define APR_HAS_UNICODE_FS        0
 #define APR_HAS_PROC_INVOKED      0
 #define APR_HAS_USER              1
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #define APR_HAS_LARGE_FILES       1
 #else
 #define APR_HAS_LARGE_FILES       0
 #endif
 #define APR_HAS_XTHREAD_FILES     0
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #define APR_HAS_OS_UUID           1
 #else
 #define APR_HAS_OS_UUID           0
@@ -329,7 +337,7 @@ typedef  unsigned short  apr_uint16_t;
 
 typedef  int             apr_int32_t;
 typedef  unsigned int    apr_uint32_t;
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 typedef int socklen_t;
 #endif
 
@@ -372,11 +380,19 @@ typedef int socklen_t;
  typedef  unsigned long   apr_uint64_t;
 #endif
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+typedef  unsigned int    apr_size_t;
+typedef  int			 apr_ssize_t;
+typedef  long            apr_off_t;
+typedef  int             apr_socklen_t;
+typedef  unsigned short  apr_ino_t;
+#else
 typedef  size_t          apr_size_t;
 typedef  ssize_t         apr_ssize_t;
 typedef  off_t           apr_off_t;
 typedef  socklen_t       apr_socklen_t;
 typedef  ino_t           apr_ino_t;
+#endif
 
 #if APR_SIZEOF_VOIDP == 8
 typedef  apr_uint64_t            apr_uintptr_t;
@@ -629,7 +645,8 @@ typedef int apr_wait_t;
 #elif defined(_POSIX_PATH_MAX)
 #define APR_PATH_MAX       _POSIX_PATH_MAX
 #else
-#ifndef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#else
 #error no decision has been made on APR_PATH_MAX for your platform
 #endif
 #endif
