@@ -32,11 +32,8 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_CONDITIONAL_VARIABLE_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_CONDITIONAL_VARIABLE_H_
 
-#if defined(OS_POSIX)
+#if defined(OS_POSIX) || defined(OS_WINCE) || defined(OS_WINCE)
 #include <pthread.h>
-#else
-#include "pthread.h"
-//#error Please implement conditional variable for your OS
 #endif
 #include <stdint.h>
 

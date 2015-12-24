@@ -55,7 +55,7 @@ using namespace sync_primitives;
 CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 namespace {
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 void findThreadById(const std::vector<PlatformThreadStruct> &mapNames, 
 	PlatformThreadHandle id, 
 	std::vector<PlatformThreadStruct>::const_iterator &findIter)
@@ -79,14 +79,14 @@ UnnamedThreadRegistry::~UnnamedThreadRegistry() {
 
 std::string UnnamedThreadRegistry::GetUniqueName(PlatformThreadHandle id) {
   AutoLock auto_lock(state_lock_);
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
   IdNameMap::iterator found;
   findThreadById(id_number_, id, found);
 #else
   IdNameMap::iterator found = id_number_.find(id);
 #endif
   if (found != id_number_.end()) {
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	  return found->name;
 #else
     return found->second;
@@ -95,7 +95,7 @@ std::string UnnamedThreadRegistry::GetUniqueName(PlatformThreadHandle id) {
     ++last_thread_number_;
     std::stringstream namestream;
     namestream<<kUnknownName<<last_thread_number_;
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	found->name = namestream.str();
 	return found->name;
 #else
@@ -115,7 +115,7 @@ void ThreadManager::RegisterName(PlatformThreadHandle id, const string& name) {
   AutoLock auto_lock(state_lock_);
   if (names_.count(name) == 0) {
     names_.insert(name);
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	IdNamesMap::const_iterator findIter;
 	findThreadById(id_names_, id, findIter);
 	if (findIter == id_names_.end()){
@@ -144,14 +144,14 @@ void ThreadManager::RegisterName(PlatformThreadHandle id, const string& name) {
 
 string ThreadManager::GetName(PlatformThreadHandle id) const {
   AutoLock auto_lock(state_lock_);
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
   IdNamesMap::const_iterator found;
   findThreadById(id_names_, id, found);
 #else
   IdNamesMap::const_iterator found = id_names_.find(id);
 #endif
   if (found != id_names_.end()) {
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	  return found->name;
 #else
     return found->second;
@@ -164,7 +164,7 @@ string ThreadManager::GetName(PlatformThreadHandle id) const {
 
 void ThreadManager::Unregister(PlatformThreadHandle id) {
   AutoLock auto_lock(state_lock_);
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
   IdNamesMap::iterator findIter;
   findThreadById(id_names_, id, findIter);
 	if (id_names_.end() != findIter){
@@ -173,7 +173,7 @@ void ThreadManager::Unregister(PlatformThreadHandle id) {
 	string name = id_names_[id];
 #endif
 	names_.erase(name);
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 		id_names_.erase(findIter);
 	}
 #else

@@ -58,7 +58,7 @@
 namespace threads {
 namespace impl {
   class Thread;
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	typedef struct tagPlatformThreadStruct
 	{
 		PlatformThreadHandle	id;

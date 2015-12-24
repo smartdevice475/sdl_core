@@ -41,7 +41,7 @@
 #endif
 typedef std::basic_string<wchar_t> wchar_string;
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 // do nothing
 #else
 #define CP_UTF8 0

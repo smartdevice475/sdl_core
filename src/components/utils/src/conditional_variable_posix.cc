@@ -39,13 +39,7 @@
 
 #include "utils/lock.h"
 #include "utils/logger.h"
-#ifdef OS_WIN32
 #include "utils/date_time.h"
-//#pragma warning(disable : 4390)
-#elif defined(OS_MAC)
-#include "utils/date_time.h"
-#else
-#endif
 
 namespace {
 const long kNanosecondsPerSecond = 1000000000;
@@ -129,7 +123,7 @@ bool ConditionalVariable::Wait(AutoLock& auto_lock) {
 ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
     AutoLock& auto_lock, int32_t milliseconds){
   struct timespec now;
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
   clock_gettime(CLOCK_REALTIME, &now);
 #elif defined(OS_MAC)
   clock_gettime(CLOCK_MONOTONIC, &now);

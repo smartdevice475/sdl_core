@@ -34,7 +34,9 @@
 #define SRC_COMPONENTS_INCLUDE_UTILS_TIMER_THREAD_H_
 
 #include <time.h>
+#ifndef OS_WINCE
 #include <cstdint>
+#endif
 #include <limits>
 #include <string>
 #include <algorithm>

@@ -21,7 +21,7 @@
  *
  */
 #pragma once
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include "libusb.h"
 #endif
 #if defined(_MSC_VER)

@@ -172,7 +172,7 @@ Thread::Thread(const char* name, ThreadDelegate* delegate)
 	, delegate_(delegate)
 	, thread_created_(false)
 	, finalized_(false)
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #else
 	, thread_handle_(0)
 #endif
@@ -182,7 +182,7 @@ Thread::Thread(const char* name, ThreadDelegate* delegate)
 	if (name) {
 		name_ = name;
 	}
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	thread_handle_.p = 0;
 	thread_handle_.x = 0;
 #endif

@@ -49,7 +49,7 @@ SingleThreadSimpleValidator::~SingleThreadSimpleValidator() {
 }
 
 void SingleThreadSimpleValidator::AssertRunningOnCreationThread() const {
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	Thread::Id current_id = Thread::CurrentId();
 #else
 	PlatformThreadHandle current_id = Thread::CurrentId();

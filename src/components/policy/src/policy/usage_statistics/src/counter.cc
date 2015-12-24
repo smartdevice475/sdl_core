@@ -90,7 +90,11 @@ AppStopwatch::AppStopwatch(utils::SharedPtr<usage_statistics::StatisticsManager>
 
 AppStopwatch::AppStopwatch(utils::SharedPtr<StatisticsManager> statistics_manager,
                            const std::string& app_id,
+#ifdef OS_WINCE
+                           uint32_t time_out)
+#else
                            std::uint32_t time_out)
+#endif
   : app_id_(app_id),
     stopwatch_type_(SECONDS_HMI_NONE),
     statistics_manager_(statistics_manager),

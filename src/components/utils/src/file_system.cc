@@ -29,10 +29,10 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "utils/file_system.h"
+
 #include "utils/logger.h"
 
-#if defined(OS_WIN32)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include <Windows.h>
 #include <sstream>
 #else
@@ -52,15 +52,32 @@
 #include "utils/global.h"
 #endif
 
+#include "utils/file_system.h"
+
 CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 uint64_t file_system::GetAvailableDiskSpace(const std::string& path) {
-#if defined(OS_WIN32) || defined(OS_WINCE)
+#if defined(OS_WIN32)
 	uint64_t i64FreeBytesToCaller;
 	uint64_t i64TotalBytes;
 	uint64_t i64FreeBytes;
 	BOOL fResult = GetDiskFreeSpaceEx(
 		path.c_str(),
+		(PULARGE_INTEGER)&i64FreeBytesToCaller,
+		(PULARGE_INTEGER)&i64TotalBytes,
+		(PULARGE_INTEGER)&i64FreeBytes);
+
+	return fResult ? i64FreeBytes : 0;
+#elif defined (OS_WINCE)
+	uint64_t i64FreeBytesToCaller;
+	uint64_t i64TotalBytes;
+	uint64_t i64FreeBytes;
+	
+	wchar_string strUnicodeData;
+	Global::toUnicode(path, CP_ACP, strUnicodeData);
+
+	BOOL fResult = GetDiskFreeSpaceEx(
+		strUnicodeData.c_str(),
 		(PULARGE_INTEGER)&i64FreeBytesToCaller,
 		(PULARGE_INTEGER)&i64TotalBytes,
 		(PULARGE_INTEGER)&i64FreeBytes);
@@ -163,9 +180,9 @@ bool file_system::CreateDirectoryRecursively(const std::string& path) {
     pos = path.find('/', pos + 1);
 #endif
     if (!DirectoryExists(path.substr(0, pos))) {
-#if defined(OS_WIN32) || defined(OS_WINCE)
+#if defined(OS_WIN32)
 	if (0 != ::CreateDirectory(path.substr(0, pos).c_str(), NULL)) {
-#elif defined OS_WINCE
+#elif defined(OS_WINCE)
 	wchar_string strUnicodeData;
 	Global::toUnicode(path.substr(0, pos), CP_ACP, strUnicodeData);
 	if (0 != ::CreateDirectory(strUnicodeData.c_str(), NULL)) {
@@ -182,12 +199,19 @@ bool file_system::CreateDirectoryRecursively(const std::string& path) {
 
 bool file_system::IsDirectory(const std::string& name) {
 #if defined(OS_WIN32)
-	int fileAttri = GetFileAttributes(name.c_str());
+	int fileAttri = GetFileAttributes(name.c_str());.
+
+	if(fileAttri != -1){
+		if (fileAttri & FILE_ATTRIBUTE_DIRECTORY){
+			return true;
+		}	
+	}
+	return false;
 #elif defined(OS_WINCE)
 	wchar_string strUnicodeData;
 	Global::toUnicode(name, CP_ACP, strUnicodeData);
 	int fileAttri = GetFileAttributes(strUnicodeData.c_str());
-#endif
+
 	if(fileAttri != -1){
 		if (fileAttri & FILE_ATTRIBUTE_DIRECTORY){
 			return true;
@@ -244,6 +268,11 @@ bool file_system::FileExists(const std::string& name) {
 	wchar_string strUnicodeData;
 	Global::toUnicode(name, CP_ACP, strUnicodeData);
 	HANDLE file = ::CreateFile(strUnicodeData.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+	bool b = !(file == (HANDLE)-1);
+	if (b)
+		::CloseHandle((HANDLE)file);
+	return b;
 #else
 	struct stat status;
 	memset(&status, 0, sizeof(status));

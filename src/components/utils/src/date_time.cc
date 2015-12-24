@@ -30,9 +30,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef MODIFY_FUNCTION_SIGN
+#include "utils/date_time.h"
+
 #include <global_first.h>
-#endif
 #if defined(OS_WIN32) || defined(OS_WINCE)
 #include <time.h>
 #include <assert.h>
@@ -41,19 +41,19 @@
 #include <sys/time.h>
 #endif
 #include <stdint.h>
-#include "utils/date_time.h"
+
 #if defined(OS_WIN32) || defined(OS_WINCE)
 #include "os/poll_windows.h"
 #endif
 #ifdef OS_WINCE
 #include "utils/global.h"
 #endif
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 void clock_gettime(int i, timespec * tm)
 {
 	if (i == CLOCK_MONOTONIC)
 	{
-		unsigned _int64 cur = GetTickCount();
+		unsigned long cur = GetTickCount();
 		tm->tv_sec = cur / 1000;
 		tm->tv_nsec = (cur % 1000) * 1000;
 	}
@@ -82,7 +82,7 @@ void clock_gettime(int i, timespec * tm)
 
 namespace date_time {
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #else
 int32_t const DateTime::MILLISECONDS_IN_SECOND;
 int32_t const DateTime::MICROSECONDS_IN_MILLISECONDS;

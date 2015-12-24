@@ -39,7 +39,7 @@
 #include <cstdio>
 
 #include "rpc_base/validation_report.h"
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include "utils/macro.h"
 #endif
 namespace rpc {
