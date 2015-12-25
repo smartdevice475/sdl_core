@@ -846,10 +846,10 @@ ADD_SUBDIRECTORY(./src/3rd_party-static)
 ADD_SUBDIRECTORY(./src/components)
 
 # --- Main application
-#ADD_SUBDIRECTORY(./src/appMain)
+ADD_SUBDIRECTORY(./src/appMain)
 
 # --- Plugins
-#ADD_SUBDIRECTORY(./src/plugins)
+ADD_SUBDIRECTORY(./src/plugins)
 
 
 # Building tests

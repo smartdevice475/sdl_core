@@ -46,6 +46,12 @@ IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	)
 ENDIF()
 
+IF(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+    INCLUDE_DIRECTORIES(
+      ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
+    )
+ENDIF()
+
 SET(SOURCES
     ${CH_SRC_DIR}/connection_handler_impl.cc
     ${CH_SRC_DIR}/connection.cc

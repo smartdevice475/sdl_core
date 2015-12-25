@@ -38,6 +38,10 @@
 #include <string>
 #include <vector>
 
+#ifdef OS_WINCE
+#include "validation_report.h"
+#endif
+
 namespace Json {
 class Value;
 }  // namespace Json
@@ -86,7 +90,7 @@ class Range {
   public:
     // Methods
     Range(const T min, const T max);
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 		T min_rpc() const;
 		T max_rpc() const;
 #else
@@ -418,7 +422,9 @@ class Optional {
 }  // namespace rpc
 
 // Template methods implementation
+#ifndef OS_WINCE
 #include "rpc_base_inl.h"
+#endif
 #include "rpc_base_json_inl.h"
 
 #endif /* VALIDATED_TYPES_H_ */
