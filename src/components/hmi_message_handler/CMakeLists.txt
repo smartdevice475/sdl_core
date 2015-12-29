@@ -53,6 +53,12 @@ IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	)
 ENDIF()
 
+IF(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+    INCLUDE_DIRECTORIES(
+      ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
+    )
+ENDIF()
+
 IF(HMIADAPTER STREQUAL "dbus")
     SET(DBUS_SOURCE ./src/dbus_message_adapter.cc)
     SET(DBUS_ADAPTER DBus)

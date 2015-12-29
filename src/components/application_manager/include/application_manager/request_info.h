@@ -340,11 +340,18 @@ namespace request_controller {
     HMILevelTimeScale(const TimevalStruct& start,
                       const TimevalStruct& end,
                       const uint32_t& app_id,
-                      const mobile_apis::HMILevel::eType& hmi_level)
-      : start_(start),
+					  const mobile_apis::HMILevel::eType& hmi_level) :
+#ifndef OS_WINCE
+	    start_(start),
         end_(end),
+#endif
         app_id_(app_id),
-        hmi_level_(hmi_level) {}
+        hmi_level_(hmi_level) {
+#ifdef OS_WINCE
+		memcpy(&start_, &start, sizeof(TimevalStruct));
+		memcpy(&end_, &end, sizeof(TimevalStruct));
+#endif
+		}
 
     bool operator()(RequestInfoPtr setEntry) {
       if (!setEntry.valid()) {

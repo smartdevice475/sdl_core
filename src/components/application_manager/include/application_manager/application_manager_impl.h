@@ -1146,8 +1146,13 @@ class ApplicationManagerImpl : public ApplicationManager,
       AppV4DevicePredicate(const connection_handler::DeviceHandle handle):
         handle_(handle) {}
       bool operator () (const ApplicationSharedPtr app) const {
+#ifdef OS_WINCE
+		  return app ? handle_ == app->device() &&
+			  kV4 == app->protocol_version() : false;
+#else
         return app ? handle_ == app->device() &&
                      ProtocolVersion::kV4 == app->protocol_version() : false;
+#endif
       }
     };
 

@@ -106,8 +106,13 @@ HmiStatePtr StateController::ResolveHmiState(ApplicationSharedPtr app,
                 << ", audio_state " << state->audio_streaming_state()
                 << ", system_context " << state->system_context());
 
+#ifdef OS_WINCE
   HmiStatePtr available_state = CreateHmiState(app->app_id(),
-      HmiState::StateID::STATE_ID_REGULAR);
+      HmiState::STATE_ID_REGULAR);
+#else
+  HmiStatePtr available_state = CreateHmiState(app->app_id(),
+	  HmiState::StateID::STATE_ID_REGULAR);
+#endif
   DCHECK_OR_RETURN(available_state, HmiStatePtr());
   available_state->set_hmi_level(state->hmi_level());
   available_state->set_audio_streaming_state(state->audio_streaming_state());
@@ -234,8 +239,13 @@ void StateController::SetupRegularHmiState(ApplicationSharedPtr app,
   DCHECK_OR_RETURN_VOID(app);
   HmiStatePtr prev_state = app->RegularHmiState();
   DCHECK_OR_RETURN_VOID(prev_state);
+#ifdef OS_WINCE
   HmiStatePtr new_state = CreateHmiState(app->app_id(),
-      HmiState::StateID::STATE_ID_REGULAR);
+      HmiState::STATE_ID_REGULAR);
+#else
+  HmiStatePtr new_state = CreateHmiState(app->app_id(),
+	  HmiState::StateID::STATE_ID_REGULAR);
+#endif
   DCHECK_OR_RETURN_VOID(new_state);
   new_state->set_hmi_level(hmi_level);
   new_state->set_audio_streaming_state(audio_state);

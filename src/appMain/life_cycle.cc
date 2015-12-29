@@ -54,7 +54,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "appMain")
 namespace {
 void NameMessageBrokerThread(const System::Thread& thread,
                              const std::string& name) {
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	pthread_t pt;
 	pt.p = thread.GetId();
 	pt.x = 0;
@@ -372,7 +372,7 @@ bool LifeCycle::InitMessageSystem() {
 namespace {
   pthread_t main_thread;
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
   BOOL WINAPI HandlerRoutine(DWORD dwCtrlType)
   {
 	  switch (dwCtrlType)

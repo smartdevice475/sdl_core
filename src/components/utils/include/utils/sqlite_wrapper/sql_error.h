@@ -38,7 +38,7 @@
 namespace utils {
 namespace dbms {
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #undef ERROR
 #endif
 

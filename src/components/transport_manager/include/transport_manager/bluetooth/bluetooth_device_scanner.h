@@ -36,10 +36,13 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_SCANNER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_SCANNER_H_
 
-#ifdef OS_WIN32
-#ifdef OS_WINCE
+#if defined(OS_WIN32)
+#include <initguid.h>
+#include <winsock2.h>
+#include <ws2bth.h>
+#include <map>
+#elif defined(OS_WINCE)
 #include <objbase.h>
-#endif
 #include <initguid.h>
 #include <winsock2.h>
 #include <ws2bth.h>

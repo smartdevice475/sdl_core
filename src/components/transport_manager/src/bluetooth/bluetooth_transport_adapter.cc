@@ -35,7 +35,9 @@
 
 #include <errno.h>
 #include <sys/types.h>
+#ifndef OS_WINCE
 #include <sys/socket.h>
+#endif
 #include <unistd.h>
 
 #include <iomanip>

@@ -66,12 +66,20 @@ namespace helpers {
     return !EQ<T>(what, to);
   }
 
+#ifdef OS_WINCE
+  template<class U>
+#else
   template<class U = bool>
+#endif
   bool ALL (U what, U to) {
     return what && to;
   }
 
+#ifdef OS_WINCE
+  template<class U>
+#else
   template<class U = bool>
+#endif
   bool ONE (U what, U to) {
     return what || to;
   }

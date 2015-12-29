@@ -83,10 +83,17 @@ struct Version {
   APIVersion min_supported_api_version;
   APIVersion max_supported_api_version;
 
+#ifdef OS_WINCE
+  Version()
+	  : min_supported_api_version(kUnknownAPI),
+	  max_supported_api_version(kUnknownAPI) {
+  }
+#else
   Version()
     : min_supported_api_version(APIVersion::kUnknownAPI),
       max_supported_api_version(APIVersion::kUnknownAPI) {
   }
+#endif
 };
 
 struct AppFile {

@@ -48,7 +48,6 @@ typedef struct timeval TimevalStruct;
 void clock_gettime(int i, timespec * tm);
 
 #elif defined(OS_MAC)
-
 #include <mach/clock.h>
 #include <mach/mach.h>
 #define CLOCK_REALTIME CALENDAR_CLOCK

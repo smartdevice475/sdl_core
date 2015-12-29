@@ -36,10 +36,13 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_H_
 
-#ifdef OS_WIN32
-#ifdef OS_WINCE
+#if defined(OS_WIN32)
+#include <initguid.h>
+#include <winsock2.h>  
+#include <ws2bth.h>
+#include <stdint.h>
+#elif defined(OS_WINCE)
 #include <objbase.h>
-#endif
 #include <initguid.h>
 #include <winsock2.h>  
 #include <ws2bth.h>
@@ -61,7 +64,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	// Bluetooth device address define
 	typedef SOCKADDR_BTH bdaddr_t;
 #endif
@@ -81,7 +84,7 @@ typedef std::vector<uint8_t> RfcommChannelVector;
  */
 class BluetoothDevice : public Device {
  public:
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	 static void GetAddressString(const bdaddr_t& device_address, char *device_address_string, int address_size);
 	 static void GetAddressInfo(const char *device_address_string, bdaddr_t& device_address);
 #endif

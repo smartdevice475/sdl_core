@@ -233,6 +233,113 @@ class TransportManagerImpl : public TransportManager,
   TransportManagerImpl();
 
  protected:
+
+#ifdef OS_WINCE
+  template <class Proc>
+  void RaiseEvent(Proc proc, DeviceHandle device_handle) {
+    for (TransportManagerListenerList::iterator it =
+             transport_manager_listener_.begin();
+         it != transport_manager_listener_.end(); ++it) {
+      ((*it)->*proc)(device_handle);
+    }
+  }
+  template <class Proc>
+  void RaiseEvent(Proc proc, const protocol_handler::RawMessagePtr message) {
+    for (TransportManagerListenerList::iterator it =
+             transport_manager_listener_.begin();
+         it != transport_manager_listener_.end(); ++it) {
+      ((*it)->*proc)(message);
+    }
+  }
+  template <class Proc>
+  void RaiseEvent(Proc proc, ConnectionUID connection_id, const CommunicationError& error) {
+    for (TransportManagerListenerList::iterator it =
+             transport_manager_listener_.begin();
+         it != transport_manager_listener_.end(); ++it) {
+      ((*it)->*proc)(connection_id, error);
+    }
+  }
+  template <class Proc>
+  void RaiseEvent(Proc proc, ConnectionUID connection_id, const DataReceiveError& error) {
+    for (TransportManagerListenerList::iterator it =
+             transport_manager_listener_.begin();
+         it != transport_manager_listener_.end(); ++it) {
+      ((*it)->*proc)(connection_id, error);
+    }
+  }
+  template <class Proc>
+  void RaiseEvent(Proc proc, const DataSendError& error, const protocol_handler::RawMessagePtr& message) {
+    for (TransportManagerListenerList::iterator it =
+             transport_manager_listener_.begin();
+         it != transport_manager_listener_.end(); ++it) {
+      ((*it)->*proc)(error, message);
+    }
+  }
+  template <class Proc>
+  void RaiseEvent(Proc proc, const DeviceInfo& device_info) {
+    for (TransportManagerListenerList::iterator it =
+             transport_manager_listener_.begin();
+         it != transport_manager_listener_.end(); ++it) {
+      ((*it)->*proc)(device_info);
+    }
+  }
+  template <class Proc>
+  void RaiseEvent(Proc proc, const std::vector<DeviceInfo>& device_info_list) {
+    for (TransportManagerListenerList::iterator it =
+             transport_manager_listener_.begin();
+         it != transport_manager_listener_.end(); ++it) {
+      ((*it)->*proc)(device_info_list);
+    }
+  }
+  template <class Proc>
+  void RaiseEvent(Proc proc) {
+    for (TransportManagerListenerList::iterator it =
+             transport_manager_listener_.begin();
+         it != transport_manager_listener_.end(); ++it) {
+      ((*it)->*proc)();
+    }
+  }
+  template <class Proc>
+  void RaiseEvent(Proc proc, const SearchDeviceError& error) {
+    for (TransportManagerListenerList::iterator it =
+             transport_manager_listener_.begin();
+         it != transport_manager_listener_.end(); ++it) {
+      ((*it)->*proc)(error);
+    }
+  }
+  template <class Proc>
+  void RaiseEvent(Proc proc, const DeviceInfo& device_info, const ConnectionUID& connection_id) {
+    for (TransportManagerListenerList::iterator it =
+             transport_manager_listener_.begin();
+         it != transport_manager_listener_.end(); ++it) {
+      ((*it)->*proc)(device_info, connection_id);
+    }
+  }
+  template <class Proc>
+  void RaiseEvent(Proc proc, const DeviceInfo& device_info, const ConnectError& error) {
+    for (TransportManagerListenerList::iterator it =
+             transport_manager_listener_.begin();
+         it != transport_manager_listener_.end(); ++it) {
+      ((*it)->*proc)(device_info, error);
+    }
+  }
+  template <class Proc>
+  void RaiseEvent(Proc proc, const DeviceHandle& device, const DisconnectDeviceError& error) {
+    for (TransportManagerListenerList::iterator it =
+             transport_manager_listener_.begin();
+         it != transport_manager_listener_.end(); ++it) {
+      ((*it)->*proc)(device, error);
+    }
+  }
+  template <class Proc>
+  void RaiseEvent(Proc proc, const DataReceiveError& error) {
+    for (TransportManagerListenerList::iterator it =
+             transport_manager_listener_.begin();
+         it != transport_manager_listener_.end(); ++it) {
+      ((*it)->*proc)(error);
+    }
+  }
+#else
   template <class Proc, class... Args>
   void RaiseEvent(Proc proc, Args... args) {
     for (TransportManagerListenerList::iterator it =
@@ -241,7 +348,7 @@ class TransportManagerImpl : public TransportManager,
       ((*it)->*proc)(args...);
     }
   }
-
+#endif
   /**
    * @brief Put massage in the container of massages.
    *

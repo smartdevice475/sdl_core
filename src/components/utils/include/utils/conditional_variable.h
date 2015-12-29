@@ -32,7 +32,7 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_CONDITIONAL_VARIABLE_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_CONDITIONAL_VARIABLE_H_
 
-#if defined(OS_POSIX) || defined(OS_WINCE) || defined(OS_WINCE)
+#if defined(OS_POSIX) || defined(OS_WIN32) || defined(OS_WINCE)
 #include <pthread.h>
 #endif
 #include <stdint.h>

@@ -40,6 +40,10 @@
 #include "utils/helpers.h"
 #include "utils/gen_hash.h"
 
+#ifdef OS_WINCE
+#include "utils/global.h"
+#endif
+
 namespace {
 const std::string kDatabaseName = "resumption";
 }
@@ -75,7 +79,7 @@ bool ResumptionDataDB::Init() {
     bool is_opened = false;
     const uint16_t open_attempt_timeout_ms =
         profile::Profile::instance()->open_attempt_timeout_ms_resumption_db();
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	// const uint32_t sleep_interval_mcsec = open_attempt_timeout_ms * 1000;
 #else
     const useconds_t sleep_interval_mcsec = open_attempt_timeout_ms * 1000;
@@ -1730,13 +1734,23 @@ bool ResumptionDataDB::ExecInsertVrCommands(
      field "idchoice" from table "vrCommandsArray" = 2*/
   for (size_t i = 0; i < length_vr_commands; ++i) {
     insert_vr_command.Bind(0, vr_commands_array[i].asString());
-    if (AccessoryVRCommand::kVRCommandFromCommand == value) {
+#ifdef OS_WINCE
+    if (kVRCommandFromCommand == value) {
       insert_vr_command.Bind(1, primary_key);
       insert_vr_command.Bind(2);
-    } else if (AccessoryVRCommand::kVRCommandFromChoice == value) {
+    } else if (kVRCommandFromChoice == value) {
       insert_vr_command.Bind(1);
       insert_vr_command.Bind(2, primary_key);
     }
+#else
+	if (AccessoryVRCommand::kVRCommandFromCommand == value) {
+		insert_vr_command.Bind(1, primary_key);
+		insert_vr_command.Bind(2);
+	} else if (AccessoryVRCommand::kVRCommandFromChoice == value) {
+		insert_vr_command.Bind(1);
+		insert_vr_command.Bind(2, primary_key);
+	}
+#endif
     if (!insert_vr_command.Exec() || !insert_vr_command.Reset()) {
       LOG4CXX_WARN(logger_, "Problem with insert vr_command to DB");
       return false;
@@ -2167,7 +2181,11 @@ bool ResumptionDataDB::InsertGlobalPropertiesData(
   SmartMap::iterator it_end = global_properties.map_end();
   bool data_exists = false;
   while (it_begin != it_end) {
+#ifdef OS_WINCE
+	if (SmartType_Null != ((it_begin->second).getType())) {
+#else
     if (SmartType::SmartType_Null != ((it_begin->second).getType())) {
+#endif
       LOG4CXX_INFO(logger_, "Global properties contains - "<<it_begin->first);
       data_exists = true;
       break;
@@ -2197,7 +2215,11 @@ bool ResumptionDataDB::InsertGlobalPropertiesData(
   CustomBind(strings::vr_help_title, global_properties, insert_global_properties, 0);
   CustomBind(strings::menu_title, global_properties, insert_global_properties, 1);
 
+#ifdef OS_WINCE
+  if (SmartType_Null == global_properties[strings::menu_icon].getType()) {
+#else
   if (SmartType::SmartType_Null == global_properties[strings::menu_icon].getType()) {
+#endif
     insert_global_properties.Bind(2);
   } else {
     int64_t image_key = 0;
