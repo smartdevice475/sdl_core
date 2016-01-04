@@ -877,9 +877,9 @@ int ASN1_TIME_check(ASN1_TIME *t);
 ASN1_GENERALIZEDTIME *ASN1_TIME_to_generalizedtime(ASN1_TIME *t, ASN1_GENERALIZEDTIME
                                                    **out);
 
-int i2d_ASN1_SET(STACK * a, unsigned char **pp,
+int i2d_ASN1_SET(STACK *a, unsigned char **pp,
                  i2d_of_void *i2d, int ex_tag, int ex_class, int is_set);
-STACK *d2i_ASN1_SET(STACK ** a, const unsigned char **pp, long length,
+STACK *d2i_ASN1_SET(STACK **a, const unsigned char **pp, long length,
                     d2i_of_void *d2i, void (*free_func) (void *),
                     int ex_tag, int ex_class);
 
@@ -1018,8 +1018,8 @@ int ASN1_parse_dump(BIO *bp, const unsigned char *pp, long len, int indent,
 const char *ASN1_tag2str(int tag);
 
 /* Used to load and write netscape format cert/key */
-int i2d_ASN1_HEADER(ASN1_HEADER * a, unsigned char **pp);
-ASN1_HEADER *d2i_ASN1_HEADER(ASN1_HEADER ** a, const unsigned char **pp,
+int i2d_ASN1_HEADER(ASN1_HEADER *a, unsigned char **pp);
+ASN1_HEADER *d2i_ASN1_HEADER(ASN1_HEADER **a, const unsigned char **pp,
                              long length);
 ASN1_HEADER *ASN1_HEADER_new(void);
 void ASN1_HEADER_free(ASN1_HEADER * a);
@@ -1094,7 +1094,7 @@ typedef int asn1_output_data_fn(BIO *out, BIO *data, ASN1_VALUE *val,
 int int_smime_write_ASN1(BIO *bio, ASN1_VALUE *val, BIO *data, int flags,
                          int ctype_nid, int econt_nid,
                          STACK_OF(X509_ALGOR) *mdalgs,
-                         asn1_output_data_fn * data_fn, const ASN1_ITEM *it);
+                         asn1_output_data_fn *data_fn, const ASN1_ITEM *it);
 ASN1_VALUE *SMIME_read_ASN1(BIO *bio, BIO **bcont, const ASN1_ITEM *it);
 
 /* BEGIN ERROR CODES */
