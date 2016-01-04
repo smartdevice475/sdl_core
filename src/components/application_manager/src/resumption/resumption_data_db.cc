@@ -87,7 +87,7 @@ bool ResumptionDataDB::Init() {
     LOG4CXX_DEBUG(logger_, "Open attempt timeout(ms) is: "
                   << open_attempt_timeout_ms);
     for (int i = 0; i < attempts; ++i) {
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 		Sleep(open_attempt_timeout_ms);
 #else
       usleep(sleep_interval_mcsec);

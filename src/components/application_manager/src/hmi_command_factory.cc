@@ -283,11 +283,21 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
 
   bool is_response = false;
   const int msg_type = (*message)[strings::params][strings::message_type].asInt();
+#ifdef OS_WINCE
+  if (msg_type == static_cast<int>(application_manager::kResponse)) {
+#else
   if (msg_type == static_cast<int>(application_manager::MessageType::kResponse)) {
+#endif
     is_response = true;
     LOG4CXX_INFO(logger_, "HMICommandFactory::CreateCommand response");
+
+#ifdef OS_WINCE
   } else if ((*message)[strings::params][strings::message_type]
-      == static_cast<int>(application_manager::MessageType::kErrorResponse)) {
+      == static_cast<int>(application_manager::kErrorResponse)) {
+#else
+  } else if ((*message)[strings::params][strings::message_type]
+  == static_cast<int>(application_manager::MessageType::kErrorResponse)) {
+#endif
     is_response = true;
     LOG4CXX_INFO(logger_, "HMICommandFactory::CreateCommand error response");
   } else {

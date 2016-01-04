@@ -85,7 +85,7 @@
  * Will cauch assert on debug version,
  * Will return return_value in release build
  */
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #define DCHECK_OR_RETURN(condition, return_value)
 #else
 #define DCHECK_OR_RETURN(condition, return_value) \

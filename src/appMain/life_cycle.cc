@@ -372,7 +372,7 @@ bool LifeCycle::InitMessageSystem() {
 namespace {
   pthread_t main_thread;
 
-#if defined(OS_WIN32) || defined(OS_WINCE)
+#if defined(OS_WIN32)
   BOOL WINAPI HandlerRoutine(DWORD dwCtrlType)
   {
 	  switch (dwCtrlType)
@@ -432,12 +432,13 @@ namespace {
 void LifeCycle::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   main_thread = pthread_self();
-#ifdef OS_WIN32
+#if defined(OS_WIN32)
   if (!SetConsoleCtrlHandler(HandlerRoutine, TRUE))
   {
 	  LOG4CXX_FATAL(logger_, "Subscribe to system signals error");
 	  return;
   }
+#elif defined(OS_WINCE)
 #else
   // First, register signal handlers
   if(!::utils::SubscribeToInterruptSignal(&sig_handler) ||
@@ -447,7 +448,7 @@ void LifeCycle::Run() {
   }
 #endif
   // Now wait for any signal
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
   Sleep(INFINITE);
 #else
   pause();

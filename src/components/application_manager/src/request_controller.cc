@@ -57,15 +57,25 @@ RequestController::RequestController()
 
 RequestController::~RequestController() {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (pool_state_ != TPoolState::STOPPED) {
-    DestroyThreadpool();
+#ifdef OS_WINCE
+  if (pool_state_ != STOPPED) {
+	  DestroyThreadpool();
   }
+#else
+  if (pool_state_ != TPoolState::STOPPED) {
+	  DestroyThreadpool();
+  }
+#endif
 }
 
 void RequestController::InitializeThreadpool() {
   LOG4CXX_AUTO_TRACE(logger_);
   // TODO(DK): Consider lazy loading threads instead of creating all at once
+#ifdef OS_WINCE
+  pool_state_ = STARTED;
+#else
   pool_state_ = TPoolState::STARTED;
+#endif
   char name[50];
   for (uint32_t i = 0; i < pool_size_; i++) {
     snprintf(name, sizeof(name)/sizeof(name[0]), "AM Pool %d", i);
@@ -79,7 +89,11 @@ void RequestController::DestroyThreadpool() {
   LOG4CXX_AUTO_TRACE(logger_);
   {
     AutoLock auto_lock(mobile_request_list_lock_);
+#ifdef OS_WINCE
+    pool_state_ = STOPPED;
+#else
     pool_state_ = TPoolState::STOPPED;
+#endif
     LOG4CXX_DEBUG(logger_, "Broadcasting STOP signal to all threads...");
     cond_var_.Broadcast();  // notify all threads we are shutting down
   }
@@ -410,7 +424,11 @@ void RequestController::Worker::threadMain() {
     // Try to pick a request
     AutoLock auto_lock(request_controller_->mobile_request_list_lock_);
 
+#ifdef OS_WINCE
+    while ((request_controller_->pool_state_ != STOPPED) &&
+#else
     while ((request_controller_->pool_state_ != TPoolState::STOPPED) &&
+#endif
            (request_controller_->mobile_request_list_.empty())) {
       // Wait until there is a task in the queue
       // Unlock mutex while wait, then lock it back when signaled
@@ -420,9 +438,15 @@ void RequestController::Worker::threadMain() {
     }
 
     // If the thread was shutdown, return from here
-    if (request_controller_->pool_state_ == TPoolState::STOPPED) {
+#ifdef OS_WINCE
+    if (request_controller_->pool_state_ == STOPPED) {
       break;
     }
+#else
+	if (request_controller_->pool_state_ == TPoolState::STOPPED) {
+		break;
+	}
+#endif
 
     if (request_controller_->mobile_request_list_.empty()) {
       LOG4CXX_WARN(logger_, "Mobile request list is empty");
