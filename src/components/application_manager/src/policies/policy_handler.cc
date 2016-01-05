@@ -32,8 +32,10 @@
 
 #include "application_manager/policies/policy_handler.h"
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32)
 #include <Windows.h>
+#elif defined(OS_WINCE)
+#include <map>
 #else
 #include <unistd.h>
 #include <dlfcn.h>
@@ -287,7 +289,7 @@ bool PolicyHandler::LoadPolicyLibrary() {
     return NULL;
   }
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32)
   dl_handle_ = LoadLibrary(kLibrary.c_str());
 
   if (dl_handle_) {
@@ -299,7 +301,20 @@ bool PolicyHandler::LoadPolicyLibrary() {
   else {
 	  LOG4CXX_ERROR(logger_, GetLastError());
   }
+#elif defined(OS_WINCE)
+  wchar_string strUnicodeData;
+  Global::toUnicode(kLibrary, CP_ACP, strUnicodeData);
+  dl_handle_ = LoadLibrary(strUnicodeData.c_str());
 
+  if (dl_handle_) {
+	  if (CreateManager()) {
+		  policy_manager_->set_listener(this);
+		  event_observer_ = new PolicyEventObserver(this);
+	  }
+  }
+  else {
+	  LOG4CXX_ERROR(logger_, GetLastError());
+  }
 #elif defined(OS_ANDROID)
   dl_handle_ = dlopen(kLibrary.c_str(), RTLD_LAZY);
 
@@ -341,8 +356,16 @@ bool PolicyHandler::PolicyEnabled() {
 bool PolicyHandler::CreateManager() {
   typedef policy::PolicyManager* (*CreateManager)();
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32)
   CreateManager create_manager = (CreateManager)GetProcAddress(dl_handle_, "CreateManager");
+
+  if (create_manager) {
+	  policy_manager_ = create_manager();
+  } else {
+	  LOG4CXX_WARN(logger_, GetLastError());
+  }
+#elif defined(OS_WINCE)
+  CreateManager create_manager = (CreateManager)GetProcAddress(dl_handle_, L"CreateManager");
 
   if (create_manager) {
 	  policy_manager_ = create_manager();
@@ -748,8 +771,13 @@ void PolicyHandler::OnPendingPermissionChange(
   mobile_apis::HMILevel::eType app_hmi_level = app->hmi_level();
 
   switch (app_hmi_level) {
+#ifdef OS_WINCE
+  case mobile_apis::HMILevel::HMI_FULL:
+  case mobile_apis::HMILevel::HMI_LIMITED: {
+#else
   case mobile_apis::HMILevel::eType::HMI_FULL:
   case mobile_apis::HMILevel::eType::HMI_LIMITED: {
+#endif
     if (permissions.appPermissionsConsentNeeded) {
       MessageHelper::
           SendOnAppPermissionsChangedNotification(app->app_id(), permissions);
@@ -760,7 +788,11 @@ void PolicyHandler::OnPendingPermissionChange(
       break;
     }
   }
+#ifdef OS_WINCE
+  case mobile_apis::HMILevel::HMI_BACKGROUND: {
+#else
   case mobile_apis::HMILevel::eType::HMI_BACKGROUND: {
+#endif
     if (permissions.isAppPermissionsRevoked) {
       MessageHelper::
           SendOnAppPermissionsChangedNotification(app->app_id(), permissions);
@@ -863,13 +895,13 @@ bool PolicyHandler::UnloadPolicyLibrary() {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "policy_manager_ = " << policy_manager_);
   bool ret = true;
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #else
   delete policy_manager_;
   policy_manager_ = 0;
 #endif
   if (dl_handle_) {
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	ret = FreeLibrary(dl_handle_);
 #else
     ret = (dlclose(dl_handle_) == 0);

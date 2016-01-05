@@ -50,8 +50,13 @@ OnPermissionsChangeNotification::~OnPermissionsChangeNotification() {
 void OnPermissionsChangeNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
+#ifdef OS_WINCE
+  (*message_)[strings::params][strings::message_type] =
+	  static_cast<int32_t>(application_manager::kNotification);
+#else
   (*message_)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
+#endif
 
   SendNotification();
 }

@@ -389,9 +389,15 @@ void PolicyManagerImpl::SetUserConsentForDevice(const std::string& device_id,
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Device :" << device_id);
   DeviceConsent current_consent = GetUserConsentForDevice(device_id);
+#ifdef OS_WINCE
+  bool is_current_device_allowed =
+	  kDeviceAllowed == current_consent ? true : false;
+  if (kDeviceHasNoConsent != current_consent &&
+#else
   bool is_current_device_allowed =
       DeviceConsent::kDeviceAllowed == current_consent ? true : false;
   if (DeviceConsent::kDeviceHasNoConsent != current_consent &&
+#endif
       is_current_device_allowed == is_allowed) {
     const std::string consent = is_allowed ? "allowed" : "disallowed";
     LOG4CXX_INFO(logger_, "Device is already " << consent << ".");

@@ -34,9 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_VR_CANCEL_RECORD_NOTIFICATION_H_
 
 #include "application_manager/commands/hmi/notification_from_hmi.h"
-#ifdef MODIFY_FUNCTION_SIGN
 #include <lib_msp_vr.h>
-#endif
 
 namespace application_manager {
 

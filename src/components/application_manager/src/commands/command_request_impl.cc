@@ -137,7 +137,11 @@ void CommandRequestImpl::SendResponse(
   }
   smart_objects::SmartObject& response = *result;
 
+#ifdef OS_WINCE
+  response[strings::params][strings::message_type] = kResponse;
+#else
   response[strings::params][strings::message_type] = MessageType::kResponse;
+#endif
   response[strings::params][strings::correlation_id] = correlation_id();
   response[strings::params][strings::protocol_type] =
       CommandImpl::mobile_protocol_type_;
@@ -206,7 +210,11 @@ uint32_t CommandRequestImpl::SendHMIRequest(
   }
 
   smart_objects::SmartObject& request = *result;
+#ifdef OS_WINCE
+  request[strings::params][strings::message_type] = kRequest;
+#else
   request[strings::params][strings::message_type] = MessageType::kRequest;
+#endif
   request[strings::params][strings::function_id] = function_id;
   request[strings::params][strings::correlation_id] = hmi_correlation_id;
   request[strings::params][strings::protocol_version] =
@@ -236,8 +244,13 @@ void CommandRequestImpl::CreateHMINotification(
   }
   smart_objects::SmartObject& notify = *result;
 
+#ifdef OS_WINCE
+  notify[strings::params][strings::message_type] =
+	  static_cast<int32_t>(application_manager::kNotification);
+#else
   notify[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
+#endif
   notify[strings::params][strings::protocol_version] =
       CommandImpl::protocol_version_;
   notify[strings::params][strings::protocol_type] =

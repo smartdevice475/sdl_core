@@ -13,7 +13,7 @@
 #include <netinet/in.h>
 #endif
 
-#ifdef _WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include <winsock2.h>
 #endif//_WIN32
 

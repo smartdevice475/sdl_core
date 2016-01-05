@@ -32,7 +32,7 @@
 
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include <WinSock2.h>
 #elif defined(OS_MAC)
 #include <arpa/inet.h>

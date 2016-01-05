@@ -220,7 +220,11 @@ void GetVehicleDataRequest::Run() {
 
   if (app->IsCommandLimitsExceeded(
         static_cast<mobile_apis::FunctionID::eType>(function_id()),
+#ifdef OS_WINCE
+        application_manager::CONFIG_FILE)) {
+#else
         application_manager::TLimitSource::CONFIG_FILE)) {
+#endif
     LOG4CXX_ERROR(logger_, "GetVehicleData frequency is too high.");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;

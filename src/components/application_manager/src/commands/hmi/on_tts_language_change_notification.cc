@@ -72,7 +72,7 @@ void OnTTSLanguageChangeNotification::Run() {
 
   ApplicationManagerImpl::ApplicationListAccessor accessor;
 
-  ApplicationManagerImpl::ApplictionSetIt it = accessor.begin();
+  ApplicationManagerImpl::ApplictionSetConstIt it = accessor.begin();
   for (; accessor.end() != it;) {
     ApplicationSharedPtr app = *it++;
     (*message_)[strings::params][strings::connection_key] = app->app_id();

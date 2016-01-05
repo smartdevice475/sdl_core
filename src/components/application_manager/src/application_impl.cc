@@ -32,7 +32,8 @@
 
 #include "application_manager/application_impl.h"
 #include <string>
-#ifndef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#else
 #include <strings.h>
 #endif
 #include "application_manager/message_helper.h"

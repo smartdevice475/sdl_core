@@ -57,8 +57,13 @@ void OnSystemRequestNotification::Run() {
   smart_objects::SmartObject& params = (*message_)[strings::params];
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
 
+#ifdef OS_WINCE
+  params[strings::function_id] =
+	  static_cast<int32_t>(mobile_apis::FunctionID::OnSystemRequestID);
+#else
   params[strings::function_id] =
     static_cast<int32_t>(mobile_apis::FunctionID::eType::OnSystemRequestID);
+#endif
 
   const std::string app_id = msg_params[strings::app_id].asString();
   LOG4CXX_DEBUG(logger_, "Received OnSystemRequest for " << app_id );

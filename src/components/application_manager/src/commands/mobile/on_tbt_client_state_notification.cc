@@ -51,8 +51,13 @@ OnTBTClientStateNotification::~OnTBTClientStateNotification() {
 void OnTBTClientStateNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
+#ifdef OS_WINCE
+  (*message_)[strings::params][strings::message_type] =
+	  static_cast<int32_t>(application_manager::kNotification);
+#else
   (*message_)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
+#endif
 
   const std::vector<ApplicationSharedPtr>& applications =
       ApplicationManagerImpl::instance()->applications_with_navi();
@@ -60,7 +65,11 @@ void OnTBTClientStateNotification::Run() {
   std::vector<ApplicationSharedPtr>::const_iterator it = applications.begin();
   for (; applications.end() != it; ++it) {
     ApplicationSharedPtr app = *it;
+#ifdef OS_WINCE
+    if (mobile_apis::HMILevel::HMI_NONE != app->hmi_level()) {
+#else
     if (mobile_apis::HMILevel::eType::HMI_NONE != app->hmi_level()) {
+#endif
       (*message_)[strings::params][strings::connection_key] = app->app_id();
       SendNotification();
     }

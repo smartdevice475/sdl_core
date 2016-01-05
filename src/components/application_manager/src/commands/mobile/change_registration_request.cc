@@ -254,9 +254,13 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
                                        tts_result_);
 #endif									   
 
+#ifdef OS_WINCE
+	(*message_)[strings::params][strings::function_id] =
+		mobile_apis::FunctionID::ChangeRegistrationID;
+#else
     (*message_)[strings::params][strings::function_id] =
           mobile_apis::FunctionID::eType::ChangeRegistrationID;
-
+#endif
     SendResponse(AllHmiResponsesSuccess(ui_result_, vr_result_, tts_result_),
                  static_cast<mobile_apis::Result::eType>(greates_result_code),
                  NULL, &(message[strings::msg_params]));

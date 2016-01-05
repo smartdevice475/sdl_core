@@ -59,8 +59,13 @@ void OnSearchAppListNotification::Run() {
   message[strings::params][strings::function_id] =
     static_cast<int32_t>(hmi_apis::FunctionID::BasicCommunication_OnFindAppList);
 
+#ifdef OS_WINCE
+  message[strings::params][strings::message_type] =
+	  static_cast<int32_t>(application_manager::MessageType::kNotification);
+#else
   message[strings::params][strings::message_type] =
     static_cast<int32_t>(application_manager::MessageType::kNotification);
+#endif
   int index = 0;
 
   ApplicationManagerImpl::ApplicationListAccessor accessor;

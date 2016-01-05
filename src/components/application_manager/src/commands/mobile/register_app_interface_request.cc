@@ -158,7 +158,7 @@ void RegisterAppInterfaceRequest::Run() {
 
   // wait till HMI started
   while (!ApplicationManagerImpl::instance()->IsHMICooperating()) {
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
     Sleep(1);
 #else
     sleep(1);
@@ -325,10 +325,15 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
     return;
   }
 
+#ifdef OS_WINCE
+  response_params[strings::sync_msg_version][strings::major_version] = kAPIV3;
+  response_params[strings::sync_msg_version][strings::minor_version] = kAPIV0;
+#else
   response_params[strings::sync_msg_version][strings::major_version] =
     APIVersion::kAPIV3;
   response_params[strings::sync_msg_version][strings::minor_version] =
     APIVersion::kAPIV0;
+#endif
 
   response_params[strings::language] = hmi_capabilities.active_vr_language();
   response_params[strings::hmi_display_language] =

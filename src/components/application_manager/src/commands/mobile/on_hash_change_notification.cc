@@ -55,8 +55,13 @@ OnHashChangeNotification::~OnHashChangeNotification() {
 void OnHashChangeNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
+#ifdef OS_WINCE
+  (*message_)[strings::params][strings::message_type] =
+	  static_cast<int32_t>(application_manager::kNotification);
+#else
   (*message_)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
+#endif
 
   int32_t app_id;
   app_id = (*message_)[strings::params][strings::connection_key].asInt();

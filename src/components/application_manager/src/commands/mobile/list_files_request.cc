@@ -86,8 +86,13 @@ void ListFilesRequest::Run() {
       (*message_)[strings::msg_params][strings::filenames][i++] =
         it->first.substr(it->first.find_last_of('/') + 1);
   }
+#ifdef OS_WINCE
   (*message_)[strings::params][strings::message_type] =
-      application_manager::MessageType::kResponse;
+      application_manager::kResponse;
+#else
+  (*message_)[strings::params][strings::message_type] =
+	  application_manager::MessageType::kResponse;
+#endif
   SendResponse(true, mobile_apis::Result::SUCCESS, NULL,
                &(*message_)[strings::msg_params]);
 }

@@ -93,7 +93,7 @@ void OnExitAllApplicationsNotification::Run() {
       mobile_api::AppInterfaceUnregisteredReason::FACTORY_DEFAULTS == mob_reason) {
     app_manager->HeadUnitReset(mob_reason);
   }
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
     ApplicationManagerImpl::instance()->SetUnregisterAllApplicationsReason(
       mob_reason);
 #else

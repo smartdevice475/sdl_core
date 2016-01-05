@@ -142,8 +142,13 @@ void OnButtonEventNotification::SendButtonEvent(ApplicationConstSharedPtr app) {
 
   (*on_btn_event)[strings::params][strings::connection_key] = app->app_id();
 
+#ifdef OS_WINCE
+  (*on_btn_event)[strings::params][strings::function_id] =
+	  static_cast<int32_t>(mobile_apis::FunctionID::OnButtonEventID);
+#else
   (*on_btn_event)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::eType::OnButtonEventID);
+#endif
 
   (*on_btn_event)[strings::msg_params][strings::button_name] =
       (*message_)[strings::msg_params][hmi_response::button_name];

@@ -50,8 +50,13 @@ OnHMIStatusNotificationFromMobile::~OnHMIStatusNotificationFromMobile() {
 void OnHMIStatusNotificationFromMobile::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
+#ifdef OS_WINCE
+  (*message_)[strings::params][strings::message_type] = static_cast<int32_t> (
+	  application_manager::kNotification);
+#else
   (*message_)[strings::params][strings::message_type] = static_cast<int32_t> (
       application_manager::MessageType::kNotification);
+#endif
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
         connection_key());
 
@@ -79,7 +84,11 @@ void OnHMIStatusNotificationFromMobile::Run() {
                 << connection_key() << " and handle: " << handle);
 
   if (!is_apps_requested_before &&
+#ifdef OS_WINCE
+      kV4 == app->protocol_version() && app->is_foreground()) {
+#else
       ProtocolVersion::kV4 == app->protocol_version() && app->is_foreground()) {
+#endif
     // In case this notification will be received from mobile side with
     // foreground level for app on mobile, this should trigger remote
     // apps list query for SDL 4.0 app
@@ -91,14 +100,22 @@ void OnHMIStatusNotificationFromMobile::Run() {
     LOG4CXX_DEBUG(logger_, "Remote apps list had been requested already "
                   " for handle: " << handle);
 
+#ifdef OS_WINCE
+    if (kV4 == app->protocol_version()) {
+#else
     if (ProtocolVersion::kV4 == app->protocol_version()) {
+#endif
       ApplicationManagerImpl::ApplicationListAccessor accessor;
 
       bool is_another_foreground_sdl4_app = false;
-      ApplicationManagerImpl::ApplictionSetIt it = accessor.begin();
+      ApplicationManagerImpl::ApplictionSetConstIt it = accessor.begin();
       for (;accessor.end() != it; ++it) {
         if (connection_key() != (*it)->app_id() &&
+#ifdef OS_WINCE
+            kV4 == (*it)->protocol_version() &&
+#else
             ProtocolVersion::kV4 == (*it)->protocol_version() &&
+#endif
            (*it)->is_foreground()) {
           is_another_foreground_sdl4_app = true;
           break;

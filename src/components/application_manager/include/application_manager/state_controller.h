@@ -98,8 +98,13 @@ class StateController : public event_engine::EventObserver {
       }
       HmiStatePtr prev_regular = app->RegularHmiState();
       DCHECK_OR_RETURN_VOID(prev_regular);
+#ifdef OS_WINCE
       HmiStatePtr hmi_state = CreateHmiState(app->app_id(),
-          HmiState::StateID::STATE_ID_REGULAR);
+          HmiState::STATE_ID_REGULAR);
+#else
+	  HmiStatePtr hmi_state = CreateHmiState(app->app_id(),
+		  HmiState::StateID::STATE_ID_REGULAR);
+#endif
       DCHECK_OR_RETURN_VOID(hmi_state);
       hmi_state->set_hmi_level(hmi_level);
       hmi_state->set_audio_streaming_state(audio_state);
@@ -118,8 +123,13 @@ class StateController : public event_engine::EventObserver {
       if (!app) {
         return;
       }
+#ifdef OS_WINCE
       HmiStatePtr hmi_state = CreateHmiState(app->app_id(),
-          HmiState::StateID::STATE_ID_REGULAR);
+          HmiState::STATE_ID_REGULAR);
+#else
+	  HmiStatePtr hmi_state = CreateHmiState(app->app_id(),
+		  HmiState::StateID::STATE_ID_REGULAR);
+#endif
       DCHECK_OR_RETURN_VOID(hmi_state);
       hmi_state->set_hmi_level(hmi_level);
       hmi_state->set_audio_streaming_state(CalcAudioState(app, hmi_level));

@@ -93,7 +93,7 @@ void MediaManagerImpl::Init() {
 #endif
 #endif
 
-#if /*defined(MODIFY_FUNCTION_SIGN) || */defined(OS_WIN32)
+#if /*defined(MODIFY_FUNCTION_SIGN) || */defined(OS_WIN32) || defined(OS_WINCE)
 
 #else
   if ("socket" == profile::Profile::instance()->video_server_type()) {
@@ -112,6 +112,21 @@ void MediaManagerImpl::Init() {
     streamer_[ServiceType::kAudio] = new FileAudioStreamerAdapter();
   }
 #endif
+
+#ifdef OS_WINCE
+  streamer_listener_[kMobileNav] = new StreamerListener();
+  streamer_listener_[kAudio] = new StreamerListener();
+
+  if (streamer_[kMobileNav]) {
+    streamer_[kMobileNav]->AddListener(
+        streamer_listener_[kMobileNav]);
+  }
+
+  if (streamer_[kAudio]) {
+    streamer_[kAudio]->AddListener(
+        streamer_listener_[kAudio]);
+  }
+#else
   streamer_listener_[ServiceType::kMobileNav] = new StreamerListener();
   streamer_listener_[ServiceType::kAudio] = new StreamerListener();
 
@@ -124,6 +139,7 @@ void MediaManagerImpl::Init() {
     streamer_[ServiceType::kAudio]->AddListener(
         streamer_listener_[ServiceType::kAudio]);
   }
+#endif
 }
 
 void MediaManagerImpl::PlayA2DPSource(int32_t application_key) {
@@ -244,7 +260,11 @@ void MediaManagerImpl::OnMessageReceived(
   const ServiceType service_type = message->service_type();
 
   if (Compare<ServiceType, NEQ, ALL>(
+#ifdef OS_WINCE
+        service_type, kMobileNav, kAudio)) {
+#else
         service_type, ServiceType::kMobileNav, ServiceType::kAudio)) {
+#endif
     LOG4CXX_DEBUG(logger_, "Unsupported service type in MediaManager");
     return;
   }

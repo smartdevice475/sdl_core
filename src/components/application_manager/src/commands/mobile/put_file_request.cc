@@ -239,7 +239,11 @@ void PutFileRequest::SendOnPutFileNotification() {
   message[strings::params][strings::function_id] =
     hmi_apis::FunctionID::BasicCommunication_OnPutFile;
 
+#ifdef OS_WINCE
+  message[strings::params][strings::message_type] = kNotification;
+#else
   message[strings::params][strings::message_type] = MessageType::kNotification;
+#endif
   message[strings::msg_params][strings::app_id] = connection_key();
   message[strings::msg_params][strings::sync_file_name] = sync_file_name_;
   message[strings::msg_params][strings::offset] = offset_;

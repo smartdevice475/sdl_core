@@ -49,8 +49,13 @@ void OnVIVehicleDataNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   // prepare SmartObject for mobile factory
+#ifdef OS_WINCE
+  (*message_)[strings::params][strings::function_id] =
+	  static_cast<int32_t>(mobile_apis::FunctionID::OnVehicleDataID);
+#else
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::eType::OnVehicleDataID);
+#endif
 
   SendNotificationToMobile(message_);
 }

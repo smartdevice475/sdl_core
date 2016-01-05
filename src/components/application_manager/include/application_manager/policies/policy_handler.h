@@ -457,7 +457,7 @@ private:
   static const std::string kLibrary;
   mutable sync_primitives::RWLock policy_manager_lock_;
   utils::SharedPtr<PolicyManager> policy_manager_;
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
   HINSTANCE dl_handle_;
 #else
   void* dl_handle_;

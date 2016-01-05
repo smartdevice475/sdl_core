@@ -89,9 +89,13 @@ void OnVRCommandNotification::Run() {
     event.set_smart_object(*message_);
     event.raise();
   } else {
+#ifdef OS_WINCE
+	  (*message_)[strings::params][strings::function_id] =
+		  static_cast<int32_t>(mobile_apis::FunctionID::OnCommandID);
+#else
     (*message_)[strings::params][strings::function_id] =
         static_cast<int32_t>(mobile_apis::FunctionID::eType::OnCommandID);
-
+#endif
     (*message_)[strings::msg_params][strings::trigger_source] =
         static_cast<int32_t>(mobile_apis::TriggerSource::TS_VR);
     SendNotificationToMobile(message_);
