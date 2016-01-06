@@ -7,7 +7,7 @@
 #ifndef CSENDER_H
 #define CSENDER_H
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #undef ssize_t
 #endif
 

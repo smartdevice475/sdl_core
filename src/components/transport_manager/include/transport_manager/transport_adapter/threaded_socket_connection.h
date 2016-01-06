@@ -35,10 +35,14 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_THREADED_SOCKET_CONNECTION_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_THREADED_SOCKET_CONNECTION_H_
 
-#if defined(OS_WIN32) || defined(OS_WINCE)
+#if defined(OS_WIN32)
 #include "pthread.h"
 #include <WINSOCK2.H> 
-#include <stdio.h> 
+#include <stdio.h>
+#elif defined(OS_WINCE)
+#include "pthread.h"
+#include <winsock.h> 
+#include <stdio.h>
 #else
 #include <poll.h>
 #endif
@@ -148,7 +152,7 @@ class ThreadedSocketConnection : public Connection {
     ThreadedSocketConnection* connection_;
   };
   
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	int CreatePipe();
 #endif
 
@@ -162,7 +166,7 @@ class ThreadedSocketConnection : public Connection {
   bool Send();
   void Abort();
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
   friend void* StartThreadedSocketConnection(void*);
 #endif
 

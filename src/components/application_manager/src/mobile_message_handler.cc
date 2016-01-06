@@ -67,6 +67,30 @@ application_manager::Message* MobileMessageHandler::HandleIncomingMessageProtoco
   const protocol_handler::RawMessagePtr message) {
   DCHECK_OR_RETURN(message, NULL);
   application_manager::Message* out_message = NULL;
+#ifdef OS_WINCE
+  switch (message->protocol_version()) {
+  case kV1:
+	  LOG4CXX_DEBUG(logger_, "Protocol version - V1");
+	  out_message = MobileMessageHandler::HandleIncomingMessageProtocolV1(message);
+	  break;
+  case kV2:
+	  LOG4CXX_DEBUG(logger_, "Protocol version - V2");
+	  out_message = MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
+	  break;
+  case kV3:
+	  LOG4CXX_DEBUG(logger_, "Protocol version - V3");
+	  out_message = MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
+	  break;
+  case kV4:
+	  LOG4CXX_DEBUG(logger_, "Protocol version - V4");
+	  out_message = MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
+	  break;
+  default:
+	  LOG4CXX_WARN(logger_, "Can't recognise protocol version");
+	  out_message = NULL;
+	  break;
+  }
+#else
   switch (message->protocol_version()) {
   case ProtocolVersion::kV1:
     LOG4CXX_DEBUG(logger_, "Protocol version - V1");
@@ -89,6 +113,7 @@ application_manager::Message* MobileMessageHandler::HandleIncomingMessageProtoco
     out_message = NULL;
     break;
   }
+#endif
   if (out_message == NULL) {
       LOG4CXX_WARN(logger_, "Message is NULL");
       return NULL;

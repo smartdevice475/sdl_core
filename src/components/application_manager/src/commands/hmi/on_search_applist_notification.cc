@@ -61,7 +61,7 @@ void OnSearchAppListNotification::Run() {
 
 #ifdef OS_WINCE
   message[strings::params][strings::message_type] =
-	  static_cast<int32_t>(application_manager::MessageType::kNotification);
+	static_cast<int32_t>(application_manager::kNotification);
 #else
   message[strings::params][strings::message_type] =
     static_cast<int32_t>(application_manager::MessageType::kNotification);

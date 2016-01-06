@@ -32,8 +32,10 @@
 
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 
-#if defined(OS_WIN32) || defined(OS_WINCE)
+#if defined(OS_WIN32)
 #include <WinSock2.h>
+#elif defined(OS_WINCE)
+#include <WinSock.h>
 #elif defined(OS_MAC)
 #include <arpa/inet.h>
 #endif

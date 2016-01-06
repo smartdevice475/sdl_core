@@ -67,6 +67,33 @@ using namespace application_manager;
 namespace {
 using namespace mobile_apis;
 typedef std::map<RequestType::eType, std::string> RequestTypeMap;
+#ifdef OS_WINCE
+const RequestTypeMap::value_type rawData[] = {
+  std::make_pair(RequestType::INVALID_ENUM, "INVALID_ENUM"),
+  std::make_pair(RequestType::HTTP, "HTTP"),
+  std::make_pair(RequestType::FILE_RESUME, "FILE_RESUME"),
+  std::make_pair(RequestType::AUTH_REQUEST, "AUTH_REQUEST"),
+  std::make_pair(RequestType::AUTH_CHALLENGE, "AUTH_CHALLENGE"),
+  std::make_pair(RequestType::AUTH_ACK, "AUTH_ACK"),
+  std::make_pair(RequestType::PROPRIETARY, "PROPRIETARY"),
+  std::make_pair(RequestType::QUERY_APPS, "QUERY_APPS"),
+  std::make_pair(RequestType::LAUNCH_APP, "LAUNCH_APP"),
+  std::make_pair(RequestType::LOCK_SCREEN_ICON_URL, "LOCK_SCREEN_ICON_URL"),
+  std::make_pair(RequestType::TRAFFIC_MESSAGE_CHANNEL, "TRAFFIC_MESSAGE_CHANNEL"),
+  std::make_pair(RequestType::DRIVER_PROFILE, "DRIVER_PROFILE"),
+  std::make_pair(RequestType::VOICE_SEARCH, "VOICE_SEARCH"),
+  std::make_pair(RequestType::NAVIGATION, "NAVIGATION"),
+  std::make_pair(RequestType::PHONE,"PHONE"),
+  std::make_pair(RequestType::CLIMATE, "CLIMATE"),
+  std::make_pair(RequestType::SETTINGS, "SETTINGS"),
+  std::make_pair(RequestType::VEHICLE_DIAGNOSTICS, "VEHICLE_DIAGNOSTICS"),
+  std::make_pair(RequestType::EMERGENCY, "EMERGENCY"),
+  std::make_pair(RequestType::MEDIA, "MEDIA"),
+  std::make_pair(RequestType::FOTA, "FOTA")
+};
+const int numElems = sizeof(rawData) / sizeof(rawData[0]);
+RequestTypeMap TypeToString(rawData, rawData + numElems);
+#else
 RequestTypeMap TypeToString = {
   {RequestType::INVALID_ENUM, "INVALID_ENUM"},
   {RequestType::HTTP, "HTTP"},
@@ -90,6 +117,7 @@ RequestTypeMap TypeToString = {
   {RequestType::MEDIA, "MEDIA"},
   {RequestType::FOTA, "FOTA"}
 };
+#endif
 
 const std::string RequestTypeToString(RequestType::eType type) {
   RequestTypeMap::const_iterator it = TypeToString.find(type);

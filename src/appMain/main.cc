@@ -49,8 +49,10 @@
 #include <fstream>   // cpplint: Streams are highly discouraged.
 
 // ----------------------------------------------------------------------------
-#ifdef OS_WIN32
+#if defined(OS_WIN32)
 #include <winsock2.h>
+#elif defined(OS_WINCE)
+#include <winsock.h>
 #endif
 
 #include "./life_cycle.h"

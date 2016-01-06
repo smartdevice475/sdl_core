@@ -110,7 +110,7 @@ bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
         logger_,
         "Failed to connect for application " << application_handle() << ", error " << errno);
     *error = new ConnectError();
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	closesocket(socket);
 #else
     ::close(socket);

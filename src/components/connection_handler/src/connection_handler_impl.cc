@@ -443,7 +443,11 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
   sync_primitives::AutoLock lock2(connection_handler_observer_lock_);
   if (connection_handler_observer_) {
     connection_handler_observer_->OnServiceEndedCallback(
+#ifdef OS_WINCE
+        session_key, service_type, kCommon);
+#else
         session_key, service_type, CloseSessionReason::kCommon);
+#endif
   }
   return session_key;
 }
@@ -945,7 +949,11 @@ void ConnectionHandlerImpl::OnConnectionEnded(
       for (ServiceList::const_iterator service_it = service_list.begin(), end =
            service_list.end(); service_it != end; ++service_it) {
         connection_handler_observer_->OnServiceEndedCallback(
+#ifdef OS_WINCE
+            session_key, service_it->service_type, kCommon);
+#else
             session_key, service_it->service_type, CloseSessionReason::kCommon);
+#endif
       }
     }
   }

@@ -39,7 +39,7 @@
 #include "transport_manager/transport_adapter/device.h"
 
 #include <map>
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include "pthread.h"
 #include <stdint.h>
 #elif defined(OS_MAC)
@@ -56,7 +56,7 @@
 #endif
 #include "utils/lock.h"
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 typedef __int32 in_addr_t;
 #endif
 #include "transport_manager/transport_adapter/device.h"

@@ -33,7 +33,7 @@
 
 #include "transport_manager/tcp/tcp_client_listener.h"
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include <memory.h>
 #include <signal.h>
 #include <errno.h>
@@ -70,7 +70,7 @@ namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	typedef int socklen_t;
 	struct TCP_KEEPALIVE {
 		unsigned long onoff;
@@ -115,7 +115,7 @@ TransportAdapter::Error TcpClientListener::Init() {
   server_address.sin_port = htons(port_);
   server_address.sin_addr.s_addr = INADDR_ANY;
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
   char optval = 0;
 #else
   int optval = 1;
@@ -143,7 +143,7 @@ void TcpClientListener::Terminate() {
     return;
   }
 
-#ifdef OS_WIN32
+#if defined(OS_WIN320) || defined(OS_WINCE)
   if (shutdown(socket_, 2) != 0) {
 	  LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to shutdown socket");
   }
@@ -253,7 +253,11 @@ void TcpClientListener::Loop() {
                                      &client_address_size);
     if (thread_stop_requested_) {
       LOG4CXX_DEBUG(logger_, "thread_stop_requested_");
+#ifdef OS_WINCE
+	  closesocket(connection_fd);
+#else
       close(connection_fd);
+#endif
       break;
     }
 
@@ -264,7 +268,11 @@ void TcpClientListener::Loop() {
 
     if (AF_INET != client_address.sin_family) {
       LOG4CXX_DEBUG(logger_, "Address of connected client is invalid");
-      close(connection_fd);
+#ifdef OS_WINCE
+	  closesocket(connection_fd);
+#else
+	  close(connection_fd);
+#endif
       continue;
     }
 
@@ -306,7 +314,7 @@ void TcpClientListener::StopLoop() {
   server_address.sin_addr.s_addr = INADDR_ANY;
   connect(byesocket, reinterpret_cast<sockaddr*>(&server_address),
           sizeof(server_address));
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
   shutdown(byesocket, 2);
   closesocket(byesocket);
 #else

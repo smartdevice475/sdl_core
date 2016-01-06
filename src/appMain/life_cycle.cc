@@ -398,6 +398,7 @@ namespace {
 
 	  return TRUE;
   }
+#elif defined(OS_WINCE)
 #else
   void sig_handler(int sig) {
     switch(sig) {

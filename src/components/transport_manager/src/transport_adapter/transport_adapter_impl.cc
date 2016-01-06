@@ -44,6 +44,18 @@ namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapterImpl")
 namespace {
+#ifdef OS_WINCE
+  const DeviceTypes::value_type rawData[] = {
+	  std::make_pair(AOA, std::string("USB_AOA")),
+	  std::make_pair(PASA_AOA, std::string("USB_AOA")),
+	  std::make_pair(MME, std::string("USB_IOS")),
+	  std::make_pair(BLUETOOTH, std::string("BLUETOOTH")),
+	  std::make_pair(PASA_BLUETOOTH, std::string("BLUETOOTH")),
+	  std::make_pair(TCP, std::string("WIFI"))
+  };
+  const int numElems = sizeof(rawData) / sizeof(rawData[0]);
+  DeviceTypes devicesType(rawData, rawData + numElems);
+#else
 DeviceTypes devicesType = {
   std::make_pair(AOA, std::string("USB_AOA")),
   std::make_pair(PASA_AOA, std::string("USB_AOA")),
@@ -52,6 +64,7 @@ DeviceTypes devicesType = {
   std::make_pair(PASA_BLUETOOTH, std::string("BLUETOOTH")),
   std::make_pair(TCP, std::string("WIFI"))
 };
+#endif
 }
 
 TransportAdapterImpl::TransportAdapterImpl(

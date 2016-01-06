@@ -30,9 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32)
 #include <errno.h>
 #include <fcntl.h>
+#include <memory.h>
+#include <unistd.h>
+#elif defined(OS_WINCE)
+#include <errno.h>
 #include <memory.h>
 #include <unistd.h>
 #else
@@ -76,7 +80,7 @@ ThreadedSocketConnection::~ThreadedSocketConnection() {
   delete thread_->delegate();
   threads::DeleteThread(thread_);
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
   if (-1 != read_fd_) { 
 	closesocket(read_fd_);
   }
@@ -99,7 +103,7 @@ void ThreadedSocketConnection::Abort() {
   terminate_flag_ = true;
 }
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 void* StartThreadedSocketConnection(void* v) {
   LOG4CXX_AUTO_TRACE(logger_);
   ThreadedSocketConnection* connection =
@@ -165,7 +169,7 @@ clean:
 
 TransportAdapter::Error ThreadedSocketConnection::Start() {
   LOG4CXX_AUTO_TRACE(logger_);
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
   if (-1 == CreatePipe())
 	  return TransportAdapter::FAIL;
   if (!thread_->start()) {
@@ -212,7 +216,7 @@ void ThreadedSocketConnection::Finalize() {
     LOG4CXX_DEBUG(logger_, "not unexpected_disconnect");
     controller_->ConnectionFinished(device_handle(), application_handle());
   }
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
   closesocket(socket_);
   closesocket(read_fd_);
   closesocket(write_fd_);
@@ -230,7 +234,7 @@ TransportAdapter::Error ThreadedSocketConnection::Notify() const {
     return TransportAdapter::BAD_STATE;
   }
   uint8_t c = 0;
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
   if (1 == ::send(write_fd_, (const char *)&c, 1, 0)) {
 #else
   if (1 != write(write_fd_, &c, 1)) {
@@ -282,7 +286,7 @@ void ThreadedSocketConnection::threadMain() {
 }
 
 void ThreadedSocketConnection::Transmit() {
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	//LOG4CXX_INFO(logger, "begin while(!terminate_flag_)");
 	fd_set fdread;
 	timeval tv;
@@ -395,7 +399,7 @@ void ThreadedSocketConnection::Transmit() {
   }
 
   // receive data
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
     if (0 != poll_fds[0].revents & (POLLIN | POLLPRI)) {
 #elif defined(OS_MAC)
     if (0 != (poll_fds[0].revents & (POLLIN | POLLPRI))) {
@@ -415,7 +419,7 @@ void ThreadedSocketConnection::Transmit() {
 }
 
 bool ThreadedSocketConnection::Receive() {
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	unsigned char buffer[4096];
 	ssize_t bytes_read = 0;
 	int times = 1;// 30;

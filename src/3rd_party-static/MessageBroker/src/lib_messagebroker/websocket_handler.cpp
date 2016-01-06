@@ -13,8 +13,10 @@
 #include <netinet/in.h>
 #endif
 
-#if defined(OS_WIN32) || defined(OS_WINCE)
+#if defined(OS_WIN32)
 #include <winsock2.h>
+#elif defined(OS_WINCE)
+#include <winsock.h>
 #endif//_WIN32
 
 #include "websocket_handler.hpp"

@@ -254,7 +254,11 @@ bool AlertRequest::Validate(uint32_t app_id) {
   if (mobile_apis::HMILevel::HMI_BACKGROUND == app->hmi_level() &&
       app->IsCommandLimitsExceeded(
         static_cast<mobile_apis::FunctionID::eType>(function_id()),
+#ifdef OS_WINCE
+        application_manager::POLICY_TABLE)) {
+#else
         application_manager::TLimitSource::POLICY_TABLE)) {
+#endif
     LOG4CXX_ERROR(logger_, "Alert frequency is too high.");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return false;
