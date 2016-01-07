@@ -30,7 +30,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include <vector>
 #include <algorithm>
 #include <functional>
@@ -184,6 +184,20 @@ bool StateController::IsStateAvailable(ApplicationSharedPtr app,
     return true;
   }
 
+#ifdef OS_WINCE
+  if (IsTempStateActive(HmiState::STATE_ID_VR_SESSION) ||
+	  IsTempStateActive(HmiState::STATE_ID_SAFETY_MODE)) {
+		  LOG4CXX_DEBUG(logger_, "Requested state is not available. "
+			  << "VR session or emergency event is active");
+		  return false;
+  }
+  if (IsTempStateActive(HmiState::STATE_ID_PHONE_CALL) &&
+	  app->is_media_application()) {
+		  LOG4CXX_DEBUG(logger_, "Requested state for media application "
+			  << "is not available. Phone call is active");
+		  return false;
+  }
+#else
   if (IsTempStateActive(HmiState::StateID::STATE_ID_VR_SESSION) ||
       IsTempStateActive(HmiState::StateID::STATE_ID_SAFETY_MODE)) {
     LOG4CXX_DEBUG(logger_, "Requested state is not available. "
@@ -196,6 +210,7 @@ bool StateController::IsStateAvailable(ApplicationSharedPtr app,
                   << "is not available. Phone call is active");
     return false;
   }
+#endif
 
   LOG4CXX_DEBUG(logger_, "Requested state is available");
   return true;
@@ -210,8 +225,13 @@ void StateController::SetupRegularHmiState(ApplicationSharedPtr app,
                 ", audio_state " << state->audio_streaming_state() <<
                 ", system_context " << state->system_context());
   HmiStatePtr curr_state = app->CurrentHmiState();
+#ifdef OS_WINCE
+  HmiStatePtr old_state = CreateHmiState(app->app_id(),
+	  HmiState::STATE_ID_REGULAR);
+#else
   HmiStatePtr old_state = CreateHmiState(app->app_id(),
       HmiState::StateID::STATE_ID_REGULAR);
+#endif
   DCHECK_OR_RETURN_VOID(old_state);
   old_state->set_hmi_level(curr_state->hmi_level());
   old_state->set_audio_streaming_state(curr_state->audio_streaming_state());
@@ -400,11 +420,11 @@ void StateController::TempStateStopped(HmiState::StateID ID) {
     sync_primitives::AutoLock autolock(active_states_lock_);
     active_states_.remove(ID);
   }
-  ForEachApplication(std::bind1st(
-                       std::mem_fun(
-                         &StateController::ApplyPostponedStateForApp),
-                       this)
-                     );
+#ifdef OS_WINCE
+  ForEachApplication(std::bind1st(std::mem_fun(&StateController::ApplyPostponedStateForApp), this));
+#else
+  ForEachApplication(std::bind1st(std::mem_fun(&StateController::ApplyPostponedStateForApp), this));
+#endif
 }
 
 void StateController::DeactivateAppWithGeneralReason(ApplicationSharedPtr app) {

@@ -55,11 +55,21 @@ using protocol_handler::Extract;
 
 namespace {
   typedef std::map<MessageType, std::string> MessageTypeMap;
+#ifdef OS_WINCE
+  const MessageTypeMap::value_type rawData[] = {
+	  std::make_pair(kRequest, "Request"),
+	  std::make_pair(kResponse, "Response"),
+	  std::make_pair(kNotification, "Notification")
+  };
+  const int numElems = sizeof(rawData) / sizeof(rawData[0]);
+  MessageTypeMap messageTypes(rawData, rawData + numElems);
+#else
   MessageTypeMap messageTypes = {
     std::make_pair(kRequest, "Request"),
     std::make_pair(kResponse, "Response"),
     std::make_pair(kNotification, "Notification")
   };
+#endif
 }
 CREATE_LOGGERPTR_GLOBAL(logger_, "MobileMessageHandler")
 

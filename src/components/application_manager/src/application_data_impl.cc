@@ -397,8 +397,13 @@ void DynamicApplicationDataImpl::SetGlobalProperties(
       const NsSmartDeviceLink::NsSmartObjects::SmartObject&)) {
 
   smart_objects::SmartType so_type = param.getType();
+#ifdef OS_WINCE
+  if (so_type != smart_objects::SmartType_Invalid  &&
+	  so_type != smart_objects::SmartType_Null) {
+#else
   if (so_type != smart_objects::SmartType::SmartType_Invalid  &&
       so_type != smart_objects::SmartType::SmartType_Null) {
+#endif
     if (callback) {
       (this->*callback)(param);
     }

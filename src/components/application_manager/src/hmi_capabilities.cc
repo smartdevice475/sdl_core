@@ -51,6 +51,186 @@ namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "HMICapabilities")
 
+#ifdef OS_WINCE
+const std::map<std::string, hmi_apis::Common_VrCapabilities::eType>::value_type rawData1[] = 
+{
+	std::make_pair("TEXT", hmi_apis::Common_VrCapabilities::VR_TEXT)
+};
+const int numElems1 = sizeof(rawData1) / sizeof(rawData1[0]);
+std::map<std::string, hmi_apis::Common_VrCapabilities::eType> vr_enum_capabilities(rawData1, rawData1 + numElems1);
+
+const std::map<std::string, hmi_apis::Common_ButtonName::eType>::value_type rawData2[] =
+{
+	std::make_pair("OK"             , hmi_apis::Common_ButtonName::OK),
+	std::make_pair("SEEKLEFT"       , hmi_apis::Common_ButtonName::SEEKLEFT),
+	std::make_pair("SEEKRIGHT"      , hmi_apis::Common_ButtonName::SEEKRIGHT),
+	std::make_pair("TUNEUP"         , hmi_apis::Common_ButtonName::TUNEUP),
+	std::make_pair("TUNEDOWN"       , hmi_apis::Common_ButtonName::TUNEDOWN),
+	std::make_pair("PRESET_0"       , hmi_apis::Common_ButtonName::PRESET_0),
+	std::make_pair("PRESET_1"       , hmi_apis::Common_ButtonName::PRESET_1),
+	std::make_pair("PRESET_2"       , hmi_apis::Common_ButtonName::PRESET_2),
+	std::make_pair("PRESET_3"       , hmi_apis::Common_ButtonName::PRESET_3),
+	std::make_pair("PRESET_4"       , hmi_apis::Common_ButtonName::PRESET_4),
+	std::make_pair("PRESET_5"       , hmi_apis::Common_ButtonName::PRESET_5),
+	std::make_pair("PRESET_6"       , hmi_apis::Common_ButtonName::PRESET_6),
+	std::make_pair("PRESET_7"       , hmi_apis::Common_ButtonName::PRESET_7),
+	std::make_pair("PRESET_8"       , hmi_apis::Common_ButtonName::PRESET_8),
+	std::make_pair("PRESET_9"       , hmi_apis::Common_ButtonName::PRESET_9),
+	std::make_pair("CUSTOM_BUTTON"  , hmi_apis::Common_ButtonName::CUSTOM_BUTTON),
+	std::make_pair("SEARCH"         , hmi_apis::Common_ButtonName::SEARCH)
+};
+const int numElems2 = sizeof(rawData2) / sizeof(rawData2[0]);
+std::map<std::string, hmi_apis::Common_ButtonName::eType> button_enum_name(rawData2, rawData2 + numElems2);
+
+const std::map<std::string, hmi_apis::Common_TextFieldName::eType>::value_type rawData3[] =
+{
+	std::make_pair("mainField1", hmi_apis::Common_TextFieldName::mainField1),
+	std::make_pair("mainField2", hmi_apis::Common_TextFieldName::mainField2),
+	std::make_pair("mainField3", hmi_apis::Common_TextFieldName::mainField3),
+	std::make_pair("mainField4", hmi_apis::Common_TextFieldName::mainField4),
+	std::make_pair("statusBar" , hmi_apis::Common_TextFieldName::statusBar),
+	std::make_pair("mediaClock", hmi_apis::Common_TextFieldName::mediaClock),
+	std::make_pair("mediaTrack", hmi_apis::Common_TextFieldName::mediaTrack),
+	std::make_pair("alertText1", hmi_apis::Common_TextFieldName::alertText1),
+	std::make_pair("alertText2", hmi_apis::Common_TextFieldName::alertText2),
+	std::make_pair("alertText3", hmi_apis::Common_TextFieldName::alertText3),
+	std::make_pair("scrollableMessageBody" , hmi_apis::Common_TextFieldName::scrollableMessageBody),
+	std::make_pair("initialInteractionText", hmi_apis::Common_TextFieldName::initialInteractionText),
+	std::make_pair("navigationText1"       , hmi_apis::Common_TextFieldName::navigationText1),
+	std::make_pair("navigationText2"       , hmi_apis::Common_TextFieldName::navigationText2),
+	std::make_pair("ETA"                   , hmi_apis::Common_TextFieldName::ETA),
+	std::make_pair("totalDistance"         , hmi_apis::Common_TextFieldName::totalDistance),
+	std::make_pair("audioPassThruDisplayText1", hmi_apis::Common_TextFieldName::audioPassThruDisplayText1),
+	std::make_pair("audioPassThruDisplayText2", hmi_apis::Common_TextFieldName::audioPassThruDisplayText2),
+	std::make_pair("sliderHeader"     , hmi_apis::Common_TextFieldName::sliderHeader),
+	std::make_pair("sliderFooter"     , hmi_apis::Common_TextFieldName::sliderFooter),
+	std::make_pair("notificationText" , hmi_apis::Common_TextFieldName::notificationText),
+	std::make_pair("menuName"         , hmi_apis::Common_TextFieldName::menuName),
+	std::make_pair("secondaryText"    , hmi_apis::Common_TextFieldName::secondaryText),
+	std::make_pair("tertiaryText"     , hmi_apis::Common_TextFieldName::tertiaryText),
+	std::make_pair("timeToDestination", hmi_apis::Common_TextFieldName::timeToDestination),
+	std::make_pair("locationName"     , hmi_apis::Common_TextFieldName::locationName),
+	std::make_pair("locationDescription", hmi_apis::Common_TextFieldName::locationDescription),
+	std::make_pair("addressLines"         , hmi_apis::Common_TextFieldName::turnText),
+	std::make_pair("turnText"         , hmi_apis::Common_TextFieldName::addressLines),
+	std::make_pair("phoneNumber"         , hmi_apis::Common_TextFieldName::phoneNumber),
+	std::make_pair("turnText"         , hmi_apis::Common_TextFieldName::turnText),
+	std::make_pair("menuTitle"        , hmi_apis::Common_TextFieldName::menuTitle)
+};
+const int numElems3 = sizeof(rawData3) / sizeof(rawData3[0]);
+const std::map<std::string, hmi_apis::Common_TextFieldName::eType> text_fields_enum_name(rawData3, rawData3 + numElems3);
+
+const std::map<std::string, hmi_apis::Common_MediaClockFormat::eType>::value_type rawData4[] =
+{
+	std::make_pair("CLOCK1"    , hmi_apis::Common_MediaClockFormat::CLOCK1),
+	std::make_pair("CLOCK2"    , hmi_apis::Common_MediaClockFormat::CLOCK2),
+	std::make_pair("CLOCK3"    , hmi_apis::Common_MediaClockFormat::CLOCK3),
+	std::make_pair("CLOCKTEXT1", hmi_apis::Common_MediaClockFormat::CLOCKTEXT1),
+	std::make_pair("CLOCKTEXT2", hmi_apis::Common_MediaClockFormat::CLOCKTEXT2),
+	std::make_pair("CLOCKTEXT3", hmi_apis::Common_MediaClockFormat::CLOCKTEXT3),
+	std::make_pair("CLOCKTEXT4", hmi_apis::Common_MediaClockFormat::CLOCKTEXT4)
+};
+const int numElems4 = sizeof(rawData4) / sizeof(rawData4[0]);
+std::map<std::string, hmi_apis::Common_MediaClockFormat::eType> media_clock_enum_name(rawData4, rawData4 + numElems4);
+
+const std::map<std::string, hmi_apis::Common_ImageType::eType>::value_type rawData5[] =
+{
+	std::make_pair("STATIC" , hmi_apis::Common_ImageType::STATIC),
+	std::make_pair("DYNAMIC", hmi_apis::Common_ImageType::DYNAMIC)
+};
+const int numElems5 = sizeof(rawData5) / sizeof(rawData5[0]);
+std::map<std::string, hmi_apis::Common_ImageType::eType> image_type_enum(rawData5, rawData5 + numElems5);
+
+const std::map<std::string, hmi_apis::Common_SamplingRate::eType>::value_type rawData6[] =
+{
+	std::make_pair("8KHZ" , hmi_apis::Common_SamplingRate::RATE_8KHZ),
+	std::make_pair("16KHZ", hmi_apis::Common_SamplingRate::RATE_16KHZ),
+	std::make_pair("22KHZ", hmi_apis::Common_SamplingRate::RATE_22KHZ),
+	std::make_pair("44KHZ", hmi_apis::Common_SamplingRate::RATE_44KHZ)
+};
+const int numElems6 = sizeof(rawData6) / sizeof(rawData6[0]);
+std::map<std::string, hmi_apis::Common_SamplingRate::eType> sampling_rate_enum(rawData6, rawData6 + numElems6);
+
+const std::map<std::string, hmi_apis::Common_BitsPerSample::eType>::value_type rawData7[] =
+{
+	std::make_pair("RATE_8_BIT", hmi_apis::Common_BitsPerSample::RATE_8_BIT),
+	std::make_pair("RATE_16_BIT", hmi_apis::Common_BitsPerSample::RATE_16_BIT)
+};
+const int numElems7 = sizeof(rawData7) / sizeof(rawData7[0]);
+std::map<std::string, hmi_apis::Common_BitsPerSample::eType> bit_per_sample_enum(rawData7, rawData7 + numElems7);
+
+const std::map<std::string, hmi_apis::Common_AudioType::eType>::value_type rawData8[] =
+{
+	std::make_pair("PCM", hmi_apis::Common_AudioType::PCM)
+};
+const int numElems8 = sizeof(rawData8) / sizeof(rawData8[0]);
+std::map<std::string, hmi_apis::Common_AudioType::eType> audio_type_enum(rawData8, rawData8 + numElems8);
+
+const std::map<std::string, hmi_apis::Common_HmiZoneCapabilities::eType>::value_type rawData9[] =
+{
+	std::make_pair("FRONT", hmi_apis::Common_HmiZoneCapabilities::FRONT),
+	std::make_pair("BACK", hmi_apis::Common_HmiZoneCapabilities::BACK)
+};
+const int numElems9 = sizeof(rawData9) / sizeof(rawData9[0]);
+const std::map<std::string, hmi_apis::Common_HmiZoneCapabilities::eType> hmi_zone_enum(rawData9, rawData9 + numElems9);
+
+const const std::map<std::string, hmi_apis::Common_ImageFieldName::eType>::value_type rawData10[] =
+{
+	std::make_pair("softButtonImage", hmi_apis::Common_ImageFieldName::softButtonImage),
+	std::make_pair("choiceImage", hmi_apis::Common_ImageFieldName::choiceImage),
+	std::make_pair("choiceSecondaryImage", hmi_apis::Common_ImageFieldName::choiceSecondaryImage),
+	std::make_pair("vrHelpItem", hmi_apis::Common_ImageFieldName::vrHelpItem),
+	std::make_pair("turnIcon", hmi_apis::Common_ImageFieldName::turnIcon),
+	std::make_pair("menuIcon", hmi_apis::Common_ImageFieldName::menuIcon),
+	std::make_pair("cmdIcon", hmi_apis::Common_ImageFieldName::cmdIcon),
+	std::make_pair("appIcon", hmi_apis::Common_ImageFieldName::appIcon),
+	std::make_pair("graphic", hmi_apis::Common_ImageFieldName::graphic),
+	std::make_pair("showConstantTBTIcon", hmi_apis::Common_ImageFieldName::showConstantTBTIcon),
+	std::make_pair("showConstantTBTNextTurnIcon", hmi_apis::Common_ImageFieldName::showConstantTBTNextTurnIcon)
+};
+const int numElems10 = sizeof(rawData10) / sizeof(rawData10[0]);
+const std::map<std::string, hmi_apis::Common_ImageFieldName::eType> image_field_name_enum(rawData10, rawData10 + numElems10);
+
+const const std::map<std::string, hmi_apis::Common_FileType::eType>::value_type rawData11[] =
+{
+	std::make_pair("GRAPHIC_BMP", hmi_apis::Common_FileType::GRAPHIC_BMP),
+	std::make_pair("GRAPHIC_JPEG", hmi_apis::Common_FileType::GRAPHIC_JPEG),
+	std::make_pair("GRAPHIC_PNG", hmi_apis::Common_FileType::GRAPHIC_PNG),
+	std::make_pair("AUDIO_WAVE", hmi_apis::Common_FileType::AUDIO_WAVE),
+	std::make_pair("AUDIO_MP3", hmi_apis::Common_FileType::AUDIO_MP3),
+	std::make_pair("AUDIO_AAC", hmi_apis::Common_FileType::AUDIO_AAC),
+	std::make_pair("BINARY", hmi_apis::Common_FileType::BINARY),
+	std::make_pair("JSON", hmi_apis::Common_FileType::JSON)
+};
+const int numElems11 = sizeof(rawData11) / sizeof(rawData11[0]);
+const std::map<std::string, hmi_apis::Common_FileType::eType> file_type_enum(rawData11, rawData11 + numElems11);
+
+const const std::map<std::string, hmi_apis::Common_DisplayType::eType>::value_type rawData12[] =
+{
+	std::make_pair("CID", hmi_apis::Common_DisplayType::CID),
+	std::make_pair("TYPE2", hmi_apis::Common_DisplayType::TYPE2),
+	std::make_pair("TYPE5", hmi_apis::Common_DisplayType::TYPE5),
+	std::make_pair("NGN", hmi_apis::Common_DisplayType::NGN),
+	std::make_pair("GEN2_8_DMA", hmi_apis::Common_DisplayType::GEN2_8_DMA),
+	std::make_pair("GEN2_6_DMA", hmi_apis::Common_DisplayType::GEN2_6_DMA),
+	std::make_pair("MFD3", hmi_apis::Common_DisplayType::MFD3),
+	std::make_pair("MFD4", hmi_apis::Common_DisplayType::MFD4),
+	std::make_pair("MFD5", hmi_apis::Common_DisplayType::MFD5),
+	std::make_pair("GEN3_8_INCH", hmi_apis::Common_DisplayType::GEN3_8_INCH)
+};
+const int numElems12 = sizeof(rawData12) / sizeof(rawData12[0]);
+const std::map<std::string, hmi_apis::Common_DisplayType::eType> display_type_enum(rawData12, rawData12 + numElems12);
+
+const const std::map<std::string, hmi_apis::Common_CharacterSet::eType>::value_type rawData13[] =
+{
+	std::make_pair("TYPE2SET" , hmi_apis::Common_CharacterSet::TYPE2SET),
+	std::make_pair("TYPE5SET" , hmi_apis::Common_CharacterSet::TYPE5SET),
+	std::make_pair("CID1SET" ,  hmi_apis::Common_CharacterSet::CID1SET),
+	std::make_pair("CID2SET" ,  hmi_apis::Common_CharacterSet::CID2SET)
+};
+const int numElems13 = sizeof(rawData13) / sizeof(rawData13[0]);
+const std::map<std::string, hmi_apis::Common_CharacterSet::eType> character_set_enum(rawData13, rawData13 + numElems13);
+#else
 std::map<std::string, hmi_apis::Common_VrCapabilities::eType> vr_enum_capabilities =
 {
     {"TEXT", hmi_apis::Common_VrCapabilities::VR_TEXT}
@@ -78,7 +258,7 @@ std::map<std::string, hmi_apis::Common_ButtonName::eType> button_enum_name =
 
 };
 
-std::map<std::string, hmi_apis::Common_TextFieldName::eType> text_fields_enum_name =
+const std::map<std::string, hmi_apis::Common_TextFieldName::eType> text_fields_enum_name =
 {
     {"mainField1", hmi_apis::Common_TextFieldName::mainField1},
     {"mainField2", hmi_apis::Common_TextFieldName::mainField2},
@@ -206,6 +386,7 @@ const std::map<std::string, hmi_apis::Common_CharacterSet::eType> character_set_
     {"CID1SET" ,  hmi_apis::Common_CharacterSet::CID1SET},
     {"CID2SET" ,  hmi_apis::Common_CharacterSet::CID2SET}
 };
+#endif
 
 HMICapabilities::HMICapabilities(ApplicationManagerImpl* const app_mngr)
   : is_vr_cooperating_(false),

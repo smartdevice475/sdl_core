@@ -66,6 +66,10 @@
 #endif  // MESSAGEBROKER_HMIADAPTER
 #include "system.h"      // cpplint: Include the directory when naming .h files
 
+#ifdef OS_WINCE
+#include "Winsock2.h"
+#endif
+
 #ifdef ENABLE_SECURITY
 namespace security_manager {
 class CryptoManager;

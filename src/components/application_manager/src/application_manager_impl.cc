@@ -71,12 +71,23 @@ namespace {
 namespace application_manager {
 
 namespace {
+#ifdef OS_WINCE
+  const DeviceTypes::value_type rawData[] = {
+    std::make_pair(std::string("USB_AOA"), hmi_apis::Common_TransportType::USB_AOA),
+    std::make_pair(std::string("USB_IOS"), hmi_apis::Common_TransportType::USB_IOS),
+    std::make_pair(std::string("BLUETOOTH"), hmi_apis::Common_TransportType::BLUETOOTH),
+    std::make_pair(std::string("WIFI"), hmi_apis::Common_TransportType::WIFI)
+  };
+  const int numElems = sizeof(rawData) / sizeof(rawData[0]);
+  DeviceTypes devicesType(rawData, rawData + numElems);
+#else
   DeviceTypes devicesType = {
     std::make_pair(std::string("USB_AOA"), hmi_apis::Common_TransportType::USB_AOA),
     std::make_pair(std::string("USB_IOS"), hmi_apis::Common_TransportType::USB_IOS),
     std::make_pair(std::string("BLUETOOTH"), hmi_apis::Common_TransportType::BLUETOOTH),
     std::make_pair(std::string("WIFI"), hmi_apis::Common_TransportType::WIFI)
   };
+#endif
 }
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
@@ -121,14 +132,24 @@ ApplicationManagerImpl::ApplicationManagerImpl()
                                       &ApplicationManagerImpl::OnTimerSendTTSGlobalProperties,
                                       true),
     is_low_voltage_(false) {
+#ifdef OS_WINCE
+    std::srand(time(0));
+#else
     std::srand(std::time(0));
+#endif
     AddPolicyObserver(this);
 
+#ifdef OS_WINCE
+	dir_type_to_string_map_.insert(std::make_pair(TYPE_STORAGE, "Storage"));
+	dir_type_to_string_map_.insert(std::make_pair(TYPE_SYSTEM, "System"));
+	dir_type_to_string_map_.insert(std::make_pair(TYPE_ICONS, "Icons"));
+#else
 	dir_type_to_string_map_.insert( {
 		{ TYPE_STORAGE, "Storage" },
 		{ TYPE_SYSTEM, "System" },
 		{ TYPE_ICONS, "Icons" }
     });
+#endif
 
     sync_primitives::AutoLock lock(timer_pool_lock_);
     ApplicationManagerTimerPtr clearTimerPoolTimer(new TimerThread<ApplicationManagerImpl>(
@@ -470,6 +491,16 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
       message[strings::params][strings::protocol_version].asInt());
   application->set_protocol_version(protocol_version);
 
+#ifdef OS_WINCE
+  if (kUnknownProtocol != protocol_version) {
+	  connection_handler_->BindProtocolVersionWithSession(
+		  connection_key, static_cast<uint8_t>(protocol_version));
+  }
+  if (protocol_version >= kV3 &&
+	  profile::Profile::instance()->heart_beat_timeout() > 0) {
+		  connection_handler_->StartSessionHeartBeat(connection_key);
+  }
+#else
   if (ProtocolVersion::kUnknownProtocol != protocol_version) {
     connection_handler_->BindProtocolVersionWithSession(
         connection_key, static_cast<uint8_t>(protocol_version));
@@ -478,6 +509,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
           profile::Profile::instance()->heart_beat_timeout() > 0) {
     connection_handler_->StartSessionHeartBeat(connection_key);
   }
+#endif
 
   // Keep HMI add id in case app is present in "waiting for registration" list
   apps_to_register_list_lock_.Acquire();
@@ -796,11 +828,19 @@ ApplicationConstSharedPtr ApplicationManagerImpl::waiting_app(
     const uint32_t hmi_id) const {
   AppsWaitRegistrationSet app_list = apps_waiting_for_registration().GetData();
 
+#ifdef OS_WINCE
+  AppsWaitRegistrationSet::const_iterator it_end = app_list.end();
+
+  HmiAppIdPredicate finder(hmi_id);
+  ApplicationSharedPtr result;
+  AppsWaitRegistrationSet::const_iterator it_app = std::find_if((AppsWaitRegistrationSet::const_iterator)app_list.begin(), it_end, finder);
+#else
   AppsWaitRegistrationSet::const_iterator it_end = app_list.end();
 
   HmiAppIdPredicate finder(hmi_id);
   ApplicationSharedPtr result;
   ApplictionSetConstIt it_app = std::find_if(app_list.begin(), it_end, finder);
+#endif
   if (it_app != it_end) {
     result = *it_app;
   }
@@ -817,8 +857,13 @@ ApplicationManagerImpl::apps_waiting_for_registration() const {
 bool ApplicationManagerImpl::IsAppsQueriedFrom(
     const connection_handler::DeviceHandle handle) const {
   sync_primitives::AutoLock lock(apps_to_register_list_lock_);
+#ifdef OS_WINCE
+  AppsWaitRegistrationSet::const_iterator it = apps_to_register_.begin();
+  AppsWaitRegistrationSet::const_iterator it_end = apps_to_register_.end();
+#else
   AppsWaitRegistrationSet::iterator it = apps_to_register_.begin();
   AppsWaitRegistrationSet::const_iterator it_end = apps_to_register_.end();
+#endif
   for (; it != it_end; ++it) {
     if (handle == (*it)->device()) {
       return true;
@@ -978,6 +1023,30 @@ void ApplicationManagerImpl::ReplaceMobileByHMIAppId(
       message[strings::app_id] = application->hmi_app_id();
     }
   } else {
+#ifdef OS_WINCE
+    switch (message.getType()) {
+      case smart_objects::SmartType_Array: {
+        smart_objects::SmartArray* message_array = message.asArray();
+        smart_objects::SmartArray::iterator it = message_array->begin();
+        for(; it != message_array->end(); ++it) {
+          ReplaceMobileByHMIAppId(*it);
+        }
+        break;
+      }
+      case smart_objects::SmartType_Map: {
+        std::set<std::string> keys = message.enumerate();
+        std::set<std::string>::const_iterator key = keys.begin();
+        for (; key != keys.end(); ++key) {
+          std::string k = *key;
+          ReplaceMobileByHMIAppId(message[*key]);
+        }
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+#else
     switch (message.getType()) {
       case smart_objects::SmartType::SmartType_Array: {
         smart_objects::SmartArray* message_array = message.asArray();
@@ -1000,6 +1069,7 @@ void ApplicationManagerImpl::ReplaceMobileByHMIAppId(
         break;
       }
     }
+#endif
   }
 }
 
@@ -1016,6 +1086,29 @@ void ApplicationManagerImpl::ReplaceHMIByMobileAppId(
       message[strings::app_id] = application->app_id();
     }
   } else {
+#ifdef OS_WINCE
+    switch (message.getType()) {
+      case smart_objects::SmartType_Array: {
+        smart_objects::SmartArray* message_array = message.asArray();
+        smart_objects::SmartArray::iterator it = message_array->begin();
+        for(; it != message_array->end(); ++it) {
+          ReplaceHMIByMobileAppId(*it);
+        }
+        break;
+      }
+      case smart_objects::SmartType_Map: {
+        std::set<std::string> keys = message.enumerate();
+        std::set<std::string>::const_iterator key = keys.begin();
+        for (; key != keys.end(); ++key) {
+          ReplaceHMIByMobileAppId(message[*key]);
+        }
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+#else
     switch (message.getType()) {
       case smart_objects::SmartType::SmartType_Array: {
         smart_objects::SmartArray* message_array = message.asArray();
@@ -1037,6 +1130,7 @@ void ApplicationManagerImpl::ReplaceHMIByMobileAppId(
         break;
       }
     }
+#endif
   }
 }
 
@@ -1060,8 +1154,13 @@ bool ApplicationManagerImpl::StartNaviService(
     // Fill NaviServices map. Set true to first value of pair if
     // we've started video service or to second value if we've
     // started audio service
+#ifdef OS_WINCE
+	service_type == kMobileNav ? it->second.first =
+		true : it->second.second = true;
+#else
     service_type == ServiceType::kMobileNav ? it->second.first =
         true : it->second.second = true;
+#endif
 
     application(app_id)->StartStreaming(service_type);
     return true;
@@ -1083,9 +1182,15 @@ void ApplicationManagerImpl::StopNaviService(
     // Fill NaviServices map. Set false to first value of pair if
     // we've stopped video service or to second value if we've
     // stopped audio service
+#ifdef OS_WINCE
+    service_type == kMobileNav ? it->second.first =
+        false : it->second.second = false;
+  }
+#else
     service_type == ServiceType::kMobileNav ? it->second.first =
         false : it->second.second = false;
   }
+#endif
 
   ApplicationSharedPtr app = application(app_id);
   if (!app) {
@@ -1117,7 +1222,11 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
   }
 
   if (Compare<ServiceType, EQ, ONE>(type,
+#ifdef OS_WINCE
+          kMobileNav, kAudio)) {
+#else
           ServiceType::kMobileNav, ServiceType::kAudio)) {
+#endif
     if (app->is_navi()) {
       return StartNaviService(session_key, type);
     }
@@ -1151,6 +1260,37 @@ void ApplicationManagerImpl::OnServiceEndedCallback(
     Result::eType reason;
     bool is_resuming;
     bool is_unexpected_disconnect;
+#ifdef OS_WINCE
+	switch (close_reason) {
+	  case kFlood: {
+		  reason = Result::TOO_MANY_PENDING_REQUESTS;
+		  is_resuming = true;
+		  is_unexpected_disconnect = false;
+
+		  MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+			  session_key, AppInterfaceUnregisteredReason::TOO_MANY_REQUESTS);
+		  break;
+		}
+	  case kMalformed: {
+		  reason = Result::INVALID_ENUM;
+		  is_resuming = true;
+		  is_unexpected_disconnect = false;
+		  break;
+		}
+	  case kUnauthorizedApp: {
+		  reason = Result::INVALID_ENUM;
+		  is_resuming = true;
+		  is_unexpected_disconnect = false;
+		  break;
+		}
+	  default: {
+		  reason = Result::INVALID_ENUM;
+		  is_resuming = true;
+		  is_unexpected_disconnect = true;
+		  break;
+		}
+	}
+#else
     switch (close_reason) {
       case CloseSessionReason::kFlood: {
         reason = Result::TOO_MANY_PENDING_REQUESTS;
@@ -1180,13 +1320,19 @@ void ApplicationManagerImpl::OnServiceEndedCallback(
         break;
       }
     }
+#endif
     UnregisterApplication(
         session_key, reason, is_resuming, is_unexpected_disconnect);
     return;
   }
 
+#ifdef OS_WINCE
+  if (Compare<ServiceType, EQ, ONE>(type,
+	  kMobileNav, kAudio)) {
+#else
   if (Compare<ServiceType, EQ, ONE>(type,
           ServiceType::kMobileNav, ServiceType::kAudio)) {
+#endif
     StopNaviService(session_key, type);
     }
 }
@@ -1278,7 +1424,11 @@ void ApplicationManagerImpl::SendMessageToMobile(
         ((*message)[strings::msg_params][strings::result_code] ==
          NsSmartDeviceLinkRPC::V1::Result::UNSUPPORTED_VERSION)) {
       (*message)[strings::params][strings::protocol_version] =
+#ifdef OS_WINCE
+        kV1;
+#else
         ProtocolVersion::kV1;
+#endif
     } else {
       (*message)[strings::params][strings::protocol_version] =
         SupportedSDLVersion();
@@ -1656,9 +1806,15 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
     << "; json " << message.json_message());
 
   switch (message.protocol_version()) {
+#ifdef OS_WINCE
+	case kV4:
+	case kV3:
+	case kV2: {
+#else
     case ProtocolVersion::kV4:
     case ProtocolVersion::kV3:
     case ProtocolVersion::kV2: {
+#endif
         const bool conversion_result =
             formatters::CFormatterJsonSDLRPCv2::fromString(
             message.json_message(), output, message.function_id(),
@@ -1700,7 +1856,11 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       }
       break;
     }
+#ifdef OS_WINCE
+    case kHMI: {
+#else
     case ProtocolVersion::kHMI: {
+#endif
 #ifdef ENABLE_LOG
       int32_t result =
 #endif
@@ -1718,13 +1878,21 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       if (output.validate() != smart_objects::Errors::OK) {
         LOG4CXX_ERROR(logger_, "Incorrect parameter from HMI");
 
+#ifdef OS_WINCE
+        if (application_manager::kNotification ==
+#else
         if (application_manager::MessageType::kNotification ==
+#endif
             output[strings::params][strings::message_type].asInt()) {
           LOG4CXX_ERROR(logger_, "Ignore wrong HMI notification");
           return false;
         }
 
+#ifdef OS_WINCE
+        if (application_manager::kRequest ==
+#else
         if (application_manager::MessageType::kRequest ==
+#endif
             output[strings::params][strings::message_type].asInt()) {
           LOG4CXX_ERROR(logger_, "Ignore wrong HMI request");
           return false;
@@ -1738,7 +1906,11 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       }
       break;
     }
+#ifdef OS_WINCE
+    case kV1: {
+#else
     case ProtocolVersion::kV1: {
+#endif
       static NsSmartDeviceLinkRPC::V1::v4_protocol_v1_2_no_extra v1_shema;
 
       if (message.function_id() == 0 || message.type() == kUnknownType) {
@@ -1753,14 +1925,23 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
         if (formatters::CFormatterJsonSDLRPCv1::kSuccess
             == conversation_result) {
 
+#ifdef OS_WINCE
+          smart_objects::SmartObject params = smart_objects::SmartObject(smart_objects::SmartType_Map);
+#else
           smart_objects::SmartObject params = smart_objects::SmartObject(smart_objects::SmartType::SmartType_Map);
+#endif
 
           output[strings::params][strings::message_type] =
             NsSmartDeviceLinkRPC::V1::messageType::response;
           output[strings::params][strings::connection_key] = message.connection_key();
 
+#ifdef OS_WINCE
+          output[strings::msg_params] =
+            smart_objects::SmartObject(smart_objects::SmartType_Map);
+#else
           output[strings::msg_params] =
             smart_objects::SmartObject(smart_objects::SmartType::SmartType_Map);
+#endif
           output[strings::msg_params][strings::success] = false;
           output[strings::msg_params][strings::result_code] =
             NsSmartDeviceLinkRPC::V1::Result::UNSUPPORTED_VERSION;
@@ -2328,8 +2509,13 @@ void ApplicationManagerImpl::SendOnSDLClose() {
 
   (*msg)[strings::params][strings::function_id] =
     hmi_apis::FunctionID::BasicCommunication_OnSDLClose;
+#ifdef OS_WINCE
+  (*msg)[strings::params][strings::message_type] =
+	  kNotification;
+#else
   (*msg)[strings::params][strings::message_type] =
       MessageType::kNotification;
+#endif
   (*msg)[strings::params][strings::protocol_type] =
       commands::CommandImpl::hmi_protocol_type_;
   (*msg)[strings::params][strings::protocol_version] =
@@ -2599,8 +2785,13 @@ void ApplicationManagerImpl::Handle(const impl::AudioData message) {
 
   LOG4CXX_INFO(logger_, "Fill smart object");
 
+#ifdef OS_WINCE
+  (*on_audio_pass)[strings::params][strings::message_type] =
+	  application_manager::kNotification;
+#else
   (*on_audio_pass)[strings::params][strings::message_type] =
       application_manager::MessageType::kNotification;
+#endif
 
   (*on_audio_pass)[strings::params][strings::connection_key] =
       static_cast<int32_t>(message.session_key);
@@ -2749,6 +2940,15 @@ bool ApplicationManagerImpl::CanAppStream(
   }
 
   bool is_allowed = false;
+#ifdef OS_WINCE
+  if (kMobileNav == service_type) {
+	  is_allowed = app->video_streaming_allowed();
+  } else if (kAudio == service_type) {
+	  is_allowed = app->audio_streaming_allowed();
+  } else {
+	  LOG4CXX_WARN(logger_, "Unsupported service_type " << service_type);
+  }
+#else
   if (ServiceType::kMobileNav == service_type) {
     is_allowed = app->video_streaming_allowed();
   } else if (ServiceType::kAudio == service_type) {
@@ -2756,6 +2956,7 @@ bool ApplicationManagerImpl::CanAppStream(
   } else {
     LOG4CXX_WARN(logger_, "Unsupported service_type " << service_type);
   }
+#endif
   return HMILevelAllowsStreaming(app_id, service_type) && is_allowed;
 }
 
@@ -2830,13 +3031,21 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
   if (connection_handler_) {
     if (it->second.first) {
       LOG4CXX_DEBUG(logger_, "Going to end video service");
+#ifdef OS_WINCE
+      connection_handler_->SendEndService(app_id, kMobileNav);
+#else
       connection_handler_->SendEndService(app_id, ServiceType::kMobileNav);
+#endif
       app->set_video_streaming_approved(false);
       app->set_video_streaming_allowed(false);
     }
     if (it->second.second) {
       LOG4CXX_DEBUG(logger_, "Going to end audio service");
+#ifdef OS_WINCE
+      connection_handler_->SendEndService(app_id, kAudio);
+#else
       connection_handler_->SendEndService(app_id, ServiceType::kAudio);
+#endif
       app->set_audio_streaming_approved(false);
       app->set_audio_streaming_allowed(false);
     }
@@ -3028,8 +3237,15 @@ mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
     file_stream = file_system::Open(full_file_path, std::ios_base::out);
   }
 
+#ifdef OS_WINCE
+  std::string binary_str;
+  binary_str.assign(binary_data.begin(), binary_data.end());
+  if (!file_system::Write(file_stream, (const uint8_t*)binary_str.c_str(),
+                          binary_str.size())) {
+#else
   if (!file_system::Write(file_stream, binary_data.data(),
                           binary_data.size())) {
+#endif
     file_system::Close(file_stream);
     delete file_stream;
     file_stream = NULL;
@@ -3209,7 +3425,11 @@ void ApplicationManagerImpl::OnUpdateHMIAppType(
   smart_objects::SmartObject transform_app_hmi_types(smart_objects::SmartType_Array);
   bool flag_diffirence_app_hmi_type = false;
   ApplicationListAccessor accessor;
+#ifdef OS_WINCE
+  for (ApplictionSetConstIt it = accessor.begin();
+#else
   for (ApplictionSetIt it = accessor.begin();
+#endif
       it != accessor.end(); ++it) {
 
     it_app_hmi_types_from_policy =
@@ -3265,6 +3485,19 @@ ProtocolVersion ApplicationManagerImpl::SupportedSDLVersion() const {
     profile::Profile::instance()->heart_beat_timeout();
   bool sdl4_support = profile::Profile::instance()->enable_protocol_4();
 
+#ifdef OS_WINCE
+  if (sdl4_support) {
+	  LOG4CXX_DEBUG(logger_, "SDL Supported protocol version "<<kV4);
+	  return kV4;
+  }
+  if (heart_beat_support) {
+	  LOG4CXX_DEBUG(logger_, "SDL Supported protocol version "<<kV3);
+	  return kV3;
+  }
+
+  LOG4CXX_DEBUG(logger_, "SDL Supported protocol version "<<kV2);
+  return kV2;
+#else
   if (sdl4_support) {
     LOG4CXX_DEBUG(logger_, "SDL Supported protocol version "<<ProtocolVersion::kV4);
     return ProtocolVersion::kV4;
@@ -3276,6 +3509,7 @@ ProtocolVersion ApplicationManagerImpl::SupportedSDLVersion() const {
 
   LOG4CXX_DEBUG(logger_, "SDL Supported protocol version "<<ProtocolVersion::kV2);
   return ProtocolVersion::kV2;
+#endif
 }
 
 const std::string ApplicationManagerImpl::DirectoryTypeToString(

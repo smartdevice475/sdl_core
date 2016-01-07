@@ -2231,7 +2231,11 @@ bool ResumptionDataDB::InsertGlobalPropertiesData(
     }
   }
 
+#ifdef OS_WINCE
+  if (SmartType_Null ==
+#else
   if (SmartType::SmartType_Null ==
+#endif
       global_properties[strings::keyboard_properties].getType()) {
     insert_global_properties.Bind(3);
     insert_global_properties.Bind(4);
@@ -2251,7 +2255,11 @@ bool ResumptionDataDB::InsertGlobalPropertiesData(
   }
 
   global_properties_key = insert_global_properties.LastInsertId();
+#ifdef OS_WINCE
+  if ((SmartType_Null !=
+#else
   if ((SmartType::SmartType_Null !=
+#endif
       global_properties[strings::keyboard_properties].getType()) &&
       (global_properties[strings::keyboard_properties].keyExists(
           strings::limited_character_list))) {
@@ -2263,7 +2271,11 @@ bool ResumptionDataDB::InsertGlobalPropertiesData(
     }
   }
 
+#ifdef OS_WINCE
+  if (SmartType_Null !=
+#else
   if (SmartType::SmartType_Null !=
+#endif
       global_properties[strings::vr_help].getType()) {
     if (!ExecInsertVRHelpItem(global_properties_key,
                              global_properties[strings::vr_help])) {
@@ -2290,11 +2302,19 @@ bool ResumptionDataDB::ExecInsertHelpTimeoutArray(
   size_t timeout_prompt_length = 0;
   size_t help_prompt_length = 0;
 
+#ifdef OS_WINCE
+  if (SmartType_Null != global_properties[strings::help_prompt].getType()) {
+#else
   if (SmartType::SmartType_Null != global_properties[strings::help_prompt].getType()) {
+#endif
     help_prompt_length = global_properties[strings::help_prompt].length();
   }
 
+#ifdef OS_WINCE
+  if (SmartType_Null != global_properties[strings::timeout_prompt].getType()) {
+#else
   if (SmartType::SmartType_Null != global_properties[strings::timeout_prompt].getType()) {
+#endif
     timeout_prompt_length = global_properties[strings::timeout_prompt].length();
   }
   if (0 == timeout_prompt_length && 0 == help_prompt_length) {
@@ -2529,6 +2549,26 @@ void ResumptionDataDB::CustomBind(const std::string& key,
                                   utils::dbms::SQLQuery& query, const int pos) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace smart_objects;
+#ifdef OS_WINCE
+  if (so.keyExists(key) && SmartType_Null != so[key].getType()) {
+	  switch(so[key].getType()) {
+	  case SmartType_Integer:{
+		  query.Bind(pos, so[key].asInt());
+		  break;
+										}
+	  case SmartType_String:{
+		  query.Bind(pos, so[key].asString());
+		  break;
+									   }
+	  default:{
+		  LOG4CXX_WARN(logger_, "Incorrect type");
+		  break;
+			  }
+	  }
+  } else {
+	  query.Bind(pos);
+  }
+#else
   if (so.keyExists(key) && SmartType::SmartType_Null != so[key].getType()) {
     switch(so[key].getType()) {
       case SmartType::SmartType_Integer:{
@@ -2547,6 +2587,7 @@ void ResumptionDataDB::CustomBind(const std::string& key,
   } else {
     query.Bind(pos);
   }
+#endif
 }
 
 bool ResumptionDataDB::PrepareSelectQuery(utils::dbms::SQLQuery& query,

@@ -69,6 +69,19 @@ namespace {
 typedef
 std::map<std::string, hmi_apis::Common_AppPriority::eType> CommonAppPriorityMap;
 
+#ifdef OS_WINCE
+const CommonAppPriorityMap::value_type rawData[] = {
+  std::make_pair("NORMAL", hmi_apis::Common_AppPriority::NORMAL),
+  std::make_pair("COMMUNICATION", hmi_apis::Common_AppPriority::COMMUNICATION),
+  std::make_pair("EMERGENCY", hmi_apis::Common_AppPriority::EMERGENCY),
+  std::make_pair("NAVIGATION", hmi_apis::Common_AppPriority::NAVIGATION),
+  std::make_pair("NONE", hmi_apis::Common_AppPriority::NONE),
+  std::make_pair("VOICECOM", hmi_apis::Common_AppPriority::VOICE_COMMUNICATION),
+  std::make_pair("INVALID_ENUM", hmi_apis::Common_AppPriority::INVALID_ENUM)
+};
+const int numElems = sizeof(rawData) / sizeof(rawData[0]);
+CommonAppPriorityMap app_priority_values(rawData, rawData + numElems);
+#else
 CommonAppPriorityMap app_priority_values = {
   {"NORMAL", hmi_apis::Common_AppPriority::NORMAL},
   {"COMMUNICATION", hmi_apis::Common_AppPriority::COMMUNICATION},
@@ -78,6 +91,7 @@ CommonAppPriorityMap app_priority_values = {
   {"VOICECOM", hmi_apis::Common_AppPriority::VOICE_COMMUNICATION},
   {"INVALID_ENUM", hmi_apis::Common_AppPriority::INVALID_ENUM}
 };
+#endif
 
 const uint32_t GetPriorityCode(const std::string& priority) {
   CommonAppPriorityMap::const_iterator it = app_priority_values.find(priority);

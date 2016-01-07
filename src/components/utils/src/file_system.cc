@@ -284,6 +284,7 @@ bool file_system::FileExists(const std::string& name) {
 #endif
 }
 
+#ifndef OS_WINCE
 bool file_system::Write(
   const std::string& file_name, const std::vector<uint8_t>& data,
   std::ios_base::openmode mode) {
@@ -297,6 +298,7 @@ bool file_system::Write(
   }
   return false;
 }
+#endif
 
 std::ofstream* file_system::Open(const std::string& file_name,
                                  std::ios_base::openmode mode) {

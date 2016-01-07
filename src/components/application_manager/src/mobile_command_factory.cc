@@ -131,6 +131,8 @@
 
 namespace application_manager {
 
+using namespace commands;
+
 CommandSharedPtr MobileCommandFactory::CreateCommand(
     const commands::MessageSharedPtr& message,
     commands::Command::CommandOrigin origin) {
