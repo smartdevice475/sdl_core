@@ -33,10 +33,10 @@
 #ifndef VALIDATED_TYPES_H_
 #define VALIDATED_TYPES_H_
 
-#include <stdint.h>
 #include <map>
 #include <string>
 #include <vector>
+#include <stdint.h>
 
 #ifdef OS_WINCE
 #include "validation_report.h"

@@ -108,11 +108,9 @@ bool FileExists(const std::string& name);
   * @param data data to write
   * @return returns true if the operation is successfully.
   */
-#ifndef OS_WINCE
 bool Write(const std::string& file_name,
            const std::vector<uint8_t>& data,
            std::ios_base::openmode mode = std::ios_base::out);
-#endif
 
 /**
   * @brief Opens file stream for writing

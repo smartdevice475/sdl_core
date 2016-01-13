@@ -52,7 +52,8 @@
 #if defined(OS_WIN32)
 #include <winsock2.h>
 #elif defined(OS_WINCE)
-#include <winsock.h>
+
+#include <winsock2.h>
 #endif
 
 #include "./life_cycle.h"

@@ -29,7 +29,6 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 #include "utils/logger.h"
 
 #if defined(OS_WIN32) || defined(OS_WINCE)
@@ -284,7 +283,6 @@ bool file_system::FileExists(const std::string& name) {
 #endif
 }
 
-#ifndef OS_WINCE
 bool file_system::Write(
   const std::string& file_name, const std::vector<uint8_t>& data,
   std::ios_base::openmode mode) {
@@ -298,7 +296,6 @@ bool file_system::Write(
   }
   return false;
 }
-#endif
 
 std::ofstream* file_system::Open(const std::string& file_name,
                                  std::ios_base::openmode mode) {

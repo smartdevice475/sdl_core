@@ -49,6 +49,7 @@ INCLUDE_DIRECTORIES(
   ${JSONCPP_INCLUDE_DIRECTORY}
   #${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_SOURCE_DIR}/src/components/utils/include/
+  ${CMAKE_SOURCE_DIR}/src/components/utils/include/utils
   ${CMAKE_SOURCE_DIR}/src/components
   ${CMAKE_SOURCE_DIR}/src/components/config_profile/include
   ${LOG4CXX_INCLUDE_DIRECTORY}
@@ -62,6 +63,7 @@ ENDIF()
 
 IF(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
     INCLUDE_DIRECTORIES(
+      ${CMAKE_SOURCE_DIR}/include/wince
       ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
     )
 ENDIF()

@@ -108,17 +108,9 @@ ENDIF()
 
 ADD_LIBRARY("Utils" ${SOURCES})
 
-IF(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    # --- QDB Wrapper 
-    ADD_SUBDIRECTORY(./src/qdb_wrapper)
-ELSE()
-    # --- SQLite Wrapper
-    ADD_SUBDIRECTORY(./src/sqlite_wrapper)
-ENDIF()
-
-IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    LIST(APPEND LIBRARIES dl) 
-ENDIF()
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+ list(APPEND LIBRARIES dl) 
+endif()
 
 
 IF(ENABLE_LOG)

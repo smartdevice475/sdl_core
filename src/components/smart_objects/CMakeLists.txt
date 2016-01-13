@@ -36,6 +36,12 @@ INCLUDE_DIRECTORIES(
   ${COMPONENTS_DIR}/utils/include/
 )
 
+IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    INCLUDE_DIRECTORIES(
+        ${CMAKE_SOURCE_DIR}/include/wince
+    )
+ENDIF()
+
 SET(SOURCES
     ${SMART_OBJECTS_SRC_DIR}/smart_object.cc
     ${SMART_OBJECTS_SRC_DIR}/smart_schema.cc

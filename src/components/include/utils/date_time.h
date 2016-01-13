@@ -35,10 +35,17 @@
 #if defined(OS_POSIX)
 #include <sys/time.h>
 typedef struct timeval TimevalStruct;
-#endif
-
-#if defined(OS_WIN32) || defined(OS_WINCE)
+#elif defined(OS_WIN32)
 #include <stdint.h>
+#include <pthread.h>
+#include <winsock2.h>
+typedef struct timeval TimevalStruct;
+
+#define CLOCK_REALTIME 0
+#define CLOCK_MONOTONIC 1
+void clock_gettime(int i, timespec * tm);
+#elif defined(OS_WINCE)
+#include <unistd.h>
 #include <pthread.h>
 #include <winsock.h>
 typedef struct timeval TimevalStruct;
@@ -46,7 +53,6 @@ typedef struct timeval TimevalStruct;
 #define CLOCK_REALTIME 0
 #define CLOCK_MONOTONIC 1
 void clock_gettime(int i, timespec * tm);
-
 #elif defined(OS_MAC)
 #include <mach/clock.h>
 #include <mach/mach.h>

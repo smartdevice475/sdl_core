@@ -338,13 +338,14 @@ InitResult SQLPTRepresentation::Init() {
     bool is_opened = false;
     const uint16_t open_attempt_timeout_ms =
         profile::Profile::instance()->open_attempt_timeout_ms();
-#ifndef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#else
 	const useconds_t sleep_interval_mcsec = open_attempt_timeout_ms * 1000;
 #endif
     LOG4CXX_DEBUG(logger_, "Open attempt timeout(ms) is: "
                   << open_attempt_timeout_ms);
 	for (int i = 0; i < attempts; ++i) {
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 		Sleep(open_attempt_timeout_ms);
 #else
 		usleep(sleep_interval_mcsec);

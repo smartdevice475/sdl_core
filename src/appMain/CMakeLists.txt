@@ -145,7 +145,7 @@ INCLUDE_DIRECTORIES(
     ${SecurityManagerIncludeDir}
     ${COMPONENTS_DIR}/security_manager/include
     ${COMPONENTS_DIR}/config_profile/include
-    ${COMPONENTS_DIR}/utils/include/
+    ${COMPONENTS_DIR}/utils/include
     ${COMPONENTS_DIR}/connection_handler/include/
     ${COMPONENTS_DIR}/hmi_message_handler/include
     ${COMPONENTS_DIR}/request_watchdog/include

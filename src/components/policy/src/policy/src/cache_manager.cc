@@ -34,8 +34,13 @@
 
 #include <algorithm>
 #include <functional>
+#include <cstdio>
+#ifdef OS_WINCE
+#include "wcecompat/include/time.h"
+#else
 #include <ctime>
 #include <cmath>
+#endif
 
 #include "utils/file_system.h"
 #include "json/reader.h"
@@ -52,6 +57,13 @@ namespace policy_table = rpc::policy_table_interface_base;
 namespace policy {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "CacheManager")
+
+#ifdef OS_WINCE
+double round(double val)
+{
+	return (val> 0.0) ? floor(val+ 0.5) : ceil(val- 0.5);
+}
+#endif
 
 #define CACHE_MANAGER_CHECK(return_value) {\
   if (!pt_) {\
@@ -435,7 +447,11 @@ void CacheManager::CheckPermissions(const PTString &app_id,
                   hmi_level_e);
 
         if (rpc_param.hmi_levels.end() != hmi_iter) {
+#ifdef OS_WINCE
+          result.hmi_level_permitted = kRpcAllowed;
+#else
           result.hmi_level_permitted = PermitResult::kRpcAllowed;
+#endif
 
           policy_table::Parameters::const_iterator params_iter =
               rpc_param.parameters->begin();
@@ -964,7 +980,11 @@ void CacheManager::Add(const std::string &app_id,
 
 long CacheManager::ConvertSecondsToMinute(int seconds) {
   const float seconds_in_minute = 60.0;
+#ifdef OS_WINCE
+  return round(seconds / seconds_in_minute);
+#else
   return std::round(seconds / seconds_in_minute);
+#endif
 }
 
 bool CacheManager::SetDefaultPolicy(const std::string &app_id) {
@@ -1088,6 +1108,35 @@ bool CacheManager::Init(const std::string& file_name) {
   InitResult init_result = backup_->Init();
 
   bool result = true;
+#ifdef OS_WINCE
+  switch (init_result) {
+	case EXISTS: {
+		LOG4CXX_INFO(logger_, "Policy Table exists, was loaded correctly.");
+		result = LoadFromBackup();
+		if (result) {
+			if (!backup_->IsDBVersionActual()) {
+				if (!backup_->RefreshDB()) {
+					return false;
+				}
+				backup_->UpdateDBVersion();
+				Backup();
+			}
+		}
+							 } break;
+	case SUCCESS: {
+		LOG4CXX_INFO(logger_, "Policy Table was inited successfully");
+		result = LoadFromFile(file_name, *pt_);
+		backup_->UpdateDBVersion();
+		if (result) {
+			Backup();
+		}
+							  } break;
+	default: {
+		result = false;
+		LOG4CXX_ERROR(logger_, "Failed to init policy table.");
+			 } break;
+  }
+#else
   switch (init_result) {
     case InitResult::EXISTS: {
       LOG4CXX_INFO(logger_, "Policy Table exists, was loaded correctly.");
@@ -1115,6 +1164,7 @@ bool CacheManager::Init(const std::string& file_name) {
       LOG4CXX_ERROR(logger_, "Failed to init policy table.");
     } break;
   }
+#endif
 
   return result;
 }
