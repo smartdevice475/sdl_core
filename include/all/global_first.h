@@ -2,7 +2,7 @@
 # if _WIN32_WCE >= 0x600
 #  include <stdlib.h>
 # endif
-# include <winsock.h>
+# include <winsock2.h>
 #endif
 
 #ifndef SRC_GLOBAL_FIRST_H

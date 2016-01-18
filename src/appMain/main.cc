@@ -51,9 +51,6 @@
 // ----------------------------------------------------------------------------
 #if defined(OS_WIN32)
 #include <winsock2.h>
-#elif defined(OS_WINCE)
-
-#include <winsock2.h>
 #endif
 
 #include "./life_cycle.h"
@@ -134,7 +131,7 @@ std::getline(file_str, hmi_link);
 
 LOG4CXX_INFO(logger_,
              "Input string:" << hmi_link << " length = " << hmi_link.size());
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #ifdef close
 #undef close
 file_str.close();
@@ -144,7 +141,7 @@ file_str.close();
 file_str.close();
 #endif
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #elif defined(OS_MAC)
 #else
 if (stat(hmi_link.c_str(), &sb) == -1) {
