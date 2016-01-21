@@ -226,6 +226,19 @@ bool ApplicationImpl::IsAudioApplication() const {
 void ApplicationImpl::SetRegularState(HmiStatePtr state) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(state);
+#ifdef OS_WINCE
+  DCHECK_OR_RETURN_VOID(state->state_id() ==
+	  HmiState::STATE_ID_REGULAR);
+  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
+  DCHECK_OR_RETURN_VOID(!hmi_states_.empty());
+  hmi_states_.pop_front();
+  if (!hmi_states_.empty()) {
+	  HmiStatePtr front_state = hmi_states_.front();
+	  if (front_state->state_id() == HmiState::STATE_ID_REGULAR) {
+		  hmi_states_.pop_front();
+	  }
+  }
+#else
   DCHECK_OR_RETURN_VOID(state->state_id() ==
       HmiState::StateID::STATE_ID_REGULAR);
   sync_primitives::AutoLock auto_lock(hmi_states_lock_);
@@ -237,6 +250,7 @@ void ApplicationImpl::SetRegularState(HmiStatePtr state) {
       hmi_states_.pop_front();
     }
   }
+#endif
   if (!hmi_states_.empty()) {
     HmiStatePtr front_state = hmi_states_.front();
     front_state->set_parent(state);
@@ -247,6 +261,16 @@ void ApplicationImpl::SetRegularState(HmiStatePtr state) {
 void ApplicationImpl::SetPostponedState(HmiStatePtr state) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(state);
+#ifdef OS_WINCE
+  DCHECK_OR_RETURN_VOID(state->state_id() ==
+	  HmiState::STATE_ID_POSTPONED);
+  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
+  DCHECK_OR_RETURN_VOID(!hmi_states_.empty());
+  HmiStatePtr front_state = hmi_states_.front();
+  if (front_state->state_id() == HmiState::STATE_ID_POSTPONED) {
+	  hmi_states_.pop_front();
+  }
+#else
   DCHECK_OR_RETURN_VOID(state->state_id() ==
       HmiState::StateID::STATE_ID_POSTPONED);
   sync_primitives::AutoLock auto_lock(hmi_states_lock_);
@@ -255,6 +279,7 @@ void ApplicationImpl::SetPostponedState(HmiStatePtr state) {
   if (front_state->state_id() == HmiState::StateID::STATE_ID_POSTPONED) {
     hmi_states_.pop_front();
   }
+#endif
   hmi_states_.push_front(state);
 }
 
@@ -320,9 +345,15 @@ HmiStatePtr ApplicationImpl::RegularHmiState() const {
   sync_primitives::AutoLock auto_lock(hmi_states_lock_);
   DCHECK_OR_RETURN(!hmi_states_.empty(), HmiStatePtr());
   HmiStateList::const_iterator front_itr = hmi_states_.begin();
+#ifdef OS_WINCE
+  if ((*front_itr)->state_id() == HmiState::STATE_ID_POSTPONED) {
+	  ++front_itr;
+  }
+#else
   if ((*front_itr)->state_id() == HmiState::StateID::STATE_ID_POSTPONED) {
     ++front_itr;
   }
+#endif
   return *front_itr;
 }
 
@@ -330,8 +361,13 @@ HmiStatePtr ApplicationImpl::PostponedHmiState() const {
   sync_primitives::AutoLock auto_lock(hmi_states_lock_);
   DCHECK_OR_RETURN(!hmi_states_.empty(), HmiStatePtr());
   HmiStatePtr front_state = hmi_states_.front();
+#ifdef OS_WINCE
+  return front_state->state_id() == HmiState::STATE_ID_POSTPONED ?
+         front_state : HmiStatePtr();
+#else
   return front_state->state_id() == HmiState::StateID::STATE_ID_POSTPONED ?
          front_state : HmiStatePtr();
+#endif
 }
 
 const smart_objects::SmartObject* ApplicationImpl::active_message() const {
@@ -478,6 +514,108 @@ bool ApplicationImpl::audio_streaming_allowed() const {
   return audio_streaming_allowed_;
 }
 
+#ifdef OS_WINCE
+void ApplicationImpl::StartStreaming(
+    protocol_handler::ServiceType service_type) {
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (kMobileNav == service_type) {
+    if (!video_streaming_approved()) {
+      MessageHelper::SendNaviStartStream(app_id());
+      set_video_stream_retry_number(0);
+    }
+  } else if (kAudio == service_type) {
+    if (!audio_streaming_approved()) {
+      MessageHelper::SendAudioStartStream(app_id());
+      set_video_stream_retry_number(0);
+    }
+  }
+}
+
+void ApplicationImpl::StopStreaming(
+    protocol_handler::ServiceType service_type) {
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  SuspendStreaming(service_type);
+
+  if (kMobileNav == service_type) {
+    if (video_streaming_approved()) {
+      video_stream_suspend_timer_->stop();
+      MessageHelper::SendNaviStopStream(app_id());
+      set_video_streaming_approved(false);
+    }
+  } else if (kAudio == service_type) {
+    if (audio_streaming_approved()) {
+      audio_stream_suspend_timer_->stop();
+      MessageHelper::SendAudioStopStream(app_id());
+      set_audio_streaming_approved(false);
+    }
+  }
+}
+
+void ApplicationImpl::SuspendStreaming(
+    protocol_handler::ServiceType service_type) {
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (kMobileNav == service_type) {
+    video_stream_suspend_timer_->suspend();
+    ApplicationManagerImpl::instance()->OnAppStreaming(
+        app_id(), service_type, false);
+    sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
+    video_streaming_suspended_ = true;
+  } else if (kAudio == service_type) {
+    audio_stream_suspend_timer_->suspend();
+    ApplicationManagerImpl::instance()->OnAppStreaming(
+        app_id(), service_type, false);
+    sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
+    audio_streaming_suspended_ = true;
+  }
+  MessageHelper::SendOnDataStreaming(service_type, false);
+}
+
+void ApplicationImpl::WakeUpStreaming(
+    protocol_handler::ServiceType service_type) {
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (kMobileNav == service_type) {
+    sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
+    if (video_streaming_suspended_) {
+      ApplicationManagerImpl::instance()->OnAppStreaming(
+          app_id(), service_type, true);
+      MessageHelper::SendOnDataStreaming(kMobileNav, true);
+      video_streaming_suspended_ = false;
+    }
+    video_stream_suspend_timer_->start(video_stream_suspend_timeout_);
+  } else if (kAudio == service_type) {
+    sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
+    if (audio_streaming_suspended_) {
+      ApplicationManagerImpl::instance()->OnAppStreaming(
+          app_id(), service_type, true);
+      MessageHelper::SendOnDataStreaming(kAudio, true);
+      audio_streaming_suspended_ = false;
+    }
+    audio_stream_suspend_timer_->start(audio_stream_suspend_timeout_);
+  }
+}
+
+void ApplicationImpl::OnVideoStreamSuspend() {
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "Suspend video streaming by timer");
+  SuspendStreaming(kMobileNav);
+}
+
+void ApplicationImpl::OnAudioStreamSuspend() {
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "Suspend audio streaming by timer");
+  SuspendStreaming(kAudio);
+}
+#else
 void ApplicationImpl::StartStreaming(
     protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;
@@ -578,6 +716,7 @@ void ApplicationImpl::OnAudioStreamSuspend() {
   LOG4CXX_INFO(logger_, "Suspend audio streaming by timer");
   SuspendStreaming(ServiceType::kAudio);
 }
+#endif
 
 uint32_t ApplicationImpl::audio_stream_retry_number() const {
   return audio_stream_retry_number_;

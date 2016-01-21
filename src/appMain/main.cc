@@ -100,7 +100,7 @@ const std::string kApplicationVersion = "SDL_RB_B3.5";
  */
 bool InitHmi() {
 #ifdef OS_WINCE
-	LPWIN32_FIND_DATA  sb;
+	LPWIN32_FIND_DATA  sb = {0};
 	if(INVALID_HANDLE_VALUE==FindFirstFile((LPCWSTR)"hmi_link",sb)){
 		LOG4CXX_FATAL(logger, "File with HMI link doesn't exist!");
 		return false;

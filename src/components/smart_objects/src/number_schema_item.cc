@@ -42,7 +42,8 @@ template<> SmartType TNumberSchemaItem<uint32_t>::getSmartType() const {
   return SmartType_Integer;
 }
 
-#ifndef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#else
 template<> SmartType TNumberSchemaItem<int64_t>::getSmartType() const {
   return SmartType_Integer;
 }

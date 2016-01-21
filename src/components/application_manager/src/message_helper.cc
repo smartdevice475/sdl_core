@@ -123,6 +123,40 @@ bool ValidateSoftButtons(smart_objects::SmartObject& soft_buttons) {
 
 }
 std::pair<std::string, VehicleDataType> kVehicleDataInitializer[] = {
+#ifdef OS_WINCE
+  std::make_pair(strings::gps, GPS), std::make_pair(
+    strings::speed, SPEED), std::make_pair(
+      strings::rpm, RPM), std::make_pair(
+        strings::fuel_level, FUELLEVEL), std::make_pair(
+          strings::fuel_level_state, FUELLEVEL_STATE),
+  std::make_pair(strings::instant_fuel_consumption,
+  FUELCONSUMPTION), std::make_pair(
+    strings::external_temp, EXTERNTEMP), std::make_pair(
+      strings::vin, VIN), std::make_pair(
+        strings::prndl, PRNDL), std::make_pair(
+          strings::tire_pressure, TIREPRESSURE), std::make_pair(
+            strings::odometer, ODOMETER), std::make_pair(
+              strings::belt_status, BELTSTATUS), std::make_pair(
+                strings::body_information, BODYINFO), std::make_pair(
+                  strings::device_status, DEVICESTATUS), std::make_pair(
+                    strings::driver_braking, BRAKING), std::make_pair(
+                      strings::wiper_status, WIPERSTATUS), std::make_pair(
+                        strings::head_lamp_status, HEADLAMPSTATUS),
+  std::make_pair(strings::e_call_info, ECALLINFO),
+  std::make_pair(strings::airbag_status, AIRBAGSTATUS),
+  std::make_pair(strings::emergency_event, EMERGENCYEVENT),
+  std::make_pair(strings::cluster_mode_status,
+  CLUSTERMODESTATUS), std::make_pair(
+    strings::my_key, MYKEY),
+  /*
+   NOT DEFINED in mobile API
+   std::make_pair(strings::gps,                      VehicleDataType::BATTVOLTAGE),
+   */
+  std::make_pair(strings::engine_torque, ENGINETORQUE),
+  std::make_pair(strings::acc_pedal_pos, ACCPEDAL),
+  std::make_pair(strings::steering_wheel_angle,
+  STEERINGWHEEL),
+#else
   std::make_pair(strings::gps, VehicleDataType::GPS), std::make_pair(
     strings::speed, VehicleDataType::SPEED), std::make_pair(
       strings::rpm, VehicleDataType::RPM), std::make_pair(
@@ -155,6 +189,7 @@ std::pair<std::string, VehicleDataType> kVehicleDataInitializer[] = {
   std::make_pair(strings::acc_pedal_pos, VehicleDataType::ACCPEDAL),
   std::make_pair(strings::steering_wheel_angle,
   VehicleDataType::STEERINGWHEEL),
+#endif
 };
 
 const VehicleData MessageHelper::vehicle_data_(
@@ -258,8 +293,13 @@ void MessageHelper::SendHMIStatusNotification(
   message[strings::params][strings::function_id] =
     static_cast<int32_t>(mobile_api::FunctionID::OnHMIStatusID);
 
+#ifdef OS_WINCE
+  message[strings::params][strings::message_type] =
+    static_cast<int32_t>(application_manager::kNotification);
+#else
   message[strings::params][strings::message_type] =
     static_cast<int32_t>(application_manager::MessageType::kNotification);
+#endif
 
   message[strings::params][strings::connection_key] =
     static_cast<int32_t>(application_impl.app_id());
@@ -372,8 +412,13 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
 
   const policy::DeviceConsent device_consent =
       policy::PolicyHandler::instance()->GetUserConsentForDevice(mac_address);
+#ifdef OS_WINCE
+  device_info[strings::isSDLAllowed] =
+	  policy::kDeviceAllowed == device_consent;
+#else
   device_info[strings::isSDLAllowed] =
       policy::DeviceConsent::kDeviceAllowed == device_consent;
+#endif
 
   device_info[strings::transport_type] =
       ApplicationManagerImpl::instance()->GetDeviceTransportType(transport_type);
@@ -692,8 +737,14 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateDeviceListSO(
 
     const policy::DeviceConsent device_consent =
         policy::PolicyHandler::instance()->GetUserConsentForDevice(it->second.mac_address());
+#ifdef OS_WINCE
+	list_so[index][strings::isSDLAllowed] =
+		policy::kDeviceAllowed == device_consent;
+#else
     list_so[index][strings::isSDLAllowed] =
         policy::DeviceConsent::kDeviceAllowed == device_consent;
+#endif
+
     list_so[index][strings::transport_type] =
       ApplicationManagerImpl::instance()->GetDeviceTransportType(d.connection_type());
     ++index;
@@ -825,8 +876,13 @@ void MessageHelper::SendOnButtonSubscriptionNotification(
   msg_params[strings::name] = button;
   msg_params[strings::is_suscribed] = is_subscribed;
 
+#ifdef OS_WINCE
+  notification[strings::params][strings::message_type] =
+	  static_cast<int32_t>(application_manager::kNotification);
+#else
   notification[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
+#endif
   notification[strings::params][strings::protocol_version] =
       commands::CommandImpl::protocol_version_;
   notification[strings::params][strings::protocol_type] =
@@ -1375,8 +1431,13 @@ bool MessageHelper::CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
   output[strings::device_info][strings::id] = mac_address;
   const policy::DeviceConsent device_consent =
       policy::PolicyHandler::instance()->GetUserConsentForDevice(mac_address);
+#ifdef OS_WINCE
+  output[strings::device_info][strings::isSDLAllowed] =
+	  policy::kDeviceAllowed == device_consent;
+#else
   output[strings::device_info][strings::isSDLAllowed] =
       policy::DeviceConsent::kDeviceAllowed == device_consent;
+#endif
 
   output[strings::device_info][strings::transport_type] =
       ApplicationManagerImpl::instance()->GetDeviceTransportType(transport_type);
@@ -1439,7 +1500,11 @@ void MessageHelper::SendOnAppUnregNotificationToHMI(
   message[strings::params][strings::function_id] =
     hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered;
 
+#ifdef OS_WINCE
+  message[strings::params][strings::message_type] = kNotification;
+#else
   message[strings::params][strings::message_type] = MessageType::kNotification;
+#endif
   // we put hmi_app_id because applicaton list does not contain application on this momment
   // and ReplaceHMIByMobileAppId function will be unable to replace app_id to hmi_app_id
   message[strings::msg_params][strings::app_id] = app->hmi_app_id();
@@ -1535,8 +1600,13 @@ void MessageHelper::SendVRStatusToHMI(const std::string &status)
 	smart_objects::SmartObject& message = *notification;
 	message[strings::params][strings::function_id] =
 		static_cast<int32_t>(hmi_apis::FunctionID::VR_VRStatus);
+#ifdef OS_WINCE
+	message[strings::params][strings::message_type] =
+		static_cast<int32_t>(application_manager::kNotification);
+#else
 	message[strings::params][strings::message_type] =
 		static_cast<int32_t>(application_manager::MessageType::kNotification);
+#endif
 
 	message[strings::msg_params][strings::status] = status;
 	
@@ -1553,8 +1623,13 @@ void MessageHelper::SendVRCancelToHMI()
 	smart_objects::SmartObject& message = *notification;
 	message[strings::params][strings::function_id] =
 		static_cast<int32_t>(hmi_apis::FunctionID::VR_VRCancel);
+#ifdef OS_WINCE
+	message[strings::params][strings::message_type] =
+		static_cast<int32_t>(application_manager::kNotification);
+#else
 	message[strings::params][strings::message_type] =
 		static_cast<int32_t>(application_manager::MessageType::kNotification);
+#endif
 
 	DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(notification));
 }
@@ -1569,9 +1644,13 @@ void MessageHelper::SendVRCommandHelpToHMI(const std::string &vr_content)
 	smart_objects::SmartObject& message = *notification;
 	message[strings::params][strings::function_id] =
 		static_cast<int32_t>(hmi_apis::FunctionID::VR_VRCommandHelp);
+#ifdef OS_WINCE
+	message[strings::params][strings::message_type] =
+		static_cast<int32_t>(application_manager::kNotification);
+#else
 	message[strings::params][strings::message_type] =
 		static_cast<int32_t>(application_manager::MessageType::kNotification);
-
+#endif
 	message[strings::msg_params][strings::vr_content] = vr_content;
 	
 	DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(notification));
@@ -1587,8 +1666,13 @@ void MessageHelper::SendVRExitAppToHMI()
 	smart_objects::SmartObject& message = *notification;
 	message[strings::params][strings::function_id] =
 		static_cast<int32_t>(hmi_apis::FunctionID::VR_VRExitApp);
+#ifdef OS_WINCE
+	message[strings::params][strings::message_type] =
+		static_cast<int32_t>(application_manager::kNotification);
+#else
 	message[strings::params][strings::message_type] =
 		static_cast<int32_t>(application_manager::MessageType::kNotification);
+#endif
 
 	DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(notification));
 }
@@ -1603,8 +1687,13 @@ void MessageHelper::SendVRSwitchAppToHMI(int app_id, const std::string &app_vr_n
 	smart_objects::SmartObject& message = *notification;
 	message[strings::params][strings::function_id] =
 		static_cast<int32_t>(hmi_apis::FunctionID::VR_VRSwitchApp);
+#ifdef OS_WINCE
+	message[strings::params][strings::message_type] =
+		static_cast<int32_t>(application_manager::kNotification);
+#else
 	message[strings::params][strings::message_type] =
 		static_cast<int32_t>(application_manager::MessageType::kNotification);
+#endif
 
 	message[strings::msg_params][strings::app_id] = app_id;
 	message[strings::msg_params][strings::app_vr_name] = app_vr_name;
@@ -1622,8 +1711,13 @@ void MessageHelper::SendVRCommandTTSToHMI()
 	smart_objects::SmartObject& message = *notification;
 	message[strings::params][strings::function_id] =
 		static_cast<int32_t>(hmi_apis::FunctionID::VR_VRCommandTTS);
+#ifdef OS_WINCE
+	message[strings::params][strings::message_type] =
+		static_cast<int32_t>(application_manager::kNotification);
+#else
 	message[strings::params][strings::message_type] =
 		static_cast<int32_t>(application_manager::MessageType::kNotification);
+#endif
 
 	// add app's vr
 	ApplicationSharedPtr active_app = ApplicationManagerImpl::instance()->active_application();
@@ -1672,8 +1766,13 @@ void MessageHelper::SendVRResultToHMI(int cmd_id, const std::string &vr_name)
 	smart_objects::SmartObject& message = *notification;
 	message[strings::params][strings::function_id] =
 		static_cast<int32_t>(hmi_apis::FunctionID::VR_VRResult);
+#ifdef OS_WINCE
+	message[strings::params][strings::message_type] =
+		static_cast<int32_t>(application_manager::kNotification);
+#else
 	message[strings::params][strings::message_type] =
 		static_cast<int32_t>(application_manager::MessageType::kNotification);
+#endif
 
 	message[strings::msg_params][strings::cmd_id] = cmd_id;
 	message[strings::msg_params][strings::vr_name] = vr_name;
@@ -1691,8 +1790,14 @@ void MessageHelper::SendVROnCommandToMobile(int cmd_id, int app_id)
 	smart_objects::SmartObject& message = *notification;
 	message[strings::params][strings::function_id] =
 		static_cast<int32_t>(hmi_apis::FunctionID::VR_OnCommand);
+#ifdef OS_WINCE
+	message[strings::params][strings::message_type] =
+		static_cast<int32_t>(application_manager::kNotification);
+#else
 	message[strings::params][strings::message_type] =
 		static_cast<int32_t>(application_manager::MessageType::kNotification);
+#endif
+
 	message[strings::msg_params][strings::cmd_id] = cmd_id;
 	message[strings::msg_params][strings::app_id] = app_id;
 	DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(notification));
@@ -1716,7 +1821,11 @@ uint32_t MessageHelper::SendActivateAppToHMI(uint32_t const app_id,
     smart_objects::SmartType_Map);
   (*message)[strings::params][strings::function_id] =
     hmi_apis::FunctionID::BasicCommunication_ActivateApp;
+#ifdef OS_WINCE
+  (*message)[strings::params][strings::message_type] = kRequest;
+#else
   (*message)[strings::params][strings::message_type] = MessageType::kRequest;
+#endif
   (*message)[strings::params][strings::correlation_id] = correlation_id;
   (*message)[strings::msg_params][strings::app_id] = app_id;
 
@@ -1736,7 +1845,11 @@ uint32_t MessageHelper::SendActivateAppToHMI(uint32_t const app_id,
 
     policy::DeviceConsent consent =
         policy::PolicyHandler::instance()->GetUserConsentForDevice(mac_adress);
+#ifdef OS_WINCE
+    if (!priority.empty() && (policy::kDeviceAllowed == consent)) {
+#else
     if (!priority.empty() && (policy::DeviceConsent::kDeviceAllowed == consent)) {
+#endif
       (*message)[strings::msg_params][strings::priority] = GetPriorityCode(priority);
     }
   }
@@ -1766,7 +1879,11 @@ void MessageHelper::SendOnResumeAudioSourceToHMI(const uint32_t app_id) {
 
   (*message)[strings::params][strings::function_id] =
     hmi_apis::FunctionID::BasicCommunication_OnResumeAudioSource;
+#ifdef OS_WINCE
+  (*message)[strings::params][strings::message_type] = kNotification;
+#else
   (*message)[strings::params][strings::message_type] = MessageType::kNotification;
+#endif
   (*message)[strings::params][strings::correlation_id] =
     ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
   (*message)[strings::msg_params][strings::app_id] = app_id;
@@ -1829,7 +1946,11 @@ void MessageHelper::SendSDLActivateAppResponse(policy::AppPermissions& permissio
 
   (*message)[strings::params][strings::function_id] =
     hmi_apis::FunctionID::SDL_ActivateApp;
+#ifdef OS_WINCE
+  (*message)[strings::params][strings::message_type] = kResponse;
+#else
   (*message)[strings::params][strings::message_type] = MessageType::kResponse;
+#endif
   (*message)[strings::params][strings::correlation_id] = correlation_id;
   (*message)[strings::params][strings::protocol_type] =
     commands::CommandImpl::hmi_protocol_type_;
@@ -1879,8 +2000,13 @@ void MessageHelper::SendOnSDLConsentNeeded(
 
   (*message)[strings::params][strings::function_id] =
     hmi_apis::FunctionID::SDL_OnSDLConsentNeeded;
+#ifdef OS_WINCE
+  (*message)[strings::params][strings::message_type] =
+    kNotification;
+#else
   (*message)[strings::params][strings::message_type] =
     MessageType::kNotification;
+#endif
 
   (*message)[strings::msg_params]["device"]["id"] = device_info.device_mac_address;
   (*message)[strings::msg_params]["device"]["name"] = device_info.device_name;
@@ -1918,8 +2044,13 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
 
   (*message)[strings::params][strings::function_id] =
     hmi_apis::FunctionID::SDL_GetUserFriendlyMessage;
+#ifdef OS_WINCE
+  (*message)[strings::params][strings::message_type] =
+	  kResponse;
+#else
   (*message)[strings::params][strings::message_type] =
     MessageType::kResponse;
+#endif
   (*message)[strings::params][strings::correlation_id] = correlation_id;
   (*message)[strings::params][hmi_response::code] = 0;
 
@@ -1961,8 +2092,13 @@ void MessageHelper::SendGetListOfPermissionsResponse(
 
   (*message)[strings::params][strings::function_id] =
     hmi_apis::FunctionID::SDL_GetListOfPermissions;
+#ifdef OS_WINCE
+  (*message)[strings::params][strings::message_type] =
+    kResponse;
+#else
   (*message)[strings::params][strings::message_type] =
     MessageType::kResponse;
+#endif
   (*message)[strings::params][strings::correlation_id] = correlation_id;
   (*message)[strings::params][hmi_response::code] = 0;
 
@@ -2150,6 +2286,16 @@ void MessageHelper::SendOnDataStreaming(protocol_handler::ServiceType service,
     return;
   }
 
+#ifdef OS_WINCE
+  if (kAudio != service && kMobileNav != service) {
+	  return;
+  }
+
+  (*notification)[strings::params][strings::function_id] =
+	  kAudio == service
+	  ? hmi_apis::FunctionID::Navigation_OnAudioDataStreaming
+	  : hmi_apis::FunctionID::Navigation_OnVideoDataStreaming;
+#else
   if (ServiceType::kAudio != service && ServiceType::kMobileNav != service) {
     return;
   }
@@ -2158,6 +2304,7 @@ void MessageHelper::SendOnDataStreaming(protocol_handler::ServiceType service,
       ServiceType::kAudio == service
       ? hmi_apis::FunctionID::Navigation_OnAudioDataStreaming
       : hmi_apis::FunctionID::Navigation_OnVideoDataStreaming;
+#endif
   (*notification)[strings::params][strings::message_type] =
     hmi_apis::messageType::notification;
   (*notification)[strings::params][strings::protocol_version] =
@@ -2433,7 +2580,11 @@ void MessageHelper::SendOnAppPermissionsChangedNotification(
   message[strings::params][strings::function_id] =
     hmi_apis::FunctionID::SDL_OnAppPermissionChanged;
 
+#ifdef OS_WINCE
+  message[strings::params][strings::message_type] = kNotification;
+#else
   message[strings::params][strings::message_type] = MessageType::kNotification;
+#endif
   message[strings::msg_params][strings::app_id] = connection_key;
 
   // TODO(AOleynik): Add other parameters processing from incoming struct
@@ -2481,8 +2632,13 @@ void MessageHelper::SendGetStatusUpdateResponse(const std::string& status,
 
   (*message)[strings::params][strings::function_id] =
     hmi_apis::FunctionID::SDL_GetStatusUpdate;
+#ifdef OS_WINCE
+  (*message)[strings::params][strings::message_type] =
+	  kResponse;
+#else
   (*message)[strings::params][strings::message_type] =
     MessageType::kResponse;
+#endif
   (*message)[strings::params][strings::correlation_id] = correlation_id;
   (*message)[strings::params][hmi_response::code] = 0;
 
@@ -2501,8 +2657,13 @@ void MessageHelper::SendUpdateSDLResponse(const std::string& result,
 
   (*message)[strings::params][strings::function_id] =
     hmi_apis::FunctionID::SDL_UpdateSDL;
+#ifdef OS_WINCE
+  (*message)[strings::params][strings::message_type] =
+    kResponse;
+#else
   (*message)[strings::params][strings::message_type] =
     MessageType::kResponse;
+#endif
   (*message)[strings::params][strings::correlation_id] = correlation_id;
   (*message)[strings::params][hmi_response::code] = 0;
 
@@ -2520,8 +2681,13 @@ void MessageHelper::SendOnStatusUpdate(const std::string& status) {
 
   (*message)[strings::params][strings::function_id] =
     hmi_apis::FunctionID::SDL_OnStatusUpdate;
+#ifdef OS_WINCE
+  (*message)[strings::params][strings::message_type] =
+    kNotification;
+#else
   (*message)[strings::params][strings::message_type] =
     MessageType::kNotification;
+#endif
 
   (*message)[strings::msg_params]["status"] = status;
 
