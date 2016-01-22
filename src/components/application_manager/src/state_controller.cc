@@ -280,8 +280,12 @@ void StateController::ApplyRegularState(ApplicationSharedPtr app,
   DCHECK_OR_RETURN_VOID(state);
   DCHECK_OR_RETURN_VOID(state->state_id() == HmiState::STATE_ID_REGULAR);
   SetupRegularHmiState(app, state);
+#ifdef OS_WINCE
+  ForEachApplication(HmiLevelConflictResolver(app, state, this));
+#else
   ForEachApplication<HmiLevelConflictResolver, ApplicationManagerImpl>
       (HmiLevelConflictResolver(app, state, this));
+#endif
 }
 
 bool StateController::IsSameAppType(ApplicationConstSharedPtr app1,

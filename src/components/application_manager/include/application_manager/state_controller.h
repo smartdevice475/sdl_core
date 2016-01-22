@@ -292,6 +292,20 @@ class StateController : public event_engine::EventObserver {
     /**
      * Execute Unary punction for each application
      */
+#ifdef OS_WINCE
+    template <typename UnaryFunction>
+    void ForEachApplication(UnaryFunction func) {
+      using namespace utils;
+      typename ApplicationManagerImpl::ApplicationListAccessor accessor;
+      typedef typename ApplicationManagerImpl::ApplictionSetConstIt Iter;
+      for (Iter it = accessor.begin(); it != accessor.end(); ++it) {
+        if (it->valid()) {
+          ApplicationConstSharedPtr const_app = *it;
+          func(ApplicationManagerImpl::instance()->application(const_app->app_id()));
+        }
+      }
+    }
+#else
     template <typename UnaryFunction, typename ContextAcessor>
     void ForEachApplication(UnaryFunction func) {
       using namespace utils;
@@ -304,6 +318,7 @@ class StateController : public event_engine::EventObserver {
         }
       }
     }
+#endif
 
     /**
      * @brief The HmiLevelConflictResolver struct
