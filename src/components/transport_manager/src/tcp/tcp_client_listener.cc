@@ -143,7 +143,7 @@ void TcpClientListener::Terminate() {
     return;
   }
 
-#if defined(OS_WIN320) || defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
   if (shutdown(socket_, 2) != 0) {
 	  LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to shutdown socket");
   }

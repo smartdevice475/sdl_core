@@ -129,6 +129,8 @@ bool LifeCycle::StartComponents() {
   DCHECK(hmi_handler_ != NULL)
 
 #ifdef ENABLE_SECURITY
+
+
   security_manager_ = new security_manager::SecurityManagerImpl();
 
   // FIXME(EZamakhov): move to Config or in Sm initialization method

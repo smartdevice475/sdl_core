@@ -424,11 +424,8 @@ void StateController::TempStateStopped(HmiState::StateID ID) {
     sync_primitives::AutoLock autolock(active_states_lock_);
     active_states_.remove(ID);
   }
-#ifdef OS_WINCE
+
   ForEachApplication(std::bind1st(std::mem_fun(&StateController::ApplyPostponedStateForApp), this));
-#else
-  ForEachApplication(std::bind1st(std::mem_fun(&StateController::ApplyPostponedStateForApp), this));
-#endif
 }
 
 void StateController::DeactivateAppWithGeneralReason(ApplicationSharedPtr app) {

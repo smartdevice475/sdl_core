@@ -583,11 +583,11 @@ class SmartObject FINAL {
   std::set<std::string> enumerate() const;
 
   SmartMap::iterator map_begin() const {
-    DCHECK(m_type == SmartType_Map);
+    //DCHECK(m_type == SmartType_Map);
     return m_data.map_value->begin();
   }
   SmartMap::iterator map_end() const {
-    DCHECK(m_type == SmartType_Map);
+    //DCHECK(m_type == SmartType_Map);
     return m_data.map_value->end();
   }
 

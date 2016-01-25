@@ -38,7 +38,7 @@ typedef struct timeval TimevalStruct;
 #elif defined(OS_WIN32)
 #include <stdint.h>
 #include <pthread.h>
-#include <winsock2.h>
+#include <winsock.h>
 typedef struct timeval TimevalStruct;
 
 #define CLOCK_REALTIME 0

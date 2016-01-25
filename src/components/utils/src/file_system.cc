@@ -198,7 +198,7 @@ bool file_system::CreateDirectoryRecursively(const std::string& path) {
 
 bool file_system::IsDirectory(const std::string& name) {
 #if defined(OS_WIN32)
-	int fileAttri = GetFileAttributes(name.c_str());.
+	int fileAttri = GetFileAttributes(name.c_str());
 
 	if(fileAttri != -1){
 		if (fileAttri & FILE_ATTRIBUTE_DIRECTORY){
@@ -230,7 +230,7 @@ bool file_system::IsDirectory(const std::string& name) {
 }
 
 bool file_system::DirectoryExists(const std::string& name) {
-#ifdef OS_WIN32
+#if defined(OS_WIN32)
 	int fileAttri = ::GetFileAttributes(name.c_str());
 	if(fileAttri == -1){
 		return false;
@@ -257,7 +257,7 @@ bool file_system::DirectoryExists(const std::string& name) {
 }
 
 bool file_system::FileExists(const std::string& name) {
-#ifdef OS_WIN32
+#if defined(OS_WIN32)
 	HANDLE file = ::CreateFile(name.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	bool b = !(file == (HANDLE)-1);
 	if (b)
@@ -331,7 +331,7 @@ void file_system::Close(std::ofstream* file_stream) {
 }
 
 std::string file_system::CurrentWorkingDirectory() {
-#ifdef OS_WIN32
+#if defined(OS_WIN32)
 	char szPre[MAX_PATH];
 	::GetCurrentDirectory(MAX_PATH, szPre);
 
@@ -364,7 +364,7 @@ std::string file_system::CurrentWorkingDirectory() {
 }
 
 bool file_system::DeleteFile(const std::string& name) {
-#ifdef OS_WIN32
+#if defined(OS_WIN32)
 	return ::DeleteFile(name.c_str()) == TRUE ? true : false;
 #elif defined(OS_WINCE)
 	wchar_string strUnicodeData;
@@ -379,7 +379,7 @@ bool file_system::DeleteFile(const std::string& name) {
 }
 
 void file_system::remove_directory_content(const std::string& directory_name) {
-#ifdef OS_WIN32
+#if defined(OS_WIN32)
 	::RemoveDirectory(directory_name.c_str());
 	::CreateDirectory(directory_name.c_str(), NULL);
 #elif defined(OS_WINCE)
@@ -433,7 +433,7 @@ void file_system::remove_directory_content(const std::string& directory_name) {
 
 bool file_system::RemoveDirectory(const std::string& directory_name,
                                   bool is_recursively) {
-#ifdef OS_WIN32
+#if defined(OS_WIN32)
 	return ::RemoveDirectory(directory_name.c_str()) == TRUE ? true : false;
 #elif defined(OS_WINCE)
 	wchar_string strUnicodeData;

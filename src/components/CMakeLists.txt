@@ -80,17 +80,17 @@ ADD_SUBDIRECTORY(./config_profile)
 # --- AudioManager
 ADD_SUBDIRECTORY(./media_manager)
 
-if (TIME_TESTER)
+IF(TIME_TESTER)
     ADD_SUBDIRECTORY(./time_tester)
 ENDIF()
 
 
-if (${HMI_DBUS_API})
+IF(${HMI_DBUS_API})
 # --- DBus
     ADD_SUBDIRECTORY(./dbus)
-endif ()
-if (${QT_HMI})
+ENDIF()
+IF (${QT_HMI})
 # --- Qt HMI
     ADD_SUBDIRECTORY(./qt_hmi)
-endif ()
+ENDIF()
 

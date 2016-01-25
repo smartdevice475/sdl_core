@@ -306,7 +306,8 @@ class StateController : public event_engine::EventObserver {
       }
     }
 #else
-    template <typename UnaryFunction, typename ContextAcessor>
+    template < typename UnaryFunction,
+             typename ContextAcessor = ApplicationManagerImpl >
     void ForEachApplication(UnaryFunction func) {
       using namespace utils;
       typename ContextAcessor::ApplicationListAccessor accessor;

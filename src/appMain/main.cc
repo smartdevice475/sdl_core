@@ -60,6 +60,7 @@
 #include "utils/system.h"
 #include "config_profile/profile.h"
 #include "utils/appenders_loader.h"
+#include "utils/file_system.h"
 
 #if defined(EXTENDED_MEDIA_MODE)
 #include <gst/gst.h>
@@ -191,19 +192,20 @@ int32_t main(int32_t argc, char** argv) {
 int32_t sdl_start(int32_t argc,char** argv){
 #endif
 
-  // --------------------------------------------------------------------------
+  // Load configuration parameters
   if ((argc > 1)&&(0 != argv)) {
       profile::Profile::instance()->config_file_name(argv[1]);
   } else {
-#ifdef OS_WINCE
+#if defined(OS_WIN32) || defined(OS_WINCE)
       profile::Profile::instance()->config_file_name(file_system::CurrentWorkingDirectory() + "/" + "smartDeviceLink.ini");
 #else
       profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
 #endif
   }
+
   // Logger initialization
-#ifdef OS_WINCE
-	INIT_LOGGER(file_system::CurrentWorkingDirectory() + "/" + "log4cxx.properties");
+#if defined(OS_WINCE) || defined(OS_WINCE)
+  INIT_LOGGER(file_system::CurrentWorkingDirectory() + "/" + "log4cxx.properties");
 #else
   INIT_LOGGER("log4cxx.properties");
 #if defined(__QNXNTO__) && defined(GCOV_ENABLED)
