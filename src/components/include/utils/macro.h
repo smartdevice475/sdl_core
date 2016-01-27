@@ -59,7 +59,6 @@
 #define FRIEND_DELETER_DESTRUCTOR(TypeName) \
   friend utils::deleters::Deleter<TypeName>::~Deleter()
 
-#ifndef OS_WINCE
 #ifdef DEBUG
   #define ASSERT(condition) \
     do { \
@@ -70,7 +69,6 @@
   #define ASSERT(condition) \
     fprintf(stderr, "Failed condition \"" #condition "\" [%s:%d][%s]\n\n", \
                     __FILE__, __LINE__, __FUNCTION__)
-#endif
 #endif
 
 #define DCHECK(condition) \

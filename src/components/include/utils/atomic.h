@@ -37,7 +37,7 @@
 #include <atomic.h>
 #endif
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include <Windows.h>
 #endif
 
