@@ -35,7 +35,7 @@
 #include <ostream>
 #include <vector>
 #include <string>
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include <stdint.h>
 #endif
 #include "utils/threads/thread.h"

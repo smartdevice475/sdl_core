@@ -95,7 +95,7 @@ void* Thread::threadFunc(void* arg) {
 	//     running = 1
 	//     finalized = 1
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
 	LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self().x << " started successfully");
 #else
 	LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self() << " started successfully");
@@ -103,20 +103,22 @@ void* Thread::threadFunc(void* arg) {
 
 	threads::Thread* thread = reinterpret_cast<Thread*>(arg);
 	DCHECK(thread);
-
+	std::cout<<"DCHECK(thread)"<<endl;
 	pthread_cleanup_push(&cleanup, thread);
-
+	std::cout<<"Lock.Acquire()"<<endl;
 	thread->state_lock_.Acquire();
+	std::cout<<"Lock.Broadcast()"<<endl;
 	thread->state_cond_.Broadcast();
+	std::cout<<"thread loop"<<endl;
 
 	while (!thread->finalized_) {
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
 		LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self().x << " iteration");
 #else
 		LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self() << " iteration");
 #endif
 		thread->run_cond_.Wait(thread->state_lock_);
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
 		LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self().x << " execute. " << "stopped_ = " << thread->stopped_ << "; finalized_ = " << thread->finalized_);
 #else
 		LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self() << " execute. " << "stopped_ = " << thread->stopped_ << "; finalized_ = " << thread->finalized_);
@@ -134,7 +136,7 @@ void* Thread::threadFunc(void* arg) {
 			thread->isThreadRunning_ = false;
 		}
 		thread->state_cond_.Broadcast();
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
 		LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self().x << " finished iteration");
 #else
 		LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self() << " finished iteration");
@@ -144,7 +146,7 @@ void* Thread::threadFunc(void* arg) {
 	thread->state_lock_.Release();
 	pthread_cleanup_pop(1);
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
 	LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self().x << " exited successfully");
 #else
 	LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self() << " exited successfully");
@@ -208,7 +210,7 @@ bool Thread::startWithOptions(const ThreadOptions& options) {
 	}
 
 	if (isThreadRunning_) {
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
 		LOG4CXX_TRACE(logger_, "EXIT thread " << name_ << " #" << thread_handle_.x << " is already running");
 #else
 		LOG4CXX_TRACE(logger_, "EXIT thread " << name_ << " #" << thread_handle_ << " is already running");
@@ -221,13 +223,21 @@ bool Thread::startWithOptions(const ThreadOptions& options) {
 	pthread_attr_t attributes;
 	int pthread_result = pthread_attr_init(&attributes);
 	if (pthread_result != EOK) {
+#if defined(OS_WIN32)||defined(OS_WINCE)
+		LOG4CXX_WARN(logger_, "Couldn't init pthread attributes. Error code = " << pthread_result << " (\"" << (pthread_result) << "\")");
+#else
 		LOG4CXX_WARN(logger_, "Couldn't init pthread attributes. Error code = " << pthread_result << " (\"" << strerror(pthread_result) << "\")");
+#endif
 	}
 
 	if (!thread_options_.is_joinable()) {
 		pthread_result = pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_DETACHED);
 		if (pthread_result != EOK) {
+#if defined(OS_WIN32)||defined(OS_WINCE)
+			LOG4CXX_WARN(logger_, "Couldn't set detach state attribute. Error code = " << pthread_result << " (\"" << (pthread_result) << "\")");
+#else
 			LOG4CXX_WARN(logger_, "Couldn't set detach state attribute. Error code = " << pthread_result << " (\"" << strerror(pthread_result) << "\")");
+#endif
 			thread_options_.is_joinable(false);
 		}
 	}
@@ -236,7 +246,11 @@ bool Thread::startWithOptions(const ThreadOptions& options) {
 	if (stack_size >= Thread::kMinStackSize) {
 		pthread_result = pthread_attr_setstacksize(&attributes, stack_size);
 		if (pthread_result != EOK) {
+#if defined(OS_WIN32)||defined(OS_WINCE)
+			LOG4CXX_WARN(logger_, "Couldn't set stacksize = " << stack_size << ". Error code = " << pthread_result << " (\"" << (pthread_result) << "\")");
+#else
 			LOG4CXX_WARN(logger_, "Couldn't set stacksize = " << stack_size << ". Error code = " << pthread_result << " (\"" << strerror(pthread_result) << "\")");
+#endif
 		}
 	} else {
 		ThreadOptions thread_options_temp(Thread::kMinStackSize, thread_options_.is_joinable());
@@ -254,12 +268,16 @@ bool Thread::startWithOptions(const ThreadOptions& options) {
 			state_cond_.Wait(auto_lock);
 			thread_created_ = true;
 		} else {
+#if defined(OS_WIN32)||defined(OS_WINCE)
+			LOG4CXX_ERROR(logger_, "Couldn't create thread " << name_.c_str() << ". Error code = " << pthread_result << " (\"" << (pthread_result) << "\")");
+#else
 			LOG4CXX_ERROR(logger_, "Couldn't create thread " << name_.c_str() << ". Error code = " << pthread_result << " (\"" << strerror(pthread_result) << "\")");
+#endif
 		}
 	}
 	stopped_ = false;
 	run_cond_.NotifyOne();
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
 	LOG4CXX_DEBUG(logger_, "Thread " << name_.c_str() << " #" << thread_handle_.x << " started. pthread_result = " << pthread_result);
 #else
 	LOG4CXX_DEBUG(logger_, "Thread " << name_ << " #" << thread_handle_ << " started. pthread_result = " << pthread_result);
@@ -274,7 +292,7 @@ void Thread::stop() {
 
 	stopped_ = true;
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
 	LOG4CXX_DEBUG(logger_, "Stopping thread #" << thread_handle_.x << " \"" << name_ << " \"");
 #else
 	LOG4CXX_DEBUG(logger_, "Stopping thread #" << thread_handle_ << " \"" << name_ << " \"");
@@ -283,7 +301,7 @@ void Thread::stop() {
 	if (delegate_ && isThreadRunning_) {
 		delegate_->exitThreadMain();
 	}
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
 	LOG4CXX_DEBUG(logger_, "Stopped thread #" << thread_handle_.x << " \"" << name_ << " \"");
 #else
 	LOG4CXX_DEBUG(logger_, "Stopped thread #" << thread_handle_ << " \"" << name_ << " \"");

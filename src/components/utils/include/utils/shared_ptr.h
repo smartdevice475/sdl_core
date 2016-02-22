@@ -39,7 +39,7 @@
 
 #include "macro.h"
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 //#define _WINSOCKAPI_
 //#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>

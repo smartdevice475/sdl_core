@@ -288,7 +288,7 @@ private:
 
 PolicyHandler* PolicyHandler::instance_ = NULL;
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
 const std::string PolicyHandler::kLibrary = "Policy.dll";
 #else
 const std::string PolicyHandler::kLibrary = "libPolicy.so";

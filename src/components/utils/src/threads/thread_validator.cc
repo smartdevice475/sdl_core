@@ -55,7 +55,7 @@ void SingleThreadSimpleValidator::AssertRunningOnCreationThread() const {
 	PlatformThreadHandle current_id = Thread::CurrentId();
 #endif
 	if (creation_thread_id_ != current_id) {
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
 		LOG4CXX_ERROR(logger_, "Single-threaded object created at thread ");
 #else
 		LOG4CXX_ERROR(logger_, "Single-threaded object created at thread "

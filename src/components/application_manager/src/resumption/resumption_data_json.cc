@@ -385,7 +385,7 @@ void ResumptionDataJson::UpdateHmiLevel(const std::string& policy_app_id,
 Json::Value& ResumptionDataJson::GetSavedApplications() const {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock autolock(resumption_lock_);
+ // sync_primitives::AutoLock autolock(resumption_lock_);
   Json::Value& resumption = GetResumptionData();
   if (!resumption.isMember(strings::resume_app_list)) {
     resumption[strings::resume_app_list] = Json::Value(Json::arrayValue);
@@ -402,7 +402,7 @@ Json::Value& ResumptionDataJson::GetSavedApplications() const {
 Json::Value& ResumptionDataJson::GetResumptionData() const {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock autolock(resumption_lock_);
+ // sync_primitives::AutoLock autolock(resumption_lock_);
   Json::Value& last_state = ::resumption::LastState::instance()->dictionary;
   if (!last_state.isMember(strings::resumption)) {
     last_state[strings::resumption] = Json::Value(Json::objectValue);

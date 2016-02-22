@@ -2,7 +2,7 @@
 #define __MSP_TYPES_H__
 
 #if !defined(MSPAPI)
-#if defined(WIN32) || defined(WINPHONE8) || defined(WIN8)||defined(OS_WIN32)
+#if defined(WIN32) || defined(WINPHONE8) || defined(WIN8)||defined(OS_WIN32)||defined(OS_WINCE)
 	#define MSPAPI __stdcall
 #else
 	#define MSPAPI

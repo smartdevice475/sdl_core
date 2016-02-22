@@ -41,7 +41,7 @@
 #include <stdio.h>
 #elif defined(OS_WINCE)
 #include "pthread.h"
-#include <winsock.h> 
+#include <winsock2.h> 
 #include <stdio.h>
 #else
 #include <poll.h>

@@ -58,6 +58,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 int TransportManagerDefault::Init() {
   LOG4CXX_TRACE(logger_, "enter");
+  std::cout<<"TransportManagerDefault::Init"<<endl;
   if (E_SUCCESS != TransportManagerImpl::Init()) {
     LOG4CXX_TRACE(logger_, "exit with E_TM_IS_NOT_INITIALIZED. Condition: E_SUCCESS != TransportManagerImpl::Init()");
     return E_TM_IS_NOT_INITIALIZED;
@@ -87,6 +88,7 @@ int TransportManagerDefault::Init() {
 
 
 #if defined(USB_SUPPORT)
+  std::cout<<"USB_SUPPORT"<<endl;
   ta = new transport_adapter::UsbAoaAdapter();
 #ifdef TIME_TESTER
   if (metric_observer_) {

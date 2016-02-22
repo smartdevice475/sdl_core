@@ -44,7 +44,7 @@
 
 #include "utils/macro.h"
 #include "utils/logger.h"
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
 #include<vector>
 #include<iostream>
 #endif
@@ -224,7 +224,7 @@ void UsbHandler::CloseDeviceHandle(libusb_device_handle* device_handle) {
 }
 
 int 
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
 LIBUSB_CALL
 #endif
 ArrivedCallback(libusb_context* context, libusb_device* device,
@@ -241,7 +241,7 @@ ArrivedCallback(libusb_context* context, libusb_device* device,
 }
 
 int 
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
 LIBUSB_CALL
 #endif
 LeftCallback(libusb_context* context, libusb_device* device,
@@ -257,7 +257,7 @@ LeftCallback(libusb_context* context, libusb_device* device,
   return 0;
 }
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
 void* UsbHotPlugThread(void* data) {
   static_cast<UsbHandler*>(data)->UsbThread();
 	
@@ -379,17 +379,21 @@ TransportAdapter::Error UsbHandler::Init() {
   int libusb_ret = libusb_init(&libusb_context_);
 
   if (LIBUSB_SUCCESS != libusb_ret) {
+	  printf("libusb init failed\n");
+	  fflush(stdout);
     LOG4CXX_ERROR(logger_, "libusb_init failed: " << libusb_ret);
     LOG4CXX_TRACE(logger_, "exit with TransportAdapter::FAIL. Condition: LIBUSB_SUCCESS != libusb_ret");
     return TransportAdapter::FAIL;
   }
 
  
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
   pthread_t plug_thread;
   const int thread_plug_error =
       pthread_create(&plug_thread, 0, &UsbHotPlugThread, this);
   if (0 != thread_plug_error) {
+	  printf("plug thread create failed\n");
+	  fflush(stdout);
     LOG4CXX_ERROR(logger_, "USB device plug thread start failed, error code "
                                << thread_plug_error);
     return TransportAdapter::FAIL;
@@ -431,6 +435,7 @@ TransportAdapter::Error UsbHandler::Init() {
 #endif
 
   if (!thread_->start()) {
+	  printf("monitor thread start failed");
     LOG4CXX_ERROR(logger_, "USB device scanner thread start failed, error code");
     LOG4CXX_TRACE(logger_, "exit with TransportAdapter::FAIL.");
     return TransportAdapter::FAIL;
@@ -468,7 +473,7 @@ void UsbHandler::Thread() {
 }
 
 void 
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
 LIBUSB_CALL
 #endif
 UsbTransferSequenceCallback(libusb_transfer* transfer) {
@@ -500,13 +505,13 @@ void UsbHandler::SubmitControlTransfer(
   const libusb_request_type request_type = LIBUSB_REQUEST_TYPE_VENDOR;
 
   libusb_endpoint_direction endpoint_direction = LIBUSB_ENDPOINT_IN;
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
   if (transfer->Direction() == UsbControlTransfer::TD_IN) {
 #else
   if (transfer->Direction() == UsbControlTransfer::IN) {
 #endif
     endpoint_direction = LIBUSB_ENDPOINT_IN;
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
   } else if (transfer->Direction() == UsbControlTransfer::TD_OUT) {
 #else
   } else if (transfer->Direction() == UsbControlTransfer::OUT) {
@@ -561,7 +566,7 @@ void UsbHandler::ControlTransferCallback(libusb_transfer* transfer) {
     UsbControlTransfer* current_transfer = sequence_state->CurrentTransfer();
     bool submit_next = true;
     if (current_transfer &&
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
         current_transfer->Direction() == UsbControlTransfer::TD_IN) {
 #else
         current_transfer->Direction() == UsbControlTransfer::IN) {

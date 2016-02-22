@@ -30,7 +30,7 @@
 
 SET(target dbms)
 
-FIND_PACKAGE(sqlite3 REQUIRED)
+#FIND_PACKAGE(Sqlite3 REQUIRED)
 
 INCLUDE_DIRECTORIES(${COMPONENTS_DIR}/utils/include/utils)
 

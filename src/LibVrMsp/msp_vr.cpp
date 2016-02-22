@@ -13,7 +13,7 @@
 #include <include/msp_errors.h>
 #endif
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
 #include <Windows.h>
 #else
 #include <string.h>
@@ -374,7 +374,7 @@ void msp_vr_record_loop()
 	while ((state==MSP_RECORD_START||state==MSP_RECORD_WAIT) && (vr_local_state==MSP_LOCAL_NORMAL_RUN))
 	{
 		MSP_Printf("please say...");
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
 		Sleep(100);
 #else
 		usleep(100000);

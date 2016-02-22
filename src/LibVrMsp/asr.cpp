@@ -9,7 +9,7 @@
 #include <errno.h>
 #include <stdarg.h>
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 //#include <conio.h>
 #include <Windows.h>
 #ifndef OS_WINCE
@@ -98,17 +98,15 @@ void write_log(const char *format,...)
 char* get_current_path()
 {
     memset(current_path,0,MAX_PATH_SIZE);
-#ifdef OS_WIN32
-#ifndef OS_WINCE
+#if defined(OS_WIN32)
+
+#elif  defined(OS_WINCE)
     _chdir("release/");
     _getcwd(current_path,MAX_PATH_SIZE);
-#endif
-#else
-#ifdef OS_ANDROID
+#elif defined(OS_ANDROID)
 	
 #else
 		getcwd(current_path,MAX_PATH_SIZE);
-#endif
 #endif
     return current_path;
 }
@@ -219,7 +217,7 @@ bool  grammar_has_construct()
 void ASRRegisterDLLFuncs()
 {
 #ifdef LOADDLL
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	lib_FUNC = LoadLibrary("msc.dll");
 	if (lib_FUNC == NULL)
 	{
@@ -529,7 +527,7 @@ MSP_ERROR_CODE  ASRGetResult(char cmdIdStr[],char out_text[],int max,char data[]
        }
        else
 	   {
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
           Sleep(150);
 #else
 		  usleep(150000);

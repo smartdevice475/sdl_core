@@ -1337,9 +1337,15 @@ void SQLPTRepresentation::SaveUpdateRequired(bool value) {
   // TODO(AOleynik): Quick fix, will be reworked
   if (!query.Prepare(/*sql_pt::kUpdateFlagUpdateRequired*/
                      "UPDATE `module_meta` SET `flag_update_required` = ?")) {
+#if defined(OS_WIN32)||defined(OS_WINCE)
+	LOG4CXX_WARN(logger_,
+                 "Incorrect update into module meta (update_required): " <<
+                 (errno));
+#else
     LOG4CXX_WARN(logger_,
                  "Incorrect update into module meta (update_required): " <<
                  strerror(errno));
+#endif
     return;
   }
   query.Bind(0, value);

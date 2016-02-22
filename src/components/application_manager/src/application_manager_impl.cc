@@ -1867,10 +1867,12 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       formatters::FormatterJsonRpc::FromString <
                        hmi_apis::FunctionID::eType, hmi_apis::messageType::eType > (
                          message.json_message(), output);
+#ifdef ENABLE_LOG
       LOG4CXX_INFO(
         logger_,
         "Convertion result: " << result << " function id "
         << output[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
+#endif
       if (!hmi_so_factory().attachSchema(output)) {
         LOG4CXX_WARN(logger_, "Failed to attach schema to object.");
         return false;

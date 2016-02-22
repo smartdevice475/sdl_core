@@ -14,7 +14,7 @@
 #include <ctype.h>
 #include <pthread.h>
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include <Windows.h>
 #else
 #include <sys/mman.h>
@@ -27,7 +27,7 @@
 
 ShareMemData   *shareData = NULL;
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 typedef HANDLE  ShareMemHandle;
 #define SHARE_NULL   NULL
 #ifdef OS_WINCE
@@ -191,7 +191,7 @@ void msp_log_mode(int mode)
 
  bool msp_mem_assert()
  {
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
      if (shareData == NULL)
      {
          shareData = (ShareMemData*)MapViewOfFile(shareMem, FILE_MAP_ALL_ACCESS, 0,0, MEM_SHARE_DATA);
@@ -222,7 +222,7 @@ void msp_log_mode(int mode)
 	
     if(mode==MSP_MEM_SERVER)
     {
-#ifdef  OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
         shareMem = CreateFileMapping(INVALID_HANDLE_VALUE, SHARE_NULL, PAGE_READWRITE, 0,MEM_SHARE_DATA,SHARE_MEM_NAME);
         if (shareMem == SHARE_NULL)
         {
@@ -254,7 +254,7 @@ void msp_log_mode(int mode)
         shareData->state=0;
 		shareData->data.len = 0;
 		shareData->data.begin = shareData->data.end = 0;
-#ifdef  OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
 		//mutexMem = CreateMutex(NULL,false, "Sdl_MspMutex");
 #endif
 		pthread_mutexattr_t attr;
@@ -265,7 +265,7 @@ void msp_log_mode(int mode)
     }
     else if(mode==MSP_MEM_CLIENT)
     {
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
 #ifdef OS_WINCE
 		shareMem=CreateFileMapping(INVALID_HANDLE_VALUE, SHARE_NULL, PAGE_READWRITE, 0,MEM_SHARE_DATA,SHARE_MEM_NAME);
 #else
@@ -306,7 +306,7 @@ void msp_log_mode(int mode)
  {
 	 if (shareMem != SHARE_NULL)
 	 {
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
 		 CloseHandle(shareMem);
 #endif
 	 }

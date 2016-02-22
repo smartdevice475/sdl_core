@@ -92,7 +92,7 @@ int connect(enum TransportProtocol protocol,
     }
 
     if (protocol == TCP && ::connect(sock, (struct sockaddr*)p->ai_addr, p->ai_addrlen) == -1) {
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
 	  closesocket(sock);
 #else
 	  ::close(sock);
@@ -179,7 +179,7 @@ int bind(enum TransportProtocol protocol,
       if(::bind(sock, p->ai_addr, p->ai_addrlen) == -1)
 #endif
       {
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
 		closesocket(sock);
 #else
 		::close(sock);

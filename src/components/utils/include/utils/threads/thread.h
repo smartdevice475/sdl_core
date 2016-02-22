@@ -39,7 +39,7 @@
 #if defined(OS_POSIX)
 #include <pthread.h>
 #else
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include "pthread.h"
 #endif
 #endif
@@ -157,6 +157,7 @@ class Thread {
    * @return true if the thread was successfully started.
    */
   bool startWithOptions(const ThreadOptions& options);
+
 
   ThreadDelegate *delegate() const {
     return delegate_;

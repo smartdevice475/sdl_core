@@ -101,7 +101,7 @@ bool ConditionalVariable::Wait(Lock& lock) {
                                       &lock.mutex_);
   lock.AssertFreeAndMarkTaken();
   if (wait_status != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to wait for conditional variable");
+    LOG4CXX_ERROR(logger_, "Failed to wait for conditional variable"<<wait_status);
     return false;
   }
   return true;
@@ -114,7 +114,7 @@ bool ConditionalVariable::Wait(AutoLock& auto_lock) {
                                       &lock.mutex_);
   lock.AssertFreeAndMarkTaken();
   if (wait_status != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to wait for conditional variable");
+    LOG4CXX_ERROR(logger_, "Failed to wait for conditional variable"<<wait_status);
     return false;
   }
   return true;

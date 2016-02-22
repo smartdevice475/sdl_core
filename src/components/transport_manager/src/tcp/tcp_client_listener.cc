@@ -61,7 +61,7 @@
 #include "transport_manager/tcp/tcp_device.h"
 #include "transport_manager/tcp/tcp_socket_connection.h"
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
 #define SIO_KEEPALIVE_VALS _WSAIOW(IOC_VENDOR,4)  
 #endif
 
@@ -96,7 +96,7 @@ TransportAdapter::Error TcpClientListener::Init() {
   LOG4CXX_AUTO_TRACE(logger_);
   thread_stop_requested_ = false;
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
   WSADATA WSAData;
   if (WSAStartup(MAKEWORD(2, 0), &WSAData) != 0)
   {
@@ -178,7 +178,7 @@ void SetKeepaliveOptions(const int fd) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "fd: " << fd);
   int yes = 1;
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, (const char *)&yes, sizeof(yes));
 
 	TCP_KEEPALIVE inKeepAlive = { 0 };	// in parameter

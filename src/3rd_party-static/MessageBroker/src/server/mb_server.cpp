@@ -39,7 +39,7 @@ bool Server::Bind() {
 }
 
 void Server::Close() {
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
 	closesocket(m_sock);
 #else
   ::close(m_sock);

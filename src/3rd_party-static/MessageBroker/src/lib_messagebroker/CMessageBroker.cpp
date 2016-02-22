@@ -302,12 +302,10 @@ CMessageBroker_Private::CMessageBroker_Private() :
   mControllersIdCounter(1),
   mpSender(NULL) {
   mpRegistry = CMessageBrokerRegistry::getInstance();
-#ifdef OS_WIN32
 #ifdef OS_WINCE
   m_messageQueueSemaphore = ::CreateEvent(0, false, false, L"messagebroker-private");
-#else
+#elif OS_WIN32
   m_messageQueueSemaphore = ::CreateEvent(0, false, false, "messagebroker-private");
-#endif
 #endif
 }
 

@@ -854,7 +854,7 @@ void Profile::UpdateValues() {
                   file_system::CurrentWorkingDirectory().c_str(),
                   kMainSection, kAppConfigFolderKey);
 
-#ifndef OS_WIN32
+#if !(defined(OS_WIN32))
   if (IsRelativePath(app_config_folder_)) {
     MakeAbsolutePath(app_config_folder_);
   }
@@ -878,7 +878,7 @@ void Profile::UpdateValues() {
                   file_system::CurrentWorkingDirectory().c_str(),
                   kMainSection, kAppResourseFolderKey);
 
-#ifndef OS_WIN32
+#if !(defined(OS_WIN32))
   if (IsRelativePath(app_resourse_folder_)) {
     MakeAbsolutePath(app_resourse_folder_);
   }
@@ -1767,13 +1767,15 @@ bool Profile::IsRelativePath(const std::string& path) {
   }
 #ifdef OS_WIN32
   return ':' != path[1];
+#elif OS_WINCE
+  return '\\'!=path[0];
 #else
   return '/' != path[0];
 #endif
 }
 
 void Profile::MakeAbsolutePath(std::string& path) {
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
   path = file_system::CurrentWorkingDirectory() + "\\" + path;
 #else
   path = file_system::CurrentWorkingDirectory() + "/" + path;

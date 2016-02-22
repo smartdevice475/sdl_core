@@ -60,7 +60,11 @@ AppendersLoader::~AppendersLoader() {
 }
 
 bool AppendersLoader::Loaded() const {
+#if defined(OS_WIN32) || defined(OS_WINCE)
+	return true;
+#else
 	return handle_ != 0;
+#endif
 }
 
 }  // namespace utils

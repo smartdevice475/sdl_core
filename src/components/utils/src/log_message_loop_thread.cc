@@ -36,7 +36,7 @@
 namespace logger {
 
 void LogMessageHandler::Handle(const LogMessage message) {
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
 	message.logger->forcedLog(message.level,
 		message.entry,
 		message.location);

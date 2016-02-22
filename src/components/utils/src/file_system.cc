@@ -173,7 +173,7 @@ bool file_system::CreateDirectoryRecursively(const std::string& path) {
   bool ret_val = true;
 
   while (ret_val == true && pos <= path.length()) {
-#ifdef OS_WIN32
+#if defined(OS_WIN32)||defined(OS_WINCE)
 	pos = path.find('\\', pos + 1);
 #else
     pos = path.find('/', pos + 1);
@@ -338,6 +338,7 @@ std::string file_system::CurrentWorkingDirectory() {
 	char path[MAX_PATH];
 	memset(path, 0, MAX_PATH);
 	sprintf_s(path, MAX_PATH - 1, "%s", szPre);
+	return std::string(path);
 #elif defined(OS_WINCE)
 	wchar_t szPath[MAX_PATH];
 	::GetModuleFileName( NULL, szPath, MAX_PATH );
@@ -345,11 +346,7 @@ std::string file_system::CurrentWorkingDirectory() {
 	*lpszPath = 0;
 	std::string strData;
 	Global::fromUnicode(szPath, CP_ACP, strData);
-	const char *szPre = strData.c_str();
-
-	char path[MAX_PATH];
-	memset(path, 0, MAX_PATH);
-	sprintf_s(path, MAX_PATH - 1, "%s", szPre);
+	return strData;
 #else
   size_t filename_max_lenght = 1024;
   char currentAppPath[filename_max_lenght];
@@ -359,8 +356,9 @@ std::string file_system::CurrentWorkingDirectory() {
   char path[filename_max_lenght];
   memset(path, 0, filename_max_lenght);
   snprintf(path, filename_max_lenght - 1, "%s", currentAppPath);
-#endif
   return std::string(path);
+#endif
+  
 }
 
 bool file_system::DeleteFile(const std::string& name) {

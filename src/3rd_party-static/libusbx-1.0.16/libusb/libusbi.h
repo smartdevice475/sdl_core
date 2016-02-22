@@ -68,6 +68,10 @@
 #define ARRAYSIZE(array) (sizeof(array)/sizeof(array[0]))
 #endif
 
+#ifdef OS_WINCE
+#include <winsock2.h>
+#endif
+
 struct list_head {
 	struct list_head *prev, *next;
 };
