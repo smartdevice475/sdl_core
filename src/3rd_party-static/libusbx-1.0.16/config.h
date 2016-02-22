@@ -2,8 +2,10 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* Default visibility */
-#ifdef OS_WIN32
+#if defined(OS_WIN32)
 #define OS_WINDOWS
+#define DEFAULT_VISIBILITY /**/
+#elif defined(OS_WINCE)
 #define DEFAULT_VISIBILITY /**/
 #else
 #define DEFAULT_VISIBILITY __attribute__((visibility("default")))
@@ -40,12 +42,14 @@
 #define HAVE_MEMORY_H 1
 
 /* Define to 1 if you have the <poll.h> header file. */
-#ifndef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#else
 #define HAVE_POLL_H 1
 #endif
 
 /* Define to 1 if you have the <signal.h> header file. */
-#ifndef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#else
 #define HAVE_SIGNAL_H 1
 #endif
 
@@ -62,32 +66,37 @@
 #define HAVE_STRING_H 1
 
 /* Define to 1 if the system has the type `struct timespec'. */
-#ifndef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#else
 #define HAVE_STRUCT_TIMESPEC 1
 #endif
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
-#ifndef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#else
 #define HAVE_SYS_STAT_H 1
 #endif
 
 /* Define to 1 if you have the <sys/time.h> header file. */
-#ifndef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#else
 #define HAVE_SYS_TIME_H 1
 #endif
 
 /* Define to 1 if you have the <sys/types.h> header file. */
-#ifndef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#else
 #define HAVE_SYS_TYPES_H 1
 #endif
 
 /* Define to 1 if you have the <unistd.h> header file. */
-#ifndef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#else
 #define HAVE_UNISTD_H 1
 #endif
 
 #ifdef MODIFY_FUNCTION_SIGN
-#ifdef OS_WINCE
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #define HAVE_MISSING_H
 #endif
 #endif
@@ -137,7 +146,7 @@
 #define PACKAGE_VERSION "1.0.16"
 
 /* type of second poll() argument */
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #define POLL_NFDS_TYPE unsigned int
 #else
 #define POLL_NFDS_TYPE nfds_t
@@ -147,7 +156,8 @@
 #define STDC_HEADERS 1
 
 /* Use POSIX Threads */
-#ifndef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#else
 #define THREADS_POSIX 1
 #endif
 

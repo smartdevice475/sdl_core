@@ -79,7 +79,7 @@ private:
   void ControlTransferCallback(libusb_transfer* transfer);
   void SubmitControlTransfer(ControlTransferSequenceState* sequence_state);
   friend void 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 		LIBUSB_CALL
 #endif
 		UsbTransferSequenceCallback(libusb_transfer* transfer);
@@ -111,18 +111,18 @@ private:
 
   friend void* UsbHandlerThread(void* data);
   friend int 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 		LIBUSB_CALL
 #endif
 		ArrivedCallback(libusb_context* context, libusb_device* device,
                              libusb_hotplug_event event, void* data);
   friend int 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 		LIBUSB_CALL
 #endif
 		LeftCallback(libusb_context* context, libusb_device* device,
                           libusb_hotplug_event event, void* data);
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
   friend void* UsbHotPlugThread(void* data);
   void UsbThread();
   bool IsUsbEqual(libusb_device *devd,libusb_device *devs);

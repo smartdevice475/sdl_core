@@ -93,7 +93,7 @@ RequestInfo::RequestInfo(RequestPtr request,
 
 void application_manager::request_controller::RequestInfo::updateEndTime() {
   end_time_ = date_time::DateTime::getCurrentTime();
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
   date_time::DateTime::AddMilliseconds( end_time_, timeout_msec_ * date_time::DateTime::MILLISECONDS_IN_SECOND  );
 #else
   date_time::DateTime::AddMilliseconds(end_time_, timeout_msec_);

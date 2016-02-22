@@ -39,7 +39,7 @@
 #if defined(OS_POSIX)
 #include <pthread.h>
 #else
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include "pthread.h"
 #endif
 #endif

@@ -92,7 +92,7 @@ LifeCycle::LifeCycle()
   , mb_server_thread_(NULL)
   , mb_adapter_thread_(NULL)
 #endif  // MESSAGEBROKER_HMIADAPTER
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
   , components_started_(false)
 #endif
 { }
@@ -242,7 +242,7 @@ bool LifeCycle::StartComponents() {
   // start transport manager
   transport_manager_->Visibility(true);
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
   components_started_ = true;
 #endif
   return true;
@@ -460,7 +460,7 @@ void LifeCycle::Run() {
 
 
 void LifeCycle::StopComponents() {
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
   if (!components_started_) {
     LOG4CXX_TRACE(logger_, "exit");
     LOG4CXX_ERROR(logger_, "Components wasn't started");
@@ -578,7 +578,7 @@ void LifeCycle::StopComponents() {
     time_tester_ = NULL;
   }
 #endif  // TIME_TESTER
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
   components_started_ = false;
   LOG4CXX_TRACE(logger_, "exit");
 #endif

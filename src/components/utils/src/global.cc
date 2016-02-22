@@ -33,7 +33,7 @@
 #ifdef MODIFY_FUNCTION_SIGN
 #include <global_first.h>
 #endif
-#ifdef OS_WIN32 
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include <windows.h>
 #else
 #include <memory.h>
@@ -106,7 +106,7 @@ bool Global::isUtf8(const void* pBuffer, long size)
 
 void Global::toUnicode(const char *strSrc, unsigned int nCodePage, wchar_string &wstrOut)
 {
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	int nLength = MultiByteToWideChar(nCodePage, 0, strSrc, -1, NULL, 0);
 	wstrOut.clear();
 	wstrOut.resize(nLength);
@@ -117,7 +117,7 @@ void Global::toUnicode(const char *strSrc, unsigned int nCodePage, wchar_string 
 
 void Global::toUnicode(const std::string &strSrc, unsigned int nCodePage, wchar_string &wstrOut)
 {
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	int nLength = MultiByteToWideChar(nCodePage, 0, strSrc.c_str(), -1, NULL, 0);
 	wstrOut.clear();
 	wstrOut.resize(nLength);
@@ -128,7 +128,7 @@ void Global::toUnicode(const std::string &strSrc, unsigned int nCodePage, wchar_
 
 void Global::fromUnicode(const wchar_t *wstrSrc, unsigned int nCodePage, std::string &strOut)
 {
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	int nLength = WideCharToMultiByte(nCodePage, 0, wstrSrc, -1, NULL, 0, NULL, NULL);
 	strOut.clear();
 	strOut.resize(nLength);
@@ -139,7 +139,7 @@ void Global::fromUnicode(const wchar_t *wstrSrc, unsigned int nCodePage, std::st
 
 void Global::fromUnicode(const wchar_string &wstrSrc, unsigned int nCodePage, std::string &strOut)
 {
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	int nLength = WideCharToMultiByte(nCodePage, 0, (wchar_t*)wstrSrc.c_str(), -1, NULL, 0, NULL, NULL);
 	strOut.clear();
 	strOut.resize(nLength);
@@ -150,7 +150,7 @@ void Global::fromUnicode(const wchar_string &wstrSrc, unsigned int nCodePage, st
 
 void Global::anyMultiToUtf8Multi(const std::string &strSrc, std::string &strOut)
 {
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	if (isUnicode(strSrc.c_str(), strSrc.size())){
 		// muti-unicode to wide-unicode
 		wchar_t *pUnicodeData = new wchar_t[strSrc.size()];
@@ -183,7 +183,7 @@ void Global::anyMultiToUtf8Multi(const std::string &strSrc, std::string &strOut)
 
 void Global::utf8MultiToAnsiMulti(const std::string &strSrc, std::string &strOut)
 {
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	wchar_string wc_utf_string;
 	toUnicode(strSrc, CP_UTF8, wc_utf_string);
 	fromUnicode(wc_utf_string, CP_ACP, strOut);

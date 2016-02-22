@@ -37,7 +37,7 @@
 namespace utils {
 
 const std::string gen_hash(size_t size) {
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	static const char symbols[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 #else
   static const char symbols[] = "0123456789"

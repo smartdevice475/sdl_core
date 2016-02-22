@@ -39,7 +39,7 @@
 #include <set>
 #include <list>
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include <vector>
 #include <algorithm>
 #include <functional>

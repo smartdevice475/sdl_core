@@ -32,7 +32,7 @@
 
 #include "utils/logger.h"
 #include "utils/log_message_loop_thread.h"
-#ifndef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include <apr_time.h>
 #endif
 
@@ -52,7 +52,7 @@ void deinit_logger () {
 }
 
 log4cxx_time_t time_now() {
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	return 0;
 #else
   return apr_time_now();

@@ -18,7 +18,7 @@
 #include "msp_type.h"
 #include <vector>
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include <Windows.h> 
 #endif
 
@@ -60,7 +60,7 @@ void msp_passthru_loop()
 	while (state != MSP_RECORD_END && state != MSP_RECORD_TERMINATE)
 	{
 		MSP_Printf("please say...");
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 		Sleep(250);
 #else
 		usleep(250000);

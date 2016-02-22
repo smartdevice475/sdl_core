@@ -124,7 +124,7 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
     System::Thread* mb_adapter_thread_;
 #endif  // MESSAGEBROKER_HMIADAPTER
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
     bool components_started_;
 #endif
     FRIEND_BASE_SINGLETON_CLASS(LifeCycle);

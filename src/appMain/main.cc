@@ -36,7 +36,7 @@
 #include <sys/stat.h>
 #endif
 
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include <stdint.h>
 #else
 #include <unistd.h>
@@ -49,7 +49,7 @@
 #include <fstream>   // cpplint: Streams are highly discouraged.
 
 // ----------------------------------------------------------------------------
-#if defined(OS_WIN32)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include <winsock2.h>
 #endif
 
