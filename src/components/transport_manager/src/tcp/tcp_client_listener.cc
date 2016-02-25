@@ -61,7 +61,7 @@
 #include "transport_manager/tcp/tcp_device.h"
 #include "transport_manager/tcp/tcp_socket_connection.h"
 
-#if defined(OS_WIN32)||defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #define SIO_KEEPALIVE_VALS _WSAIOW(IOC_VENDOR,4)  
 #endif
 

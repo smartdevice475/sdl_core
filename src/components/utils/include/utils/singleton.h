@@ -120,6 +120,7 @@ T* Singleton<T, Deleter>::instance() {
   T* local_instance;
   atomic_pointer_assign(local_instance, *instance_pointer());
   memory_barrier();
+
   if (!local_instance) {
     lock.Acquire();
     local_instance = *instance_pointer();
@@ -131,6 +132,7 @@ T* Singleton<T, Deleter>::instance() {
     }
     lock.Release();
   }
+
   return local_instance;
 }
 

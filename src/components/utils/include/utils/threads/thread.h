@@ -158,7 +158,6 @@ class Thread {
    */
   bool startWithOptions(const ThreadOptions& options);
 
-
   ThreadDelegate *delegate() const {
     return delegate_;
   }

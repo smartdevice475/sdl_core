@@ -38,7 +38,7 @@
 #include "utils/timer_thread.h"
 #include <lib_msp_vr.h>
 #endif
-#if defined(OS_WIN32)||defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include "pthread.h"
 #endif
 

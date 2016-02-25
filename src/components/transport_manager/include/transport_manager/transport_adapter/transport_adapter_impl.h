@@ -38,7 +38,7 @@
 #include <map>
 #include <memory>
 #include <string>
-#if defined(OS_WINCE)||defined(OS_WIN32)
+#if defined(OS_WINCE) || defined(OS_WIN32)
 #include "pthread.h"
 #endif
 #include "utils/lock.h"

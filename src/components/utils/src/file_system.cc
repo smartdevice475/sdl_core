@@ -173,7 +173,7 @@ bool file_system::CreateDirectoryRecursively(const std::string& path) {
   bool ret_val = true;
 
   while (ret_val == true && pos <= path.length()) {
-#if defined(OS_WIN32)||defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	pos = path.find('\\', pos + 1);
 #else
     pos = path.find('/', pos + 1);

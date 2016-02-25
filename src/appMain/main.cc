@@ -36,7 +36,7 @@
 #include <sys/stat.h>
 #endif
 
-#if defined(OS_WIN32)||defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include <stdint.h>
 #else
 #include <unistd.h>
@@ -49,7 +49,7 @@
 #include <fstream>   // cpplint: Streams are highly discouraged.
 
 // ----------------------------------------------------------------------------
-#if defined(OS_WIN32)||defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include <winsock2.h>
 #endif
 
@@ -191,16 +191,18 @@ int32_t main(int32_t argc, char** argv) {
 #else
 int32_t sdl_start(int32_t argc,char** argv){
 #endif
+
   // Load configuration parameters
   if ((argc > 1)&&(0 != argv)) {
       profile::Profile::instance()->config_file_name(argv[1]);
   } else {
 #if defined(OS_WIN32) || defined(OS_WINCE)
-	  profile::Profile::instance()->config_file_name(file_system::CurrentWorkingDirectory() + "/" + "smartDeviceLink.ini");
+      profile::Profile::instance()->config_file_name(file_system::CurrentWorkingDirectory() + "/" + "smartDeviceLink.ini");
 #else
       profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
 #endif
   }
+
   // Logger initialization
 #if defined(OS_WINCE) || defined(OS_WINCE)
   INIT_LOGGER(file_system::CurrentWorkingDirectory() + "/" + "log4cxx.properties");
@@ -217,7 +219,7 @@ int32_t sdl_start(int32_t argc,char** argv){
   if (!utils::appenders_loader.Loaded()) {
     LOG4CXX_ERROR(logger_, "Appenders plugin not loaded, file logging disabled");
   }
-  
+
   LOG4CXX_INFO(logger_, "Application started!");
   LOG4CXX_INFO(logger_, "SDL version: "
                          << profile::Profile::instance()->sdl_version().c_str());
@@ -238,7 +240,7 @@ int32_t sdl_start(int32_t argc,char** argv){
     }
   }
 #endif  // __QNX__
-  std::cout<<"start components"<<endl;
+
   if (!main_namespace::LifeCycle::instance()->StartComponents()) {
     LOG4CXX_FATAL(logger_, "Failed to start components");
     main_namespace::LifeCycle::instance()->StopComponents();
@@ -248,7 +250,7 @@ int32_t sdl_start(int32_t argc,char** argv){
 
   // --------------------------------------------------------------------------
   // Third-Party components initialization.
-  std::cout<<"Init MessageSystem"<<endl;
+
   if (!main_namespace::LifeCycle::instance()->InitMessageSystem()) {
     LOG4CXX_FATAL(logger_, "Failed to init message system");
     DEINIT_LOGGER();
@@ -270,7 +272,7 @@ int32_t sdl_start(int32_t argc,char** argv){
     }
   }
   // --------------------------------------------------------------------------
-  std::cout<<"LifeCycle run"<<endl;
+
   main_namespace::LifeCycle::instance()->Run();
   LOG4CXX_INFO(logger_, "Stopping application due to signal caught");
 

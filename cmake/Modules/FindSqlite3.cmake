@@ -33,6 +33,7 @@ else (SQLITE3_LIBRARIES AND SQLITE3_INCLUDE_DIRS)
       ${CMAKE_SOURCE_DIR}/include/win32
   )
   elseif (CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  MESSAGE(STATUS "Finding sqlite3 include direction ...")
   find_path(SQLITE3_INCLUDE_DIR
     NAMES
       sqlite3.h
@@ -40,6 +41,7 @@ else (SQLITE3_LIBRARIES AND SQLITE3_INCLUDE_DIRS)
       ${_SQLITE3_INCLUDEDIR}
       ${CMAKE_SOURCE_DIR}/include/wince
   )
+  MESSAGE(STATUS "Found sqlite3 direction result: " ${SQLITE3_INCLUDE_DIR})
   else (CMAKE_SYSTEM_NAME STREQUAL "Windows")
   find_path(SQLITE3_INCLUDE_DIR
     NAMES
@@ -62,16 +64,15 @@ else (SQLITE3_LIBRARIES AND SQLITE3_INCLUDE_DIRS)
       ${CMAKE_SOURCE_DIR}/lib/win32
   )
   else (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  MESSAGE(STATUS "Finding sqlite3 lib direction ...")
   find_library(SQLITE3_LIBRARY
     NAMES
       sqlite3
     PATHS
       ${_SQLITE3_LIBDIR}
-      /usr/lib
-      /usr/local/lib
-      /opt/local/lib
-      /sw/lib
+      ${CMAKE_SOURCE_DIR}/lib/wince
   )
+  MESSAGE(STATUS "Found sqlite3 lib result: " ${SQLITE3_LIBRARY})
   endif (CMAKE_SYSTEM_NAME STREQUAL "Windows")
   
   if (SQLITE3_LIBRARY)

@@ -13,7 +13,7 @@
 #include "asr.h"
 #endif
 
-#if defined(OS_WIN32)||defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include <Windows.h>
 #else
 #include <string.h>

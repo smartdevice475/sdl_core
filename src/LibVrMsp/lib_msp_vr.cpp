@@ -254,7 +254,7 @@ void msp_log_mode(int mode)
         shareData->state=0;
 		shareData->data.len = 0;
 		shareData->data.begin = shareData->data.end = 0;
-#if defined(OS_WIN32)||defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 		//mutexMem = CreateMutex(NULL,false, "Sdl_MspMutex");
 #endif
 		pthread_mutexattr_t attr;
@@ -265,7 +265,7 @@ void msp_log_mode(int mode)
     }
     else if(mode==MSP_MEM_CLIENT)
     {
-#if defined(OS_WIN32)||defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #ifdef OS_WINCE
 		shareMem=CreateFileMapping(INVALID_HANDLE_VALUE, SHARE_NULL, PAGE_READWRITE, 0,MEM_SHARE_DATA,SHARE_MEM_NAME);
 #else
@@ -306,7 +306,7 @@ void msp_log_mode(int mode)
  {
 	 if (shareMem != SHARE_NULL)
 	 {
-#if defined(OS_WIN32)||defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 		 CloseHandle(shareMem);
 #endif
 	 }

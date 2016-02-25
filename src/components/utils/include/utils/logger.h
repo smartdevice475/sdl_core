@@ -114,7 +114,7 @@ namespace log4cxx {
     #define LOG4CXX_IS_TRACE_ENABLED(logger) logger->isTraceEnabled()
 
     
-   #define  LOGE(MSG)    {std::ofstream ff("sdllog.txt",std::iostream::out|std::iostream::app);ff<<"["<<__TIME__<<"]["<<__FILE__<<"]["<<__FUNCTION__<<"][Line:"<<__LINE__<<"]"<<MSG;ff.flush();ff.close();}
+   #define  LOGE(MSG)    {std::ofstream ff("/sdcard/sdllog.txt",std::iostream::out|std::iostream::app);ff<<"["<<__TIME__<<"]["<<__FILE__<<"]["<<__FUNCTION__<<"][Line:"<<__LINE__<<"]"<<MSG;ff.flush();ff.close();}
 
 		
 	#define LOG4CXX_INFO(logger,message)     LOGE(message<<"\n") 

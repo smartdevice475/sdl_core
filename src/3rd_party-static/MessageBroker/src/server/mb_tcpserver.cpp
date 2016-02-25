@@ -340,7 +340,7 @@ void TcpServer::Close() {
   /* close all client sockets */
   for (std::map<int, std::string*>::iterator it = m_receivingBuffers.begin();
        it != m_receivingBuffers.end() ; it++) {
-#if defined(OS_WIN32)||defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	closesocket((*it).first);
 #else
     ::close((*it).first);

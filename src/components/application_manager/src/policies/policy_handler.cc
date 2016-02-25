@@ -288,7 +288,7 @@ private:
 
 PolicyHandler* PolicyHandler::instance_ = NULL;
 
-#if defined(OS_WIN32)||defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 const std::string PolicyHandler::kLibrary = "Policy.dll";
 #else
 const std::string PolicyHandler::kLibrary = "libPolicy.so";
@@ -333,6 +333,8 @@ bool PolicyHandler::LoadPolicyLibrary() {
   wchar_string strUnicodeData;
   Global::toUnicode(kLibrary, CP_ACP, strUnicodeData);
   dl_handle_ = LoadLibrary(strUnicodeData.c_str());
+
+  LOG4CXX_INFO(logger_, "============LoadLibrary===========: strUnicodeData = " << strUnicodeData.c_str() << ", dl_handle_ = " << dl_handle_);
 
   if (dl_handle_) {
 	  if (CreateManager()) {

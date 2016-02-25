@@ -92,19 +92,17 @@ LifeCycle::LifeCycle()
   , mb_server_thread_(NULL)
   , mb_adapter_thread_(NULL)
 #endif  // MESSAGEBROKER_HMIADAPTER
-#if defined(OS_WIN32)||defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
   , components_started_(false)
 #endif
 { }
 
 bool LifeCycle::StartComponents() {
   LOG4CXX_AUTO_TRACE(logger_);
-  std::cout<<"LifeCycle::StartComponents"<<endl;
-  LOG4CXX_INFO(logger_,"transport_manager::instance");
   transport_manager_ =
     transport_manager::TransportManagerDefault::instance();
   DCHECK(transport_manager_ != NULL);
-  LOG4CXX_INFO(logger_,"protocol_handler");
+
   protocol_handler_ =
     new protocol_handler::ProtocolHandlerImpl(transport_manager_,
                                               profile::Profile::instance()->message_frequency_time(),
@@ -113,11 +111,11 @@ bool LifeCycle::StartComponents() {
                                               profile::Profile::instance()->malformed_frequency_time(),
                                               profile::Profile::instance()->malformed_frequency_count());
   DCHECK(protocol_handler_ != NULL);
- LOG4CXX_INFO(logger_,"connection_handler");
+
   connection_handler_ =
     connection_handler::ConnectionHandlerImpl::instance();
   DCHECK(connection_handler_ != NULL);
- LOG4CXX_INFO(logger_,"app_mamager_");
+
   app_manager_ =
     application_manager::ApplicationManagerImpl::instance();
   DCHECK(app_manager_ != NULL);
@@ -125,7 +123,7 @@ bool LifeCycle::StartComponents() {
     LOG4CXX_ERROR(logger_, "Application manager init failed.");
     return false;
   }
- LOG4CXX_INFO(logger_,"hmi_handler");
+
   hmi_handler_ =
     hmi_message_handler::HMIMessageHandlerImpl::instance();
   DCHECK(hmi_handler_ != NULL)
@@ -200,7 +198,7 @@ bool LifeCycle::StartComponents() {
     return false;
   }
 #endif  // ENABLE_SECURITY
-  LOG4CXX_INFO(logger_,"transport_manager::AddEventListener");
+
   transport_manager_->AddEventListener(protocol_handler_);
   transport_manager_->AddEventListener(connection_handler_);
 
@@ -239,13 +237,12 @@ bool LifeCycle::StartComponents() {
   security_manager_->set_crypto_manager(crypto_manager_);
   app_manager_->AddPolicyObserver(crypto_manager_);
 #endif  // ENABLE_SECURITY
-  std::cout<<"TRANPORT_MANAGER INIT"<<endl;
-  LOG4CXX_INFO(logger_,"transport_manager::Init");
+
   transport_manager_->Init();
   // start transport manager
   transport_manager_->Visibility(true);
 
-#if defined(OS_WIN32)||defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
   components_started_ = true;
 #endif
   return true;
@@ -463,7 +460,7 @@ void LifeCycle::Run() {
 
 
 void LifeCycle::StopComponents() {
-#if defined(OS_WIN32)||defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
   if (!components_started_) {
     LOG4CXX_TRACE(logger_, "exit");
     LOG4CXX_ERROR(logger_, "Components wasn't started");
@@ -581,7 +578,7 @@ void LifeCycle::StopComponents() {
     time_tester_ = NULL;
   }
 #endif  // TIME_TESTER
-#if defined(OS_WIN32)||defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
   components_started_ = false;
   LOG4CXX_TRACE(logger_, "exit");
 #endif

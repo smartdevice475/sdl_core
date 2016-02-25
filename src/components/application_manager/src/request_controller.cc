@@ -506,7 +506,7 @@ void RequestController::UpdateTimer() {
 
       timer_.updateTimeOut(msecs);
     } else {
-#if defined(OS_WIN32)||defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 			LOG4CXX_WARN(logger_, "Request app_id: " << front->app_id()
 				<< " correlation_id: " << front->requestId()
 				<< " is expired. "

@@ -189,7 +189,7 @@ namespace NsMessageBroker
 
       if (b_size <= 125)
       {
-#if  defined(OS_WIN32)||defined(OS_WINCE)
+#if  defined(OS_WIN32) || defined(OS_WINCE)
         payload = (unsigned char)b_size;
 		Buffer[1] = (unsigned char)b_size;
 #else
@@ -211,7 +211,7 @@ namespace NsMessageBroker
 
       if (payload == 126)
       {
-#if defined(OS_WIN32)||defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 		  Buffer[2] = (unsigned char)(b_size >> 8);
 		  Buffer[3] = (unsigned char)b_size;
 #else

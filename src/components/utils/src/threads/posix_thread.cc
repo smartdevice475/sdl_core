@@ -95,7 +95,7 @@ void* Thread::threadFunc(void* arg) {
 	//     running = 1
 	//     finalized = 1
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-#if defined(OS_WIN32)||defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self().x << " started successfully");
 #else
 	LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self() << " started successfully");
@@ -103,22 +103,20 @@ void* Thread::threadFunc(void* arg) {
 
 	threads::Thread* thread = reinterpret_cast<Thread*>(arg);
 	DCHECK(thread);
-	std::cout<<"DCHECK(thread)"<<endl;
+
 	pthread_cleanup_push(&cleanup, thread);
-	std::cout<<"Lock.Acquire()"<<endl;
+
 	thread->state_lock_.Acquire();
-	std::cout<<"Lock.Broadcast()"<<endl;
 	thread->state_cond_.Broadcast();
-	std::cout<<"thread loop"<<endl;
 
 	while (!thread->finalized_) {
-#if defined(OS_WIN32)||defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 		LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self().x << " iteration");
 #else
 		LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self() << " iteration");
 #endif
 		thread->run_cond_.Wait(thread->state_lock_);
-#if defined(OS_WIN32)||defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 		LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self().x << " execute. " << "stopped_ = " << thread->stopped_ << "; finalized_ = " << thread->finalized_);
 #else
 		LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self() << " execute. " << "stopped_ = " << thread->stopped_ << "; finalized_ = " << thread->finalized_);
@@ -136,7 +134,7 @@ void* Thread::threadFunc(void* arg) {
 			thread->isThreadRunning_ = false;
 		}
 		thread->state_cond_.Broadcast();
-#if defined(OS_WIN32)||defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 		LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self().x << " finished iteration");
 #else
 		LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self() << " finished iteration");
@@ -146,7 +144,7 @@ void* Thread::threadFunc(void* arg) {
 	thread->state_lock_.Release();
 	pthread_cleanup_pop(1);
 
-#if defined(OS_WIN32)||defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self().x << " exited successfully");
 #else
 	LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self() << " exited successfully");
@@ -210,7 +208,7 @@ bool Thread::startWithOptions(const ThreadOptions& options) {
 	}
 
 	if (isThreadRunning_) {
-#if defined(OS_WIN32)||defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 		LOG4CXX_TRACE(logger_, "EXIT thread " << name_ << " #" << thread_handle_.x << " is already running");
 #else
 		LOG4CXX_TRACE(logger_, "EXIT thread " << name_ << " #" << thread_handle_ << " is already running");
@@ -277,7 +275,7 @@ bool Thread::startWithOptions(const ThreadOptions& options) {
 	}
 	stopped_ = false;
 	run_cond_.NotifyOne();
-#if defined(OS_WIN32)||defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	LOG4CXX_DEBUG(logger_, "Thread " << name_.c_str() << " #" << thread_handle_.x << " started. pthread_result = " << pthread_result);
 #else
 	LOG4CXX_DEBUG(logger_, "Thread " << name_ << " #" << thread_handle_ << " started. pthread_result = " << pthread_result);
@@ -292,7 +290,7 @@ void Thread::stop() {
 
 	stopped_ = true;
 
-#if defined(OS_WIN32)||defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	LOG4CXX_DEBUG(logger_, "Stopping thread #" << thread_handle_.x << " \"" << name_ << " \"");
 #else
 	LOG4CXX_DEBUG(logger_, "Stopping thread #" << thread_handle_ << " \"" << name_ << " \"");
@@ -301,7 +299,7 @@ void Thread::stop() {
 	if (delegate_ && isThreadRunning_) {
 		delegate_->exitThreadMain();
 	}
-#if defined(OS_WIN32)||defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	LOG4CXX_DEBUG(logger_, "Stopped thread #" << thread_handle_.x << " \"" << name_ << " \"");
 #else
 	LOG4CXX_DEBUG(logger_, "Stopped thread #" << thread_handle_ << " \"" << name_ << " \"");

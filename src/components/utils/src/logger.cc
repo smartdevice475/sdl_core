@@ -32,7 +32,7 @@
 
 #include "utils/logger.h"
 #include "utils/log_message_loop_thread.h"
-#if defined(OS_WIN32)||defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include <apr_time.h>
 #endif
 
