@@ -44,7 +44,11 @@
 
 #include "utils/macro.h"
 #include "utils/logger.h"
+<<<<<<< HEAD
 #if defined(OS_WIN32)||defined(OS_WINCE)
+=======
+#if defined(OS_WIN32) || defined(OS_WINCE)
+>>>>>>> 114f4c5e7ac49697da8689a4de46eabf88fa90b3
 #include<vector>
 #include<iostream>
 #endif
@@ -224,7 +228,11 @@ void UsbHandler::CloseDeviceHandle(libusb_device_handle* device_handle) {
 }
 
 int 
+<<<<<<< HEAD
 #if defined(OS_WIN32)||defined(OS_WINCE)
+=======
+#if defined(OS_WIN32) || defined(OS_WINCE)
+>>>>>>> 114f4c5e7ac49697da8689a4de46eabf88fa90b3
 LIBUSB_CALL
 #endif
 ArrivedCallback(libusb_context* context, libusb_device* device,
@@ -241,7 +249,11 @@ ArrivedCallback(libusb_context* context, libusb_device* device,
 }
 
 int 
+<<<<<<< HEAD
 #if defined(OS_WIN32)||defined(OS_WINCE)
+=======
+#if defined(OS_WIN32) || defined(OS_WINCE)
+>>>>>>> 114f4c5e7ac49697da8689a4de46eabf88fa90b3
 LIBUSB_CALL
 #endif
 LeftCallback(libusb_context* context, libusb_device* device,
@@ -257,7 +269,11 @@ LeftCallback(libusb_context* context, libusb_device* device,
   return 0;
 }
 
+<<<<<<< HEAD
 #if defined(OS_WIN32)||defined(OS_WINCE)
+=======
+#if defined(OS_WIN32) || defined(OS_WINCE)
+>>>>>>> 114f4c5e7ac49697da8689a4de46eabf88fa90b3
 void* UsbHotPlugThread(void* data) {
   static_cast<UsbHandler*>(data)->UsbThread();
 	
@@ -387,7 +403,11 @@ TransportAdapter::Error UsbHandler::Init() {
   }
 
  
+<<<<<<< HEAD
 #if defined(OS_WIN32)||defined(OS_WINCE)
+=======
+#if defined(OS_WIN32) || defined(OS_WINCE)
+>>>>>>> 114f4c5e7ac49697da8689a4de46eabf88fa90b3
   pthread_t plug_thread;
   const int thread_plug_error =
       pthread_create(&plug_thread, 0, &UsbHotPlugThread, this);
@@ -473,7 +493,11 @@ void UsbHandler::Thread() {
 }
 
 void 
+<<<<<<< HEAD
 #if defined(OS_WIN32)||defined(OS_WINCE)
+=======
+#if defined(OS_WIN32) || defined(OS_WINCE)
+>>>>>>> 114f4c5e7ac49697da8689a4de46eabf88fa90b3
 LIBUSB_CALL
 #endif
 UsbTransferSequenceCallback(libusb_transfer* transfer) {
@@ -505,13 +529,21 @@ void UsbHandler::SubmitControlTransfer(
   const libusb_request_type request_type = LIBUSB_REQUEST_TYPE_VENDOR;
 
   libusb_endpoint_direction endpoint_direction = LIBUSB_ENDPOINT_IN;
+<<<<<<< HEAD
 #if defined(OS_WIN32)||defined(OS_WINCE)
+=======
+#if defined(OS_WIN32) || defined(OS_WINCE)
+>>>>>>> 114f4c5e7ac49697da8689a4de46eabf88fa90b3
   if (transfer->Direction() == UsbControlTransfer::TD_IN) {
 #else
   if (transfer->Direction() == UsbControlTransfer::IN) {
 #endif
     endpoint_direction = LIBUSB_ENDPOINT_IN;
+<<<<<<< HEAD
 #if defined(OS_WIN32)||defined(OS_WINCE)
+=======
+#if defined(OS_WIN32) || defined(OS_WINCE)
+>>>>>>> 114f4c5e7ac49697da8689a4de46eabf88fa90b3
   } else if (transfer->Direction() == UsbControlTransfer::TD_OUT) {
 #else
   } else if (transfer->Direction() == UsbControlTransfer::OUT) {
@@ -566,7 +598,11 @@ void UsbHandler::ControlTransferCallback(libusb_transfer* transfer) {
     UsbControlTransfer* current_transfer = sequence_state->CurrentTransfer();
     bool submit_next = true;
     if (current_transfer &&
+<<<<<<< HEAD
 #if defined(OS_WIN32)||defined(OS_WINCE)
+=======
+#if defined(OS_WIN32) || defined(OS_WINCE)
+>>>>>>> 114f4c5e7ac49697da8689a4de46eabf88fa90b3
         current_transfer->Direction() == UsbControlTransfer::TD_IN) {
 #else
         current_transfer->Direction() == UsbControlTransfer::IN) {
