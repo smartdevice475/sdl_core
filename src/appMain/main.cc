@@ -50,7 +50,7 @@
 
 // ----------------------------------------------------------------------------
 #if defined(OS_WIN32) || defined(OS_WINCE)
-#include <winsock2.h>
+#include <winsock.h>
 #endif
 
 #include "./life_cycle.h"

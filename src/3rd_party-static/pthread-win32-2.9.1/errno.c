@@ -85,7 +85,7 @@ _errno (void)
   else
     {
 #ifdef OS_WINCE
-      result = 1;
+      result = (int *)1;
 #else // OS_WINCE
 	  result = (int *)(&self.p->exitStatus);
 #endif // OS_WINCE

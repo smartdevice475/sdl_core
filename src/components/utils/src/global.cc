@@ -34,6 +34,7 @@
 #include <global_first.h>
 #endif
 #if defined(OS_WIN32) || defined(OS_WINCE)
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #else
 #include <memory.h>

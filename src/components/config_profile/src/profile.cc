@@ -47,6 +47,9 @@
 #include <openssl/ssl.h>
 #endif  // ENABLE_SECURITY
 
+#ifdef OS_WINCE
+int errno;
+#endif
 
 namespace {
 #define LOG_UPDATED_VALUE(value, key, section) {\

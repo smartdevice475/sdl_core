@@ -422,9 +422,7 @@ class Optional {
 }  // namespace rpc
 
 // Template methods implementation
-#ifndef OS_WINCE
 #include "rpc_base_inl.h"
-#endif
 #include "rpc_base_json_inl.h"
 
 #endif /* VALIDATED_TYPES_H_ */

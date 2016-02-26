@@ -32,11 +32,7 @@
 
 #include "smart_objects/smart_object.h"
 
-#ifdef OS_WINCE
-#include "wcecompat/include/errno.h"
-#else
 #include <errno.h>
-#endif
 #include <inttypes.h>
 #include <limits>
 #include <stdlib.h>

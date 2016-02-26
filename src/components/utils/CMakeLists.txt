@@ -52,7 +52,7 @@ IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     )
 ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")  
     INCLUDE_DIRECTORIES(
-        ${CMAKE_SOURCE_DIR}/include/winCE
+        ${CMAKE_SOURCE_DIR}/include/wince
         ${CMAKE_SOURCE_DIR}/src/3rd_party/apr-1.5.0/include
         ${CMAKE_SOURCE_DIR}/src/3rd_party/apr-1.5.0/include/arch/win32
         ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1

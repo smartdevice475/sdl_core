@@ -36,7 +36,6 @@
 #include <functional>
 #include <cstdio>
 #ifdef OS_WINCE
-#include "wcecompat/include/time.h"
 #else
 #include <ctime>
 #include <cmath>
@@ -288,6 +287,14 @@ void CacheManager::Backup() {
 }
 
 std::string CacheManager::currentDateTime() {
+#ifdef OS_WINCE
+	char       buf[80];
+	SYSTEMTIME sys;
+	GetLocalTime(&sys);
+
+	sprintf_s(buf, sizeof(buf), "%u-%u-%uT%02u:%02u:%02uZ", sys.wYear, sys.wMonth, sys.wDay, sys.wHour, sys.wMinute, sys.wSecond);
+	return buf;
+#else
   time_t     now = time(0);
   struct tm  tstruct;
   char       buf[80];
@@ -295,6 +302,7 @@ std::string CacheManager::currentDateTime() {
   // ISO_8601 format is expected, e.g. “2000-01-01T12:18:53Z”
   strftime(buf, sizeof(buf), "%Y-%m-%dT%XZ", &tstruct);
   return buf;
+#endif
 }
 
 bool CacheManager::GetPermissionsForApp(const std::string &device_id,
