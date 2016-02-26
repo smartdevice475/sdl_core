@@ -12,8 +12,6 @@
 
 #ifdef __WINUSB__
 #define DEFAULT_VISIBILITY /**/
-#elif defined(OS_WINCE)
-#define DEFAULT_VISIBILITY /**/
 #else
 #define DEFAULT_VISIBILITY __attribute__((visibility("default")))
 #endif

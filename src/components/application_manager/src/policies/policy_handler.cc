@@ -334,8 +334,6 @@ bool PolicyHandler::LoadPolicyLibrary() {
   Global::toUnicode(kLibrary, CP_ACP, strUnicodeData);
   dl_handle_ = LoadLibrary(strUnicodeData.c_str());
 
-  LOG4CXX_INFO(logger_, "============LoadLibrary===========: strUnicodeData = " << strUnicodeData.c_str() << ", dl_handle_ = " << dl_handle_);
-
   if (dl_handle_) {
 	  if (CreateManager()) {
 		  policy_manager_->set_listener(this);
