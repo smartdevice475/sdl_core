@@ -454,7 +454,11 @@ private:
   PolicyHandler();
   bool SaveSnapshot(const BinaryMessage& pt_string, std::string& snap_path);
   static PolicyHandler* instance_;
+#ifdef OS_WINCE
+  static const std::wstring kLibrary;
+#else
   static const std::string kLibrary;
+#endif
   mutable sync_primitives::RWLock policy_manager_lock_;
   utils::SharedPtr<PolicyManager> policy_manager_;
 #if defined(OS_WIN32) || defined(OS_WINCE)

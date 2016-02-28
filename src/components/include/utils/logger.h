@@ -157,7 +157,7 @@ using namespace std;
     #define LOG4CXX_TRACE(x, y)  //LOG(y)
 
     #define LOG4CXX_AUTO_TRACE_WITH_NAME_SPECIFIED(loggerPtr, auto_trace)
-#define LOG4CXX_AUTO_TRACE(loggerPtr) LOG("audo trace:")
+    #define LOG4CXX_AUTO_TRACE(loggerPtr) LOG("audo trace:")
 
     #undef LOG4CXX_DEBUG
     #define LOG4CXX_DEBUG(x, y)  LOG(y)

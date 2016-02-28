@@ -288,8 +288,10 @@ private:
 
 PolicyHandler* PolicyHandler::instance_ = NULL;
 
-#if defined(OS_WIN32) || defined(OS_WINCE)
+#if defined(OS_WIN32)
 const std::string PolicyHandler::kLibrary = "Policy.dll";
+#elif defined(OS_WINCE)
+const std::wstring PolicyHandler::kLibrary = L"Policy.dll";
 #else
 const std::string PolicyHandler::kLibrary = "libPolicy.so";
 #endif
@@ -317,31 +319,19 @@ bool PolicyHandler::LoadPolicyLibrary() {
     return NULL;
   }
 
-#if defined(OS_WIN32)
+#if defined(OS_WIN32) || defined(OS_WINCE)
   dl_handle_ = LoadLibrary(kLibrary.c_str());
-
+	
+  LOG4CXX_INFO(logger_, "dl_handle_ = " << dl_handle_);
   if (dl_handle_) {
 	  if (CreateManager()) {
+		  LOG4CXX_INFO(logger_, "policy_manager_ = " << policy_manager_);
 		  policy_manager_->set_listener(this);
 		  event_observer_ = new PolicyEventObserver(this);
 	  }
   }
   else {
-	  LOG4CXX_ERROR(logger_, GetLastError());
-  }
-#elif defined(OS_WINCE)
-  wchar_string strUnicodeData;
-  Global::toUnicode(kLibrary, CP_ACP, strUnicodeData);
-  dl_handle_ = LoadLibrary(strUnicodeData.c_str());
-
-  if (dl_handle_) {
-	  if (CreateManager()) {
-		  policy_manager_->set_listener(this);
-		  event_observer_ = new PolicyEventObserver(this);
-	  }
-  }
-  else {
-	  LOG4CXX_ERROR(logger_, GetLastError());
+	  LOG4CXX_ERROR(logger_, "error = " << GetLastError());
   }
 #elif defined(OS_ANDROID)
   dl_handle_ = dlopen(kLibrary.c_str(), RTLD_LAZY);
@@ -382,6 +372,7 @@ bool PolicyHandler::PolicyEnabled() {
 }
 
 bool PolicyHandler::CreateManager() {
+  LOG4CXX_AUTO_TRACE(logger_);
   typedef policy::PolicyManager* (*CreateManager)();
 
 #if defined(OS_WIN32)
@@ -393,10 +384,23 @@ bool PolicyHandler::CreateManager() {
 	  LOG4CXX_WARN(logger_, GetLastError());
   }
 #elif defined(OS_WINCE)
-  CreateManager create_manager = (CreateManager)GetProcAddress(dl_handle_, L"CreateManager");
+  CreateManager create_manager = 0;
+  try
+  {
+	LOG4CXX_INFO(logger_, "dl_handle_ = " << dl_handle_);
+    CreateManager create_manager = (CreateManager)GetProcAddress(dl_handle_, L"CreateManager");
+	throw GetLastError();
+  }
+  catch(int error)
+  {
+	LOG4CXX_INFO(logger_, error);
+  }
+  
+  LOG4CXX_INFO(logger_, "create_manager = " << create_manager);
 
   if (create_manager) {
 	  policy_manager_ = create_manager();
+	  LOG4CXX_INFO(logger_, "policy_manager_ = " << policy_manager_);
   } else {
 	  LOG4CXX_WARN(logger_, GetLastError());
   }
