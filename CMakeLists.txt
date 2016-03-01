@@ -49,7 +49,7 @@ IF(CMAKE_SYSTEM_NAME STREQUAL "Android")
 ENDIF()
 
 MESSAGE(STATUS "Current build system name is ${CMAKE_SYSTEM_NAME}")
-MESSAGE(STATUS "Current CMAKE_BUIDL_TYPE is ${CMAKE_BUIDL_TYPE}")
+MESSAGE(STATUS "Current CMAKE_BUIDL_TYPE is ${CMAKE_BUILD_TYPE}")
 
 #Jenkins integration section
 #dont modify this section if you don't know details about integration with Jenkins!!!
@@ -220,7 +220,7 @@ ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     SET(CMAKE_CXX_FLAGS "/wd\"4819\" /wd\"4244\" /wd\"4390\" /wd\"4430\" /EHsc /bigobj")
     SET(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG") #It will be appended to CMAKE_CXX_FLAGS in release
 ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-    SET(CMAKE_CXX_FLAGS "/wd\"4819\" /wd\"4244\" /wd\"4390\" /wd\"4996\" /EHsc /bigobj /Z7 /GF /NOENTRY /SUBSYSTEM:CONSOLE")
+    SET(CMAKE_CXX_FLAGS "/wd\"4819\" /wd\"4244\" /wd\"4390\" /wd\"4996\" /EHsc /bigobj /Z7 /GF")
  SET(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG") #It will be appended to CMAKE_CXX_FLAGS in release
 ENDIF()
 
@@ -260,7 +260,7 @@ ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
     ADD_DEFINITIONS(-D_WIN32)
     ADD_DEFINITIONS(-DLOG4CXX_STATIC)
     ADD_DEFINITIONS(-DAPR_DECLARE_STATIC)
-    SET(ENABLE_LOG OFF)
+    SET(ENABLE_LOG ON)
     SET(ENABLE_SECURITY OFF)
     SET(BUILD_BT_SUPPORT OFF)
     SET(BUILD_USB_SUPPORT ON)

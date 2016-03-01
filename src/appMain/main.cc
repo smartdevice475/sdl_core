@@ -103,7 +103,7 @@ bool InitHmi() {
 #ifdef OS_WINCE
 	LPWIN32_FIND_DATA  sb = {0};
 	if(INVALID_HANDLE_VALUE==FindFirstFile((LPCWSTR)"hmi_link",sb)){
-		LOG4CXX_FATAL(logger, "File with HMI link doesn't exist!");
+		LOG4CXX_FATAL(logger_, "File with HMI link doesn't exist!");
 		return false;
 	}
 #else
@@ -192,28 +192,31 @@ int32_t main(int32_t argc, char** argv) {
 int32_t sdl_start(int32_t argc,char** argv){
 #endif
 
+	// --------------------------------------------------------------------------
+	// Logger initialization
+#ifdef OS_WINCE
+	INIT_LOGGER(file_system::CurrentWorkingDirectory() + "/" + "log4cxx.properties");
+#else
+	INIT_LOGGER("log4cxx.properties");
+#endif
+
+#if defined(__QNXNTO__) && defined(GCOV_ENABLED)
+	LOG4CXX_WARN(logger_,
+		"Attention! This application was built with unsupported "
+		"configuration (gcov + QNX). Use it at your own risk.");
+#endif
+
   // Load configuration parameters
   if ((argc > 1)&&(0 != argv)) {
       profile::Profile::instance()->config_file_name(argv[1]);
   } else {
 #if defined(OS_WIN32) || defined(OS_WINCE)
-      profile::Profile::instance()->config_file_name(file_system::CurrentWorkingDirectory() + "/" + "smartDeviceLink.ini");
+      profile::Profile::instance()->config_file_name(file_system::CurrentWorkingDirectory() + "\\" + "smartDeviceLink.ini");
 #else
       profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
 #endif
   }
 
-  // Logger initialization
-#if defined(OS_WINCE) || defined(OS_WINCE)
-  INIT_LOGGER(file_system::CurrentWorkingDirectory() + "/" + "log4cxx.properties");
-#else
-  INIT_LOGGER("log4cxx.properties");
-#if defined(__QNXNTO__) && defined(GCOV_ENABLED)
-  LOG4CXX_WARN(logger_,
-                "Attention! This application was built with unsupported "
-                "configuration (gcov + QNX). Use it at your own risk.");
-#endif
-#endif
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
 
   if (!utils::appenders_loader.Loaded()) {

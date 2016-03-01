@@ -92,7 +92,8 @@ using namespace std;
       } \
     } while (false)
 
-#ifndef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#else
     #undef LOG4CXX_TRACE
     #define LOG4CXX_TRACE(loggerPtr, logEvent) LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getTrace(), logEvent)
 #endif
@@ -101,36 +102,49 @@ using namespace std;
       logger::AutoTrace auto_trace(loggerPtr, LOG4CXX_LOCATION)
     #define LOG4CXX_AUTO_TRACE(loggerPtr) LOG4CXX_AUTO_TRACE_WITH_NAME_SPECIFIED(loggerPtr, SDL_local_auto_trace_object)
 
-#ifndef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#else
     #undef LOG4CXX_DEBUG
     #define LOG4CXX_DEBUG(loggerPtr, logEvent) LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getDebug(), logEvent)
 #endif
 
-#ifndef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#else
     #undef LOG4CXX_INFO
     #define LOG4CXX_INFO(loggerPtr, logEvent) LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getInfo(), logEvent)
 #endif
 
-#ifndef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#else
     #undef LOG4CXX_WARN
     #define LOG4CXX_WARN(loggerPtr, logEvent) LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getWarn(), logEvent)
 #endif
 
-#ifndef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#else
     #undef LOG4CXX_ERROR
     #define LOG4CXX_ERROR(loggerPtr, logEvent) LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getError(), logEvent)
 #endif
 
-#ifndef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#else
     #undef LOG4CXX_FATAL
     #define LOG4CXX_FATAL(loggerPtr, logEvent) LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getFatal(), logEvent)
 #endif
 
+#ifdef OS_WINCE
+#define LOG4CXX_ERROR_WITH_ERRNO(logger, message) \
+	LOG4CXX_ERROR(logger, message << ", error code " << errno << " (" << errno << ")")
+
+#define LOG4CXX_WARN_WITH_ERRNO(logger, message) \
+	LOG4CXX_WARN(logger, message << ", error code " << errno << " (" << errno << ")")
+#else
     #define LOG4CXX_ERROR_WITH_ERRNO(logger, message) \
       LOG4CXX_ERROR(logger, message << ", error code " << errno << " (" << strerror(errno) << ")")
 
      #define LOG4CXX_WARN_WITH_ERRNO(logger, message) \
        LOG4CXX_WARN(logger, message << ", error code " << errno << " (" << strerror(errno) << ")")
+#endif
 
 #else  // ENABLE_LOG is OFF
 

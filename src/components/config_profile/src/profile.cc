@@ -48,7 +48,8 @@
 #endif  // ENABLE_SECURITY
 
 #ifdef OS_WINCE
-int errno;
+#undef errno
+extern int errno;
 #endif
 
 namespace {
