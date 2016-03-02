@@ -47,10 +47,8 @@
 #include "policy/update_status_manager.h"
 #include "config_profile/profile.h"
 
-#if defined(OS_WIN32)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 __declspec(dllexport) policy::PolicyManager* CreateManager() {
-#elif defined(OS_WINCE)
-__declspec(dllexport) policy::PolicyManager* _cdecl CreateManager() {
 #else
 policy::PolicyManager* CreateManager() {
 #endif
