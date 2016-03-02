@@ -461,8 +461,6 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
 #if defined(OS_WIN32) || defined(OS_WINCE)
 extern "C" __declspec(dllexport) policy::PolicyManager* CreateManager();
-#elif defined(OS_WINCE)
-extern "C" __declspec(dllimport) policy::PolicyManager* _cdecl CreateManager();
 #else
 extern "C" policy::PolicyManager* CreateManager();
 #endif
