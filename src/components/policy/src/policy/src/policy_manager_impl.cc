@@ -49,6 +49,8 @@
 
 #if defined(OS_WIN32)
 __declspec(dllexport) policy::PolicyManager* CreateManager() {
+#elif defined(OS_WINCE)
+__declspec(dllexport) policy::PolicyManager* _cdecl CreateManager() {
 #else
 policy::PolicyManager* CreateManager() {
 #endif

@@ -384,23 +384,10 @@ bool PolicyHandler::CreateManager() {
 	  LOG4CXX_WARN(logger_, GetLastError());
   }
 #elif defined(OS_WINCE)
-  CreateManager create_manager = 0;
-  try
-  {
-	LOG4CXX_INFO(logger_, "dl_handle_ = " << dl_handle_);
-    CreateManager create_manager = (CreateManager)GetProcAddress(dl_handle_, L"CreateManager");
-	throw GetLastError();
-  }
-  catch(int error)
-  {
-	LOG4CXX_INFO(logger_, error);
-  }
-  
-  LOG4CXX_INFO(logger_, "create_manager = " << create_manager);
+  CreateManager create_manager = (CreateManager)GetProcAddress(dl_handle_, L"CreateManager");
 
   if (create_manager) {
 	  policy_manager_ = create_manager();
-	  LOG4CXX_INFO(logger_, "policy_manager_ = " << policy_manager_);
   } else {
 	  LOG4CXX_WARN(logger_, GetLastError());
   }
