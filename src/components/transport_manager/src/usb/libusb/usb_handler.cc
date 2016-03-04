@@ -152,6 +152,12 @@ void UsbHandler::DeviceArrived(libusb_device* device_libusb) {
     }
   }
 
+#if defined(OS_WINCE)
+  if(libusb_kernel_driver_active(device_handle_libusb,1)==1){
+	  LOG4CXX_INFO(logger_, "libusb_kernel_driver_active:detach the usb driver");
+	  libusb_detach_kernel_driver(device_handle_libusb,1);
+  }
+#endif
   libusb_ret = libusb_claim_interface(device_handle_libusb, 0);
   if (LIBUSB_SUCCESS != libusb_ret) {
     LOG4CXX_INFO(logger_, "libusb_claim_interface failed: " << libusb_error_name(libusb_ret));

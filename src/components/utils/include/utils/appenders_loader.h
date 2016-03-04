@@ -32,7 +32,9 @@
 
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_APPENDERS_LOADER_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_APPENDERS_LOADER_H_
-
+#if defined(OS_WIN32) ||defined(OS_WINCE)
+#include <Windows.h>
+#endif
 #define RTLD_LAZY	1
 
 namespace utils {
@@ -43,7 +45,12 @@ class AppendersLoader {
   ~AppendersLoader();
   bool Loaded() const;
  private:
-  void* handle_;
+#if defined(OS_WIN32) ||defined(OS_WINCE)
+	HANDLE handle_;
+#else
+	 void* handle_;
+#endif
+  
 };
 
 extern AppendersLoader appenders_loader;
