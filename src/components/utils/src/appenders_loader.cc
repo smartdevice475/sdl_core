@@ -45,28 +45,26 @@ AppendersLoader appenders_loader;
 
 AppendersLoader::AppendersLoader() {
 #if defined(OS_WIN32) || defined(OS_WINCE)
-	handle_=LoadLibrary(L"appenders.dll");
+  handle_=LoadLibrary(L"appenders.dll");
 #else
-	handle_ = dlopen("libappenders.so", RTLD_LAZY);
+  handle_ = dlopen("libappenders.so", RTLD_LAZY);
 #endif
 }
 
 AppendersLoader::~AppendersLoader() {
 #if defined(OS_WIN32) || defined(OS_WINCE)
-	if (handle_!=0)
-	{
-		CloseHandle(handle_);
-	}
-	
+  if (handle_!=0) {
+    CloseHandle(handle_);
+  }
 #else
-	if (handle_ != 0) {
+  if (handle_ != 0) {
     dlclose(handle_);
   }
 #endif
 }
 
 bool AppendersLoader::Loaded() const {
-	return handle_ != 0;
+  return handle_ != 0;
 }
 
 }  // namespace utils

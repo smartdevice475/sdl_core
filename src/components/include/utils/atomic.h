@@ -89,7 +89,7 @@
 #elif defined(__GNUG__)
 #define atomic_post_set(dst) __sync_val_compare_and_swap((dst), 0, 1)
 #elif defined(_MSC_VER) && (_MSC_VER >= 1200)
-#define atomic_post_set(dst) InterlockedCompareExchange((dst), 0, 1)
+#define atomic_post_set(dst) InterlockedCompareExchange((dst), 1, 0)
 #else
 #error "atomic post set operation not defined"
 #endif
@@ -99,7 +99,7 @@
 #elif defined(__GNUG__)
 #define atomic_post_clr(dst) __sync_val_compare_and_swap((dst), 1, 0)
 #elif defined(_MSC_VER) && (_MSC_VER >= 1200)
-#define atomic_post_clr(dst) InterlockedCompareExchange((dst), 1, 0)
+#define atomic_post_clr(dst) InterlockedCompareExchange((dst), 0, 1)
 #else
 #error "atomic post clear operation not defined"
 #endif

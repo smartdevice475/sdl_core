@@ -87,7 +87,7 @@ void Lock::Acquire() {
 void Lock::Release() {
   AssertTakenAndMarkFree();
   const int32_t status = pthread_mutex_unlock(&mutex_);
-  std::cout<<status<<endl;
+
   if (status != 0) {
     LOG4CXX_ERROR(logger_, "Failed to unlock mutex" << &mutex_ << ": "
                   << (status));/*EBUSY*/

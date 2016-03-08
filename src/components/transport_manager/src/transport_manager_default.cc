@@ -88,7 +88,7 @@ int TransportManagerDefault::Init() {
 
 
 #if defined(USB_SUPPORT)
-  std::cout<<"USB_SUPPORT"<<endl;
+  LOG4CXX_TRACE(logger_, "USB_SUPPORT");
   ta = new transport_adapter::UsbAoaAdapter();
 #ifdef TIME_TESTER
   if (metric_observer_) {

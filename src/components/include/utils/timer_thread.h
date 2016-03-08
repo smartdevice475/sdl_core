@@ -369,19 +369,16 @@ void TimerThread<T>::TimerDelegate::threadMain() {
   while (!stop_flag_) {
     // Sleep
     int32_t wait_milliseconds_left = TimerDelegate::get_timeout();
-    LOG4CXX_DEBUG(logger_, "Milliseconds left to wait: "
-                  << wait_milliseconds_left);
+    LOG4CXX_DEBUG(logger_, "Milliseconds left to wait: " << wait_milliseconds_left);
+
     ConditionalVariable::WaitStatus wait_status =
         termination_condition_.WaitFor(auto_lock, wait_milliseconds_left);
     // Quit sleeping or continue sleeping in case of spurious wake up
-    if (ConditionalVariable::kTimeout == wait_status
-        || wait_milliseconds_left <= 0) {
-      LOG4CXX_TRACE(logger_,
-                    "Timer timeout (ms): " << wait_milliseconds_left);
+    if (ConditionalVariable::kTimeout == wait_status || wait_milliseconds_left <= 0) {
+      LOG4CXX_TRACE(logger_, "Timer timeout (ms): " << wait_milliseconds_left);
       timer_thread_->onTimeOut();
     } else {
-      LOG4CXX_DEBUG(logger_,
-                    "Timeout reset force: " << TimerDelegate::timeout_milliseconds_);
+      LOG4CXX_DEBUG(logger_, "Timeout reset force: " << TimerDelegate::timeout_milliseconds_);
     }
     {
       sync_primitives::AutoLock auto_lock(restart_flag_lock_);
@@ -400,20 +397,17 @@ void TimerThread<T>::TimerLooperDelegate::threadMain() {
   TimerDelegate::stop_flag_ = false;
   while (!TimerDelegate::stop_flag_) {
     int32_t wait_milliseconds_left = TimerDelegate::get_timeout();
-    LOG4CXX_DEBUG(logger_, "Milliseconds left to wait: "
-                  << wait_milliseconds_left);
+
+    LOG4CXX_DEBUG(logger_, "Milliseconds left to wait: " << wait_milliseconds_left);
     ConditionalVariable::WaitStatus wait_status =
-        TimerDelegate::termination_condition_.WaitFor(auto_lock,
-                                                      wait_milliseconds_left);
+        TimerDelegate::termination_condition_.WaitFor(auto_lock, wait_milliseconds_left);
+
     // Quit sleeping or continue sleeping in case of spurious wake up
-    if (ConditionalVariable::kTimeout == wait_status
-        || wait_milliseconds_left <= 0) {
-      LOG4CXX_TRACE(logger_,
-                    "Timer timeout (ms): " << wait_milliseconds_left);
+    if (ConditionalVariable::kTimeout == wait_status || wait_milliseconds_left <= 0) {
+      LOG4CXX_TRACE(logger_, "Timer timeout (ms): " << wait_milliseconds_left);
       TimerDelegate::timer_thread_->onTimeOut();
     } else {
-      LOG4CXX_DEBUG(logger_, "Timeout reset force (ms): "
-                    << TimerDelegate::timeout_milliseconds_);
+      LOG4CXX_DEBUG(logger_, "Timeout reset force (ms): " << TimerDelegate::timeout_milliseconds_);
     }
   }
 }

@@ -99,7 +99,7 @@ class Lock {
   Lock(bool is_recursive);
   ~Lock();
 
-  // Ackquire the lock. Must be called only once on a thread.
+  // Acquire the lock. Must be called only once on a thread.
   // Please consider using AutoLock to capture it.
   void Acquire();
   // Release the lock. Must be called only once on a thread after lock.

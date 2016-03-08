@@ -283,7 +283,7 @@ bool UsbHandler::IsUsbEqual(libusb_device *devd,libusb_device *devs)
 		uint16_t idProductd = descd.idProduct;
 		uint16_t idProducts = descs.idProduct;
 		if (idVendord == 0x18d1 || idVendors == 0x18d1){
-			printf("vid:%d\n", idVendord);
+			LOG4CXX_INFO(logger_, "vid: " << idVendord);
 		}
 		bool bolret = (idVendord == idVendors && idProductd == idProducts);
 		return bolret;
@@ -302,7 +302,7 @@ bool UsbHandler::IsUsbEqual(libusb_device *devd,libusb_device *devs)
 void UsbHandler::UsbThread(){
 	
 	libusb_set_debug(libusb_context_, LIBUSB_LOG_LEVEL_INFO); 
-	printf("UsbThread");
+	LOG4CXX_INFO(logger_, "UsbThread");
 	fflush(stdout);
 	while (!shutdown_requested_){
 		libusb_device **devs=NULL;
@@ -311,7 +311,7 @@ void UsbHandler::UsbThread(){
 		//check  exist
 		//LOG4CXX_INFO(logger_,"check exist usb");
 		if(num<0){
-			printf("lisusb_get_device_list:errno=%d\n",num);
+			LOG4CXX_INFO(logger_, "lisusb_get_device_list:errno = " << num);
 			fflush(stdout);
 		}
 		std::vector<libusb_device*> leftDevs;
@@ -398,7 +398,7 @@ TransportAdapter::Error UsbHandler::Init() {
   const int thread_plug_error =
       pthread_create(&plug_thread, 0, &UsbHotPlugThread, this);
   if (0 != thread_plug_error) {
-	  printf("plug thread create failed\n");
+	  LOG4CXX_INFO(logger_, "plug thread create failed");
 	  fflush(stdout);
     LOG4CXX_ERROR(logger_, "USB device plug thread start failed, error code "
                                << thread_plug_error);
@@ -441,7 +441,7 @@ TransportAdapter::Error UsbHandler::Init() {
 #endif
 
   if (!thread_->start()) {
-	  printf("monitor thread start failed");
+    LOG4CXX_INFO(logger_, "monitor thread start failed");
     LOG4CXX_ERROR(logger_, "USB device scanner thread start failed, error code");
     LOG4CXX_TRACE(logger_, "exit with TransportAdapter::FAIL.");
     return TransportAdapter::FAIL;
