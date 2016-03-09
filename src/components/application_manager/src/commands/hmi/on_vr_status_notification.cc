@@ -47,11 +47,8 @@ OnVRStatusNotification::~OnVRStatusNotification() {
 }
 
 void OnVRStatusNotification::Run() {
-	LOG4CXX_INFO(logger_, "OnVRStatusNotification::Run");
-	printf("OnVRStatusNotification::Run\n");
-
+  LOG4CXX_INFO(logger_, "OnVRStatusNotification::Run");
   SendNotification();
-  printf("SendNotification\n");
 }
 
 }  // namespace commands

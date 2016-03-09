@@ -47,8 +47,7 @@ OnVRSwitchAppNotification::~OnVRSwitchAppNotification() {
 }
 
 void OnVRSwitchAppNotification::Run() {
-	LOG4CXX_INFO(logger_, "OnVRSwitchAppNotification::Run");
-	printf("OnVRSwitchAppNotification::Run\n");
+  LOG4CXX_INFO(logger_, "OnVRSwitchAppNotification::Run");
 
   SendNotification();
 }

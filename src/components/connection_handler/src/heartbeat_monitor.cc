@@ -77,9 +77,7 @@ void HeartBeatMonitor::Process() {
 
 void HeartBeatMonitor::threadMain() {
   AutoLock main_lock(main_thread_lock_);
-  LOG4CXX_DEBUG(
-      logger_,
-      "Start heart beat monitor. Timeout is " << default_heartbeat_timeout_);
+  LOG4CXX_DEBUG(logger_, "Start heart beat monitor. Timeout is " << default_heartbeat_timeout_);
   while (run_) {
     heartbeat_monitor_.WaitFor(main_lock, kDefaultCycleTimeout);
     Process();

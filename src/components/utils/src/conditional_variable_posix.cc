@@ -150,8 +150,12 @@ ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
 
   LOG4CXX_INFO(logger_, "Wait for timeout: wait_interval.tv_sec = " << wait_interval.tv_sec << " wait_interval.tv_nsec = " << wait_interval.tv_nsec);
   int32_t timedwait_status = pthread_cond_timedwait(&cond_var_, &lock.mutex_, &wait_interval);
+#ifdef OS_WINCE
+  lock.Release();
+#else
   lock.AssertFreeAndMarkTaken();
-
+#endif
+  
   WaitStatus wait_status = kNoTimeout;
   switch(timedwait_status) {
     case 0: {

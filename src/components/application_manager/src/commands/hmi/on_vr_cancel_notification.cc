@@ -48,7 +48,6 @@ OnVRCancelNotification::~OnVRCancelNotification() {
 
 void OnVRCancelNotification::Run() {
   LOG4CXX_INFO(logger_, "OnVRCancelNotification::Run");
-  printf("OnVRCancelNotification::Run\n");
 
   SendNotification();
 }

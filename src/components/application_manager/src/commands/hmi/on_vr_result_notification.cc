@@ -47,8 +47,7 @@ OnVRResultNotification::~OnVRResultNotification() {
 }
 
 void OnVRResultNotification::Run() {
-	LOG4CXX_INFO(logger_, "OnVRResultNotification::Run");
-	printf("OnVRResultNotification::Run\n");
+  LOG4CXX_INFO(logger_, "OnVRResultNotification::Run");
 
   SendNotification();
 }

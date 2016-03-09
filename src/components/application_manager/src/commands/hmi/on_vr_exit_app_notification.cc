@@ -47,8 +47,7 @@ OnVRExitAppNotification::~OnVRExitAppNotification() {
 }
 
 void OnVRExitAppNotification::Run() {
-	LOG4CXX_INFO(logger_, "OnVRExitAppNotification::Run");
-	printf("OnVRExitAppNotification::Run\n");
+  LOG4CXX_INFO(logger_, "OnVRExitAppNotification::Run");
 
   SendNotification();
 }

@@ -47,8 +47,7 @@ OnVRCommandTTSNotification::~OnVRCommandTTSNotification() {
 }
 
 void OnVRCommandTTSNotification::Run() {
-	LOG4CXX_INFO(logger_, "OnVRCommandTTSNotification::Run");
-	printf("OnVRCommandTTSNotification::Run\n");
+  LOG4CXX_INFO(logger_, "OnVRCommandTTSNotification::Run");
 
   SendNotification();
 }

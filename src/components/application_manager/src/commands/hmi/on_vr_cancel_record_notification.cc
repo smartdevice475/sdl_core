@@ -53,7 +53,6 @@ OnVRCancelRecordNotification::~OnVRCancelRecordNotification() {
 
 void OnVRCancelRecordNotification::Run() {
   LOG4CXX_INFO(logger_, "OnVRCancelRecordNotification::Run");
-  printf("OnVRCancelRecordNotification::Run\n");
 
   ApplicationManagerImpl::instance()->set_vr_session_started(false);
 #ifdef ASR_HAS_VR

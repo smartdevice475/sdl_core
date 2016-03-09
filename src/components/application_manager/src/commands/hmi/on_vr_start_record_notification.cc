@@ -62,7 +62,6 @@ OnVRStartRecordNotification::~OnVRStartRecordNotification() {
 
 void OnVRStartRecordNotification::Run() {
 	LOG4CXX_INFO(logger_, "OnVRStartRecordNotification::Run");
-	printf("OnVRStartRecordNotification::Run\n");
 	ApplicationManagerImpl::instance()->set_vr_session_started(true);
 #ifdef ASR_HAS_VR
 	msp_vr_register_callback(this, OnVRStartRecordNotification::handleVRResult);
@@ -74,10 +73,10 @@ void OnVRStartRecordNotification::Run() {
 	//if (vr_timer_==NULL)
 	//	vr_timer_ = new timer::TimerThread<OnVRStartRecordNotification>(this, &application_manager::commands::OnVRStartRecordNotification::OnTimer);
 	//vr_timer_->start(8);
-	printf("record start\n");
+
 	if (!msp_vr_start())
 	{
-		printf("record start failed\n");
+		LOG4CXX_INFO(logger_, "record start failed.");
 		//vr_timer_->stop();
 		//OnVRStartRecordNotification::handleVRResult(this, 0, NULL, -1);
 	}
@@ -107,13 +106,11 @@ void OnVRStartRecordNotification::handleVRResult(void *data,int cmdId, char *res
 	//msp_vr_set_state(MSP_RECORD_END);
 	if (code == 0 && result != NULL)
 	{
-		printf("******************************\ncommand id=%d,command text=%s\n******************************\n", cmdId, result);
-
-		LOG4CXX_INFO(logger_, "VR result send sucess");
+		LOG4CXX_INFO(logger_, "VR result send success");
 		OnVRStartRecordNotification  *object = static_cast<OnVRStartRecordNotification*>(data);
 		
 		VRStatus status = ApplicationManagerImpl::instance()->handleVRCommand(cmdId, result);
-		printf("status=%d\n", status);
+
 		if (VRSTATUS_SUCCESS == status)
 		{
 			MessageHelper::SendVRStatusToHMI("SUCCESS");
@@ -130,7 +127,6 @@ void OnVRStartRecordNotification::handleVRResult(void *data,int cmdId, char *res
 	else
 	{
 		LOG4CXX_INFO(logger_, "VR result send faild:" << "code=" << code);
-		printf("vr send failed,code=%d\n", code);
 		if (code <0)
 		{
 
@@ -138,19 +134,16 @@ void OnVRStartRecordNotification::handleVRResult(void *data,int cmdId, char *res
 		else if (code == 10114)
 		{
 			MessageHelper::SendVRStatusToHMI("TIME_OVER");
-			printf("Timer out\n");
 			return;
 		}
 		else
 		{
-			printf("vr send failed,code=%d\n", code);
 			MessageHelper::SendVRStatusToHMI("FAIL");
 		}
 		
 		/*OnVRStartRecordNotification  *object = static_cast<OnVRStartRecordNotification*>(data);
 		if (object != NULL)
 		{
-			printf("stop timer\n");
 			object->StopTimer();
 		}*/
 	}
@@ -165,7 +158,6 @@ void OnVRStartRecordNotification::handleVRResult(void *data,int cmdId, char *res
 //{
 //	msp_vr_terminate();
 //	MessageHelper::SendVRStatusToHMI("TIME_OVER");
-//	printf("timer stop,Timer out\n");
 //}
 
 
@@ -263,7 +255,6 @@ int OnVRStartRecordNotification::ConstructedVRGrammars(char cmd[],smart_objects:
 			msp_vr_grammar_trim(strOut.c_str(), out, strlen(strOut.c_str()));
 			strcat(cmd, out);
 		}
-		//printf("%s,id=%d\n", (*it_array).asString().c_str(), id); 
 		num++; 
 	}
 	return num;
