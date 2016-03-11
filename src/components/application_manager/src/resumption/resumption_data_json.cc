@@ -341,7 +341,7 @@ void ResumptionDataJson::GetDataForLoadResumeData(
     smart_objects::SmartObject& saved_data) const {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock autolock(resumption_lock_);
+  // sync_primitives::AutoLock autolock(resumption_lock_);
   smart_objects::SmartObject so_array_data(smart_objects::SmartType_Array);
   int i = 0;
   for (Json::Value::iterator it = GetSavedApplications().begin();

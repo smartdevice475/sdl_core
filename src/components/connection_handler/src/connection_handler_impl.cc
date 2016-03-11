@@ -96,7 +96,7 @@ void ConnectionHandlerImpl::set_connection_handler_observer(
     ConnectionHandlerObserver *observer) {
   LOG4CXX_DEBUG(logger_, "ConnectionHandlerImpl::set_connection_handler_observer() "
                 << observer);
-  sync_primitives::AutoLock lock(connection_handler_observer_lock_);
+  // sync_primitives::AutoLock lock(connection_handler_observer_lock_);
   if (!observer) {
     LOG4CXX_WARN(logger_, "Set Null pointer to observer.");
   }

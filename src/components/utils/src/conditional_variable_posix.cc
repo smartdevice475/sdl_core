@@ -55,7 +55,8 @@ ConditionalVariable::ConditionalVariable() {
   pthread_condattr_t attrs;
   int32_t initialized  = pthread_condattr_init(&attrs);
   if (initialized != 0)
-    LOG4CXX_ERROR(logger_, "Failed to initialize conditional variable attributes");
+    LOG4CXX_ERROR(logger_, "Failed to initialize "
+                            "conditional variable attributes");
 
 #if defined(OS_WIN32) || defined(OS_WINCE)
 //
@@ -66,14 +67,14 @@ ConditionalVariable::ConditionalVariable() {
 #else
   pthread_condattr_setclock(&attrs, CLOCK_MONOTONIC);
 #endif
-
   initialized = pthread_cond_init(&cond_var_, &attrs);
   if (initialized != 0)
-    LOG4CXX_ERROR(logger_, "Failed to initialize conditional variable");
-
+    LOG4CXX_ERROR(logger_, "Failed to initialize "
+                            "conditional variable");
   int32_t rv = pthread_condattr_destroy(&attrs);
   if (rv != 0)
-    LOG4CXX_ERROR(logger_, "Failed to destroy conditional variable attributes");
+    LOG4CXX_ERROR(logger_, "Failed to destroy "
+                            "conditional variable attributes");
 }
 
 ConditionalVariable::~ConditionalVariable() {
@@ -82,7 +83,6 @@ ConditionalVariable::~ConditionalVariable() {
 }
 
 void ConditionalVariable::NotifyOne() {
-  LOG4CXX_INFO(logger_, "Signal conditional variable");
   int32_t signaled = pthread_cond_signal(&cond_var_);
   if (signaled != 0)
     LOG4CXX_ERROR(logger_, "Failed to signal conditional variable");
@@ -90,7 +90,6 @@ void ConditionalVariable::NotifyOne() {
 }
 
 void ConditionalVariable::Broadcast() {
-  LOG4CXX_INFO(logger_, "Broadcast conditional variable");
   int32_t signaled = pthread_cond_broadcast(&cond_var_);
   if (signaled != 0)
     LOG4CXX_ERROR(logger_, "Failed to broadcast conditional variable");
@@ -98,27 +97,25 @@ void ConditionalVariable::Broadcast() {
 }
 
 bool ConditionalVariable::Wait(Lock& lock) {
-  LOG4CXX_INFO(logger_, "Wait for conditional variable");
   lock.AssertTakenAndMarkFree();
   int32_t wait_status = pthread_cond_wait(&cond_var_,
                                       &lock.mutex_);
   lock.AssertFreeAndMarkTaken();
   if (wait_status != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to wait for conditional variable"<<wait_status);
+    LOG4CXX_ERROR(logger_, "Failed to wait for conditional variable");
     return false;
   }
   return true;
 }
 
 bool ConditionalVariable::Wait(AutoLock& auto_lock) {
-  LOG4CXX_INFO(logger_, "Wait for conditional variable");
   Lock& lock = auto_lock.GetLock();
   lock.AssertTakenAndMarkFree();
   int32_t wait_status = pthread_cond_wait(&cond_var_,
                                       &lock.mutex_);
   lock.AssertFreeAndMarkTaken();
   if (wait_status != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to wait for conditional variable"<<wait_status);
+    LOG4CXX_ERROR(logger_, "Failed to wait for conditional variable");
     return false;
   }
   return true;
@@ -128,7 +125,7 @@ ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
     AutoLock& auto_lock, int32_t milliseconds){
   struct timespec now;
 #if defined(OS_WIN32) || defined(OS_WINCE)
-  clock_gettime(CLOCK_MONOTONIC, &now);
+  clock_gettime(CLOCK_REALTIME, &now);
 #elif defined(OS_MAC)
   clock_gettime(CLOCK_MONOTONIC, &now);
 #else
@@ -142,20 +139,11 @@ ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
   wait_interval.tv_sec += wait_interval.tv_nsec / kNanosecondsPerSecond;
   wait_interval.tv_nsec %= kNanosecondsPerSecond;
   Lock& lock = auto_lock.GetLock();
-#ifdef OS_WINCE
-  lock.Acquire();
-#else
   lock.AssertTakenAndMarkFree();
-#endif
-
-  LOG4CXX_INFO(logger_, "Wait for timeout: wait_interval.tv_sec = " << wait_interval.tv_sec << " wait_interval.tv_nsec = " << wait_interval.tv_nsec);
-  int32_t timedwait_status = pthread_cond_timedwait(&cond_var_, &lock.mutex_, &wait_interval);
-#ifdef OS_WINCE
-  lock.Release();
-#else
+  int32_t timedwait_status = pthread_cond_timedwait(&cond_var_,
+                                                &lock.mutex_,
+                                                &wait_interval);
   lock.AssertFreeAndMarkTaken();
-#endif
-  
   WaitStatus wait_status = kNoTimeout;
   switch(timedwait_status) {
     case 0: {

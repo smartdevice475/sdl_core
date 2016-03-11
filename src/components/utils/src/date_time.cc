@@ -53,7 +53,7 @@ void clock_gettime(int i, timespec * tm)
 {
 	if (i == CLOCK_MONOTONIC)
 	{
-		unsigned long cur = GetTickCount();
+		unsigned __int64 cur = GetTickCount();
 		tm->tv_sec = cur / 1000;
 		tm->tv_nsec = (cur % 1000) * 1000;
 	}

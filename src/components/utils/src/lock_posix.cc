@@ -129,7 +129,7 @@ void Lock::Init(bool is_recursive) {
 
   const int32_t mutex_type = is_recursive
                              ? PTHREAD_MUTEX_RECURSIVE
-                             :PTHREAD_MUTEX_DEFAULT ;//PTHREAD_MUTEX_ERRORCHECK
+                             : PTHREAD_MUTEX_ERRORCHECK;
 
   pthread_mutexattr_settype(&attr, mutex_type);
   const int32_t status = pthread_mutex_init(&mutex_, &attr);
