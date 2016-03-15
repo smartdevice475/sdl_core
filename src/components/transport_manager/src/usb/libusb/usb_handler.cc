@@ -329,11 +329,6 @@ void UsbHandler::UsbThread(){
 
 		for(int i=0;i<leftDevs.size();i++){
 			libusb_device *device=leftDevs[i];
-			std::cout<<"libusb device left (bus number "
-                            << static_cast<int>(libusb_get_bus_number(device))
-                            << ", device address "
-                            << static_cast<int>(
-                                   libusb_get_device_address(device)) << ")";
 			LOG4CXX_INFO(logger_, "libusb device left (bus number "
                             << static_cast<int>(libusb_get_bus_number(device))
                             << ", device address "
@@ -358,11 +353,6 @@ void UsbHandler::UsbThread(){
 		//
 		for(int i=0;i<arriveDevs.size();i++){
 			libusb_device *device=arriveDevs[i];
-			std::cout<< "libusb device arrived (bus number "
-                            << static_cast<int>(libusb_get_bus_number(device))
-                            << ", device address "
-                            << static_cast<int>(
-                                   libusb_get_device_address(device)) << ")";
 			LOG4CXX_INFO(logger_, "libusb device arrived (bus number "
                             << static_cast<int>(libusb_get_bus_number(device))
                             << ", device address "

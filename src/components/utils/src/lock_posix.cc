@@ -124,17 +124,19 @@ void Lock::AssertTakenAndMarkFree() {
 #endif
 
 void Lock::Init(bool is_recursive) {
-  pthread_mutexattr_t attr;
-  pthread_mutexattr_init(&attr);
+  int32_t status;
 
-  const int32_t mutex_type = is_recursive
-                             ? PTHREAD_MUTEX_RECURSIVE
-                             : PTHREAD_MUTEX_ERRORCHECK;
+  if (is_recursive) {
+	  pthread_mutexattr_t attr;
 
-  pthread_mutexattr_settype(&attr, mutex_type);
-  const int32_t status = pthread_mutex_init(&mutex_, &attr);
-
-  pthread_mutexattr_destroy(&attr);
+	  pthread_mutexattr_init(&attr);
+	  pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+	  status = pthread_mutex_init(&mutex_, &attr);
+	  pthread_mutexattr_destroy(&attr);
+  }
+  else {
+	  status = pthread_mutex_init(&mutex_, NULL);
+  }
 
   if (status != 0) {
     LOG4CXX_FATAL(logger_, "Failed to initialize mutex. "

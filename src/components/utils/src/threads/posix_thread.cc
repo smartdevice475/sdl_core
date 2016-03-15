@@ -108,6 +108,7 @@ void* Thread::threadFunc(void* arg) {
 
 	thread->state_lock_.Acquire();
 	thread->state_cond_.Broadcast();
+    thread->run_cond_.Wait(thread->state_lock_);
 
 	while (!thread->finalized_) {
 #if defined(OS_WIN32) || defined(OS_WINCE)
@@ -115,7 +116,7 @@ void* Thread::threadFunc(void* arg) {
 #else
 		LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self() << " iteration");
 #endif
-		thread->run_cond_.Wait(thread->state_lock_);
+		
 #if defined(OS_WIN32) || defined(OS_WINCE)
 		LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self().x << " execute. " << "stopped_ = " << thread->stopped_ << "; finalized_ = " << thread->finalized_);
 #else

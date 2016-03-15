@@ -58,7 +58,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 int TransportManagerDefault::Init() {
   LOG4CXX_TRACE(logger_, "enter");
-  std::cout<<"TransportManagerDefault::Init"<<endl;
+
   if (E_SUCCESS != TransportManagerImpl::Init()) {
     LOG4CXX_TRACE(logger_, "exit with E_TM_IS_NOT_INITIALIZED. Condition: E_SUCCESS != TransportManagerImpl::Init()");
     return E_TM_IS_NOT_INITIALIZED;

@@ -33,15 +33,7 @@
 #ifndef SRC_COMPONENTS_INCLUDE_UTILS_LOGGER_H_
 #define SRC_COMPONENTS_INCLUDE_UTILS_LOGGER_H_
 
-#include <iostream>
-#include <stdio.h>
-using namespace std;
-#ifndef ENABLE_LOG
-#include <sstream>
-#include <string>
-#include <fstream>
-#include <ostream>
-#else
+#ifdef ENABLE_LOG
 #include <errno.h>
 #include <string.h>
 #include <sstream>
@@ -148,12 +140,6 @@ using namespace std;
 
 #else  // ENABLE_LOG is OFF
 
-#define LOG(MSG)  {std::cout<<"["<<__FUNCTION__<<"][Line:"<<__LINE__<<"]"<<MSG<<endl; }while(false)
-//std::ofstream ff("sdllog.txt",std::iostream::out|std::iostream::app);ff<<"["<<__FUNCTION__<<"][Line:"<<__LINE__<<"]"<<MSG<<endl;ff.flush();ff.close();
-//{std::cout<<__FUNCTION__<<__LINE__<<MSG<<endl;}while(0)//{printf("%s:LINE:%d]",__FUNCTION__,__LINE__);fflush(stdout);}while(0)
-//#define LOG(MSG) //{std::ofstream ff("sdllog.txt",std::ios::out|std::ios::app);ff<<MSG<<endl;ff.flush(); ff.close(); }
-
-
     #define CREATE_LOGGERPTR_GLOBAL(logger_var, logger_name)
 
     #define CREATE_LOGGERPTR_LOCAL(logger_var, logger_name)
@@ -168,31 +154,31 @@ using namespace std;
     #define LOG4CXX_IS_TRACE_ENABLED(logger) false
 
     #undef LOG4CXX_TRACE
-    #define LOG4CXX_TRACE(x, y)  //LOG(y)
+    #define LOG4CXX_TRACE(x, y)
 
     #define LOG4CXX_AUTO_TRACE_WITH_NAME_SPECIFIED(loggerPtr, auto_trace)
-    #define LOG4CXX_AUTO_TRACE(loggerPtr) LOG("audo trace:")
+    #define LOG4CXX_AUTO_TRACE(loggerPtr)
 
     #undef LOG4CXX_DEBUG
-    #define LOG4CXX_DEBUG(x, y)  LOG(y)
+    #define LOG4CXX_DEBUG(x, y)
 
     #undef LOG4CXX_INFO
-    #define LOG4CXX_INFO(x, y)  LOG(y)
+    #define LOG4CXX_INFO(x, y)
 
     #undef LOG4CXX_WARN
-    #define LOG4CXX_WARN(x, y)  LOG(y)
+    #define LOG4CXX_WARN(x, y)
 
     #undef LOG4CXX_ERROR
-    #define LOG4CXX_ERROR(x, y)  LOG(y)
+    #define LOG4CXX_ERROR(x, y)
 
     #undef LOG4CXX_ERROR_WITH_ERRNO
-    #define LOG4CXX_ERROR_WITH_ERRNO(x, y) LOG(y)
+    #define LOG4CXX_ERROR_WITH_ERRNO(x, y)
 
     #undef LOG4CXX_WARN_WITH_ERRNO
-    #define LOG4CXX_WARN_WITH_ERRNO(x, y)  LOG(y)
+    #define LOG4CXX_WARN_WITH_ERRNO(x, y)
 
     #undef LOG4CXX_FATAL
-    #define LOG4CXX_FATAL(x, y)  LOG(y)
+    #define LOG4CXX_FATAL(x, y)
 #endif  // ENABLE_LOG
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_LOGGER_H_
