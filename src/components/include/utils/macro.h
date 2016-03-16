@@ -40,8 +40,7 @@
 #include "logger.h"
 
 
-// A macro to set some action for variable to avoid "unused variable" warning
-#define UNUSED(x) (void)x;
+
 // A macro to disallow the copy constructor and operator= functions
 // This should be used in the private: declarations for a class
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \
@@ -59,6 +58,7 @@
 #define FRIEND_DELETER_DESTRUCTOR(TypeName) \
   friend utils::deleters::Deleter<TypeName>::~Deleter()
 
+#ifndef ASSERT
 #ifdef DEBUG
   #define ASSERT(condition) \
     do { \
@@ -69,6 +69,7 @@
   #define ASSERT(condition) \
     fprintf(stderr, "Failed condition \"" #condition "\" [%s:%d][%s]\n\n", \
                     __FILE__, __LINE__, __FUNCTION__)
+#endif
 #endif
 
 #define DCHECK(condition) \
@@ -83,9 +84,6 @@
  * Will cauch assert on debug version,
  * Will return return_value in release build
  */
-#if defined(OS_WIN32) || defined(OS_WINCE)
-#define DCHECK_OR_RETURN(condition, return_value)
-#else
 #define DCHECK_OR_RETURN(condition, return_value) \
   if (!(condition)) { \
     CREATE_LOGGERPTR_LOCAL(logger_, "assert"); \
@@ -94,14 +92,10 @@
     ASSERT((condition)); \
     return (return_value); \
   }
-#endif
 /*
  * Will cauch assert on debug version,
  * Will return return_value in release build
  */
-#if defined(OS_WIN32) || defined(OS_WINCE)
-#define DCHECK_OR_RETURN_VOID(condition)
-#else
 #define DCHECK_OR_RETURN_VOID(condition) \
   if (!(condition)) { \
     CREATE_LOGGERPTR_LOCAL(logger_, "assert"); \
@@ -110,7 +104,7 @@
     ASSERT((condition)); \
     return ; \
   }
-#endif
+
 
 #define NOTREACHED() DCHECK(!"Unreachable code")
 

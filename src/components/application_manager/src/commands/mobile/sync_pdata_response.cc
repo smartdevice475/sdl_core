@@ -30,10 +30,6 @@
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
  */
-
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
-#endif
 #include "application_manager/commands/mobile/sync_pdata_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"

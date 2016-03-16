@@ -31,9 +31,6 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
-#endif
 #include <string>
 #include "application_manager/commands/mobile/add_command_request.h"
 #include "application_manager/application_manager_impl.h"
@@ -392,11 +389,7 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
     result_code = mobile_apis::Result::WARNINGS;
   } else {
     result_code = MessageHelper::HMIToMobileResult(
-#if defined(OS_WIN32) || defined(OS_WINCE)
-        max(ui_result_, vr_result_));
-#else
-        std::max(ui_result_, vr_result_));
-#endif
+    std::max(ui_result_, vr_result_));
   }
 
   if (BothSend() && hmi_apis::Common_Result::SUCCESS == vr_result_) {

@@ -13,7 +13,8 @@
 #  For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 #
 
-
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+else ()
 if (SQLITE3_LIBRARIES AND SQLITE3_INCLUDE_DIRS)
   set(SQLITE3_FOUND TRUE)
 else (SQLITE3_LIBRARIES AND SQLITE3_INCLUDE_DIRS)
@@ -24,25 +25,6 @@ else (SQLITE3_LIBRARIES AND SQLITE3_INCLUDE_DIRS)
     message(WARNING "PkgConfig isn't installed. You need to sure sqlite3>=3.7.11")
   endif (PKG_CONFIG_FOUND)
   
-  if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-  find_path(SQLITE3_INCLUDE_DIR
-    NAMES
-      sqlite3.h
-    PATHS
-      ${_SQLITE3_INCLUDEDIR}
-      ${CMAKE_SOURCE_DIR}/include/win32
-  )
-  elseif (CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-  MESSAGE(STATUS "Finding sqlite3 include direction ...")
-  find_path(SQLITE3_INCLUDE_DIR
-    NAMES
-      sqlite3.h
-    PATHS
-      ${_SQLITE3_INCLUDEDIR}
-      ${CMAKE_SOURCE_DIR}/include/wince
-  )
-  MESSAGE(STATUS "Found sqlite3 direction result: " ${SQLITE3_INCLUDE_DIR})
-  else (CMAKE_SYSTEM_NAME STREQUAL "Windows")
   find_path(SQLITE3_INCLUDE_DIR
     NAMES
       sqlite3.h
@@ -53,28 +35,18 @@ else (SQLITE3_LIBRARIES AND SQLITE3_INCLUDE_DIRS)
       /opt/local/include
       /sw/include
   )
-  endif (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 
-  if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
   find_library(SQLITE3_LIBRARY
     NAMES
       sqlite3
     PATHS
       ${_SQLITE3_LIBDIR}
-      ${CMAKE_SOURCE_DIR}/lib/win32
+      /usr/lib
+      /usr/local/lib
+      /opt/local/lib
+      /sw/lib
   )
-  else (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-  MESSAGE(STATUS "Finding sqlite3 lib direction ...")
-  find_library(SQLITE3_LIBRARY
-    NAMES
-      sqlite3
-    PATHS
-      ${_SQLITE3_LIBDIR}
-      ${CMAKE_SOURCE_DIR}/lib/wince
-  )
-  MESSAGE(STATUS "Found sqlite3 lib result: " ${SQLITE3_LIBRARY})
-  endif (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-  
+
   if (SQLITE3_LIBRARY)
     set(SQLITE3_FOUND TRUE)
   endif (SQLITE3_LIBRARY)
@@ -108,3 +80,4 @@ else (SQLITE3_LIBRARIES AND SQLITE3_INCLUDE_DIRS)
   mark_as_advanced(SQLITE3_INCLUDE_DIRS SQLITE3_LIBRARIES)
 
 endif (SQLITE3_LIBRARIES AND SQLITE3_INCLUDE_DIRS)
+endif()

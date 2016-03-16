@@ -31,9 +31,6 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
-#endif
 #include "application_manager/commands/mobile/encoded_sync_pdata_response.h"
 
 namespace application_manager {

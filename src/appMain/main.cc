@@ -29,9 +29,6 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
-#endif
 #ifndef OS_WINCE
 #include <sys/stat.h>
 #endif
@@ -50,7 +47,9 @@
 
 // ----------------------------------------------------------------------------
 #if defined(OS_WIN32) || defined(OS_WINCE)
-#include <winsock.h>
+#ifndef _WINSOCKAPI_
+#include <winsock2.h>
+#endif
 #endif
 
 #include "./life_cycle.h"

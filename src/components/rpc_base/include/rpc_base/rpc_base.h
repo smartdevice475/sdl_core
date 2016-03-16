@@ -38,8 +38,12 @@
 #include <vector>
 #include <stdint.h>
 
-#ifdef OS_WINCE
-#include "validation_report.h"
+#ifdef max
+#undef max
+#endif
+
+#ifdef min
+#undef min
 #endif
 
 namespace Json {
@@ -90,13 +94,8 @@ class Range {
   public:
     // Methods
     Range(const T min, const T max);
-#if defined(OS_WIN32) || defined(OS_WINCE)
-		T min_rpc() const;
-		T max_rpc() const;
-#else
     T min() const;
     T max() const;
-#endif
     template<typename U>
     bool Includes(U val) const;
   private:

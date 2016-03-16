@@ -30,9 +30,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
-#endif
 #include "application_manager/commands/hmi/on_vr_cancel_record_notification.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/application_manager_impl.h"

@@ -32,7 +32,7 @@
 
 #include "policy/policy_table.h"
 
-#  include "policy/sql_pt_representation.h"
+#include "policy/sql_pt_representation.h"
 
 #include "utils/logger.h"
 
@@ -41,9 +41,7 @@ namespace policy {
 CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyTable")
 
 PolicyTable::PolicyTable()
-    : pt_data_(
-               new SQLPTRepresentation()
-               ) {
+    : pt_data_(new SQLPTRepresentation()) {
 }
 
 PolicyTable::PolicyTable(utils::SharedPtr<PTRepresentation> pt_data)

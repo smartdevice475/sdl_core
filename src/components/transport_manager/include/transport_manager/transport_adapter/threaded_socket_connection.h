@@ -35,13 +35,11 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_THREADED_SOCKET_CONNECTION_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_THREADED_SOCKET_CONNECTION_H_
 
-#if defined(OS_WIN32)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #include "pthread.h"
-#include <WINSOCK2.H> 
-#include <stdio.h>
-#elif defined(OS_WINCE)
-#include "pthread.h"
-#include <winsock2.h> 
+#ifndef _WINSOCKAPI_
+#include <winsock2.h>
+#endif
 #include <stdio.h>
 #else
 #include <poll.h>

@@ -32,7 +32,6 @@
 
 #include "utils/date_time.h"
 
-#include <global_first.h>
 #if defined(OS_WIN32) || defined(OS_WINCE)
 #include <time.h>
 #include <assert.h>

@@ -32,10 +32,6 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
-#endif
 #include <cstring>
 #include <cstdlib>
 
@@ -358,7 +354,6 @@ void UsbHandler::UsbThread(){
                             << ", device address "
                             << static_cast<int>(
                                    libusb_get_device_address(device)) << ")");
-  PRINTMSG(1, (L"\n%s, line:%d, DeviceArrived(device);\n", __FUNCTIONW__, __LINE__));
 			DeviceArrived(device);
 		}
 

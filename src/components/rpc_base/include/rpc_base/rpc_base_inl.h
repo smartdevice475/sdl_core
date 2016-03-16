@@ -55,31 +55,19 @@ Range<T>::Range(T min, T max)
 }
 
 template <typename T>
-#if defined(OS_WIN32) || defined(OS_WINCE)
-T Range<T>::min_rpc() const {
-#else
 T Range<T>::min() const {
-#endif
   return min_;
 }
 
 template <typename T>
-#if defined(OS_WIN32) || defined(OS_WINCE)
-T Range<T>::max_rpc() const {
-#else
 T Range<T>::max() const {
-#endif
   return max_;
 }
 
 template <typename T>
 template <typename U>
 bool Range<T>::Includes(U val) const {
-#if defined(OS_WIN32) || defined(OS_WINCE)
-	return min_rpc() <= val && val <= max_rpc();
-#else
-	return min() <= val && val <= max();
-#endif
+  return min() <= val && val <= max();
 }
 
 
@@ -183,11 +171,7 @@ const Range<T> Integer<T, minval, maxval>::range_(minval, maxval);
 template<typename T, T minval, T maxval>
 Integer<T, minval, maxval>::Integer()
     : PrimitiveType(kUninitialized),
-#if defined(OS_WIN32) || defined(OS_WINCE)
-		value_(range_.min_rpc()) {
-#else
       value_(range_.min()) {
-#endif
 }
 
 template<typename T, T minval, T maxval>
@@ -233,9 +217,9 @@ Integer<T, minval, maxval>::operator IntType() const {
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 const Range<double> Float<minnum, maxnum, minden, maxden>::range_(
 #if defined(OS_WIN32) || defined(OS_WINCE)
-	double(minnum) / minden, double(maxnum) / maxden);
+    double(minnum) / minden, double(maxnum) / maxden);
 #else
-	(double(minnum)/minden), (double(maxnum)/maxden));
+    (double(minnum)/minden), (double(maxnum)/maxden));
 #endif
 
 

@@ -32,24 +32,8 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0)
 
 SET(PROJECT smartDeviceLinkCore)
 
-#compiler set
-#MESSAGE(STATUS ${CMAKE_SYSTEM_NAME})
-IF(SYSTEM_NAME STREQUAL "Android")
-SET(CMAKE_SYSTEM_NAME Android)
-ENDIF()
-
-#when build on android plat,you should set -DCOMPILER_PATH=your compiler root path
-IF(CMAKE_SYSTEM_NAME STREQUAL "Android")
-    IF(NOT COMPILER_PATH)
-    SET(COMPILER_PATH "/opt/android-9-toolchain")
-    ENDIF()
-    MESSAGE(STATUS "Current cross compiler path is ${COMPILER_PATH}")
-    SET(CMAKE_CXX_COMPILER "${COMPILER_PATH}/bin/arm-linux-androideabi-g++")
-    SET(CMAKE_C_COMPILER "${COMPILER_PATH}/bin/arm-linux-androideabi-gcc")
-ENDIF()
-
 MESSAGE(STATUS "Current build system name is ${CMAKE_SYSTEM_NAME}")
-MESSAGE(STATUS "Current CMAKE_BUIDL_TYPE is ${CMAKE_BUILD_TYPE}")
+MESSAGE(STATUS "Current CMAKE_BUILD_TYPE is ${CMAKE_BUILD_TYPE}")
 
 #Jenkins integration section
 #dont modify this section if you don't know details about integration with Jenkins!!!

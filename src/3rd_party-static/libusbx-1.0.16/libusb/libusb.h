@@ -72,7 +72,7 @@ typedef unsigned __int32  uint32_t;
 #undef interface
 #endif
 #ifdef OS_WINCE
-#include <winsock2.h>
+#include <winsock.h>
 #endif
 #if !defined(__CYGWIN__)
 #include <winsock.h>

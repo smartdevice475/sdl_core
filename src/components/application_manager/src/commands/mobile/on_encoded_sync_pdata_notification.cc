@@ -31,9 +31,6 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
-#endif
 #include <string>
 #include <vector>
 #include "application_manager/commands/mobile/on_encoded_sync_pdata_notification.h"

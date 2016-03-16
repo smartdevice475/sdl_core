@@ -31,7 +31,9 @@
 #include <stdint.h>
 #endif //_MSC_VER
 
+#ifndef _WINSOCKAPI_
 #include <winsock2.h>
+#endif
 #include <windows.h>
 
 #if _MSC_VER >= 1400 // VC++ 8.0

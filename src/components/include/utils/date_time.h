@@ -47,7 +47,7 @@ void clock_gettime(int i, timespec * tm);
 #elif defined(OS_WINCE)
 #include <unistd.h>
 #include <pthread.h>
-#include <winsock2.h>
+#include <winsock.h>
 typedef struct timeval TimevalStruct;
 
 #define CLOCK_REALTIME 0

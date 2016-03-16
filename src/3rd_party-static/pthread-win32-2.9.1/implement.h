@@ -54,7 +54,7 @@ typedef VOID (APIENTRY *PAPCFUNC)(DWORD dwParam);
 /*
  * note: ETIMEDOUT is correctly defined in winsock.h
  */
-#include <winsock2.h>
+#include <winsock.h>
 
 /*
  * In case ETIMEDOUT hasn't been defined above somehow.

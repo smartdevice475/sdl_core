@@ -42,6 +42,7 @@ INCLUDE_DIRECTORIES(
     ${CMAKE_SOURCE_DIR}/src/3rd_party-static/libusbx-1.0.16/libusb
     ${CMAKE_SOURCE_DIR}/src/3rd_party/sqlite3
     ${LOG4CXX_INCLUDE_DIRECTORY}
+    ${SQLITE3_INCLUDE_DIRECTORY}
 )
 
 IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")

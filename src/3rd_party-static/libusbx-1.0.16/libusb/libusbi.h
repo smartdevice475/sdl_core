@@ -72,7 +72,7 @@
 #endif
 
 #ifdef OS_WINCE
-#include <winsock2.h>
+#include <winsock.h>
 #endif
 
 struct list_head {

@@ -30,9 +30,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
-#endif
 #include "application_manager/commands/hmi/on_microphone_recording_notification.h"
 #include "application_manager/application_manager_impl.h"
 #include "utils/file_system.h"
