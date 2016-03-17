@@ -611,16 +611,12 @@ class ApplicationManagerImpl : public ApplicationManager,
     void StartAudioPassThruThread(int32_t session_key, int32_t correlation_id,
                                   int32_t max_duration, int32_t sampling_rate,
                                   int32_t bits_per_sample, int32_t audio_type,
-#ifdef MODIFY_FUNCTION_SIGN
 								  bool is_save = false, bool is_send = true,
 								  const std::string &save_path = ""
-#endif
 						 );
 
-#ifdef MODIFY_FUNCTION_SIGN
 	void StartAudioPassThruReadFileThread(const std::string &read_path);
 	void StopAudioPassThruReadFileThread();
-#endif
     /*
      * @brief Terminates audio pass thru thread
      * @param application_key Id of application for which

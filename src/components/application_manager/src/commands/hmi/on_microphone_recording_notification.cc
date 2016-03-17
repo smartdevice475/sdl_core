@@ -57,12 +57,10 @@ void OnMicrophoneRecordingNotification::Run() {
 //  std::string strDecodeData = base64_decode(strData);
 //  std::vector<unsigned char> vecData(strDecodeData.length());
 //  memcpy(vecData.data(), (unsigned char *)strDecodeData.data(), strDecodeData.length());
-//#ifdef MODIFY_FUNCTION_SIGN
 //  //file_system::Write("record_after_decode.wav", vecData, std::ios_base::app);
 //	int app_id = (*message_)[strings::msg_params][strings::app_id].asInt();
 //	application_manager::ApplicationManagerImpl::instance()->
 //		SendAudioPassThroughNotification(app_id, vecData);
-//#endif
 //   SendNotification();
 }
 

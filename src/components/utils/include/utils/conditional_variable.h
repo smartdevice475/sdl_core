@@ -44,10 +44,7 @@ namespace sync_primitives {
 class AutoLock;
 
 namespace impl {
-#if defined(OS_POSIX)
-typedef pthread_cond_t PlatformConditionalVariable;
-#endif
-#if defined(OS_WIN32) || defined(OS_WINCE)
+#if defined(OS_POSIX) || defined(OS_WIN32) || defined(OS_WINCE)
 typedef pthread_cond_t PlatformConditionalVariable;
 #endif
 } // namespace impl

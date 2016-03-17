@@ -68,7 +68,7 @@ namespace NsMessageBroker
       }
       removeSubscribersByDescriptor(fd);
    }
-#ifdef MODIFY_FUNCTION_SIGN
+
    /**
    * \brief clear controller from the registry.
    * \param name name of controller.
@@ -78,7 +78,7 @@ namespace NsMessageBroker
 	   DBG_MSG(("CMessageBrokerRegistry::clearController()\n"));
 	   mControllersList.clear();
    }
-#endif
+
    void CMessageBrokerRegistry::removeControllersByDescriptor(const int fd) {
       DBG_MSG(("CMessageBrokerRegistry::removeControllersByDescriptor(%d)\n",
                fd));
@@ -158,7 +158,7 @@ namespace NsMessageBroker
 		   DBG_MSG(("Count of subscribers: %d\n", mSubscribersList.size()));
 	   }
    }
-#ifdef MODIFY_FUNCTION_SIGN
+
    void CMessageBrokerRegistry::deleteSubscriber(std::string name)
    {
 	   DBG_MSG(("CMessageBrokerRegistry::deleteSubscriber()\n"));
@@ -183,7 +183,6 @@ namespace NsMessageBroker
 	   deleteSubscriber("UI.SubscribeButton");
 	   deleteSubscriber("UI.UnsubscribeButton");
    }
-#endif
 
    int CMessageBrokerRegistry::getDestinationFd(std::string name)
    {
