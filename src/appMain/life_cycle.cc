@@ -30,7 +30,7 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "./life_cycle.h"
+#include "life_cycle.h"
 #include "utils/signals.h"
 #include "config_profile/profile.h"
 #include "resumption/last_state.h"
@@ -43,13 +43,13 @@
 
 #ifdef ENABLE_LOG
 #include "utils/log_message_loop_thread.h"
-#endif
+#endif  // ENABLE_LOG
 
 using threads::Thread;
 
 namespace main_namespace {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "appMain")
+CREATE_LOGGERPTR_GLOBAL(logger_, "SDLMain")
 
 namespace {
 void NameMessageBrokerThread(const System::Thread& thread,
@@ -66,31 +66,31 @@ void NameMessageBrokerThread(const System::Thread& thread,
 }  // namespace
 
 LifeCycle::LifeCycle()
-  : transport_manager_(NULL)
-  , protocol_handler_(NULL)
-  , connection_handler_(NULL)
-  , app_manager_(NULL)
+    : transport_manager_(NULL)
+    , protocol_handler_(NULL)
+    , connection_handler_(NULL)
+    , app_manager_(NULL)
 #ifdef ENABLE_SECURITY
-  , crypto_manager_(NULL)
-  , security_manager_(NULL)
+    , crypto_manager_(NULL)
+    , security_manager_(NULL)
 #endif  // ENABLE_SECURITY
-  , hmi_handler_(NULL)
-  , hmi_message_adapter_(NULL)
-  , media_manager_(NULL)
+    , hmi_handler_(NULL)
+    , hmi_message_adapter_(NULL)
+    , media_manager_(NULL)
 #ifdef TIME_TESTER
-  , time_tester_(NULL)
+    , time_tester_(NULL)
 #endif  // TIME_TESTER
 #ifdef DBUS_HMIADAPTER
-  , dbus_adapter_(NULL)
-  , dbus_adapter_thread_(NULL)
+    , dbus_adapter_(NULL)
+    , dbus_adapter_thread_(NULL)
 #endif  // DBUS_HMIADAPTER
 #ifdef MESSAGEBROKER_HMIADAPTER
-  , mb_adapter_(NULL)
-  , message_broker_(NULL)
-  , message_broker_server_(NULL)
-  , mb_thread_(NULL)
-  , mb_server_thread_(NULL)
-  , mb_adapter_thread_(NULL)
+    , mb_adapter_(NULL)
+    , message_broker_(NULL)
+    , message_broker_server_(NULL)
+    , mb_thread_(NULL)
+    , mb_server_thread_(NULL)
+    , mb_adapter_thread_(NULL)
 #endif  // MESSAGEBROKER_HMIADAPTER
 #if defined(OS_WIN32) || defined(OS_WINCE)
   , components_started_(false)
@@ -136,25 +136,39 @@ bool LifeCycle::StartComponents() {
   // FIXME(EZamakhov): move to Config or in Sm initialization method
   std::string cert_filename;
   profile::Profile::instance()->ReadStringValue(
-        &cert_filename, "",
-        security_manager::SecurityManagerImpl::ConfigSection(), "CertificatePath");
+      &cert_filename,
+      "",
+      security_manager::SecurityManagerImpl::ConfigSection(),
+      "CertificatePath");
 
   std::string ssl_mode;
   profile::Profile::instance()->ReadStringValue(
-          &ssl_mode, "CLIENT", security_manager::SecurityManagerImpl::ConfigSection(), "SSLMode");
+      &ssl_mode,
+      "CLIENT",
+      security_manager::SecurityManagerImpl::ConfigSection(),
+      "SSLMode");
   crypto_manager_ = new security_manager::CryptoManagerImpl();
 
   std::string key_filename;
   profile::Profile::instance()->ReadStringValue(
-        &key_filename, "", security_manager::SecurityManagerImpl::ConfigSection(), "KeyPath");
+      &key_filename,
+      "",
+      security_manager::SecurityManagerImpl::ConfigSection(),
+      "KeyPath");
 
   std::string ciphers_list;
   profile::Profile::instance()->ReadStringValue(
-        &ciphers_list, SSL_TXT_ALL, security_manager::SecurityManagerImpl::ConfigSection(), "CipherList");
+      &ciphers_list,
+      SSL_TXT_ALL,
+      security_manager::SecurityManagerImpl::ConfigSection(),
+      "CipherList");
 
   bool verify_peer;
   profile::Profile::instance()->ReadBoolValue(
-        &verify_peer, false, security_manager::SecurityManagerImpl::ConfigSection(), "VerifyPeer");
+      &verify_peer,
+      false,
+      security_manager::SecurityManagerImpl::ConfigSection(),
+      "VerifyPeer");
 
   std::string protocol_name;
   profile::Profile::instance()->ReadStringValue(
@@ -219,7 +233,7 @@ bool LifeCycle::StartComponents() {
   connection_handler_->set_protocol_handler(protocol_handler_);
   connection_handler_->set_connection_handler_observer(app_manager_);
 
-  // it is important to initialise TimeTester before TM to listen TM Adapters
+// it is important to initialise TimeTester before TM to listen TM Adapters
 #ifdef TIME_TESTER
   time_tester_ = new time_tester::TimeManager();
   time_tester_->Init(protocol_handler_);
@@ -257,11 +271,10 @@ bool LifeCycle::InitMessageSystem() {
     return false;
   }
 
-  message_broker_server_ =
-    new NsMessageBroker::TcpServer(
-    profile::Profile::instance()->server_address(),
-    profile::Profile::instance()->server_port(),
-    message_broker_);
+  message_broker_server_ = new NsMessageBroker::TcpServer(
+      profile::Profile::instance()->server_address(),
+      profile::Profile::instance()->server_port(),
+      message_broker_);
   if (!message_broker_server_) {
     LOG4CXX_FATAL(logger_, " Wrong pJSONRPC20Server pointer!");
     return false;
@@ -286,8 +299,7 @@ bool LifeCycle::InitMessageSystem() {
     LOG4CXX_INFO(logger_, " Message broker server listen successful!");
   }
 
-  mb_adapter_ =
-    new hmi_message_handler::MessageBrokerAdapter(
+  mb_adapter_ = new hmi_message_handler::MessageBrokerAdapter(
     hmi_message_handler::HMIMessageHandlerImpl::instance(),
     profile::Profile::instance()->server_address(),
     profile::Profile::instance()->server_port());
@@ -301,28 +313,31 @@ bool LifeCycle::InitMessageSystem() {
 
   LOG4CXX_INFO(logger_, "Start CMessageBroker thread!");
   mb_thread_ = new System::Thread(
-    new System::ThreadArgImpl<NsMessageBroker::CMessageBroker>(
-      *message_broker_, &NsMessageBroker::CMessageBroker::MethodForThread,
-      NULL));
+      new System::ThreadArgImpl<NsMessageBroker::CMessageBroker>(
+          *message_broker_,
+          &NsMessageBroker::CMessageBroker::MethodForThread,
+          NULL));
   mb_thread_->Start(false);
   // Thread can be named only when started because before that point
   // thread doesn't have valid Id to associate name with
   NameMessageBrokerThread(*mb_thread_, "MessageBroker");
 
   LOG4CXX_INFO(logger_, "Start MessageBroker TCP server thread!");
-  mb_server_thread_  = new System::Thread(
-    new System::ThreadArgImpl<NsMessageBroker::TcpServer>(
-      *message_broker_server_, &NsMessageBroker::TcpServer::MethodForThread,
-      NULL));
+  mb_server_thread_ =
+      new System::Thread(new System::ThreadArgImpl<NsMessageBroker::TcpServer>(
+          *message_broker_server_,
+          &NsMessageBroker::TcpServer::MethodForThread,
+          NULL));
   mb_server_thread_->Start(false);
   NameMessageBrokerThread(*mb_server_thread_, "MB TCPServer");
 
   LOG4CXX_INFO(logger_, "StartAppMgr JSONRPC 2.0 controller receiver thread!");
-  mb_adapter_thread_  = new System::Thread(
-    new System::ThreadArgImpl<hmi_message_handler::MessageBrokerAdapter>(
-      *mb_adapter_,
-      &hmi_message_handler::MessageBrokerAdapter::SubscribeAndBeginReceiverThread,
-      NULL));
+  mb_adapter_thread_ = new System::Thread(
+      new System::ThreadArgImpl<hmi_message_handler::MessageBrokerAdapter>(
+          *mb_adapter_,
+          &hmi_message_handler::MessageBrokerAdapter::
+              SubscribeAndBeginReceiverThread,
+          NULL));
   mb_adapter_thread_->Start(false);
   NameMessageBrokerThread(*mb_adapter_thread_, "MB Adapter");
 
@@ -337,10 +352,10 @@ bool LifeCycle::InitMessageSystem() {
  */
 bool LifeCycle::InitMessageSystem() {
   dbus_adapter_ = new hmi_message_handler::DBusMessageAdapter(
-    hmi_message_handler::HMIMessageHandlerImpl::instance());
+      hmi_message_handler::HMIMessageHandlerImpl::instance());
 
   hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
-    dbus_adapter_);
+      dbus_adapter_);
   if (!dbus_adapter_->Init()) {
     LOG4CXX_FATAL(logger_, "Cannot init DBus service!");
     return false;
@@ -350,10 +365,10 @@ bool LifeCycle::InitMessageSystem() {
 
   LOG4CXX_INFO(logger_, "Start DBusMessageAdapter thread!");
   dbus_adapter_thread_ = new System::Thread(
-    new System::ThreadArgImpl<hmi_message_handler::DBusMessageAdapter>(
-      *dbus_adapter_,
-      &hmi_message_handler::DBusMessageAdapter::MethodForReceiverThread,
-      NULL));
+      new System::ThreadArgImpl<hmi_message_handler::DBusMessageAdapter>(
+          *dbus_adapter_,
+          &hmi_message_handler::DBusMessageAdapter::MethodForReceiverThread,
+          NULL));
   dbus_adapter_thread_->Start(false);
 
   return true;
@@ -363,9 +378,9 @@ bool LifeCycle::InitMessageSystem() {
 #ifdef MQUEUE_HMIADAPTER
 bool LifeCycle::InitMessageSystem() {
   hmi_message_adapter_ = new hmi_message_handler::MqueueAdapter(
-    hmi_message_handler::HMIMessageHandlerImpl::instance());
+      hmi_message_handler::HMIMessageHandlerImpl::instance());
   hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
-    hmi_message_adapter_);
+      hmi_message_adapter_);
   return true;
 }
 
@@ -560,9 +575,14 @@ void LifeCycle::StopComponents() {
     mb_thread_->Join();
     delete mb_thread_;
   }
-  message_broker_server_->Close();
+  if (message_broker_server_) {
+    message_broker_server_->Close();
+  }
   delete message_broker_server_;
-  message_broker_->stopMessageBroker();
+
+  if (message_broker_) {
+    message_broker_->stopMessageBroker();
+  }
 
   networking::cleanup();
 #endif  // MESSAGEBROKER_HMIADAPTER

@@ -76,10 +76,6 @@ System::System(const std::string& file, const std::string& command)
   argv_.push_back(command);
 }
 
-bool System::Execute() {
-  return Execute(false);
-}
-
 System& System::Add(const std::string& arg) {
   argv_.push_back(arg);
   return *this;
@@ -91,6 +87,10 @@ std::string System::command() const {
 
 std::vector<std::string> System::argv() const {
   return argv_;
+}
+
+bool System::Execute() {
+  return Execute(false);
 }
 
 #ifdef __QNX__

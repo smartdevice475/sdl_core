@@ -32,7 +32,6 @@
 
 #include "utils/rwlock.h"
 #include "utils/logger.h"
-#include "pthread.h"
 
 namespace sync_primitives {
 

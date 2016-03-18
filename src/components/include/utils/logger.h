@@ -34,16 +34,19 @@
 #define SRC_COMPONENTS_INCLUDE_UTILS_LOGGER_H_
 
 #ifdef ENABLE_LOG
-#include <errno.h>
-#include <string.h>
-#include <sstream>
-#include <log4cxx/propertyconfigurator.h>
-#include <log4cxx/spi/loggingevent.h>
-#include "utils/push_log.h"
-#include "utils/logger_status.h"
-#include "utils/auto_trace.h"
+  #include <errno.h>
+  #include <string.h>
+  #include <sstream>
+  #include <log4cxx/propertyconfigurator.h>
+  #include <log4cxx/spi/loggingevent.h>
+  #include "utils/push_log.h"
+  #include "utils/logger_status.h"
+  #include "utils/auto_trace.h"
 #ifdef OS_WIN32
 #define __PRETTY_FUNCTION__ __FUNCTION__
+#endif
+#ifdef OS_WINCE
+#define strerror(x) x
 #endif
 #endif  // ENABLE_LOG
 
@@ -65,6 +68,11 @@
     // without this deinitilization log4cxx threads continue using some instances destroyed by exit()
     void deinit_logger();
     #define DEINIT_LOGGER() deinit_logger()
+
+    // special macros to dump logs from queue
+    // it's need, for example, when crash happend
+    void flush_logger();
+    #define FLUSH_LOGGER() flush_logger()
 
     #define LOG4CXX_IS_TRACE_ENABLED(logger) logger->isTraceEnabled()
 

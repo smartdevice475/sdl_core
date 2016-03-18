@@ -346,7 +346,7 @@ template<class T>
 TimerThread<T>::TimerDelegate::TimerDelegate(TimerThread* timer_thread)
     : timer_thread_(timer_thread),
       timeout_milliseconds_(0),
-      state_lock_(false),
+      state_lock_(true),
       stop_flag_(false),
       restart_flag_(false) {
   DCHECK(timer_thread_);

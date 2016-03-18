@@ -40,9 +40,10 @@ const std::string gen_hash(size_t size) {
 #if defined(OS_WIN32) || defined(OS_WINCE)
 	static const char symbols[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 #else
-  static const char symbols[] = "0123456789"
-                                "abcdefghijklmnopqrstuvwxyz"
-                                "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  static const char symbols[] =
+      "0123456789"
+      "abcdefghijklmnopqrstuvwxyz"
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 #endif
   static const size_t capacity = sizeof(symbols) - 1;
 
@@ -59,7 +60,7 @@ int32_t Djb2HashFromString(const std::string& str_to_hash) {
   std::string::const_iterator it = str_to_hash.begin();
   std::string::const_iterator it_end = str_to_hash.end();
 
-  for (;it != it_end; ++it) {
+  for (; it != it_end; ++it) {
     hash = ((hash << 5) + hash) + (*it);
   }
 

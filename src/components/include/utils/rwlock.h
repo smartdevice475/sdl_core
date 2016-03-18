@@ -47,7 +47,7 @@ typedef pthread_rwlock_t PlatformRWLock;
 #elif defined(OS_POSIX)
 typedef pthread_rwlock_t PlatformRWLock;
 #else
-//#error Please implement rwlock for your OS
+#error Please implement rwlock for your OS
 #endif
 }  // namespace impl
 

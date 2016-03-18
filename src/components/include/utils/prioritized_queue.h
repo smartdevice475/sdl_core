@@ -83,11 +83,12 @@ class PrioritizedQueue {
       queues_.erase(last);
     }
   }
+
  private:
   QueuesMap queues_;
   size_t total_size_;
 };
 
-}
+}  // namespace utils
 
 #endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_

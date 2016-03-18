@@ -52,7 +52,7 @@
 namespace resumption {
 using namespace application_manager;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ResumeCtrl")
+CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
 ResumeCtrl::ResumeCtrl():
   queue_lock_(false),
@@ -77,8 +77,9 @@ bool ResumeCtrl::Init() {
         dynamic_cast<ResumptionDataDB*>(resumption_storage_.get());
 
     if (!db->IsDBVersionActual()) {
-      LOG4CXX_INFO(logger_, "DB version had been changed. "
-                            "Rebuilding resumption DB.");
+      LOG4CXX_INFO(logger_,
+                   "DB version had been changed. "
+                   "Rebuilding resumption DB.");
 
       smart_objects::SmartObject data;
       db->GetAllData(data);
@@ -99,9 +100,7 @@ bool ResumeCtrl::Init() {
   return true;
 }
 
-ResumeCtrl::~ResumeCtrl() {
-
-}
+ResumeCtrl::~ResumeCtrl() {}
 
 void ResumeCtrl::SaveAllApplications() {
   ApplicationManagerImpl::ApplicationListAccessor accessor;
@@ -113,8 +112,9 @@ void ResumeCtrl::SaveAllApplications() {
 void ResumeCtrl::SaveApplication(ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(application);
-  LOG4CXX_INFO(logger_,"application with appID "<<application->app_id()
-               <<" will be saved");
+  LOG4CXX_INFO(logger_,
+               "application with appID " << application->app_id()
+                                         << " will be saved");
   resumption_storage_->SaveApplication(application);
 }
 
@@ -126,8 +126,9 @@ bool ResumeCtrl::RestoreAppHMIState(ApplicationSharedPtr application) {
   using namespace mobile_apis;
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(application, false);
-  LOG4CXX_DEBUG(logger_, "app_id : " << application->app_id()
-                << "; policy_app_id : " << application->mobile_app_id());
+  LOG4CXX_DEBUG(logger_,
+                "app_id : " << application->app_id() << "; policy_app_id : "
+                            << application->mobile_app_id());
   const std::string device_id =
       MessageHelper::GetDeviceMacAddressForHandle(application->device());
   smart_objects::SmartObject saved_app(smart_objects::SmartType_Map);
@@ -139,7 +140,7 @@ bool ResumeCtrl::RestoreAppHMIState(ApplicationSharedPtr application) {
     if (saved_app.keyExists(strings::hmi_level)) {
       const HMILevel::eType saved_hmi_level =
           static_cast<mobile_apis::HMILevel::eType>(
-            saved_app[strings::hmi_level].asInt());
+              saved_app[strings::hmi_level].asInt());
       LOG4CXX_DEBUG(logger_, "Saved HMI Level is : " << saved_hmi_level);
       return SetAppHMIState(application, saved_hmi_level, true);
     } else {
@@ -156,7 +157,7 @@ bool ResumeCtrl::SetupDefaultHMILevel(ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(application, false);
   mobile_apis::HMILevel::eType default_hmi =
-      ApplicationManagerImpl::instance()-> GetDefaultHmiLevel(application);
+      ApplicationManagerImpl::instance()->GetDefaultHmiLevel(application);
   return SetAppHMIState(application, default_hmi, false);
 }
 
@@ -176,6 +177,7 @@ void ResumeCtrl::ApplicationResumptiOnTimer() {
   }
   is_resumption_active_ = false;
   waiting_for_timer_.clear();
+  StartSavePersistentDataTimer();
 }
 
 void ResumeCtrl::OnAppActivated(ApplicationSharedPtr application) {
@@ -197,9 +199,11 @@ bool ResumeCtrl::SetAppHMIState(ApplicationSharedPtr application,
   using namespace mobile_apis;
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(application, false);
-  LOG4CXX_TRACE(logger_, " app_id : " << application->app_id()
-                << ", hmi_level : " << hmi_level
-                << ", check_policy : " << check_policy);
+  LOG4CXX_TRACE(
+      logger_,
+      " app_id : " << application->app_id() << ", hmi_level : " << hmi_level
+                   << ", check_policy : "
+                   << check_policy);
   const std::string device_id =
       MessageHelper::GetDeviceMacAddressForHandle(application->device());
   if (check_policy &&
@@ -723,19 +727,19 @@ void ResumeCtrl::LoadResumeData() {
     resumption_storage_->UpdateHmiLevel(
           so_applications_data[i][strings::app_id].asString(),
         so_applications_data[i][strings::device_id].asString(),
-        static_cast<int32_t>(mobile_apis::HMILevel::INVALID_ENUM));
+        mobile_apis::HMILevel::INVALID_ENUM);
   }
   if (full_app != NULL) {
     resumption_storage_->UpdateHmiLevel(
           (*full_app)[strings::app_id].asString(),
         (*full_app)[strings::device_id].asString(),
-        static_cast<int32_t>(mobile_apis::HMILevel::HMI_FULL));
+        mobile_apis::HMILevel::HMI_FULL);
   }
   if (limited_app != NULL) {
     resumption_storage_->UpdateHmiLevel(
           (*limited_app)[strings::app_id].asString(),
         (*limited_app)[strings::device_id].asString(),
-        static_cast<int32_t>(mobile_apis::HMILevel::HMI_LIMITED));
+        mobile_apis::HMILevel::HMI_LIMITED);
   }
 }
 

@@ -154,7 +154,7 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     sync_primitives::AutoLock lock(timer_pool_lock_);
     ApplicationManagerTimerPtr clearTimerPoolTimer(new TimerThread<ApplicationManagerImpl>(
         "ClearTimerPoolTimer", this, &ApplicationManagerImpl::ClearTimerPool, true));
-    clearTimerPoolTimer->start(10);
+    clearTimerPoolTimer->start(10000);
     timer_pool_.push_back(clearTimerPoolTimer);
 }
 

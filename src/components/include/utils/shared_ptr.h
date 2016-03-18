@@ -53,7 +53,7 @@ namespace utils {
 template<typename ObjectType>
 class SharedPtr {
   public:
-    //std smart pointer compability
+    //std smart pointer compatibility
     typedef ObjectType element_type;
     /**
      * @brief Constructor.
