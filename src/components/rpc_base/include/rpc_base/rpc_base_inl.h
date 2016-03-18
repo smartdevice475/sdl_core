@@ -166,18 +166,18 @@ inline Boolean::operator bool() const {
  * Integer class
  */
 template<typename T, T minval, T maxval>
-const Range<T> Integer<T, minval, maxval>::range_(minval, maxval);
-
-template<typename T, T minval, T maxval>
 Integer<T, minval, maxval>::Integer()
     : PrimitiveType(kUninitialized),
+	  range_(minval, maxval),
       value_(range_.min()) {
 }
 
 template<typename T, T minval, T maxval>
 Integer<T, minval, maxval>::Integer(IntType value)
-    : PrimitiveType(range_.Includes(value) ? kValid : kInvalid),
-      value_(value) {
+	: PrimitiveType(kUninitialized),
+      value_(value),
+	  range_(minval, maxval){
+	value_state_ = range_.Includes(value) ? kValid : kInvalid;
 }
 
 template<typename T, T minval, T maxval>
@@ -214,29 +214,21 @@ Integer<T, minval, maxval>::operator IntType() const {
 /*
  * Float class
  */
-template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
-const Range<double> Float<minnum, maxnum, minden, maxden>::range_(
-#if defined(OS_WIN32) || defined(OS_WINCE)
-    double(minnum) / minden, double(maxnum) / maxden);
-#else
-    (double(minnum)/minden), (double(maxnum)/maxden));
-#endif
-
 
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 Float<minnum, maxnum, minden, maxden>::Float()
-    : PrimitiveType(kUninitialized),
-#if defined(OS_WIN32) || defined(OS_WINCE)
-		value_(range_.min_rpc()) {
-#else
-      value_(range_.min()) {
-#endif
+	: PrimitiveType(kUninitialized){
+	range_ = Range<double>(minnum/minden, maxmun/maxden);
+	value_ = range_.min();
+	value_state_ = range_.Includes(value) ? kValid : kInvalid;
 }
 
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 Float<minnum, maxnum, minden, maxden>::Float(double value)
-    : PrimitiveType(range_.Includes(value) ? kValid : kInvalid),
+	: PrimitiveType(kUninitialized),
       value_(value) {
+	range_ = Range<double>(minnum/minden, maxnum/maxden);
+	value_state_ = range_.Includes(value) ? kValid : kInvalid;
 }
 
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
@@ -255,24 +247,26 @@ Float<minnum, maxnum, minden, maxden>::operator double() const {
 /*
  * String class
  */
-template<size_t minlen, size_t maxlen>
-const Range<size_t> String<minlen, maxlen>::length_range_(minlen, maxlen);
 
 template<size_t minlen, size_t maxlen>
 String<minlen, maxlen>::String()
-    : PrimitiveType(kUninitialized) {
+    : PrimitiveType(kUninitialized),
+	length_range_(minlen, maxlen){
 }
 
 template<size_t minlen, size_t maxlen>
 String<minlen, maxlen>::String(const std::string& value)
-    : PrimitiveType(length_range_.Includes(value.length()) ? kValid : kInvalid),
-      value_(value) {
+	: PrimitiveType(kUninitialized),
+      value_(value),
+	  length_range_(minlen, maxlen){
+	value_state_ = length_range_.Includes(value.length()) ? kValid : kInvalid;
 }
 
 template<size_t minlen, size_t maxlen>
 String<minlen, maxlen>::String(const char* value)
     : PrimitiveType(kUninitialized),
-      value_(value) {
+      value_(value),
+	  length_range_(minlen, maxlen){
   value_state_ = length_range_.Includes(value_.length()) ? kValid : kInvalid;
 }
 

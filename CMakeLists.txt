@@ -204,8 +204,10 @@ ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     SET(CMAKE_CXX_FLAGS "/wd\"4819\" /wd\"4244\" /wd\"4390\" /wd\"4430\" /EHsc /bigobj")
     SET(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG") #It will be appended to CMAKE_CXX_FLAGS in release
 ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-    SET(CMAKE_CXX_FLAGS "/wd\"4819\" /wd\"4244\" /wd\"4390\" /wd\"4996\" /EHsc /bigobj /Z7 /GF")
- SET(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG") #It will be appended to CMAKE_CXX_FLAGS in release
+    SET(CMAKE_CXX_FLAGS "/wd\"4819\" /wd\"4244\" /wd\"4390\" /wd\"4996\"  /EHsc /bigobj /Z7 /GF")
+	SET(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG") #It will be appended to CMAKE_CXX_FLAGS in release
+	SET(CMAKE_C_FLAGS ${CMAKE_CXX_FLAGS})  
+	SET(CMAKE_EXE_LINKER_FLAGS "/SUBSYSTEM:CONSOLE /ENTRY:")  
 ENDIF()
 
 IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")

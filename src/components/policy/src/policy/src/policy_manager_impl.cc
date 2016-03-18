@@ -52,6 +52,9 @@ __declspec(dllexport) policy::PolicyManager* CreateManager() {
 #else
 policy::PolicyManager* CreateManager() {
 #endif
+#ifdef OS_WINCE
+	INIT_LOGGER(file_system::CurrentWorkingDirectory() + "\\" + "Policy.properties");
+#endif
 return new policy::PolicyManagerImpl();
 }
 
