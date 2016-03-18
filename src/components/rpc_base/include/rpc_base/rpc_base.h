@@ -38,6 +38,9 @@
 #include <vector>
 #include <stdint.h>
 
+#ifdef OS_WINCE
+#include "validation_report.h"
+#endif
 #ifdef max
 #undef max
 #endif
@@ -205,7 +208,7 @@ class Integer : public PrimitiveType {
 
   private:
     IntType value_;
-    static const Range<T> range_;
+	Range<T> range_;
 };
 
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
@@ -224,7 +227,7 @@ class Float : public PrimitiveType {
 
   private:
     double value_;
-    static const Range<double> range_;
+    Range<double> range_;
 };
 
 template<size_t minlen, size_t maxlen>
@@ -247,7 +250,7 @@ class String : public PrimitiveType {
 
   private:
     std::string value_;
-    static const Range<size_t> length_range_;
+    Range<size_t> length_range_;
 };
 
 template<typename T>

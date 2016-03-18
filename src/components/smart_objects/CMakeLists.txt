@@ -38,7 +38,7 @@ INCLUDE_DIRECTORIES(
 
 IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     INCLUDE_DIRECTORIES(
-        ${CMAKE_SOURCE_DIR}/include/wince
+        ${CMAKE_SOURCE_DIR}/include/win32
     )
 ENDIF()
 

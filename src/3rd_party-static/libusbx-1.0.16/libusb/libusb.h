@@ -71,8 +71,8 @@ typedef unsigned __int32  uint32_t;
 #if defined(interface)
 #undef interface
 #endif
-#ifdef OS_WINCE
-#include <winsock.h>
+#if defined(OS_WINCE)||defined(OS_WIN32)
+#include <winsock2.h>
 #endif
 #if !defined(__CYGWIN__)
 #include <winsock.h>
