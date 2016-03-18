@@ -34,12 +34,10 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/application_manager_impl.h"
 
-#ifdef MODIFY_FUNCTION_SIGN
 #include "config_profile/profile.h"
 #include "utils/global.h"
 #include <lib_msp_vr.h>
 #include "utils/timer_thread.h"
-#endif
 
 namespace application_manager {
 

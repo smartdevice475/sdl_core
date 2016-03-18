@@ -267,13 +267,11 @@ struct PermissionConsent {
  */
 struct UserFriendlyMessage {
     std::string message_code;
-#ifdef MODIFY_FUNCTION_SIGN
     std::string tts;
     std::string label;
     std::string line1;
     std::string line2;
     std::string text_body;
-#endif
 };
 
 /**

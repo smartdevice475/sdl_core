@@ -154,8 +154,7 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     sync_primitives::AutoLock lock(timer_pool_lock_);
     ApplicationManagerTimerPtr clearTimerPoolTimer(new TimerThread<ApplicationManagerImpl>(
         "ClearTimerPoolTimer", this, &ApplicationManagerImpl::ClearTimerPool, true));
-    const uint32_t timeout_ms = 10000;
-    clearTimerPoolTimer->start(timeout_ms);
+    clearTimerPoolTimer->start(10);
     timer_pool_.push_back(clearTimerPoolTimer);
 }
 
@@ -701,10 +700,8 @@ HmiStatePtr ApplicationManagerImpl::CreateRegularState(uint32_t app_id,
 void ApplicationManagerImpl::StartAudioPassThruThread(int32_t session_key,
     int32_t correlation_id, int32_t max_duration, int32_t sampling_rate,
     int32_t bits_per_sample, int32_t audio_type
-#ifdef MODIFY_FUNCTION_SIGN
 		,bool is_save, bool is_send
 		,const std::string &save_path
-#endif
 		) {
   LOG4CXX_INFO(logger_, "START MICROPHONE RECORDER");
   if (NULL != media_manager_) {
@@ -715,7 +712,6 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int32_t session_key,
   }
 }
 
-#ifdef MODIFY_FUNCTION_SIGN
 void ApplicationManagerImpl::StartAudioPassThruReadFileThread(const std::string &read_path)
 {
 	Global::utf8MultiToAnsiMulti(read_path, read_path_);
@@ -727,7 +723,7 @@ void ApplicationManagerImpl::StopAudioPassThruReadFileThread()
 {
 	audio_pass_thru_read_file_thread_->stop();
 }
-#endif
+
 void ApplicationManagerImpl::SendAudioPassThroughNotification(
   uint32_t session_key,
   std::vector<uint8_t>& binary_data) {
@@ -2357,7 +2353,7 @@ void ApplicationManagerImpl::updateRequestTimeout(uint32_t connection_key,
   request_ctrl_.updateRequestTimeout(connection_key, mobile_correlation_id,
                                      new_timeout_value);
 }
-#ifdef MODIFY_FUNCTION_SIGN
+
 VRStatus ApplicationManagerImpl::handleVRCommand(const int vrCommandId, const std::string& vrCommandName)
 {
 	LOG4CXX_INFO(logger_, "vrCommandId is " << vrCommandId);
@@ -2442,8 +2438,6 @@ ApplicationSharedPtr ApplicationManagerImpl::fetchAppliation(const std::string& 
 	}
 	return ApplicationSharedPtr();
 }
-
-#endif
 
 const uint32_t ApplicationManagerImpl::application_id
 (const int32_t correlation_id) {

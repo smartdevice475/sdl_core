@@ -62,7 +62,6 @@ ssize_t TcpServer::Send(int fd, const std::string& data) {
   return rep.length();
 }
 
-#ifdef MODIFY_FUNCTION_SIGN
 ssize_t TcpServer::Send(int fd, const char *data, int size) {
 	DBG_MSG(("Send to %d: %s\n", fd, data));
 	int bytesToSend = size;
@@ -79,7 +78,7 @@ ssize_t TcpServer::Send(int fd, const char *data, int size) {
 	} while (bytesToSend > 0);
 	return size;
 }
-#endif
+
 bool TcpServer::Recv(int fd) {
   DBG_MSG(("TcpServer::Recv(%d)\n", fd));
 

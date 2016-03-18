@@ -77,7 +77,6 @@ SET(SOURCES
   ./src/sql_pt_representation.cc
   ./src/update_status_manager.cc
   ./src/cache_manager.cc
-  ${CMAKE_SOURCE_DIR}/src/components/rpc_base/src/rpc_base/rpc_base.cc
 )
 
 
@@ -101,6 +100,7 @@ ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
   LIST(APPEND LIBRARIES sqlite3)
   LIST(APPEND LIBRARIES pthreadVC2)
   LIST(APPEND LIBRARIES ws2)
+  LIST(APPEND LIBRARIES rpc_base)
 ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Android")
   INCLUDE_DIRECTORIES(sqlite_wrapper/include)
 ELSE()

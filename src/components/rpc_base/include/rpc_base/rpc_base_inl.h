@@ -102,7 +102,7 @@ inline void PrimitiveType::ReportErrors(ValidationReport* report) const {
       break;
     }
     default: {
-      assert(!"Unexpected value state");
+      // assert(!"Unexpected value state");
       break;
     }
   }
@@ -135,7 +135,7 @@ inline void CompositeType::ReportErrors(ValidationReport* report) const {
       break;
     }
     default:
-      assert(!"Unexpected initialization state");
+      // assert(!"Unexpected initialization state");
       break;
   }
 }

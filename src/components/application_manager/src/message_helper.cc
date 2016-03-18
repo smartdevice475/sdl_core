@@ -1513,7 +1513,6 @@ void MessageHelper::SendOnAppUnregNotificationToHMI(
   ApplicationManagerImpl::instance()->ManageHMICommand(notification);
 }
 
-#ifdef MODIFY_FUNCTION_SIGN
 void MessageHelper::SendDeleteInteractionChoiseSetNotificationToHMI(ApplicationConstSharedPtr app) {
 	if (!app) {
 		return;
@@ -1587,7 +1586,6 @@ void MessageHelper::SendUnsubscribeButtonNotificationToHMI(ApplicationConstShare
 		ApplicationManagerImpl::instance()->ManageHMICommand(ui_subscribed_button);
 	}
 }
-#endif
 
 #ifdef MODIFY_FUNCTION_SIGN
 void MessageHelper::SendVRStatusToHMI(const std::string &status)

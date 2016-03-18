@@ -44,7 +44,6 @@
 #include "utils/lock.h"
 #include "utils/timer_thread.h"
 #include "utils/conditional_variable.h"
-#include "policy/policy_types.h"
 
 namespace policy {
 

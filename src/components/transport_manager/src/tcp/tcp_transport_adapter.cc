@@ -56,9 +56,7 @@
 #include "transport_manager/tcp/tcp_connection_factory.h"
 #include "transport_manager/tcp/tcp_device.h"
 
-#ifdef MODIFY_FUNCTION_SIGN
 #include "config_profile/profile.h"
-#endif
 
 #ifdef AVAHI_SUPPORT
 #include "transport_manager/tcp/dnssd_service_browser.h"
