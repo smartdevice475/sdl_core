@@ -58,7 +58,7 @@ void NameMessageBrokerThread(const System::Thread& thread,
 	pthread_t pt;
 	pt.p = thread.GetId();
 	pt.x = 0;
-	Thread::SetNameForId(Thread::Id(pt), name);
+	Thread::SetNameForId(pt, name);
 #else
   Thread::SetNameForId(thread.GetId(), name);
 #endif

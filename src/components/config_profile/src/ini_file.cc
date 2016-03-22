@@ -38,6 +38,7 @@
 #include <ctype.h>
 #include <limits.h>
 #include <stdint.h>
+#include "utils/macro.h"
 #include <winbase.h>
 
 #if defined(OS_WIN32) || defined(OS_WINCE)

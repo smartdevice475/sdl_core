@@ -62,9 +62,11 @@ INCLUDE_DIRECTORIES(
 
 IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     INCLUDE_DIRECTORIES(
+        ${COMPONENTS_DIR}/utils/include/utils/sqlite_wrapper/
         ${CMAKE_SOURCE_DIR}/include/win32
         ${CMAKE_SOURCE_DIR}/src/3rd_party/apr-1.5.0/include/arch/win32
         ${CMAKE_SOURCE_DIR}/src/LibVrMsp/
+	${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
     )
 ENDIF()
 

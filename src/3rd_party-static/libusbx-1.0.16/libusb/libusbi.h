@@ -37,9 +37,6 @@
 #include "libusb.h"
 #include "version.h"
 
-#ifdef OS_WINCE
-#include "winsock.h"
-#endif
 /* Inside the libusbx code, mark all public functions as follows:
  *   return_type API_EXPORTED function_name(params) { ... }
  * But if the function returns a pointer, mark it as follows:
@@ -69,10 +66,6 @@
 
 #if !defined(ARRAYSIZE)
 #define ARRAYSIZE(array) (sizeof(array)/sizeof(array[0]))
-#endif
-
-#ifdef OS_WINCE
-#include <winsock2.h>
 #endif
 
 struct list_head {

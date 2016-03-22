@@ -140,7 +140,7 @@ MessageLoopThread<Q>::MessageLoopThread(const std::string&   name,
     : thread_delegate_(new LoopThreadDelegate(&message_queue_, handler)),
       thread_(threads::CreateThread(name.c_str(),
                                     thread_delegate_)) {
-	const bool started = thread_->startWithOptions(thread_opts);
+  const bool started = thread_->start(thread_opts);
   if (!started) {
     CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
     LOG4CXX_ERROR(logger_, "Failed to start thread " << name);
@@ -150,7 +150,6 @@ MessageLoopThread<Q>::MessageLoopThread(const std::string&   name,
 template<class Q>
 MessageLoopThread<Q>::~MessageLoopThread() {
   Shutdown();
-  thread_->join();
   delete thread_delegate_;
   threads::DeleteThread(thread_);
 }
@@ -162,7 +161,7 @@ void MessageLoopThread<Q>::PostMessage(const Message& message) {
 
 template <class Q>
 void MessageLoopThread<Q>::Shutdown() {
-  thread_->stop();
+  thread_->join();
 }
 
 template<class Q>

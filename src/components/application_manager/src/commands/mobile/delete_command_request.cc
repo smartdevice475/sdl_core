@@ -38,6 +38,11 @@
 #include "interfaces/HMI_API.h"
 #include "utils/helpers.h"
 
+#ifdef OS_WIN32
+#undef max
+#undef min
+#endif
+
 namespace application_manager {
 
 namespace commands {

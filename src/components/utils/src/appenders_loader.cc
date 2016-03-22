@@ -44,7 +44,9 @@ namespace utils {
 AppendersLoader appenders_loader;
 
 AppendersLoader::AppendersLoader() {
-#if defined(OS_WIN32) || defined(OS_WINCE)
+#if defined(OS_WIN32)
+  handle_=LoadLibrary("appenders.dll");
+#elif defined(OS_WINCE)
   handle_=LoadLibrary(L"appenders.dll");
 #else
   handle_ = dlopen("libappenders.so", RTLD_LAZY);

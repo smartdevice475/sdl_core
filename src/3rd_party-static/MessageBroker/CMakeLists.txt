@@ -9,13 +9,13 @@ INCLUDE_DIRECTORIES(
 
 IF(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
     INCLUDE_DIRECTORIES(
-        ../pthread-win32-2.9.1
+      ../pthread-win32-2.9.1
     )
 ENDIF()
 
 IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     INCLUDE_DIRECTORIES(
-        ${CMAKE_SOURCE_DIR}/include/win32
+      ../pthread-win32-2.9.1
     )
 ENDIF()
 

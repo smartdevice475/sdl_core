@@ -39,6 +39,11 @@
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
+#ifdef OS_WIN32
+#undef max
+#undef min
+#endif
+
 namespace application_manager {
 
 namespace commands {

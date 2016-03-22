@@ -22,4 +22,6 @@ add_definitions(-DWINCE)
 add_definitions(-D_WIN32)
 
 add_library(pthreadVC2 ${HEADERS} ${SOURCES})
-
+IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  TARGET_LINK_LIBRARIES(pthreadVC2 ws2_32)
+ENDIF()
