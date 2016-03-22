@@ -49,9 +49,9 @@ set(testLibraries
 )
 
 set(testSources
-  usage_statistics_test.cc    
-  shared_library_test.cc    
-  generated_code_test.cc #APPLINK-10657
+  usage_statistics_test.cc
+  shared_library_test.cc
+  generated_code_test.cc
   policy_manager_impl_test.cc
 )
 

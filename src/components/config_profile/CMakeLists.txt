@@ -29,29 +29,29 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-INCLUDE_DIRECTORIES(
-  INCLUDE
+include_directories (
+  include
   ${COMPONENTS_DIR}/utils/include/
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
-IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    INCLUDE_DIRECTORIES(
-        ${CMAKE_SOURCE_DIR}/include/win32
-	${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
-    )
-ENDIF()
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  include_directories(
+    ${CMAKE_SOURCE_DIR}/include/win32
+    ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
+  )
+endif()
 
-IF(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-    INCLUDE_DIRECTORIES(
-      ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
-    )
-ENDIF()
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  include_directories(
+    ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
+  )
+endif()
 
-SET(SOURCES
+set (SOURCES
     ${COMPONENTS_DIR}/config_profile/src/profile.cc
     ${COMPONENTS_DIR}/config_profile/src/ini_file.cc
 )
 
-ADD_LIBRARY("ConfigProfile" ${SOURCES})
-TARGET_LINK_LIBRARIES("ConfigProfile" Utils)
+add_library("ConfigProfile" ${SOURCES})
+target_link_libraries("ConfigProfile" Utils)

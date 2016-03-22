@@ -29,7 +29,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-INCLUDE_DIRECTORIES(
+include_directories (
     include/
     ${COMPONENTS_DIR}/application_manager/include/
     ${COMPONENTS_DIR}/utils/include/
@@ -47,56 +47,56 @@ INCLUDE_DIRECTORIES(
     ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
-IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-	INCLUDE_DIRECTORIES(
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	include_directories(
 	  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
 	)
-ENDIF()
+endif()
 
-IF(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-    INCLUDE_DIRECTORIES(
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+    include_directories(
       ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
     )
-ENDIF()
+endif()
 
-IF(HMIADAPTER STREQUAL "dbus")
-    SET(DBUS_SOURCE ./src/dbus_message_adapter.cc)
-    SET(DBUS_ADAPTER DBus)
-ENDIF()
+if(HMIADAPTER STREQUAL "dbus")
+    set (DBUS_SOURCE ./src/dbus_message_adapter.cc)
+    set (DBUS_ADAPTER DBus)
+endif()
 
-IF(MODIFY_FUNCTION_FLAGS)
-SET(SOURCES
+if(MODIFY_FUNCTION_FLAGS)
+set(SOURCES
     ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_handler_impl.cc
     ${COMPONENTS_DIR}/hmi_message_handler/src/messagebroker_adapter.cc
     ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_adapter.cc
     ${DBUS_SOURCE}
 )
-ELSE()
-SET(SOURCES
+else()
+set(SOURCES
     ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_handler_impl.cc
     ${COMPONENTS_DIR}/hmi_message_handler/src/messagebroker_adapter.cc
     ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_adapter.cc
 	${COMPONENTS_DIR}/hmi_message_handler/src/mqueue_adapter.cc
     ${DBUS_SOURCE}
 )
-ENDIF()
+endif()
 
-SET(LIBRARIES
+set(LIBRARIES
     Utils
     ${DBUS_ADAPTER}
     ${RTLIB}
 )
 
-ADD_LIBRARY("HMIMessageHandler" ${SOURCES})
-TARGET_LINK_LIBRARIES("HMIMessageHandler" ${LIBRARIES})
+add_library("HMIMessageHandler" ${SOURCES})
+target_link_libraries("HMIMessageHandler" ${LIBRARIES})
 
-IF(ENABLE_LOG)
-    TARGET_LINK_LIBRARIES("HMIMessageHandler" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
-ENDIF()
+if(ENABLE_LOG)
+    target_link_libraries("HMIMessageHandler" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+endif()
 
 # Tests temporary are inactivated. For details please check
 # Readme.txt in test directory of hmi_message_handler 
 
-#IF(BUILD_TESTS)
-#  ADD_SUBDIRECTORY(test)
-#ENDIF()
+if(BUILD_TESTS)
+  add_subdirectory(test)
+endif()

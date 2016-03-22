@@ -29,46 +29,46 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-INCLUDE_DIRECTORIES(
-    include
-    ${COMPONENTS_DIR}/utils/include/
-    ${COMPONENTS_DIR}/protocol_handler/include/
-    ${COMPONENTS_DIR}/connection_handler/include/
-    ${COMPONENTS_DIR}/config_profile/include/
-    ${LOG4CXX_INCLUDE_DIRECTORY}
+include_directories(
+  include
+  ${COMPONENTS_DIR}/utils/include/
+  ${COMPONENTS_DIR}/protocol_handler/include/
+  ${COMPONENTS_DIR}/connection_handler/include/
+  ${COMPONENTS_DIR}/config_profile/include/
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
-IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    INCLUDE_DIRECTORIES(
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    include_directories(
       ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
     )
-ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-    INCLUDE_DIRECTORIES(
+elseif(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+    include_directories(
       ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
     )
-ENDIF()
+endif()
 
-SET(SOURCES
+set(SOURCES
     ${COMPONENTS_DIR}/protocol_handler/src/incoming_data_handler.cc
     ${COMPONENTS_DIR}/protocol_handler/src/protocol_handler_impl.cc
     ${COMPONENTS_DIR}/protocol_handler/src/protocol_packet.cc
     ${COMPONENTS_DIR}/protocol_handler/src/protocol_payload.cc
 )
 
-SET(LIBRARIES
-    ProtocolLibrary
-    Utils
+set(LIBRARIES
+  ProtocolLibrary
+  Utils
 )
 
 get_property(dirs DIRECTORY "" PROPERTY LIBRARIES)
-FOREACH(dir ${dirs})
-    MESSAGE(STATUS "libraries='${dir}'")
-ENDFOREACH()
+foreach(dir ${dirs})
+  message(STATUS "libraries='${dir}'")
+endforeach()
 
 
-ADD_LIBRARY(ProtocolHandler ${SOURCES})
-TARGET_LINK_LIBRARIES(ProtocolHandler ${LIBRARIES})
+add_library(ProtocolHandler ${SOURCES})
+target_link_libraries(ProtocolHandler ${LIBRARIES})
 
-IF(BUILD_TESTS)
-    ADD_SUBDIRECTORY(test)
-ENDIF()
+if(BUILD_TESTS)
+  add_subdirectory(test)
+endif()

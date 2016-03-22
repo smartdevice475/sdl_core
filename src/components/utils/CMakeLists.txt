@@ -29,39 +29,39 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-SET(UTILS_INCLUDE_DIR ${COMPONENTS_DIR}/utils/include)
-SET(UTILS_SRC_DIR ${COMPONENTS_DIR}/utils/src)
+set(UTILS_INCLUDE_DIR ${COMPONENTS_DIR}/utils/include)
+set(UTILS_SRC_DIR ${COMPONENTS_DIR}/utils/src)
 
-INCLUDE_DIRECTORIES(
-    ${UTILS_INCLUDE_DIR}
-    ${COMPONENTS_DIR}/config_profile/include
-    ${COMPONENTS_DIR}/media_manager/include
-    ${COMPONENTS_DIR}/protocol_handler/include
-    ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_SOURCE_DIR}/src/3rd_party/apache-log4cxx-win32-0.10.0/apr/include
-    ${CMAKE_SOURCE_DIR}/src/3rd_party-static/libusbx-1.0.16/libusb
-    ${CMAKE_SOURCE_DIR}/src/3rd_party/sqlite3
-    ${LOG4CXX_INCLUDE_DIRECTORY}
-    ${SQLITE3_INCLUDE_DIRECTORY}
+include_directories (
+  ${UTILS_INCLUDE_DIR}
+  ${COMPONENTS_DIR}/config_profile/include
+  ${COMPONENTS_DIR}/media_manager/include
+  ${COMPONENTS_DIR}/protocol_handler/include
+  ${CMAKE_SOURCE_DIR}/include
+  ${CMAKE_SOURCE_DIR}/src/3rd_party/apache-log4cxx-win32-0.10.0/apr/include
+  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/libusbx-1.0.16/libusb
+  ${CMAKE_SOURCE_DIR}/src/3rd_party/sqlite3
+  ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${SQLITE3_INCLUDE_DIRECTORY}
 )
 
-IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    INCLUDE_DIRECTORIES(
-        ${CMAKE_SOURCE_DIR}/include/win32
-        ${CMAKE_SOURCE_DIR}/src/3rd_party/apr-1.5.0/include
-        ${CMAKE_SOURCE_DIR}/src/3rd_party/apr-1.5.0/include/arch/win32
-		${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
-    )
-ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-    INCLUDE_DIRECTORIES(
-        ${CMAKE_SOURCE_DIR}/include/wince
-        ${CMAKE_SOURCE_DIR}/src/3rd_party/apr-1.5.0/include
-        ${CMAKE_SOURCE_DIR}/src/3rd_party/apr-1.5.0/include/arch/win32
-        ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
-    )
-ENDIF()
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  include_directories(
+    ${CMAKE_SOURCE_DIR}/include/win32
+    ${CMAKE_SOURCE_DIR}/src/3rd_party/apr-1.5.0/include
+    ${CMAKE_SOURCE_DIR}/src/3rd_party/apr-1.5.0/include/arch/win32
+    ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
+  )
+elseif(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  include_directories(
+    ${CMAKE_SOURCE_DIR}/include/wince
+    ${CMAKE_SOURCE_DIR}/src/3rd_party/apr-1.5.0/include
+    ${CMAKE_SOURCE_DIR}/src/3rd_party/apr-1.5.0/include/arch/win32
+    ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
+  )
+endif()
 
-SET(SOURCES
+set (SOURCES
     ${UTILS_SRC_DIR}/bitstream.cc
     ${UTILS_SRC_DIR}/conditional_variable_posix.cc
     ${UTILS_SRC_DIR}/file_system.cc
@@ -80,75 +80,74 @@ SET(SOURCES
     ${UTILS_SRC_DIR}/gen_hash.cc
 )
 
-IF(ENABLE_LOG)
-    LIST(APPEND SOURCES
-        ${UTILS_SRC_DIR}/push_log.cc
-        ${UTILS_SRC_DIR}/log_message_loop_thread.cc
-        ${UTILS_SRC_DIR}/logger_status.cc
-        ${UTILS_SRC_DIR}/auto_trace.cc
-        ${UTILS_SRC_DIR}/logger.cc
-    )
-ENDIF()
+if(ENABLE_LOG)
+  list(APPEND SOURCES
+    ${UTILS_SRC_DIR}/push_log.cc
+    ${UTILS_SRC_DIR}/log_message_loop_thread.cc
+    ${UTILS_SRC_DIR}/logger_status.cc
+    ${UTILS_SRC_DIR}/auto_trace.cc
+    ${UTILS_SRC_DIR}/logger.cc
+  )
+endif()
 
-IF(BUILD_BACKTRACE_SUPPORT)
-    LIST(APPEND SOURCES
+if (BUILD_BACKTRACE_SUPPORT)
+    list(APPEND SOURCES
         ${UTILS_SRC_DIR}/back_trace.cc
     )
-ENDIF()
+endif()
 
-IF(MODIFY_FUNCTION_FLAGS)
-    LIST(APPEND SOURCES
+if(MODIFY_FUNCTION_FLAGS)
+    list(APPEND SOURCES
     ./src/global.cc
     )
-ENDIF()
+endif()
 
-IF(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    LIST(APPEND SOURCES
+if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
+    list(APPEND SOURCES
         ${UTILS_SRC_DIR}/threads/pulse_thread_delegate.cc
     )
-ENDIF()
+endif()
 
-ADD_LIBRARY("Utils" ${SOURCES})
+add_library("Utils" ${SOURCES})
 
-IF(CMAKE_SYSTEM_NAME STREQUAL "QNX")
+if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
     # --- QDB Wrapper 
-    ADD_SUBDIRECTORY(./src/qdb_wrapper)
-ELSE()
+    add_subdirectory(./src/qdb_wrapper)
+else ()
     # --- SQLite Wrapper
-    ADD_SUBDIRECTORY(./src/sqlite_wrapper)
-ENDIF()
+    add_subdirectory(./src/sqlite_wrapper)
+endif ()
 
-IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    LIST(APPEND LIBRARIES dl) 
-ENDIF()
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    list(APPEND LIBRARIES dl) 
+endif()
 
 
-IF(ENABLE_LOG)
-IF(MODIFY_FUNCTION_FLAGS)
-ELSE()
-    LIST(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
-    LIST(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
-    LIST(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
-    ADD_DEPENDENCIES(Utils install-3rd_party_logger)
-ENDIF()
-    LIST(APPEND LIBRARIES ConfigProfile)
+if(ENABLE_LOG)
+  list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+  list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
+  list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
+  list(APPEND LIBRARIES ConfigProfile)
 
-ENDIF()
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  add_dependencies(Utils install-3rd_party_logger)
+endif()
+endif()
 
-IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    TARGET_LINK_LIBRARIES("Utils" pthread ${RTLIB})
-ENDIF()
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  target_link_libraries("Utils" pthread ${RTLIB})
+endif()
 
-MESSAGE(STATUS "Utils->LIBRARIES:" ${LIBRARIES})
-TARGET_LINK_LIBRARIES("Utils" ${LIBRARIES})
+target_link_libraries("Utils" ${LIBRARIES})
 
-IF(BUILD_TESTS)
-    ADD_SUBDIRECTORY(test)
-ENDIF()
 
-INSTALL(TARGETS "Utils"
-    DESTINATION bin
-    PERMISSIONS
+if(BUILD_TESTS)
+  add_subdirectory(test)
+endif()
+
+install(TARGETS "Utils"
+  DESTINATION bin
+  PERMISSIONS
     OWNER_READ OWNER_WRITE
     GROUP_READ
     WORLD_READ

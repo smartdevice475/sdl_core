@@ -69,6 +69,6 @@ if(ENABLE_LOG)
     target_link_libraries("media_manager_test" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
-endif() # BUILD_TESTS
+endif()
 
 # vim: set ts=2 sw=2 et:

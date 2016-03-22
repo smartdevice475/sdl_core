@@ -28,69 +28,69 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-SET(COMPONENTS_DIR ${CMAKE_SOURCE_DIR}/src/components)
+set(COMPONENTS_DIR ${CMAKE_SOURCE_DIR}/src/components)
 
 # --- HMI_API interfaces
-ADD_SUBDIRECTORY(./interfaces)
+add_subdirectory(./interfaces)
 
 # --- ProtocolHandler
-ADD_SUBDIRECTORY(./protocol)
+add_subdirectory(./protocol)
 
 # --- TransportManager
-ADD_SUBDIRECTORY(./transport_manager)
+add_subdirectory(./transport_manager)
 
 # --- Policies
-ADD_SUBDIRECTORY(./resumption)
+add_subdirectory(./resumption)
 
 # --- formatters
-ADD_SUBDIRECTORY(./formatters)
+add_subdirectory(./formatters)
 
 # --- ProtocolHandler
-ADD_SUBDIRECTORY(./protocol_handler)
+add_subdirectory(./protocol_handler)
 
 # --- ConnectionHandler
-ADD_SUBDIRECTORY(./connection_handler)
+add_subdirectory(./connection_handler)
 
 # --- Utils
-ADD_SUBDIRECTORY(./utils)
+add_subdirectory(./utils)
 
 # --- Security manager
-IF(ENABLE_SECURITY)
-  ADD_SUBDIRECTORY(./security_manager)
-ENDIF()
+if(ENABLE_SECURITY)
+  add_subdirectory(./security_manager)
+endif()
 #
 # --- Policy_impl
-ADD_SUBDIRECTORY(./policy)
+add_subdirectory(./policy)
 
 # --- Validated types
-ADD_SUBDIRECTORY(./rpc_base)
+add_subdirectory(./rpc_base)
 
 # --- SmartObjects
-ADD_SUBDIRECTORY(./smart_objects)
+add_subdirectory(./smart_objects)
 
 # --- Application manager
-ADD_SUBDIRECTORY(./application_manager)
+add_subdirectory(./application_manager)
 
 # --- HMI Message Handler
-ADD_SUBDIRECTORY(./hmi_message_handler)
+add_subdirectory(./hmi_message_handler)
 
 # --- Config
-ADD_SUBDIRECTORY(./config_profile)
+add_subdirectory(./config_profile)
 
 # --- AudioManager
-ADD_SUBDIRECTORY(./media_manager)
+add_subdirectory(./media_manager)
 
-IF(TIME_TESTER)
-    ADD_SUBDIRECTORY(./time_tester)
-ENDIF()
+if (TIME_TESTER)
+    add_subdirectory(./time_tester)
+endif()
 
 
-IF(${HMI_DBUS_API})
+if (${HMI_DBUS_API})
 # --- DBus
-    ADD_SUBDIRECTORY(./dbus)
-ENDIF()
-IF (${QT_HMI})
+    add_subdirectory(./dbus)
+endif ()
+if (${QT_HMI})
 # --- Qt HMI
-    ADD_SUBDIRECTORY(./qt_hmi)
-ENDIF()
+    add_subdirectory(./qt_hmi)
+endif ()
 

@@ -29,9 +29,9 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-SET(CH_SRC_DIR ${COMPONENTS_DIR}/connection_handler/src)
+set(CH_SRC_DIR ${COMPONENTS_DIR}/connection_handler/src)
 
-INCLUDE_DIRECTORIES(
+include_directories (
     include
     ${COMPONENTS_DIR}/protocol_handler/include/
     ${COMPONENTS_DIR}/config_profile/include/
@@ -40,33 +40,33 @@ INCLUDE_DIRECTORIES(
     ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
-IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-	INCLUDE_DIRECTORIES(
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	include_directories(
 	  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
 	)
-ENDIF()
+endif()
 
-IF(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-    INCLUDE_DIRECTORIES(
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+    include_directories(
       ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
     )
-ENDIF()
+endif()
 
-SET(SOURCES
+set (SOURCES
     ${CH_SRC_DIR}/connection_handler_impl.cc
     ${CH_SRC_DIR}/connection.cc
     ${CH_SRC_DIR}/device.cc
     ${CH_SRC_DIR}/heartbeat_monitor.cc
 )
 
-SET(LIBRARIES
+set(LIBRARIES
     ConfigProfile
     ProtocolLibrary
 )
 
-ADD_LIBRARY(connectionHandler ${SOURCES})
-TARGET_LINK_LIBRARIES(connectionHandler encryption)
+add_library(connectionHandler ${SOURCES})
+target_link_libraries(connectionHandler encryption)
 
-IF(BUILD_TESTS)
-    ADD_SUBDIRECTORY(test)
-ENDIF()
+if(BUILD_TESTS)
+    add_subdirectory(test)
+endif()

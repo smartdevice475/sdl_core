@@ -28,17 +28,17 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-SET(target dbms)
+set(target dbms)
 
-FIND_PACKAGE(Sqlite3 REQUIRED)
+find_package(Sqlite3 REQUIRED)
 
-INCLUDE_DIRECTORIES(${COMPONENTS_DIR}/utils/include/utils)
+include_directories(${COMPONENTS_DIR}/utils/include/utils)
 
-SET(SOURCES
-    ./sql_database.cc
-    ./sql_query.cc
-    ./sql_error.cc
+set(SOURCES
+  ./sql_database.cc
+  ./sql_query.cc
+  ./sql_error.cc
 )
 
-ADD_LIBRARY(${target} ${SOURCES})
-TARGET_LINK_LIBRARIES(${target} Utils sqlite3)
+add_library(${target} ${SOURCES})
+target_link_libraries(${target} Utils sqlite3)

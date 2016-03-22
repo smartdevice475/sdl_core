@@ -28,65 +28,65 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-SET(APR_SOURCE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../apr-1.5.0)
-SET(APR_BUILD_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../apr-build)
+set(APR_SOURCE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../apr-1.5.0)
+set(APR_BUILD_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../apr-build)
 
-SET(APR_INCLUDE_DIRECTORY ${APR_SOURCE_DIRECTORY}/include)
+set(APR_INCLUDE_DIRECTORY ${APR_SOURCE_DIRECTORY}/include)
 
-SET(APR_LIBS_DIRECTORY ${APR_BUILD_DIRECTORY}/.libs)
+set(APR_LIBS_DIRECTORY ${APR_BUILD_DIRECTORY}/.libs)
 
-FILE(MAKE_DIRECTORY
-    ${APR_BUILD_DIRECTORY}/include/private
-    ${APR_SOURCE_DIRECTORY}/include/private
+file(MAKE_DIRECTORY
+  ${APR_BUILD_DIRECTORY}/include/private
+  ${APR_SOURCE_DIRECTORY}/include/private
 )
 
-FILE(COPY ${APR_SOURCE_DIRECTORY}/tools/gen_test_char.c
-    DESTINATION ${APR_BUILD_DIRECTORY}/tools
+file(COPY ${APR_SOURCE_DIRECTORY}/tools/gen_test_char.c
+  DESTINATION ${APR_BUILD_DIRECTORY}/tools
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    SET(CONFIGURE_FLAGS
-        "--host=${CMAKE_SYSTEM_PROCESSOR}-nto-qnx"
-        "ac_cv_file__dev_zero=yes"
-        "ac_cv_func_setpgrp_void=yes"
-        "apr_cv_process_shared_works=yes"
-        "apr_cv_mutex_recursive=yes"
-        "apr_cv_mutex_robust_shared=no"
-        "apr_cv_tcp_nodelay_with_cork=no"
-        "ac_cv_sizeof_struct_iovec=8"
-    )
-ELSE()
-    SET(CONFIGURE_FLAGS "")
-ENDIF()
+  set(CONFIGURE_FLAGS
+    "--host=${CMAKE_SYSTEM_PROCESSOR}-nto-qnx"
+    "ac_cv_file__dev_zero=yes"
+    "ac_cv_func_setpgrp_void=yes"
+    "apr_cv_process_shared_works=yes"
+    "apr_cv_mutex_recursive=yes"
+    "apr_cv_mutex_robust_shared=no"
+    "apr_cv_tcp_nodelay_with_cork=no"
+    "ac_cv_sizeof_struct_iovec=8"
+  )
+else()
+  set(CONFIGURE_FLAGS "")
+endif()
 
-ADD_CUSTOM_COMMAND(OUTPUT ${APR_BUILD_DIRECTORY}/Makefile
-    COMMAND CC=${CMAKE_C_COMPILER} ${APR_SOURCE_DIRECTORY}/configure ${CONFIGURE_FLAGS}
-    COMMAND ${CMAKE_COMMAND} -E copy include/apr.h ${APR_SOURCE_DIRECTORY}/include
-    WORKING_DIRECTORY ${APR_BUILD_DIRECTORY}
+add_custom_command(OUTPUT ${APR_BUILD_DIRECTORY}/Makefile
+  COMMAND CC=${CMAKE_C_COMPILER} ${APR_SOURCE_DIRECTORY}/configure ${CONFIGURE_FLAGS}
+  COMMAND ${CMAKE_COMMAND} -E copy include/apr.h ${APR_SOURCE_DIRECTORY}/include
+  WORKING_DIRECTORY ${APR_BUILD_DIRECTORY}
 )
 
-ADD_CUSTOM_COMMAND(OUTPUT ${APR_BUILD_DIRECTORY}/include/private/apr_escape_test_char.h
-    DEPENDS ${APR_BUILD_DIRECTORY}/Makefile
-    COMMAND make include/private/apr_escape_test_char.h
-    COMMAND ${CMAKE_COMMAND} -E copy include/private/apr_escape_test_char.h ${APR_SOURCE_DIRECTORY}/include/private
-    WORKING_DIRECTORY ${APR_BUILD_DIRECTORY}
+add_custom_command(OUTPUT ${APR_BUILD_DIRECTORY}/include/private/apr_escape_test_char.h
+  DEPENDS ${APR_BUILD_DIRECTORY}/Makefile
+  COMMAND make include/private/apr_escape_test_char.h
+  COMMAND ${CMAKE_COMMAND} -E copy include/private/apr_escape_test_char.h ${APR_SOURCE_DIRECTORY}/include/private
+  WORKING_DIRECTORY ${APR_BUILD_DIRECTORY}
 )
 
-ADD_CUSTOM_TARGET(libapr-1 ALL make
-    DEPENDS ${APR_BUILD_DIRECTORY}/include/private/apr_escape_test_char.h
-    WORKING_DIRECTORY ${APR_BUILD_DIRECTORY}
+add_custom_target(libapr-1 ALL make
+  DEPENDS ${APR_BUILD_DIRECTORY}/include/private/apr_escape_test_char.h
+  WORKING_DIRECTORY ${APR_BUILD_DIRECTORY}
 )
 
-INSTALL(
-    DIRECTORY ${APR_LIBS_DIRECTORY}/
-    DESTINATION ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib
-    USE_SOURCE_PERMISSIONS
-    FILES_MATCHING PATTERN libapr-1.so*
+install(
+  DIRECTORY ${APR_LIBS_DIRECTORY}/
+  DESTINATION ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib
+  USE_SOURCE_PERMISSIONS
+  FILES_MATCHING PATTERN libapr-1.so*
 )
 
-INSTALL(
-    DIRECTORY ${APR_INCLUDE_DIRECTORY}/
-    DESTINATION ${3RD_PARTY_INSTALL_PREFIX}/include
-    USE_SOURCE_PERMISSIONS
-    FILES_MATCHING PATTERN *.h
+install(
+  DIRECTORY ${APR_INCLUDE_DIRECTORY}/
+  DESTINATION ${3RD_PARTY_INSTALL_PREFIX}/include
+  USE_SOURCE_PERMISSIONS
+  FILES_MATCHING PATTERN *.h
 )

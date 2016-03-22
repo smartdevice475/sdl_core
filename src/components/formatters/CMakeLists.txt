@@ -29,22 +29,22 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-SET(FORMATTERS_SRC_DIR ${COMPONENTS_DIR}/formatters/src)
+set(FORMATTERS_SRC_DIR  ${COMPONENTS_DIR}/formatters/src)
 
-INCLUDE_DIRECTORIES(
-    include/
-    ${COMPONENTS_DIR}/protocol_handler/include/
-    ${COMPONENTS_DIR}/utils/include/
-    ${JSONCPP_INCLUDE_DIRECTORY}
-    ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
-    ${COMPONENTS_DIR}/smart_objects/include
+include_directories (
+  include/
+  ${COMPONENTS_DIR}/protocol_handler/include/
+  ${COMPONENTS_DIR}/utils/include/
+  ${JSONCPP_INCLUDE_DIRECTORY}
+  ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
+  ${COMPONENTS_DIR}/smart_objects/include
 )
 
-SET(SOURCES
+set(SOURCES
     ${FORMATTERS_SRC_DIR}/CSmartFactory.cpp
 )
 
-SET(FORMATTER_SOURCES
+set(FORMATTER_SOURCES
      ${FORMATTERS_SRC_DIR}/CFormatterJsonBase.cpp
      ${FORMATTERS_SRC_DIR}/CFormatterJsonSDLRPCv1.cpp
      ${FORMATTERS_SRC_DIR}/CFormatterJsonSDLRPCv2.cpp
@@ -53,10 +53,10 @@ SET(FORMATTER_SOURCES
      ${FORMATTERS_SRC_DIR}/generic_json_formatter.cc
 )
 
-ADD_LIBRARY("formatters" ${SOURCES}
+add_library("formatters" ${SOURCES}
     ${FORMATTER_SOURCES}
 )
 
-IF(BUILD_TESTS)
-    ADD_SUBDIRECTORY(test)
-ENDIF()
+if(BUILD_TESTS)
+  add_subdirectory(test)
+endif()

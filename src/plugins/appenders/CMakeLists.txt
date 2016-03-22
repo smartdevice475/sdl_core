@@ -28,25 +28,25 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-SET(target "appenders")
+set(target "appenders")
 
-SET(SOURCES
-    safe_file_appender.cc
-    safe_rolling_file_appender.cc
+set(SOURCES
+  safe_file_appender.cc
+  safe_rolling_file_appender.cc
 )
 
-INCLUDE_DIRECTORIES(
-    ${LOG4CXX_INCLUDE_DIRECTORY}
+include_directories(
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
-ADD_LIBRARY(${target} MODULE ${SOURCES})
+add_library(${target} MODULE ${SOURCES})
 
-TARGET_LINK_LIBRARIES(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 
-INSTALL(TARGETS ${target}
-    DESTINATION bin
-    PERMISSIONS
-    OWNER_READ OWNER_WRITE OWNER_EXECUTE
-    GROUP_READ GROUP_EXECUTE
-    WORLD_READ WORLD_EXECUTE
+install(TARGETS ${target}
+  DESTINATION bin
+  PERMISSIONS
+  OWNER_READ OWNER_WRITE OWNER_EXECUTE
+  GROUP_READ GROUP_EXECUTE
+  WORLD_READ WORLD_EXECUTE
 )

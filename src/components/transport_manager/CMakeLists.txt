@@ -28,10 +28,10 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-SET(target TransportManager)
-SET(TM_SRC_DIR ${COMPONENTS_DIR}/transport_manager/src)
+set(target TransportManager)
+set(TM_SRC_DIR ${COMPONENTS_DIR}/transport_manager/src)
 
-INCLUDE_DIRECTORIES(
+include_directories (
   include
   ${COMPONENTS_DIR}/include
   ${COMPONENTS_DIR}/utils/include/
@@ -45,24 +45,24 @@ INCLUDE_DIRECTORIES(
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
-IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-	INCLUDE_DIRECTORIES(
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	include_directories(
 	  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
 	)
-ENDIF()
+endif()
 
-IF(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-    INCLUDE_DIRECTORIES(
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+    include_directories(
       ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
     )
-ENDIF()
+endif()
 
-IF(BUILD_BT_SUPPORT)
-  INCLUDE_DIRECTORIES(
+if (BUILD_BT_SUPPORT)
+  include_directories(
   )
-ENDIF()
+endif()
 
-SET(SOURCES
+set (SOURCES
   ${TM_SRC_DIR}/transport_manager_impl.cc
   ${TM_SRC_DIR}/transport_manager_default.cc
   ${TM_SRC_DIR}/transport_adapter/transport_adapter_listener_impl.cc
@@ -75,12 +75,12 @@ SET(SOURCES
   ${TM_SRC_DIR}/tcp/tcp_connection_factory.cc
 )
 
-IF(BUILD_AVAHI_SUPPORT)
+if(BUILD_AVAHI_SUPPORT)
   list (APPEND SOURCES
     ${TM_SRC_DIR}/tcp/dnssd_service_browser.cc
   )
-ENDIF()
-IF(BUILD_BT_SUPPORT)
+endif()
+if (BUILD_BT_SUPPORT)
   list (APPEND SOURCES
   ${TM_SRC_DIR}/bluetooth/bluetooth_device_scanner.cc
   ${TM_SRC_DIR}/bluetooth/bluetooth_transport_adapter.cc
@@ -88,61 +88,62 @@ IF(BUILD_BT_SUPPORT)
   ${TM_SRC_DIR}/bluetooth/bluetooth_socket_connection.cc
   ${TM_SRC_DIR}/bluetooth/bluetooth_device.cc
   )
-ENDIF()
+endif()
 
-IF(BUILD_USB_SUPPORT)
+if (BUILD_USB_SUPPORT)
   list (APPEND SOURCES
     ${TM_SRC_DIR}/usb/usb_aoa_adapter.cc
     ${TM_SRC_DIR}/usb/usb_connection_factory.cc
     ${TM_SRC_DIR}/usb/usb_device_scanner.cc
   )
-  IF(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Android" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE" OR CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Android" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE" OR CMAKE_SYSTEM_NAME STREQUAL "Windows")
     list (APPEND SOURCES
     ${TM_SRC_DIR}/usb/libusb/usb_handler.cc
     ${TM_SRC_DIR}/usb/libusb/usb_connection.cc
     ${TM_SRC_DIR}/usb/libusb/platform_usb_device.cc
     )
-  ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    LIST(APPEND SOURCES
+  elseif(CMAKE_SYSTEM_NAME STREQUAL "QNX")
+    list(APPEND SOURCES
     ${TM_SRC_DIR}/usb/qnx/usb_handler.cc
     ${TM_SRC_DIR}/usb/qnx/usb_connection.cc
     ${TM_SRC_DIR}/usb/qnx/platform_usb_device.cc
     )
-  ENDIF()
-ENDIF(BUILD_USB_SUPPORT)
-
-IF(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-ENDIF()
-ADD_LIBRARY(${target} ${SOURCES})
-TARGET_LINK_LIBRARIES(${target} ProtocolLibrary)
-
-IF(BUILD_USB_SUPPORT)
-  IF(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    TARGET_LINK_LIBRARIES(${target} usbdi)
-  ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Windows"  OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-    TARGET_LINK_LIBRARIES(${target} Libusb-1.0.16)
-  ENDIF()
-ENDIF(BUILD_USB_SUPPORT)
+  endif()
+endif(BUILD_USB_SUPPORT)
 
 
-IF(BUILD_AVAHI_SUPPORT)
-  TARGET_LINK_LIBRARIES(${target} avahi-common)
-ENDIF()
+if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
+endif()
+add_library(${target} ${SOURCES})
+target_link_libraries(${target} ProtocolLibrary)
 
-IF(ENABLE_LOG)
-IF(MODIFY_FUNCTION_FLAGS)
-ELSE()
-  TARGET_LINK_LIBRARIES(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
-ENDIF()
-ENDIF()
+if (BUILD_USB_SUPPORT)
+  if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
+    target_link_libraries(${target} usbdi)
+  elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows"  OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+    target_link_libraries(${target} Libusb-1.0.16)
+  endif()
+endif(BUILD_USB_SUPPORT)
 
-IF(BUILD_BT_SUPPORT)
-  TARGET_LINK_LIBRARIES(${target} bluetooth)
-ENDIF()
 
-IF(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-ENDIF()
+if(BUILD_AVAHI_SUPPORT)
+  target_link_libraries(${target} avahi-common)
+endif()
 
-IF(BUILD_TESTS)
-  ADD_SUBDIRECTORY(test)
-ENDIF()
+if(ENABLE_LOG)
+if(MODIFY_FUNCTION_FLAGS)
+else()
+  target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+endif()
+endif()
+
+if (BUILD_BT_SUPPORT)
+  target_link_libraries(${target} bluetooth)
+endif()
+
+if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
+endif()
+
+if(BUILD_TESTS)
+  add_subdirectory(test)
+endif()

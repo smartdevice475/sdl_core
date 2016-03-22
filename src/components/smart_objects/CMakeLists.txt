@@ -29,20 +29,20 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-SET(SMART_OBJECTS_SRC_DIR ${COMPONENTS_DIR}/smart_objects/src)
+set(SMART_OBJECTS_SRC_DIR ${COMPONENTS_DIR}/smart_objects/src)
 
-INCLUDE_DIRECTORIES(
+include_directories (
   include
   ${COMPONENTS_DIR}/utils/include/
 )
 
-IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    INCLUDE_DIRECTORIES(
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    include_directories(
         ${CMAKE_SOURCE_DIR}/include/win32
     )
-ENDIF()
+endif()
 
-SET(SOURCES
+set (SOURCES
     ${SMART_OBJECTS_SRC_DIR}/smart_object.cc
     ${SMART_OBJECTS_SRC_DIR}/smart_schema.cc
     ${SMART_OBJECTS_SRC_DIR}/schema_item.cc
@@ -57,16 +57,16 @@ SET(SOURCES
     ${SMART_OBJECTS_SRC_DIR}/array_schema_item.cc
 )
 
-ADD_LIBRARY("SmartObjects" ${SOURCES})
+add_library("SmartObjects" ${SOURCES})
 
-IF(ENABLE_LOG)
-IF(MODIFY_FUNCTION_FLAGS)
-ELSE()
-  TARGET_LINK_LIBRARIES("SmartObjects" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
-ENDIF()
-ENDIF()
+if(ENABLE_LOG)
+if(MODIFY_FUNCTION_FLAGS)
+else()
+  target_link_libraries("SmartObjects" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+endif()
+endif()
 
-IF(BUILD_TESTS)
-  ADD_SUBDIRECTORY(test)
-ENDIF()
+if(BUILD_TESTS)
+  add_subdirectory(test)
+endif()
 

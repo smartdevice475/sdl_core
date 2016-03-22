@@ -1,27 +1,27 @@
-SET(ENCRYPTION_INCLUDE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include)
-SET(ENCRYPTION_INCLUDE_DIRECTORY ${ENCRYPTION_INCLUDE_DIRECTORY} PARENT_SCOPE)
+set(ENCRYPTION_INCLUDE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include)
+set(ENCRYPTION_INCLUDE_DIRECTORY ${ENCRYPTION_INCLUDE_DIRECTORY} PARENT_SCOPE)
 
-INCLUDE_DIRECTORIES (
-    ./include
+include_directories (
+  ./include
 )
 
-IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include/win32/)
-ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-    INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include/wince/)
-    INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib/wince/)
-ENDIF()
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    include_directories(${CMAKE_SOURCE_DIR}/include/win32/)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+    include_directories(${CMAKE_SOURCE_DIR}/include/wince/)
+    include_directories(${CMAKE_SOURCE_DIR}/lib/wince/)
+endif()
 
-SET(SOURCES
+set (SOURCES
     ./src/Base64.cpp
     ./src/hashing.cc
 )
 
-IF(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-    SET(LIBRARIES ssleay32 libeay32)
-ELSE()
-    SET(LIBRARIES crypto)
-ENDIF()
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+set (LIBRARIES ssleay32 libeay32)
+else()
+set (LIBRARIES crypto)
+endif()
 
-ADD_LIBRARY(encryption ${SOURCES})
-TARGET_LINK_LIBRARIES(encryption ${LIBRARIES})
+add_library(encryption ${SOURCES})
+target_link_libraries(encryption ${LIBRARIES})
