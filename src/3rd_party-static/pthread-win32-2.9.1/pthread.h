@@ -33,12 +33,6 @@
 #if !defined( PTHREAD_H )
 #define PTHREAD_H
 
-#ifdef OS_WINCE
-# if _WIN32_WCE > 0x600
-#  include <stdlib.h>
-# endif
-#endif // OS_WINCE
-
 /*
  * See the README file for an explanation of the pthreads-win32 version
  * numbering scheme and how the DLL is named etc.

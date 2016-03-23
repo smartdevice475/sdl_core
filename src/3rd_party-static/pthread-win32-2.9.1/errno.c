@@ -85,10 +85,10 @@ _errno (void)
   else
     {
 #ifdef OS_WINCE
-      result = (int *)1;
-#else // OS_WINCE
-	  result = (int *)(&self.p->exitStatus);
-#endif // OS_WINCE
+      result = &(((ptw32_thread_t*)(self.p))->ptErrno);
+#else
+      result = (int *)(&self.p->exitStatus);
+#endif
     }
 
   return (result);
