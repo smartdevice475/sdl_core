@@ -256,7 +256,6 @@ bool Thread::start(const ThreadOptions& options) {
     }
   }
   stopped_ = false;
-  Sleep(200);
   run_cond_.NotifyOne();
 #if defined(OS_WIN32) || defined(OS_WINCE)
   LOG4CXX_DEBUG(logger_,
