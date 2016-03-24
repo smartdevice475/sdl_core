@@ -235,7 +235,7 @@ TransportAdapter::Error ThreadedSocketConnection::Notify() const {
   }
   uint8_t c = 0;
 #if defined(OS_WIN32) || defined(OS_WINCE)
-  if (1 == ::send(write_fd_, (const char *)&c, 1, 0)) {
+  if (1 != ::send(write_fd_, (const char *)&c, 1, 0)) {
 #else
   if (1 != write(write_fd_, &c, 1)) {
 #endif
