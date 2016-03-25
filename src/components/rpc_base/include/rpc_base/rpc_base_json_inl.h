@@ -135,7 +135,7 @@ Integer<T, minval, maxval>::Integer(const Json::Value* value)
         value_ = IntType(intval);
       }
       else {
-        alue_state_ = kInvalid;
+        value_state_ = kInvalid;
       }
     }
 }
