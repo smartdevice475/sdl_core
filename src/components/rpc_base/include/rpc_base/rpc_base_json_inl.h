@@ -126,42 +126,43 @@ inline Json::Value Boolean::ToJsonValue() const {
 
 template<typename T, T minval, T maxval>
 Integer<T, minval, maxval>::Integer(const Json::Value* value)
-	: PrimitiveType(InitHelper(value, &Json::Value::isInt)),
-	value_(minval),
-	range_(minval, maxval){
-  if (is_valid()) {
-    Json::Value::Int64 intval = value->asInt64();
-    if (range_.Includes(intval)) {
-      value_ = IntType(intval);
-    } else {
-      value_state_ = kInvalid;
+    : PrimitiveType(InitHelper(value, &Json::Value::isInt)),
+      value_(minval),
+      range_(minval, maxval){
+    if (is_valid()) {
+      Json::Value::Int64 intval = value->asInt64();
+      if (range_.Includes(intval)) {
+        value_ = IntType(intval);
+      }
+      else {
+        alue_state_ = kInvalid;
+      }
     }
-  }
 }
 
 template<typename T, T minval, T maxval>
 Integer<T, minval, maxval>::Integer(const Integer& val)
-  : PrimitiveType(kUninitialized),
-    value_(val.value_),
-	range_(minval, maxval){
-	value_state_ = range_.Includes(val.value_) ? kValid : kInvalid;
+    : PrimitiveType(kUninitialized),
+      value_(val.value_),
+      range_(minval, maxval){
+    value_state_ = range_.Includes(val.value_) ? kValid : kInvalid;
 }
 
 template<typename T, T minval, T maxval>
 Integer<T, minval, maxval>::Integer(const Json::Value* value, IntType def_value)
-	: PrimitiveType(InitHelper(value, &Json::Value::isInt)),
-	value_(def_value),
-	range_(minval, maxval){
-  if (!is_initialized()) {
-    value_state_ = kValid;
-  } else if (is_valid()) {
-    Json::Value::Int64 intval = value->asInt64();
-    if (range_.Includes(intval)) {
-      value_ = IntType(intval);
-    } else {
-      value_state_ = kInvalid;
+    : PrimitiveType(InitHelper(value, &Json::Value::isInt)),
+      value_(def_value),
+      range_(minval, maxval){
+    if (!is_initialized()) {
+      value_state_ = kValid;
+    } else if (is_valid()) {
+      Json::Value::Int64 intval = value->asInt64();
+      if (range_.Includes(intval)) {
+        value_ = IntType(intval);
+      } else {
+        value_state_ = kInvalid;
+      }
     }
-  }
 }
 
 template<typename T, T minval, T maxval>
@@ -173,7 +174,7 @@ template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 Float<minnum, maxnum, minden, maxden>::Float(const Json::Value* value)
   : PrimitiveType(InitHelper(value, &Json::Value::isDouble)),
     value_() {
-	range_ = Range<double>(minnum/minden, maxnum/maxden);
+  range_ = Range<double>(minnum/minden, maxnum/maxden);
   if (is_valid()) {
     value_ = value->asDouble();
     value_state_ = range_.Includes(value_) ? kValid : kInvalid;
@@ -203,7 +204,7 @@ template<size_t minlen, size_t maxlen>
 String<minlen, maxlen>::String(const Json::Value* value)
   : PrimitiveType(InitHelper(value, &Json::Value::isString)),
     value_(is_valid() ? value->asString() : std::string()),
-	length_range_(minlen, maxlen){
+    length_range_(minlen, maxlen){
   if (is_valid()) {
     value_state_ = length_range_.Includes(value_.length()) ? kValid : kInvalid;
   }
@@ -213,7 +214,7 @@ template<size_t minlen, size_t maxlen>
 String<minlen, maxlen>::String(const Json::Value* value, const std::string& def_value)
   : PrimitiveType(InitHelper(value, &Json::Value::isString)),
     value_(def_value),
-	length_range_(minlen, maxlen){
+    length_range_(minlen, maxlen){
   if (!is_initialized()) {
     value_state_ = kValid;
   } else if (is_valid()) {

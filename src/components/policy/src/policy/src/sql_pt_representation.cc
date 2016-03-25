@@ -74,12 +74,8 @@ SQLPTRepresentation::SQLPTRepresentation()
 #endif
   std::string path = profile::Profile::instance()->app_storage_folder();
   if (!path.empty()) {
-#ifdef OS_WINCE
-	db_->set_path(path + "\\");
-#else
     db_->set_path(path + "/");
-#endif
-	LOG4CXX_INFO(logger_,"SQLPTRepresentation path:"<<db_->get_path());
+    LOG4CXX_INFO(logger_, "SQLPTRepresentation path:" << db_->get_path());
   }
 #endif  // __QNX__
 }

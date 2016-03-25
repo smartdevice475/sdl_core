@@ -168,16 +168,16 @@ inline Boolean::operator bool() const {
 template<typename T, T minval, T maxval>
 Integer<T, minval, maxval>::Integer()
     : PrimitiveType(kUninitialized),
-	  range_(minval, maxval),
+      range_(minval, maxval),
       value_(range_.min()) {
 }
 
 template<typename T, T minval, T maxval>
 Integer<T, minval, maxval>::Integer(IntType value)
-	: PrimitiveType(kUninitialized),
+    : PrimitiveType(kUninitialized),
       value_(value),
-	  range_(minval, maxval){
-	value_state_ = range_.Includes(value) ? kValid : kInvalid;
+      range_(minval, maxval){
+    value_state_ = range_.Includes(value) ? kValid : kInvalid;
 }
 
 template<typename T, T minval, T maxval>
@@ -217,18 +217,18 @@ Integer<T, minval, maxval>::operator IntType() const {
 
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 Float<minnum, maxnum, minden, maxden>::Float()
-	: PrimitiveType(kUninitialized){
-	range_ = Range<double>(minnum/minden, maxmun/maxden);
-	value_ = range_.min();
-	value_state_ = range_.Includes(value) ? kValid : kInvalid;
+    : PrimitiveType(kUninitialized){
+    range_ = Range<double>(minnum/minden, maxmun/maxden);
+    value_ = range_.min();
+    value_state_ = range_.Includes(value) ? kValid : kInvalid;
 }
 
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 Float<minnum, maxnum, minden, maxden>::Float(double value)
-	: PrimitiveType(kUninitialized),
+    : PrimitiveType(kUninitialized),
       value_(value) {
-	range_ = Range<double>(minnum/minden, maxnum/maxden);
-	value_state_ = range_.Includes(value) ? kValid : kInvalid;
+    range_ = Range<double>(minnum/minden, maxnum/maxden);
+    value_state_ = range_.Includes(value) ? kValid : kInvalid;
 }
 
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
@@ -251,23 +251,23 @@ Float<minnum, maxnum, minden, maxden>::operator double() const {
 template<size_t minlen, size_t maxlen>
 String<minlen, maxlen>::String()
     : PrimitiveType(kUninitialized),
-	length_range_(minlen, maxlen){
+      length_range_(minlen, maxlen){
 }
 
 template<size_t minlen, size_t maxlen>
 String<minlen, maxlen>::String(const std::string& value)
-	: PrimitiveType(kUninitialized),
+    : PrimitiveType(kUninitialized),
       value_(value),
-	  length_range_(minlen, maxlen){
-	value_state_ = length_range_.Includes(value.length()) ? kValid : kInvalid;
+      length_range_(minlen, maxlen){
+    value_state_ = length_range_.Includes(value.length()) ? kValid : kInvalid;
 }
 
 template<size_t minlen, size_t maxlen>
 String<minlen, maxlen>::String(const char* value)
     : PrimitiveType(kUninitialized),
       value_(value),
-	  length_range_(minlen, maxlen){
-  value_state_ = length_range_.Includes(value_.length()) ? kValid : kInvalid;
+      length_range_(minlen, maxlen){
+    value_state_ = length_range_.Includes(value_.length()) ? kValid : kInvalid;
 }
 
 template<size_t minlen, size_t maxlen>

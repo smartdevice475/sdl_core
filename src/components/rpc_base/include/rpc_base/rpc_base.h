@@ -208,7 +208,7 @@ class Integer : public PrimitiveType {
 
   private:
     IntType value_;
-	Range<T> range_;
+    Range<T> range_;
 };
 
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
