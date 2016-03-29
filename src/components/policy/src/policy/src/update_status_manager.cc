@@ -36,7 +36,7 @@
 
 namespace  policy {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "UpdateStatusManager")
+CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
 UpdateStatusManager::UpdateStatusManager() :
   listener_(NULL),
@@ -96,6 +96,7 @@ void UpdateStatusManager::OnWrongUpdateReceived() {
   update_status_thread_delegate_->updateTimeOut(0); // Stop Timer
   set_update_required(true);
   set_exchange_in_progress(false);
+  set_exchange_pending(false);
 }
 
 void UpdateStatusManager::OnResetDefaultPT(bool is_update_required) {

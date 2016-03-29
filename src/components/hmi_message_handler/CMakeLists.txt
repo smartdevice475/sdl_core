@@ -35,7 +35,6 @@ include_directories (
     ${COMPONENTS_DIR}/utils/include/
     ${COMPONENTS_DIR}/smart_objects/include/
     ${COMPONENTS_DIR}/formatters/include/
-    ${COMPONENTS_DIR}/config_profile/include/
     ${COMPONENTS_DIR}/media_manager/include/
     ${COMPONENTS_DIR}/protocol_handler/include
     ${JSONCPP_INCLUDE_DIRECTORY}
@@ -64,22 +63,13 @@ if(HMIADAPTER STREQUAL "dbus")
     set (DBUS_ADAPTER DBus)
 endif()
 
-if(MODIFY_FUNCTION_FLAGS)
-set(SOURCES
+set (SOURCES
     ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_handler_impl.cc
     ${COMPONENTS_DIR}/hmi_message_handler/src/messagebroker_adapter.cc
-    ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_adapter.cc
+    ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_adapter_impl.cc
+    ${COMPONENTS_DIR}/hmi_message_handler/src/mqueue_adapter.cc
     ${DBUS_SOURCE}
 )
-else()
-set(SOURCES
-    ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_handler_impl.cc
-    ${COMPONENTS_DIR}/hmi_message_handler/src/messagebroker_adapter.cc
-    ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_adapter.cc
-	${COMPONENTS_DIR}/hmi_message_handler/src/mqueue_adapter.cc
-    ${DBUS_SOURCE}
-)
-endif()
 
 set(LIBRARIES
     Utils

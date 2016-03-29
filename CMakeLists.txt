@@ -586,7 +586,7 @@ if(FORCE_3RD_PARTY)
   endif()
 endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
 else()
 if(ENABLE_LOG)
   if(NO_REBUILD_3RD_PARTY_LOGGER)
@@ -789,7 +789,7 @@ if (HMIADAPTER STREQUAL "dbus")
     set (install-3rd_party_dbus_var "install-3rd_party_dbus")
   endif()
 endif()
-endif(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+endif()
 
 add_subdirectory(${3RD_PARTY_SOURCE_DIRECTORY} ${3RD_PARTY_BINARY_DIRECTORY} EXCLUDE_FROM_ALL)
 add_custom_target(install-3rd_party

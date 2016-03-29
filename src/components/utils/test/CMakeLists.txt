@@ -45,33 +45,35 @@ set(testSources
   file_system_test.cc
   date_time_test.cc
   system_test.cc
-  signals_linux_test.cc
   thread_validator_test.cc
   conditional_variable_test.cc
   message_queue_test.cc
   resource_usage_test.cc
   bitstream_test.cc
+  prioritized_queue_test.cc
   data_accessor_test.cc
   lock_posix_test.cc
   singleton_test.cc
   #posix_thread_test.cc
   stl_utils_test.cc
-  timer_thread_test.cc
   rwlock_posix_test.cc
   async_runner_test.cc
+  shared_ptr_test.cc
+  scope_guard_test.cc
+  atomic_object_test.cc
+  message_loop_thread_test.cc
+  custom_string_test.cc
+  timer_test.cc
 )
 
 set(testLibraries
   gmock
   Utils
   Policy
+  ConfigProfile
 )
 
-if(EXTENDED_POLICY_FLAG)
-  include_directories(${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct_ext)
-else()
-  include_directories(${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct)
-endif()
+include_directories(${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   # --- Tests for QDB Wrapper
@@ -104,6 +106,7 @@ endif()
 
 file(COPY testscript.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 create_test("utils_test" "${testSources}" "${testLibraries}")
 

@@ -46,7 +46,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "UsbConnection")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 
 UsbConnection::UsbConnection(const DeviceUID& device_uid,
@@ -267,7 +267,7 @@ void UsbConnection::Finalise() {
 #ifdef OS_ANDROID
     usleep(150000);
 #elif defined(OS_WIN32) || defined(OS_WINCE)
-	  ::Sleep(150);
+    ::Sleep(150);
 #else
     pthread_yield();
 #endif

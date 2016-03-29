@@ -102,7 +102,7 @@ inline void PrimitiveType::ReportErrors(ValidationReport* report) const {
       break;
     }
     default: {
-      // assert(!"Unexpected value state");
+      assert(!"Unexpected value state");
       break;
     }
   }
@@ -135,7 +135,7 @@ inline void CompositeType::ReportErrors(ValidationReport* report) const {
       break;
     }
     default:
-      // assert(!"Unexpected initialization state");
+      assert(!"Unexpected initialization state");
       break;
   }
 }
@@ -166,18 +166,18 @@ inline Boolean::operator bool() const {
  * Integer class
  */
 template<typename T, T minval, T maxval>
+const Range<T> Integer<T, minval, maxval>::range_(minval, maxval);
+
+template<typename T, T minval, T maxval>
 Integer<T, minval, maxval>::Integer()
     : PrimitiveType(kUninitialized),
-      range_(minval, maxval),
       value_(range_.min()) {
 }
 
 template<typename T, T minval, T maxval>
 Integer<T, minval, maxval>::Integer(IntType value)
-    : PrimitiveType(kUninitialized),
-      value_(value),
-      range_(minval, maxval){
-    value_state_ = range_.Includes(value) ? kValid : kInvalid;
+    : PrimitiveType(range_.Includes(value) ? kValid : kInvalid),
+      value_(value) {
 }
 
 template<typename T, T minval, T maxval>
@@ -190,7 +190,10 @@ Integer<T, minval, maxval>& Integer<T, minval, maxval>::operator=(IntType new_va
 template<typename T, T minval, T maxval>
 Integer<T, minval, maxval>& Integer<T, minval, maxval>::operator=(const Integer& new_val) {
   this->value_ = new_val.value_;
-  this->value_state_= range_.Includes(new_val.value_) ? kValid : kInvalid;
+  if (new_val.is_initialized()) {
+    this->value_state_= range_.Includes(new_val.value_) ? kValid : kInvalid;
+  }
+
   return *this;
 }
 
@@ -214,21 +217,21 @@ Integer<T, minval, maxval>::operator IntType() const {
 /*
  * Float class
  */
+template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
+const Range<double> Float<minnum, maxnum, minden, maxden>::range_(
+    (double(minnum)/minden), (double(maxnum)/maxden));
+
 
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 Float<minnum, maxnum, minden, maxden>::Float()
-    : PrimitiveType(kUninitialized){
-    range_ = Range<double>(minnum/minden, maxmun/maxden);
-    value_ = range_.min();
-    value_state_ = range_.Includes(value) ? kValid : kInvalid;
+    : PrimitiveType(kUninitialized),
+      value_(range_.min()) {
 }
 
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 Float<minnum, maxnum, minden, maxden>::Float(double value)
-    : PrimitiveType(kUninitialized),
+    : PrimitiveType(range_.Includes(value) ? kValid : kInvalid),
       value_(value) {
-    range_ = Range<double>(minnum/minden, maxnum/maxden);
-    value_state_ = range_.Includes(value) ? kValid : kInvalid;
 }
 
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
@@ -247,31 +250,29 @@ Float<minnum, maxnum, minden, maxden>::operator double() const {
 /*
  * String class
  */
+template<size_t minlen, size_t maxlen>
+const Range<size_t> String<minlen, maxlen>::length_range_(minlen, maxlen);
 
 template<size_t minlen, size_t maxlen>
 String<minlen, maxlen>::String()
-    : PrimitiveType(kUninitialized),
-      length_range_(minlen, maxlen){
+    : PrimitiveType(kUninitialized) {
 }
 
 template<size_t minlen, size_t maxlen>
 String<minlen, maxlen>::String(const std::string& value)
-    : PrimitiveType(kUninitialized),
-      value_(value),
-      length_range_(minlen, maxlen){
-    value_state_ = length_range_.Includes(value.length()) ? kValid : kInvalid;
+    : PrimitiveType(length_range_.Includes(value.length()) ? kValid : kInvalid),
+      value_(value) {
 }
 
 template<size_t minlen, size_t maxlen>
 String<minlen, maxlen>::String(const char* value)
     : PrimitiveType(kUninitialized),
-      value_(value),
-      length_range_(minlen, maxlen){
-    value_state_ = length_range_.Includes(value_.length()) ? kValid : kInvalid;
+      value_(value) {
+  value_state_ = length_range_.Includes(value_.length()) ? kValid : kInvalid;
 }
 
 template<size_t minlen, size_t maxlen>
-bool String<minlen, maxlen>::operator<(String new_val) {
+bool String<minlen, maxlen>::operator<(const String& new_val) const {
   return value_ < new_val.value_;
 }
 
@@ -284,13 +285,16 @@ String<minlen, maxlen>& String<minlen, maxlen>::operator=(const std::string& new
 
 template<size_t minlen, size_t maxlen>
 String<minlen, maxlen>& String<minlen, maxlen>::operator=(const String& new_val) {
+  if(*this == new_val) {
+    return *this;
+  }
   value_.assign(new_val.value_);
   value_state_ = new_val.value_state_;
   return *this;
 }
 
 template<size_t minlen, size_t maxlen>
-bool String<minlen, maxlen>::operator==(const String& rhs) {
+bool String<minlen, maxlen>::operator==(const String& rhs) const {
   return value_ == rhs.value_;
 }
 
@@ -315,7 +319,7 @@ Enum<T>::Enum(EnumType value)
 }
 
 template<typename T>
-Enum<T>& Enum<T>::operator=(EnumType new_val) {
+Enum<T>& Enum<T>::operator=(const EnumType& new_val) {
   value_ = new_val;
   value_state_ = IsValidEnum(value_) ? kValid : kInvalid;
   return *this;
@@ -606,6 +610,13 @@ T* Optional<T>::operator->() {
 template<typename T>
 const T* Optional<T>::operator->() const {
   return &value_;
+}
+
+template<typename T>
+void Optional<T>::assign_if_valid(const Optional<T>& value) {
+  if (value.is_initialized()) {
+    value_ = value.value_;
+  }
 }
 
 template<typename T>

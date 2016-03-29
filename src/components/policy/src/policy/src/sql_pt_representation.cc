@@ -30,8 +30,6 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "policy/sql_pt_representation.h"
-
 #include <sstream>
 #include <stdlib.h>
 #include <stdint.h>
@@ -50,7 +48,7 @@
 
 namespace policy {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "SQLPTRepresentation")
+CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
 namespace {
 template<typename T, typename K> void InsertUnique(K value, T* array) {
@@ -75,7 +73,6 @@ SQLPTRepresentation::SQLPTRepresentation()
   std::string path = profile::Profile::instance()->app_storage_folder();
   if (!path.empty()) {
     db_->set_path(path + "/");
-    LOG4CXX_INFO(logger_, "SQLPTRepresentation path:" << db_->get_path());
   }
 #endif  // __QNX__
 }
@@ -329,7 +326,9 @@ bool SQLPTRepresentation::GetPriority(const std::string& policy_app_id,
 
 InitResult SQLPTRepresentation::Init() {
   LOG4CXX_AUTO_TRACE(logger_);
-
+#ifdef BUILD_TESTS
+  open_counter_ = 0;
+#endif // BUILD_TESTS
   if (!db_->Open()) {
     LOG4CXX_ERROR(logger_, "Failed opening database.");
     LOG4CXX_INFO(logger_, "Starting opening retries.");
@@ -341,17 +340,20 @@ InitResult SQLPTRepresentation::Init() {
         profile::Profile::instance()->open_attempt_timeout_ms();
 #if defined(OS_WIN32) || defined(OS_WINCE)
 #else
-	const useconds_t sleep_interval_mcsec = open_attempt_timeout_ms * 1000;
+    const useconds_t sleep_interval_mcsec = open_attempt_timeout_ms * 1000;
 #endif
     LOG4CXX_DEBUG(logger_, "Open attempt timeout(ms) is: "
                   << open_attempt_timeout_ms);
-	for (int i = 0; i < attempts; ++i) {
+    for (int i = 0; i < attempts; ++i) {
 #if defined(OS_WIN32) || defined(OS_WINCE)
 		Sleep(open_attempt_timeout_ms);
 #else
-		usleep(sleep_interval_mcsec);
+      usleep(sleep_interval_mcsec);
 #endif
       LOG4CXX_INFO(logger_, "Attempt: " << i+1);
+#ifdef BUILD_TESTS
+      ++open_counter_;
+#endif // BUILD_TESTS
       if (db_->Open()){
         LOG4CXX_INFO(logger_, "Database opened.");
         is_opened = true;
@@ -371,6 +373,7 @@ InitResult SQLPTRepresentation::Init() {
     LOG4CXX_ERROR(logger_, "There are no read/write permissions for database");
     return InitResult::FAIL;
   }
+
 #endif  // __QNX__
   utils::dbms::SQLQuery check_pages(db());
   if (!check_pages.Prepare(sql_pt::kCheckPgNumber) || !check_pages.Next()) {
@@ -428,8 +431,14 @@ bool SQLPTRepresentation::Close() {
   return db_->LastError().number() == utils::dbms::OK;
 }
 
-VehicleData SQLPTRepresentation::GetVehicleData() {
-  return VehicleData();
+const VehicleInfo SQLPTRepresentation::GetVehicleInfo() const {
+  policy_table::ModuleConfig module_config;
+  GatherModuleConfig(&module_config);
+  VehicleInfo vehicle_info;
+  vehicle_info.vehicle_make = *module_config.vehicle_make;
+  vehicle_info.vehicle_model = *module_config.vehicle_model;
+  vehicle_info.vehicle_year = *module_config.vehicle_year;
+  return vehicle_info;
 }
 
 bool SQLPTRepresentation::Drop() {
@@ -518,10 +527,11 @@ void SQLPTRepresentation::GatherModuleConfig(
     config->exchange_after_x_kilometers = query.GetInteger(2);
     config->exchange_after_x_days = query.GetInteger(3);
     config->timeout_after_x_seconds = query.GetInteger(4);
-    *config->certificate = query.GetString(5);
-    *config->vehicle_make = query.GetString(6);
-    *config->vehicle_model = query.GetString(7);
-    *config->vehicle_year = query.GetString(8);
+    *config->vehicle_make = query.GetString(5);
+    *config->vehicle_model = query.GetString(6);
+    *config->vehicle_year = query.GetString(7);
+    *config->preloaded_date = query.GetString(8);
+    *config->certificate = query.GetString(9);
   }
 
   utils::dbms::SQLQuery endpoints(db());
@@ -529,7 +539,9 @@ void SQLPTRepresentation::GatherModuleConfig(
     LOG4CXX_WARN(logger_, "Incorrect select statement for endpoints");
   } else {
     while (endpoints.Next()) {
-      config->endpoints[endpoints.GetString(1)][endpoints.GetString(2)]
+      std::stringstream stream;
+      stream << "0x0" << endpoints.GetInteger(1);
+      config->endpoints[stream.str()][endpoints.GetString(2)]
       .push_back(endpoints.GetString(0));
     }
   }
@@ -946,10 +958,6 @@ bool policy::SQLPTRepresentation::SaveDevicePolicy(
     return false;
   }
 
-  if (!SaveAppGroup(kDeviceId, device.groups)) {
-    return false;
-  }
-
   return true;
 }
 
@@ -964,7 +972,7 @@ bool SQLPTRepresentation::SaveAppGroup(
   policy_table::Strings::const_iterator it;
   for (it = app_groups.begin(); it != app_groups.end(); ++it) {
     std::string ssss = *it;
-    LOG4CXX_INFO(logger_, "Group: " << ssss.c_str());
+    LOG4CXX_INFO(logger_, "Group: " << ssss);
     query.Bind(0, app_id);
     query.Bind(1, *it);
     if (!query.Exec() || !query.Reset()) {
@@ -1063,13 +1071,13 @@ bool SQLPTRepresentation::SaveModuleConfig(
   query.Bind(2, config.exchange_after_x_kilometers);
   query.Bind(3, config.exchange_after_x_days);
   query.Bind(4, config.timeout_after_x_seconds);
-  query.Bind(5, config.certificate);
+  query.Bind(5, (*config.certificate));
   config.vehicle_make.is_initialized() ?
-  query.Bind(6, *(config.vehicle_make)) : query.Bind(5);
+  query.Bind(6, *(config.vehicle_make)) : query.Bind(6);
   config.vehicle_model.is_initialized() ?
-  query.Bind(7, *(config.vehicle_model)) : query.Bind(6);
+  query.Bind(7, *(config.vehicle_model)) : query.Bind(7);
   config.vehicle_year.is_initialized() ?
-  query.Bind(8, *(config.vehicle_year)) : query.Bind(7);
+  query.Bind(8, *(config.vehicle_year)) : query.Bind(8);
 
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Incorrect update module config");

@@ -56,16 +56,10 @@
 #include "transport_manager/tcp/tcp_connection_factory.h"
 #include "transport_manager/tcp/tcp_device.h"
 
-#include "config_profile/profile.h"
-
-#ifdef AVAHI_SUPPORT
-#include "transport_manager/tcp/dnssd_service_browser.h"
-#endif
-
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapterImpl")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 TcpTransportAdapter::TcpTransportAdapter(const uint16_t port)
     : TransportAdapterImpl(
@@ -115,11 +109,11 @@ void TcpTransportAdapter::Store() const {
         if (port != -1) {  // don't want to store incoming applications
           Json::Value application_dictionary;
           char port_record[12];
-		  #ifdef OS_WIN32
+#ifdef OS_WIN32
 		  sprintf(port_record, "%d", port);
-		  #else
+#else
           snprintf(port_record, sizeof(port_record), "%d", port);
-		  #endif
+#endif
           application_dictionary["port"] = std::string(port_record);
           applications_dictionary.append(application_dictionary);
         }

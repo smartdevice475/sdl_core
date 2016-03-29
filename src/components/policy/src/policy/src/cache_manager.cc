@@ -55,7 +55,7 @@ namespace policy_table = rpc::policy_table_interface_base;
 
 namespace policy {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "CacheManager")
+CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
 #ifdef OS_WINCE
 double round(double val)
@@ -162,19 +162,9 @@ void CacheManager::GetAllAppGroups(const std::string& app_id,
 
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK_VOID();
+
   if (kDeviceId == app_id) {
-    policy_table::DevicePolicy& device =
-        pt_->policy_table.app_policies_section.device;
-
-    policy_table::Strings::const_iterator iter = device.groups.begin();
-    policy_table::Strings::const_iterator iter_end = device.groups.end();
-
-    for (; iter != iter_end; ++iter) {
-      const uint32_t group_id =
-          static_cast<uint32_t> ((GenerateHash(*iter)));
-      all_group_ids.push_back(group_id);
-    }
-
+    LOG4CXX_INFO(logger_, "Devices doesn't have groups");
     return;
   }
 
@@ -240,8 +230,13 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
       pt_->policy_table.app_policies_section.apps[iter->first].set_to_null();
       pt_->policy_table.app_policies_section.apps[iter->first].set_to_string("");
     } else if (policy::kDefaultId == (iter->second).get_string()) {
-      pt_->policy_table.app_policies_section.apps[iter->first] =
-          pt_->policy_table.app_policies_section.apps[kDefaultId];
+        policy_table::ApplicationPolicies::const_iterator iter_default =
+            update_pt.policy_table.app_policies_section.apps.find(kDefaultId);
+        if (update_pt.policy_table.app_policies_section.apps.end() == iter_default) {
+            LOG4CXX_ERROR(logger_, "The default section was not found in PTU");
+            continue;
+        }
+      pt_->policy_table.app_policies_section.apps[iter->first] = iter_default->second;
     } else {
       pt_->policy_table.app_policies_section.apps[iter->first] = iter->second;
     }
@@ -250,10 +245,11 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
   pt_->policy_table.app_policies_section.device =
       update_pt.policy_table.app_policies_section.device;
 
-  if (update_pt.policy_table.consumer_friendly_messages.is_initialized()) {
-    pt_->policy_table.consumer_friendly_messages =
-        update_pt.policy_table.consumer_friendly_messages;
-  }
+  pt_->policy_table.module_config.SafeCopyFrom(update_pt.policy_table.module_config);
+
+  pt_->policy_table.consumer_friendly_messages.assign_if_valid(
+        update_pt.policy_table.consumer_friendly_messages);
+
   ResetCalculatedPermissions();
   Backup();
   return true;
@@ -507,9 +503,11 @@ int CacheManager::KilometersBeforeExchange(int current) {
   return std::max(limit - actual, 0);
 }
 
-bool CacheManager::SetCountersPassedForSuccessfulUpdate(int kilometers,
-                                                        int days_after_epoch) {
+bool CacheManager::SetCountersPassedForSuccessfulUpdate(policy::Counters counter,
+                                                        int value) {
   CACHE_MANAGER_CHECK(false);
+  UNUSED(counter);
+  UNUSED(value);
   Backup();
   return true;
 }
@@ -559,13 +557,23 @@ bool CacheManager::SecondsBetweenRetries(std::vector<int>& seconds) {
   return true;
 }
 
-VehicleData CacheManager::GetVehicleData() {
-  // TODO(AGaliuzov): maybe should be removed.
-  return VehicleData();
+const policy::VehicleInfo CacheManager::GetVehicleInfo() const {
+  CACHE_MANAGER_CHECK(VehicleInfo());
+  policy_table::ModuleConfig& module_config =
+      pt_->policy_table.module_config;
+  VehicleInfo vehicle_info;
+  vehicle_info.vehicle_make = *module_config.vehicle_make;
+  vehicle_info.vehicle_model = *module_config.vehicle_model;
+  vehicle_info.vehicle_year = *module_config.vehicle_year;
+  LOG4CXX_DEBUG(logger_, "Vehicle info (make, model, year):"
+                << vehicle_info.vehicle_make << ","
+                << vehicle_info.vehicle_model << ","
+                << vehicle_info.vehicle_year );
+  return vehicle_info;
 }
 
 std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
-    const std::vector<std::string> &msg_codes, const std::string &language) {
+    const std::vector<std::string>& msg_codes, const std::string& language) {
 
   LOG4CXX_AUTO_TRACE(logger_);
   std::vector<UserFriendlyMessage> result;
@@ -626,7 +634,7 @@ void CacheManager::GetServiceUrls(const std::string& service_type,
     search_value = service_type;
   }
 
-  LOG4CXX_DEBUG(logger_, "Search service value is: " << search_value.c_str());
+  LOG4CXX_DEBUG(logger_, "Search service value is: " << search_value);
 
   policy_table::ServiceEndpoints::const_iterator iter =
       pt_->policy_table.module_config.endpoints.find(search_value);
@@ -652,7 +660,7 @@ std::string CacheManager::GetLockScreenIconUrl() const {
   return std::string ("");
 }
 
-int CacheManager::GetNotificationsNumber(const std::string &priority) {
+rpc::policy_table_interface_base::NumberOfNotificationsType CacheManager::GetNotificationsNumber(const std::string& priority) {
   CACHE_MANAGER_CHECK(0);
   typedef rpc::policy_table_interface_base::NumberOfNotificationsPerMinute NNPM;
 
@@ -661,7 +669,8 @@ int CacheManager::GetNotificationsNumber(const std::string &priority) {
 
   NNPM::const_iterator priority_iter = nnpm.find(priority);
 
-  const int result = (nnpm.end() != priority_iter ? (*priority_iter).second : 0);
+  const rpc::policy_table_interface_base::NumberOfNotificationsType result =
+      (nnpm.end() != priority_iter ? (*priority_iter).second : 0u);
   return result;
 }
 
@@ -699,6 +708,88 @@ void CacheManager::CheckSnapshotInitialization() {
   // SDL must not send certificate in snapshot
   snapshot_->policy_table.module_config.certificate =
       rpc::Optional<rpc::String<0, 65535> >();
+
+  /* consumer_friendly_messages are required for the snapshot;
+   * consumer_friendly_messages->version is required always, but
+   * consumer_friendly_messages->messages must be omitted in PTS */
+  if( snapshot_->policy_table.consumer_friendly_messages->is_initialized() ) {
+    snapshot_->policy_table.consumer_friendly_messages->messages =
+        rpc::Optional<policy_table::Messages>();
+  } else {
+    LOG4CXX_WARN(logger_, "policy_table.consumer_friendly_messages is not initialized");
+  }
+
+  /* policy_table.usage_and_error_counts are required for PTS and
+   * policy_table.usage_and_error_counts->app_level is optional */
+  rpc::Optional<policy_table::UsageAndErrorCounts>& usage_and_error_counts =
+      snapshot_->policy_table.usage_and_error_counts;
+
+  if (usage_and_error_counts->is_initialized() &&
+      usage_and_error_counts->app_level->is_initialized()) {
+    policy_table::AppLevels::iterator it =
+        usage_and_error_counts->app_level->begin();
+    policy_table::AppLevels::const_iterator it_end =
+        usage_and_error_counts->app_level->end();
+    for (;it != it_end; ++it) {
+      if (!(*it).second.minutes_in_hmi_full.is_initialized()) {
+        (*it).second.minutes_in_hmi_full = 0;
+      }
+
+      if (!(*it).second.app_registration_language_gui.is_initialized()) {
+        (*it).second.app_registration_language_gui = "unknown";
+      }
+
+      if (!(*it).second.app_registration_language_vui.is_initialized()) {
+        (*it).second.app_registration_language_vui = "unknown";
+      }
+
+      if (!(*it).second.minutes_in_hmi_limited.is_initialized()) {
+        (*it).second.minutes_in_hmi_limited = 0;
+      }
+
+      if (!(*it).second.minutes_in_hmi_background.is_initialized()) {
+        (*it).second.minutes_in_hmi_background = 0;
+      }
+
+      if (!(*it).second.minutes_in_hmi_none.is_initialized()) {
+        (*it).second.minutes_in_hmi_none = 0;
+      }
+
+      if (!(*it).second.count_of_user_selections.is_initialized()) {
+        (*it).second.count_of_user_selections = 0;
+      }
+
+      if (!(*it).second.count_of_rejections_sync_out_of_memory.is_initialized()) {
+        (*it).second.count_of_rejections_sync_out_of_memory = 0;
+      }
+
+      if (!(*it).second.count_of_rejections_nickname_mismatch.is_initialized()) {
+        (*it).second.count_of_rejections_nickname_mismatch = 0;
+      }
+
+      if (!(*it).second.count_of_rejections_duplicate_name.is_initialized()) {
+        (*it).second.count_of_rejections_duplicate_name = 0;
+      }
+
+      if (!(*it).second.count_of_rejected_rpc_calls.is_initialized()) {
+        (*it).second.count_of_rejected_rpc_calls = 0;
+      }
+
+      if (!(*it).second.count_of_rpcs_sent_in_hmi_none.is_initialized()) {
+        (*it).second.count_of_rpcs_sent_in_hmi_none = 0;
+      }
+
+      if (!(*it).second.count_of_removals_for_bad_behavior.is_initialized()) {
+        (*it).second.count_of_removals_for_bad_behavior = 0;
+      }
+
+      if (!(*it).second.count_of_run_attempts_while_revoked.is_initialized()) {
+        (*it).second.count_of_run_attempts_while_revoked = 0;
+      }
+    }
+  } else {
+    LOG4CXX_WARN(logger_, "usage_and_error_counts or app_level is not initialized");
+  }
 }
 
 void CacheManager::PersistData() {
@@ -822,6 +913,7 @@ bool policy::CacheManager::IsNumberService(const std::string& input,
 utils::SharedPtr<policy_table::Table>
 CacheManager::GenerateSnapshot() {
   CACHE_MANAGER_CHECK(snapshot_);
+  sync_primitives::AutoLock lock(cache_lock_);
   snapshot_ = new policy_table::Table();
   snapshot_->policy_table = pt_->policy_table;
   CheckSnapshotInitialization();
@@ -927,7 +1019,7 @@ void CacheManager::Increment(usage_statistics::GlobalCounterId type) {
 void CacheManager::Increment(const std::string &app_id,
                              usage_statistics::AppCounterId type) {
   CACHE_MANAGER_CHECK_VOID();
-
+  sync_primitives::AutoLock lock (cache_lock_);
   switch (type) {
     case usage_statistics::USER_SELECTIONS:
       ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
@@ -1116,47 +1208,21 @@ bool CacheManager::Init(const std::string& file_name) {
   InitResult init_result = backup_->Init();
 
   bool result = true;
-#ifdef OS_WINCE
-  switch (init_result) {
-	case EXISTS: {
-		LOG4CXX_INFO(logger_, "Policy Table exists, was loaded correctly.");
-		result = LoadFromBackup();
-		if (result) {
-			if (!backup_->IsDBVersionActual()) {
-				if (!backup_->RefreshDB()) {
-					return false;
-				}
-				backup_->UpdateDBVersion();
-				Backup();
-			}
-		}
-							 } break;
-	case SUCCESS: {
-		LOG4CXX_INFO(logger_, "Policy Table was inited successfully");
-		result = LoadFromFile(file_name, *pt_);
-		backup_->UpdateDBVersion();
-		if (result) {
-			Backup();
-		}
-							  } break;
-	default: {
-		result = false;
-		LOG4CXX_ERROR(logger_, "Failed to init policy table.");
-			 } break;
-  }
-#else
   switch (init_result) {
     case InitResult::EXISTS: {
       LOG4CXX_INFO(logger_, "Policy Table exists, was loaded correctly.");
       result = LoadFromBackup();
       if (result) {
         if (!backup_->IsDBVersionActual()) {
+          LOG4CXX_INFO(logger_, "DB version is NOT actual");
           if (!backup_->RefreshDB()) {
+            LOG4CXX_ERROR(logger_, "RefreshDB() failed");
             return false;
           }
           backup_->UpdateDBVersion();
           Backup();
         }
+        MergePreloadPT(file_name);
       }
     } break;
     case InitResult::SUCCESS: {
@@ -1172,7 +1238,6 @@ bool CacheManager::Init(const std::string& file_name) {
       LOG4CXX_ERROR(logger_, "Failed to init policy table.");
     } break;
   }
-#endif
 
   return result;
 }

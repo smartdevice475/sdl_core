@@ -48,7 +48,6 @@
 
 #include "transport_manager/transport_adapter/threaded_socket_connection.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
-#include "transport_manager/common.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -335,38 +334,40 @@ void ThreadedSocketConnection::Transmit() {
 	}
 	//LOG4CXX_INFO(logger, "end while(!terminate_flag_)");
 #else
-  LOG4CXX_TRACE_ENTER(logger_);
-  bool pipe_notified = false;
-  bool pipe_terminated = false;
+  LOG4CXX_AUTO_TRACE(logger_);
 
-  const nfds_t poll_fds_size = 2;
-  pollfd poll_fds[poll_fds_size];
+  const nfds_t kPollFdsSize = 2;
+  pollfd poll_fds[kPollFdsSize];
   poll_fds[0].fd = socket_;
-  poll_fds[0].events = POLLIN | POLLPRI | (frames_to_send_.empty() ? 0 : POLLOUT);
+
+  const bool is_queue_empty_on_poll = IsFramesToSendQueueEmpty();
+
+  poll_fds[0].events = POLLIN | POLLPRI
+      | (is_queue_empty_on_poll ? 0 : POLLOUT);
   poll_fds[1].fd = read_fd_;
   poll_fds[1].events = POLLIN | POLLPRI;
 
-  LOG4CXX_INFO(logger_, "poll (#" << pthread_self() << ") " << this);
-  if (-1 == poll(poll_fds, poll_fds_size, -1)) {
+  LOG4CXX_DEBUG(logger_, "poll " << this);
+  if (-1 == poll(poll_fds, kPollFdsSize, -1)) {
     LOG4CXX_ERROR_WITH_ERRNO(logger_, "poll failed for connection " << this);
     Abort();
-    LOG4CXX_INFO(logger_, "exit");
     return;
   }
-  LOG4CXX_INFO(logger_, "poll is ok (#" << pthread_self() << ") " << this << " revents0:" << std::hex << poll_fds[0].revents << " revents1:" << std::hex << poll_fds[1].revents);
+  LOG4CXX_DEBUG(
+      logger_,
+      "poll is ok " << this << " revents0: " << std::hex << poll_fds[0].revents <<
+      " revents1:" << std::hex << poll_fds[1].revents);
   // error check
   if (0 != (poll_fds[1].revents & (POLLERR | POLLHUP | POLLNVAL))) {
     LOG4CXX_ERROR(logger_,
                   "Notification pipe for connection " << this << " terminated");
     Abort();
-    LOG4CXX_INFO(logger_, "exit");
     return;
   }
 
-  if (0 != (poll_fds[0].revents & (POLLERR | POLLHUP | POLLNVAL))) {
-    LOG4CXX_INFO(logger_, "Connection " << this << " terminated");
+  if (poll_fds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) {
+    LOG4CXX_WARN(logger_, "Connection " << this << " terminated");
     Abort();
-    LOG4CXX_INFO(logger_, "exit");
     return;
   }
 
@@ -380,20 +381,20 @@ void ThreadedSocketConnection::Transmit() {
     LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to clear notification pipe");
     LOG4CXX_ERROR_WITH_ERRNO(logger_, "poll failed for connection " << this);
     Abort();
-    LOG4CXX_INFO(logger_, "exit");
     return;
   }
 
-  // send data if possible
-  if (!frames_to_send_.empty() && (poll_fds[0].revents | POLLOUT)) {
-    LOG4CXX_INFO(logger_, "frames_to_send_ not empty()  (#" << pthread_self() << ")");
+  const bool is_queue_empty = IsFramesToSendQueueEmpty();
+
+  // Send data if possible
+  if (!is_queue_empty && (poll_fds[0].revents | POLLOUT)) {
+    LOG4CXX_DEBUG(logger_, "frames_to_send_ not empty() ");
 
     // send data
     const bool send_ok = Send();
     if (!send_ok) {
-      LOG4CXX_INFO(logger_, "Send() failed  (#" << pthread_self() << ")");
+      LOG4CXX_ERROR(logger_, "Send() failed ");
       Abort();
-      LOG4CXX_INFO(logger_, "exit");
       return;
     }
   }
@@ -408,13 +409,11 @@ void ThreadedSocketConnection::Transmit() {
 #endif
     const bool receive_ok = Receive();
     if (!receive_ok) {
-      LOG4CXX_INFO(logger_, "Receive() failed  (#" << pthread_self() << ")");
+      LOG4CXX_ERROR(logger_, "Receive() failed ");
       Abort();
-      LOG4CXX_INFO(logger_, "exit");
       return;
     }
   }
-  LOG4CXX_TRACE_EXIT(logger_);
 #endif
 }
 
@@ -483,30 +482,32 @@ bool ThreadedSocketConnection::Receive() {
 
 bool ThreadedSocketConnection::Send() {
   LOG4CXX_AUTO_TRACE(logger_);
-  FrameQueue frames_to_send;
-  frames_to_send_mutex_.Acquire();
-  std::swap(frames_to_send, frames_to_send_);
-  frames_to_send_mutex_.Release();
+  FrameQueue frames_to_send_local;
+
+  {
+    sync_primitives::AutoLock auto_lock(frames_to_send_mutex_);
+    std::swap(frames_to_send_local, frames_to_send_);
+  }
 
   size_t offset = 0;
-  while (!frames_to_send.empty()) {
+  while (!frames_to_send_local.empty()) {
     LOG4CXX_INFO(logger_, "frames_to_send is not empty");
-    RawMessageSptr frame = frames_to_send.front();
-    const ssize_t bytes_sent = ::send(socket_, (char*)frame->data() + offset,
+    ::protocol_handler::RawMessagePtr frame = frames_to_send_local.front();
+    const ssize_t bytes_sent = ::send(socket_, frame->data() + offset,
                                       frame->data_size() - offset, 0);
 
     if (bytes_sent >= 0) {
       LOG4CXX_DEBUG(logger_, "bytes_sent >= 0");
       offset += bytes_sent;
       if (offset == frame->data_size()) {
-        frames_to_send.pop();
+        frames_to_send_local.pop();
         offset = 0;
         controller_->DataSendDone(device_handle(), application_handle(), frame);
       }
     } else {
       LOG4CXX_DEBUG(logger_, "bytes_sent < 0");
       LOG4CXX_ERROR_WITH_ERRNO(logger_, "Send failed for connection " << this);
-      frames_to_send.pop();
+      frames_to_send_local.pop();
       offset = 0;
       controller_->DataSendFailed(device_handle(), application_handle(), frame,
                                   DataSendError());

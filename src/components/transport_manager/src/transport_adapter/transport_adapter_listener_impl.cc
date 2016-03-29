@@ -39,11 +39,11 @@
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
 
 namespace transport_manager {
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapterListenerImpl")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 TransportAdapterListenerImpl::TransportAdapterListenerImpl(
-  TransportManagerImpl* manager, TransportAdapter* adapter) :
-  transport_manager_impl_(manager), transport_adapter_(adapter) {
+  TransportManager* manager, TransportAdapter* adapter) :
+  transport_manager_(manager), transport_adapter_(adapter) {
 }
 
 void TransportAdapterListenerImpl::OnSearchDeviceDone(
@@ -56,8 +56,8 @@ void TransportAdapterListenerImpl::OnSearchDeviceDone(
     TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE,
 #endif
     transport_adapter_, "", 0, ::protocol_handler::RawMessagePtr(), BaseErrorPtr());
-  if (transport_manager::E_SUCCESS
-      != transport_manager_impl_->ReceiveEventFromDevice(event)) {
+  if (transport_manager_!= NULL && transport_manager::E_SUCCESS
+      != transport_manager_->ReceiveEventFromDevice(event)) {
     LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
   LOG4CXX_TRACE(logger_, "exit");
@@ -74,8 +74,8 @@ void TransportAdapterListenerImpl::OnSearchDeviceFailed(
     TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL,
 #endif
     transport_adapter_, "", 0, ::protocol_handler::RawMessagePtr(), BaseErrorPtr(err));
-  if (transport_manager::E_SUCCESS
-      != transport_manager_impl_->ReceiveEventFromDevice(event)) {
+  if (transport_manager_!= NULL && transport_manager::E_SUCCESS
+      != transport_manager_->ReceiveEventFromDevice(event)) {
     LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
   LOG4CXX_TRACE(logger_, "exit");
@@ -91,8 +91,8 @@ void TransportAdapterListenerImpl::OnDeviceListUpdated(
     TransportAdapterListenerImpl::EventTypeEnum::ON_DEVICE_LIST_UPDATED,
 #endif
     transport_adapter_, "", 0, ::protocol_handler::RawMessagePtr(), BaseErrorPtr());
-  if (transport_manager::E_SUCCESS
-      != transport_manager_impl_->ReceiveEventFromDevice(event)) {
+  if (transport_manager_!= NULL && transport_manager::E_SUCCESS
+      != transport_manager_->ReceiveEventFromDevice(event)) {
     LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
   LOG4CXX_TRACE(logger_, "exit");
@@ -104,8 +104,8 @@ void TransportAdapterListenerImpl::OnFindNewApplicationsRequest(
   const TransportAdapterEvent event(
     TransportAdapterListenerImpl::ON_FIND_NEW_APPLICATIONS_REQUEST,
     transport_adapter_, "", 0, ::protocol_handler::RawMessagePtr(), BaseErrorPtr());
-  if (transport_manager::E_SUCCESS
-      != transport_manager_impl_->ReceiveEventFromDevice(event)) {
+  if (transport_manager_!= NULL && transport_manager::E_SUCCESS
+      != transport_manager_->ReceiveEventFromDevice(event)) {
     LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
   LOG4CXX_TRACE(logger_, "exit");
@@ -124,8 +124,8 @@ void TransportAdapterListenerImpl::OnConnectDone(
 #endif
     transport_adapter_, device, application_id, ::protocol_handler::RawMessagePtr(),
     BaseErrorPtr(new BaseError()));
-  if (transport_manager::E_SUCCESS
-      != transport_manager_impl_->ReceiveEventFromDevice(event)) {
+  if (transport_manager_!= NULL && transport_manager::E_SUCCESS
+      != transport_manager_->ReceiveEventFromDevice(event)) {
     LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
   LOG4CXX_TRACE(logger_, "exit");

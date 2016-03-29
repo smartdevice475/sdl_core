@@ -135,7 +135,7 @@ bool Resources::GetProcInfo(Resources::PidStats& output) {
   close(fd);
   return true;
 #else
-	return true;
+  return true;
 #endif
 }
 

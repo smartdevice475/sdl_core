@@ -37,7 +37,8 @@
 #include <queue>
 
 #include "thread_delegate.h"
-#include "utils/threads/thread.h"
+#include "thread.h"
+
 #include "utils/lock.h"
 #include "utils/conditional_variable.h"
 

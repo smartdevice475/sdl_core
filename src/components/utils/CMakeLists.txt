@@ -65,10 +65,9 @@ set (SOURCES
     ${UTILS_SRC_DIR}/bitstream.cc
     ${UTILS_SRC_DIR}/conditional_variable_posix.cc
     ${UTILS_SRC_DIR}/file_system.cc
-    ${UTILS_SRC_DIR}/threads/posix_thread.cc
+    ${UTILS_SRC_DIR}/threads/posix_thread.cc   
     ${UTILS_SRC_DIR}/threads/thread_delegate.cc
     ${UTILS_SRC_DIR}/threads/thread_validator.cc
-    ${UTILS_SRC_DIR}/threads/thread_manager.cc
     ${UTILS_SRC_DIR}/threads/async_runner.cc
     ${UTILS_SRC_DIR}/lock_posix.cc
     ${UTILS_SRC_DIR}/rwlock_posix.cc
@@ -78,6 +77,9 @@ set (SOURCES
     ${UTILS_SRC_DIR}/resource_usage.cc
     ${UTILS_SRC_DIR}/appenders_loader.cc
     ${UTILS_SRC_DIR}/gen_hash.cc
+    ${UTILS_SRC_DIR}/convert_utils.cc
+    ${UTILS_SRC_DIR}/custom_string.cc
+    ${UTILS_SRC_DIR}/timer.cc
 )
 
 if(ENABLE_LOG)
@@ -92,19 +94,13 @@ endif()
 
 if (BUILD_BACKTRACE_SUPPORT)
     list(APPEND SOURCES
-        ${UTILS_SRC_DIR}/back_trace.cc
-    )
-endif()
-
-if(MODIFY_FUNCTION_FLAGS)
-    list(APPEND SOURCES
-    ./src/global.cc
+    ${UTILS_SRC_DIR}/back_trace.cc
     )
 endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
     list(APPEND SOURCES
-        ${UTILS_SRC_DIR}/threads/pulse_thread_delegate.cc
+    ${UTILS_SRC_DIR}/threads/pulse_thread_delegate.cc
     )
 endif()
 
@@ -119,7 +115,7 @@ else ()
 endif ()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    list(APPEND LIBRARIES dl) 
+ list(APPEND LIBRARIES dl) 
 endif()
 
 
@@ -129,7 +125,8 @@ if(ENABLE_LOG)
   list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
   list(APPEND LIBRARIES ConfigProfile)
 
-if(NOT CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+else()
   add_dependencies(Utils install-3rd_party_logger)
 endif()
 endif()

@@ -42,9 +42,7 @@
 namespace sync_primitives {
 
 namespace impl {
-#if defined(OS_WIN32) || defined(OS_WINCE)
-typedef pthread_rwlock_t PlatformRWLock;
-#elif defined(OS_POSIX)
+#if defined(OS_POSIX) || defined(OS_WIN32) || defined(OS_WINCE)
 typedef pthread_rwlock_t PlatformRWLock;
 #else
 #error Please implement rwlock for your OS

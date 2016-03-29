@@ -33,10 +33,10 @@
 #ifndef VALIDATED_TYPES_H_
 #define VALIDATED_TYPES_H_
 
+#include <stdint.h>
 #include <map>
 #include <string>
 #include <vector>
-#include <stdint.h>
 
 #ifdef OS_WINCE
 #include "validation_report.h"
@@ -208,7 +208,7 @@ class Integer : public PrimitiveType {
 
   private:
     IntType value_;
-    Range<T> range_;
+    static const Range<T> range_;
 };
 
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
@@ -227,7 +227,7 @@ class Float : public PrimitiveType {
 
   private:
     double value_;
-    Range<double> range_;
+    static const Range<double> range_;
 };
 
 template<size_t minlen, size_t maxlen>
@@ -240,17 +240,17 @@ class String : public PrimitiveType {
     explicit String(const Json::Value* value);
     explicit String(dbus::MessageReader* reader);
     String(const Json::Value* value, const std::string& def_value);
-    bool operator<(String new_val);
+    bool operator<(const String& new_val) const;
     String& operator=(const std::string& new_val);
     String& operator=(const String& new_val);
-    bool operator==(const String& rhs);
+    bool operator==(const String& rhs) const;
     operator const std::string& () const;
     Json::Value ToJsonValue() const;
     void ToDbusWriter(dbus::MessageWriter* writer) const;
 
   private:
     std::string value_;
-    Range<size_t> length_range_;
+    static const Range<size_t> length_range_;
 };
 
 template<typename T>
@@ -265,7 +265,7 @@ class Enum : public PrimitiveType {
     explicit Enum(const Json::Value* value);
     explicit Enum(dbus::MessageReader* reader);
     Enum(const Json::Value* value, EnumType def_value);
-    Enum& operator=(EnumType new_val);
+    Enum& operator=(const EnumType& new_val);
     operator EnumType() const;
     Json::Value ToJsonValue() const;
     void ToDbusWriter(dbus::MessageWriter* writer) const;
@@ -404,6 +404,8 @@ class Optional {
     const T& operator*() const;
     T* operator->();
     const T* operator->() const;
+
+    void assign_if_valid(const Optional<T>& value);
     // For pointer-like 'if (optional_value)' tests
     // Better than operator bool because bool can be implicitly
     // casted to integral types

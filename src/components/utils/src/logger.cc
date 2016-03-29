@@ -32,15 +32,14 @@
 
 #include "utils/logger.h"
 #include "utils/log_message_loop_thread.h"
-#if defined(OS_WIN32) || defined(OS_WINCE)
+#include "utils/logger_status.h"
 #include <apr_time.h>
-#endif
 
 void deinit_logger () {
-  CREATE_LOGGERPTR_LOCAL(logger_, "Logger");
+  CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
   LOG4CXX_DEBUG(logger_, "Logger deinitialization");
   logger::set_logs_enabled(false);
-  logger::LogMessageLoopThread::destroy();
+  logger::delete_log_message_loop_thread();
   log4cxx::LoggerPtr rootLogger = log4cxx::Logger::getRootLogger();
   log4cxx::spi::LoggerRepositoryPtr repository = rootLogger->getLoggerRepository();
   log4cxx::LoggerList loggers = repository->getCurrentLoggers();
@@ -49,22 +48,9 @@ void deinit_logger () {
     logger->removeAllAppenders();
   }
   rootLogger->removeAllAppenders();
-}
-
-// Don't destroy logger here!
-// It's just for unloading logger queue
-void flush_logger() {
-  logger::LoggerStatus old_status = logger::logger_status;
-  // Stop pushing new messages to the log queue
-  logger::logger_status = logger::DeletingLoggerThread;
-  logger::LogMessageLoopThread::instance()->WaitDumpQueue();
-  logger::logger_status = old_status;
+  logger::logger_status = logger::LoggerThreadNotCreated;
 }
 
 log4cxx_time_t time_now() {
-#if defined(OS_WIN32) || defined(OS_WINCE)
-	return 0;
-#else
   return apr_time_now();
-#endif
 }

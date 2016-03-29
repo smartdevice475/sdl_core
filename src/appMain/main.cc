@@ -194,7 +194,7 @@ int32_t sdl_start(int32_t argc,char** argv){
 	// --------------------------------------------------------------------------
 	// Logger initialization
 #ifdef OS_WINCE
-	INIT_LOGGER(file_system::CurrentWorkingDirectory() + "/" + "log4cxx.properties");
+	INIT_LOGGER(file_system::CurrentWorkingDirectory() + "/" + "log4cxx.properties", profile::Profile::instance()->logs_enabled());
 #else
 	INIT_LOGGER("log4cxx.properties");
 #endif

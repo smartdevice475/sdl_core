@@ -42,10 +42,6 @@
 #include "transport_manager/usb/usb_control_transfer.h"
 #include "transport_manager/usb/libusb/platform_usb_device.h"
 
-#ifdef SP_C9_PRIMA1
-#include "transport_manager/usb/SkEAHelper_DLL.h"
-#endif
-
 #include "utils/threads/thread.h"
 
 class Thread;
@@ -68,14 +64,9 @@ class UsbHandler {
   class ControlTransferSequenceState;
 
   void Thread();
-#ifdef SP_C9_PRIMA1
-public:
-#endif
   void DeviceArrived(libusb_device* device);
   void DeviceLeft(libusb_device* device);
-#ifdef SP_C9_PRIMA1
-private:
-#endif
+
   void ControlTransferCallback(libusb_transfer* transfer);
   void SubmitControlTransfer(ControlTransferSequenceState* sequence_state);
   friend void 

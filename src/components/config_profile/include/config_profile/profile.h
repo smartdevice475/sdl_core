@@ -36,16 +36,22 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
-#include <list>
 #include "utils/macro.h"
 #include "utils/singleton.h"
+#include "protocol_handler/protocol_handler_settings.h"
+#include "connection_handler/connection_handler_settings.h"
+#include "hmi_message_handler/hmi_message_handler_settings.h"
+
 
 namespace profile {
 
 /**
  * The Profile class
  */
-class Profile : public utils::Singleton<Profile> {
+class Profile :public protocol_handler::ProtocolHandlerSettings,
+               public connection_handler::ConnectionHandlerSettings,
+               public hmi_message_handler::HMIMessageHandlerSettings,
+               public utils::Singleton<Profile> {
   public:
     // Methods section
 
@@ -91,7 +97,7 @@ class Profile : public utils::Singleton<Profile> {
     /**
      * @brief Returns true, if SDL 4.0 is enabled
      */
-    bool enable_protocol_4() const;
+    bool enable_protocol_4() const OVERRIDE;
 
     /**
      * @brief Returns application icons folder path
@@ -300,15 +306,15 @@ class Profile : public utils::Singleton<Profile> {
      */
     const uint32_t& list_files_in_none() const;
 
+    /**
+     * @brief Return List Files request array size
+     */
+    const uint32_t& list_files_response_size() const;
+
     /*
      * @brief Returns file name for storing applications data
      */
     const std::string& app_info_storage() const;
-
-    /*
-     * @brief Heartbeat timeout before closing connection
-     */
-	uint32_t heart_beat_timeout() const;
 
     /*
      * @brief Path to preloaded policy file
@@ -458,7 +464,7 @@ class Profile : public utils::Singleton<Profile> {
      * @return container of values or empty continer
      * if could not read the value out of the profile
      */
-    std::list<std::string> ReadStringContainer(
+    std::vector<std::string> ReadStringContainer(
         const char * const pSection,
         const char * const pKey,
         bool* out_result) const;
@@ -474,7 +480,7 @@ class Profile : public utils::Singleton<Profile> {
      * @return container of values or empty continer
      * if could not read the value out of the profile
      */
-    std::list<int> ReadIntContainer(const char * const pSection,
+    std::vector<int> ReadIntContainer(const char * const pSection,
                                     const char * const pKey,
                                     bool* out_result) const;
 
@@ -493,8 +499,6 @@ class Profile : public utils::Singleton<Profile> {
      * @brief Returns recording file name
      */
     const std::string& recording_file_name() const;
-
-    const std::string& mme_db_name() const;
 
     const std::string& event_mq_name() const;
 
@@ -535,17 +539,30 @@ class Profile : public utils::Singleton<Profile> {
     /*
      * ProtocolHandler section
      */
-    size_t maximum_payload_size() const;
+    size_t maximum_payload_size() const OVERRIDE;
 
-    size_t message_frequency_count() const;
+    size_t message_frequency_count() const OVERRIDE;
 
-    size_t message_frequency_time() const;
+    size_t message_frequency_time() const OVERRIDE;
 
-    bool malformed_message_filtering() const;
+    bool malformed_message_filtering() const OVERRIDE;
 
-    size_t malformed_frequency_count() const;
+    size_t malformed_frequency_count() const OVERRIDE;
 
-    size_t malformed_frequency_time() const;
+    size_t malformed_frequency_time() const OVERRIDE;
+
+    uint32_t multiframe_waiting_timeout() const OVERRIDE;
+
+    uint32_t heart_beat_timeout() const OVERRIDE;
+
+    uint16_t max_supported_protocol_version() const OVERRIDE;
+
+    #ifdef ENABLE_SECURITY
+      const std::vector<int>& force_protected_service() const OVERRIDE;
+
+      const std::vector<int>& force_unprotected_service() const OVERRIDE;
+    #endif  // ENABLE_SECURITY
+    // ProtocolHandler section end
 
     uint16_t attempts_to_open_policy_db() const;
 
@@ -729,8 +746,10 @@ private:
     uint32_t                        put_file_in_none_;
     uint32_t                        delete_file_in_none_;
     uint32_t                        list_files_in_none_;
+    uint32_t                        list_files_response_size_;
     std::string                     app_info_storage_;
     uint32_t                        heart_beat_timeout_;
+    uint16_t                        max_supported_protocol_version_;
     std::string                     preloaded_pt_file_;
     std::string                     policy_snapshot_file_name_;
     bool                            enable_policy_;
@@ -741,8 +760,8 @@ private:
     uint16_t                        transport_manager_tcp_adapter_port_;
     std::string                     tts_delimiter_;
 #if defined(OS_WIN32) || defined(OS_WINCE)
-	uint32_t                   audio_data_stopped_timeout_;
-	uint32_t                   video_data_stopped_timeout_;
+	uint32_t                        audio_data_stopped_timeout_;
+	uint32_t                        video_data_stopped_timeout_;
 #else
     std::uint32_t                   audio_data_stopped_timeout_;
     std::uint32_t                   video_data_stopped_timeout_;
@@ -764,6 +783,8 @@ private:
   bool                              verify_peer_;
   uint32_t                          update_before_hours_;
   std::string                       security_manager_protocol_name_;
+  std::vector<int>                  force_protected_service_;
+  std::vector<int>                  force_unprotected_service_;
 #endif
 
     /*

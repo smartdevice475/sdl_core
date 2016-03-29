@@ -43,7 +43,6 @@
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #include <sys/socket.h>
-
 #ifdef __linux__
 #  include <linux/tcp.h>
 #else  // __linux__
@@ -152,10 +151,10 @@ void TcpClientListener::Terminate() {
   }
 #else
   if (shutdown(socket_, SHUT_RDWR) != 0) {
-	  LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to shutdown socket");
+    LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to shutdown socket");
   }
   if (close(socket_) != 0) {
-	  LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to close socket");
+    LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to close socket");
   }
 #endif
 
@@ -208,12 +207,10 @@ void SetKeepaliveOptions(const int fd) {
   setsockopt(fd, IPPROTO_TCP, TCP_KEEPIDLE, &keepidle, sizeof(keepidle));
   setsockopt(fd, IPPROTO_TCP, TCP_KEEPCNT, &keepcnt, sizeof(keepcnt));
   setsockopt(fd, IPPROTO_TCP, TCP_KEEPINTVL, &keepintvl, sizeof(keepintvl));
-#ifndef OS_ANDROID
   setsockopt(fd, IPPROTO_TCP, TCP_USER_TIMEOUT, &user_timeout,
              sizeof(user_timeout));
-#endif
-#elif __QNX__  // __linux__
-  // TODO (KKolodiy): Out of order!
+#elif defined(__QNX__)  // __linux__
+  // TODO(KKolodiy): Out of order!
   const int kMidLength = 4;
   int mib[kMidLength];
 
@@ -240,7 +237,6 @@ void SetKeepaliveOptions(const int fd) {
   setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(yes));
   setsockopt(fd, IPPROTO_TCP, TCP_KEEPALIVE, &tval, sizeof(tval));
 #endif  // __QNX__
-#endif
 }
 
 void TcpClientListener::Loop() {

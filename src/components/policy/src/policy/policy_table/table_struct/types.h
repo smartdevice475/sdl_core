@@ -40,7 +40,8 @@ typedef Map< URL, 1, 255 > URLList;
 
 typedef Map< URLList, 1, 255 > ServiceEndpoints;
 
-typedef Map< Integer<uint8_t, 0, 255>, 0, 6 > NumberOfNotificationsPerMinute;
+typedef uint8_t NumberOfNotificationsType;
+typedef Map< Integer<NumberOfNotificationsType, 0, 255>, 0, 6 > NumberOfNotificationsPerMinute;
 
 typedef Array< Integer<uint16_t, 1, 1000>, 0, 10 > SecondsBetweenRetries;
 
@@ -60,15 +61,10 @@ typedef Array< Enum<RequestType>, 0, 255 > RequestTypes;
 
 struct PolicyBase : CompositeType {
   public:
-    Strings groups;
-    Optional< Strings > preconsented_groups;
     Enum<Priority> priority;
-    Enum<HmiLevel> default_hmi;
-    Boolean keep_context;
-    Boolean steal_focus;
   public:
     PolicyBase();
-    PolicyBase(const Strings& groups, Priority priority, HmiLevel default_hmi, bool keep_context, bool steal_focus);
+    PolicyBase(Priority priority);
     virtual ~PolicyBase();
     explicit PolicyBase(const Json::Value* value__);
     Json::Value ToJsonValue() const;
@@ -84,13 +80,14 @@ struct PolicyBase : CompositeType {
 struct DevicePolicy : PolicyBase {
   public:
     DevicePolicy();
-    DevicePolicy(const Strings& groups, Priority priority, HmiLevel default_hmi, bool keep_context, bool steal_focus);
+    DevicePolicy(Priority priority);
     ~DevicePolicy();
     explicit DevicePolicy(const Json::Value* value__);
 };
 
 struct ApplicationParams : PolicyBase {
   public:
+    Strings groups;
     Optional< Strings > nicknames;
     Optional< AppHMITypes > AppHMIType;
     Optional< RequestTypes > RequestType;
@@ -99,7 +96,7 @@ struct ApplicationParams : PolicyBase {
     Optional< String<0, 255> > certificate;
   public:
     ApplicationParams();
-    ApplicationParams(const Strings& groups, Priority priority, HmiLevel default_hmi, bool keep_context, bool steal_focus);
+    ApplicationParams(const Strings& groups, Priority priority);
     ~ApplicationParams();
     explicit ApplicationParams(const Json::Value* value__);
     Json::Value ToJsonValue() const;
@@ -190,6 +187,7 @@ struct ModuleConfig : CompositeType {
     ModuleConfig(uint8_t exchange_after_x_ignition_cycles, int64_t exchange_after_x_kilometers, uint8_t exchange_after_x_days, uint16_t timeout_after_x_seconds, const SecondsBetweenRetries& seconds_between_retries, const ServiceEndpoints& endpoints, const NumberOfNotificationsPerMinute& notifications_per_minute_by_priority);
     ~ModuleConfig();
     explicit ModuleConfig(const Json::Value* value__);
+    void SafeCopyFrom(const ModuleConfig& from);
     Json::Value ToJsonValue() const;
     bool is_valid() const;
     bool is_initialized() const;

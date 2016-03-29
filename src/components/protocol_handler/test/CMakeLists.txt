@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2015, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,9 +31,11 @@
 if(BUILD_TESTS)
 
 include_directories(
+  include
   ${GMOCK_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/protocol_handler/include
   ${COMPONENTS_DIR}/protocol_handler/test/include
+  ${COMPONENTS_DIR}/include/protocol
 )
 
 set(LIBRARIES
@@ -49,6 +51,9 @@ set(SOURCES
   incoming_data_handler_test.cc
   protocol_header_validator_test.cc
   protocol_handler_tm_test.cc
+  protocol_packet_test.cc
+  protocol_payload_test.cc
+  multiframe_builder_test.cc
 )
 
 create_test("protocol_handler_test" "${SOURCES}" "${LIBRARIES}")

@@ -61,7 +61,7 @@ struct ResourseUsage {
 };
 
 class Resources {
-public:
+  public:
   typedef uint32_t MemInfo;
 #if defined(__QNXNTO__)
   typedef procfs_info PidStats;

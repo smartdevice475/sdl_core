@@ -30,14 +30,13 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include "utils/logger.h"
 #include "transport_manager/tcp/tcp_device.h"
 
-#include "utils/logger.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-//CREATE_LOGGERPTR_LOCAL(logger_, "TransportManager")
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 

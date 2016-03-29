@@ -33,11 +33,8 @@ set(install_destination bin)
 set(copy_destination ${CMAKE_BINARY_DIR}/src/appMain)
 set(library_name ${CMAKE_SHARED_LIBRARY_PREFIX}${target}${CMAKE_SHARED_LIBRARY_SUFFIX})
 
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-if (EXTENDED_POLICY_FLAG)
-  add_definitions(-DEXTENDED_POLICY)
-endif()
 
 #Generation of policy table interface...
 #include(${CMAKE_SOURCE_DIR}/tools/intergen/GenerateInterfaceLibrary.cmake)
@@ -49,9 +46,9 @@ include_directories (
   ${JSONCPP_INCLUDE_DIRECTORY}
   #${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_SOURCE_DIR}/src/components/utils/include/
-  ${CMAKE_SOURCE_DIR}/src/components/utils/include/utils
   ${CMAKE_SOURCE_DIR}/src/components
   ${CMAKE_SOURCE_DIR}/src/components/config_profile/include
+  ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/table_struct
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
@@ -124,7 +121,6 @@ if(ENABLE_LOG)
 if(MODIFY_FUNCTION_FLAGS)
 
 else()
-  add_dependencies(${target} liblog4cxx)
   target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 endif()

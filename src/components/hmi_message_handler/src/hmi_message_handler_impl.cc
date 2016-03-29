@@ -31,31 +31,29 @@
  */
 
 #include "hmi_message_handler/hmi_message_handler_impl.h"
-#include "config_profile/profile.h"
 #include "utils/logger.h"
 
 namespace hmi_message_handler {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "HMIMessageHandler")
 
-HMIMessageHandlerImpl::HMIMessageHandlerImpl()
-    : observer_(NULL),
-      messages_to_hmi_("HMH ToHMI", this,
-                 threads::ThreadOptions(
-                     profile::Profile::instance()->thread_min_stack_size())),
-      messages_from_hmi_("HMH FromHMI", this,
-                 threads::ThreadOptions(
-                     profile::Profile::instance()->thread_min_stack_size())) {
+HMIMessageHandlerImpl::HMIMessageHandlerImpl(
+    const HMIMessageHandlerSettings& settings)
+  : settings_(settings)
+  , observer_(NULL)
+  , messages_to_hmi_("HMH ToHMI", this,
+               threads::ThreadOptions(
+                   get_settings().thread_min_stack_size()))
+  , messages_from_hmi_("HMH FromHMI", this,
+               threads::ThreadOptions(
+                   get_settings().thread_min_stack_size())){
 }
 
 HMIMessageHandlerImpl::~HMIMessageHandlerImpl() {
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock lock(observer_locker_);
-  observer_ = NULL;
-  if (!message_adapters_.empty()) {
-    LOG4CXX_WARN(logger_, "Not all HMIMessageAdapter have unsubscribed from"
-                         " HMIMessageHandlerImpl");
-  }
+  messages_to_hmi_.Shutdown();
+  messages_from_hmi_.Shutdown();
+  set_message_observer(NULL);
 }
 
 void HMIMessageHandlerImpl::OnMessageReceived(MessageSharedPointer message) {
@@ -92,15 +90,25 @@ void HMIMessageHandlerImpl::OnErrorSending(MessageSharedPointer message) {
 void HMIMessageHandlerImpl::AddHMIMessageAdapter(
     HMIMessageAdapter* adapter) {
   LOG4CXX_AUTO_TRACE(logger_);
+  if (!adapter) {
+    LOG4CXX_WARN(logger_, "HMIMessageAdapter is not valid!");
+    return;
+  }
   message_adapters_.insert(adapter);
 }
 
 void HMIMessageHandlerImpl::RemoveHMIMessageAdapter(
     HMIMessageAdapter* adapter) {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (adapter != NULL) {
-    message_adapters_.erase(adapter);
+  if (!adapter) {
+    LOG4CXX_WARN(logger_, "HMIMessageAdapter is not valid!");
+    return;
   }
+  message_adapters_.erase(adapter);
+}
+
+const HMIMessageHandlerSettings& HMIMessageHandlerImpl::get_settings() const {
+  return  settings_;
 }
 
 void HMIMessageHandlerImpl::Handle(const impl::MessageFromHmi message) {

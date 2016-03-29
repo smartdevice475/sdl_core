@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_HELPER_H_
 #define SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_HELPER_H_
 
-#include "./functions.h"
+#include "functions.h"
 #include "utils/shared_ptr.h"
 #include "policy/policy_types.h"
 
@@ -165,7 +165,7 @@ struct ProcessFunctionalGroup {
 #ifdef OS_WINCE
       GroupConsent undefined_group_consent = kGroupDisallowed);
 #else
-	  GroupConsent undefined_group_consent = GroupConsent::kGroupDisallowed);
+      GroupConsent undefined_group_consent = GroupConsent::kGroupDisallowed);
 #endif
     bool operator()(const StringsValueType& group_name);
   private:

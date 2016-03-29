@@ -29,6 +29,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
+#include "utils/file_system.h"
 #include "utils/logger.h"
 
 #if defined(OS_WIN32) || defined(OS_WINCE)
@@ -46,12 +48,11 @@
 // TODO(VS): lint error: Streams are highly discouraged.
 #include <fstream>
 #include <cstddef>
+#include <cstdio>
 #include <algorithm>
 #ifdef OS_WINCE
 #include "utils/global.h"
 #endif
-
-#include "utils/file_system.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
@@ -118,10 +119,9 @@ uint32_t file_system::DirectorySize(const std::string& path) {
   struct dirent dir_element_;
   struct dirent* dir_element = &dir_element_;
 #else
-  char* direntbuffer =
-      new char[offsetof(struct dirent, d_name) +
-               pathconf(path.c_str(), _PC_NAME_MAX) + 1];
-  struct dirent* dir_element = new(direntbuffer) dirent;
+  char* direntbuffer = new char[offsetof(struct dirent, d_name) +
+                                pathconf(path.c_str(), _PC_NAME_MAX) + 1];
+  struct dirent* dir_element = new (direntbuffer) dirent;
 #endif
   struct dirent* result = NULL;
   struct stat file_info;
@@ -130,15 +130,14 @@ uint32_t file_system::DirectorySize(const std::string& path) {
     return_code = readdir_r(directory, dir_element, &result);
     for (; NULL != result && 0 == return_code;
          return_code = readdir_r(directory, dir_element, &result)) {
-      if (0 == strcmp(result->d_name, "..")
-          || 0 == strcmp(result->d_name, ".")) {
+      if (0 == strcmp(result->d_name, "..") ||
+          0 == strcmp(result->d_name, ".")) {
         continue;
       }
       std::string full_element_path = path + "/" + result->d_name;
       if (file_system::IsDirectory(full_element_path)) {
         size += DirectorySize(full_element_path);
       } else {
-        memset(reinterpret_cast<void*>(&file_info), 0, sizeof(file_info));
         stat(full_element_path.c_str(), &file_info);
         size += file_info.st_size;
       }
@@ -283,12 +282,12 @@ bool file_system::FileExists(const std::string& name) {
 #endif
 }
 
-bool file_system::Write(
-  const std::string& file_name, const std::vector<uint8_t>& data,
-  std::ios_base::openmode mode) {
+bool file_system::Write(const std::string& file_name,
+                        const std::vector<uint8_t>& data,
+                        std::ios_base::openmode mode) {
   std::ofstream file(file_name.c_str(), std::ios_base::binary | mode);
   if (file.is_open()) {
-    for (int32_t i = 0; i < data.size(); ++i) {
+    for (uint32_t i = 0; i < data.size(); ++i) {
       file << data[i];
     }
     file.close();
@@ -299,15 +298,13 @@ bool file_system::Write(
 
 std::ofstream* file_system::Open(const std::string& file_name,
                                  std::ios_base::openmode mode) {
-
-
   std::ofstream* file = new std::ofstream();
-  file->open( file_name.c_str(),std::ios_base::binary | mode);
+  file->open(file_name.c_str(), std::ios_base::binary | mode);
   if (file->is_open()) {
-
     return file;
   }
 
+  delete file;
   return NULL;
 }
 
@@ -348,14 +345,11 @@ std::string file_system::CurrentWorkingDirectory() {
 	Global::fromUnicode(szPath, CP_ACP, strData);
 	return strData;
 #else
-  size_t filename_max_lenght = 1024;
-  char currentAppPath[filename_max_lenght];
-  memset(currentAppPath, 0, filename_max_lenght);
-  getcwd(currentAppPath, filename_max_lenght);
-
-  char path[filename_max_lenght];
-  memset(path, 0, filename_max_lenght);
-  snprintf(path, filename_max_lenght - 1, "%s", currentAppPath);
+  const size_t filename_max_length = 1024;
+  char path[filename_max_length];
+  if (0 == getcwd(path, filename_max_length)) {
+    LOG4CXX_WARN(logger_, "Could not get CWD");
+  }
   return std::string(path);
 #endif
   
@@ -369,10 +363,10 @@ bool file_system::DeleteFile(const std::string& name) {
 	Global::toUnicode(name, CP_ACP, strUnicodeData);
 	return ::DeleteFile(strUnicodeData.c_str()) == TRUE ? true : false;
 #else
-	if (FileExists(name) && IsAccessible(name, W_OK)) {
-		return !remove(name.c_str());
-	}
-	return false;
+  if (FileExists(name) && IsAccessible(name, W_OK)) {
+    return !remove(name.c_str());
+  }
+  return false;
 #endif
 }
 
@@ -395,7 +389,7 @@ void file_system::remove_directory_content(const std::string& directory_name) {
   char* direntbuffer =
       new char[offsetof(struct dirent, d_name) +
                pathconf(directory_name.c_str(), _PC_NAME_MAX) + 1];
-  struct dirent* dir_element = new(direntbuffer) dirent;
+  struct dirent* dir_element = new (direntbuffer) dirent;
 #endif
   struct dirent* result = NULL;
 
@@ -406,8 +400,8 @@ void file_system::remove_directory_content(const std::string& directory_name) {
 
     for (; NULL != result && 0 == return_code;
          return_code = readdir_r(directory, dir_element, &result)) {
-      if (0 == strcmp(result->d_name, "..")
-          || 0 == strcmp(result->d_name, ".")) {
+      if (0 == strcmp(result->d_name, "..") ||
+          0 == strcmp(result->d_name, ".")) {
         continue;
       }
 
@@ -467,8 +461,8 @@ bool file_system::IsReadingAllowed(const std::string& name) {
 }
 
 std::vector<std::string> file_system::ListFiles(
-	const std::string& directory_name) {
-		std::vector<std::string> listFiles;
+    const std::string& directory_name) {
+  std::vector<std::string> listFiles;
 #if defined(OS_WIN32)
 		WIN32_FIND_DATA ffd;
 		HANDLE hFind = ::FindFirstFile(directory_name.c_str(), &ffd);
@@ -517,52 +511,52 @@ std::vector<std::string> file_system::ListFiles(
 
 		FindClose(hFind);
 #else
-		if (!DirectoryExists(directory_name)) {
-			return listFiles;
-		}
+  if (!DirectoryExists(directory_name)) {
+    return listFiles;
+  }
 
-		int32_t return_code = 0;
-		DIR* directory = NULL;
-
+  int32_t return_code = 0;
+  DIR* directory = NULL;
 #ifndef __QNXNTO__
-		struct dirent dir_element_;
-		struct dirent* dir_element = &dir_element_;
+  struct dirent dir_element_;
+  struct dirent* dir_element = &dir_element_;
 #else
-		char* direntbuffer =
-			new char[offsetof(struct dirent, d_name) +
-			pathconf(directory_name.c_str(), _PC_NAME_MAX) + 1];
-		struct dirent* dir_element = new(direntbuffer)dirent;
+  char* direntbuffer =
+      new char[offsetof(struct dirent, d_name) +
+               pathconf(directory_name.c_str(), _PC_NAME_MAX) + 1];
+  struct dirent* dir_element = new (direntbuffer) dirent;
 #endif
+  struct dirent* result = NULL;
 
-		struct dirent* result = NULL;
+  directory = opendir(directory_name.c_str());
+  if (NULL != directory) {
+    return_code = readdir_r(directory, dir_element, &result);
 
-		directory = opendir(directory_name.c_str());
-		if (NULL != directory) {
-			return_code = readdir_r(directory, dir_element, &result);
+    for (; NULL != result && 0 == return_code;
+         return_code = readdir_r(directory, dir_element, &result)) {
+      if (0 == strcmp(result->d_name, "..") ||
+          0 == strcmp(result->d_name, ".")) {
+        continue;
+      }
 
-			for (; NULL != result && 0 == return_code;
-				return_code = readdir_r(directory, dir_element, &result)) {
-					if (0 == strcmp(result->d_name, "..")
-						|| 0 == strcmp(result->d_name, ".")) {
-							continue;
-					}
+      listFiles.push_back(std::string(result->d_name));
+    }
 
-					listFiles.push_back(std::string(result->d_name));
-			}
+    closedir(directory);
+  }
 
-			closedir(directory);
 #ifdef __QNXNTO__
-			delete[] direntbuffer;
+  delete[] direntbuffer;
 #endif
-		}
+
 #endif
-		return listFiles;
+  return listFiles;
 }
 
 bool file_system::WriteBinaryFile(const std::string& name,
                                   const std::vector<uint8_t>& contents) {
   using namespace std;
-  ofstream output(name.c_str(), ios_base::binary|ios_base::trunc);
+  ofstream output(name.c_str(), ios_base::binary | ios_base::trunc);
   output.write(reinterpret_cast<const char*>(&contents.front()),
                contents.size());
   return output.good();
@@ -573,15 +567,15 @@ bool file_system::ReadBinaryFile(const std::string& name,
 #if defined(OS_WIN32) || defined(OS_WINCE)
 	if (!FileExists(name) || !IsAccessible(name, 0)) {
 #else
-	if (!FileExists(name) || !IsAccessible(name, R_OK)) {
+  if (!FileExists(name) || !IsAccessible(name, R_OK)) {
 #endif
-		return false;
+    return false;
   }
 
   std::ifstream file(name.c_str(), std::ios_base::binary);
   std::ostringstream ss;
   ss << file.rdbuf();
-  const std::string& s = ss.str();
+  const std::string s = ss.str();
 
   result.resize(s.length());
   std::copy(s.begin(), s.end(), result.begin());
@@ -592,7 +586,7 @@ bool file_system::ReadFile(const std::string& name, std::string& result) {
 #if defined(OS_WIN32) || defined(OS_WINCE)
 	if (!FileExists(name) || !IsAccessible(name, 0)) {
 #else
-	if (!FileExists(name) || !IsAccessible(name, R_OK)) {
+  if (!FileExists(name) || !IsAccessible(name, R_OK)) {
 #endif
     return false;
   }
@@ -609,41 +603,32 @@ const std::string file_system::ConvertPathForURL(const std::string& path) {
   std::string::const_iterator it_path_end = path.end();
 
   const std::string reserved_symbols = "!#$&'()*+,:;=?@[] ";
-  std::string::const_iterator it_sym = reserved_symbols.begin();
-  std::string::const_iterator it_sym_end = reserved_symbols.end();
-
+  size_t pos = std::string::npos;
   std::string converted_path;
-  while (it_path != it_path_end) {
 
-    it_sym = reserved_symbols.begin();
-    for (; it_sym != it_sym_end; ++it_sym) {
-
-      if (*it_path == *it_sym) {
+  for (; it_path != it_path_end; ++it_path) {
+    pos = reserved_symbols.find_first_of(*it_path);
+    if (pos != std::string::npos) {
 #if defined(OS_WIN32) || defined(OS_WINCE)
-		  const size_t size = 100;
-		  char percent_value[size];
-		  sprintf_s(percent_value, size, "%%%x", *it_path);
+      const size_t size = 100;
+      char percent_value[size];
+	  sprintf_s(percent_value, size, "%%%x", *it_path);
 #else
-        size_t size = 100;
-        char percent_value[size];
-        snprintf(percent_value, size, "%%%x", *it_path);
+      size_t size = 100;
+      char percent_value[size];
+      snprintf(percent_value, size, "%%%x", *it_path);
 #endif
-        converted_path += percent_value;
-        ++it_path;
-        continue;
-      }
+      converted_path += percent_value;
+    } else {
+      converted_path += *it_path;
     }
-
-    converted_path += *it_path;
-    ++it_path;
   }
-
   return converted_path;
 }
 
 bool file_system::CreateFile(const std::string& path) {
 #if defined(OS_WINCE) || defined(OS_MAC)
-	std::ofstream file(path.c_str());
+  std::ofstream file(path.c_str());
 #else
   std::ofstream file(path);
 #endif
@@ -670,8 +655,7 @@ uint64_t file_system::GetFileModificationTime(const std::string& path) {
 #endif
 }
 
-bool file_system::CopyFile(const std::string& src,
-                           const std::string& dst) {
+bool file_system::CopyFile(const std::string& src, const std::string& dst) {
   if (!FileExists(src) || FileExists(dst) || !CreateFile(dst)) {
     return false;
   }
@@ -683,14 +667,27 @@ bool file_system::CopyFile(const std::string& src,
   return true;
 }
 
-bool file_system::MoveFile(const std::string& src,
-                           const std::string& dst) {
-  if (!CopyFile(src, dst)) {
-    return false;
+bool file_system::MoveFile(const std::string& src, const std::string& dst) {
+  if (std::rename(src.c_str(), dst.c_str()) == 0) {
+    return true;
+  } else {
+    // In case of src and dst on different file systems std::rename returns
+    // an error (at least on QNX).
+    // Seems, streams are not recommended for use, so have
+    // to find another way to do this.
+    std::ifstream s_src(src, std::ios::binary);
+    if (!s_src.good()) {
+      return false;
+    }
+    std::ofstream s_dst(dst, std::ios::binary);
+    if (!s_dst.good()) {
+      return false;
+    }
+    s_dst << s_src.rdbuf();
+    s_dst.close();
+    s_src.close();
+    DeleteFile(src);
+    return true;
   }
-  if (!DeleteFile(src)) {
-    DeleteFile(dst);
-    return false;
-  }
-  return true;
+  return false;
 }

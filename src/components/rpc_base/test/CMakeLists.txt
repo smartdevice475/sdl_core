@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2015, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@ set(LIBRARIES
 set(SOURCES
   rpc_base_json_test.cc
   rpc_base_test.cc
+  validation_report_test.cc
 )
 
 if (${HMI_DBUS_API})

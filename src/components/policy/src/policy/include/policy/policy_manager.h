@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -34,12 +34,16 @@
 #define SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_MANAGER_H_
 
 #include <vector>
+#ifndef OS_WINCE
+#include <cstdint>
+#endif
 
 #include "policy/policy_types.h"
 #include "policy/policy_listener.h"
 #include "usage_statistics/statistics_manager.h"
 
 namespace policy {
+
 class PolicyManager : public usage_statistics::StatisticsManager {
   public:
     virtual ~PolicyManager() {
@@ -89,7 +93,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     /**
      * @brief PTU is needed, for this PTS has to be formed and sent.
      */
-    virtual void RequestPTUpdate() = 0;
+    virtual bool RequestPTUpdate() = 0;
 
     /**
      * @brief Check if specified RPC for specified application
@@ -143,10 +147,10 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
     /**
      * Gets timeout to wait before next retry updating PT
-     * If timeout is less or equal to zero then the retry sequence is not need.
+     * If timeout is equal to zero then the retry sequence is not need.
      * @return timeout in seconds
      */
-    virtual int NextRetryTimeout() = 0;
+    virtual uint32_t NextRetryTimeout() = 0;
 
     /**
      * Gets timeout to wait until receive response
@@ -204,10 +208,9 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     virtual bool ReactOnUserDevConsentForApp(const std::string app_id,
         bool is_device_allowed) = 0;
     /**
-     * Sets number of kilometers and days after epoch, that passed for
-     * receiving PT UPdate.
+     * Sets counter value that passed for receiving PT UPdate.
      */
-    virtual void PTUpdatedAt(int kilometers, int days_after_epoch) = 0;
+    virtual void PTUpdatedAt(Counters counter, int value) = 0;
 
     /**
      * @brief Retrieves data from app_policies about app on its registration:
@@ -418,6 +421,11 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      */
     virtual const std::vector<std::string> GetAppRequestTypes(
       const std::string policy_app_id) const = 0;
+   
+    /**
+     * @brief Get information about vehicle
+     */
+    virtual const VehicleInfo GetVehicleInfo() const = 0;
 
     /**
      * @brief OnAppRegisteredOnMobile alows to handle event when application were

@@ -31,7 +31,7 @@
  */
 
 #include "transport_manager/transport_manager_impl.h"
-#include <pthread.h>
+
 #include <stdint.h>
 #include <cstring>
 #include <queue>
@@ -43,6 +43,8 @@
 
 #include "utils/macro.h"
 #include "utils/logger.h"
+#include "utils/make_shared.h"
+#include "utils/timer_task_impl.h"
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_manager_listener_empty.h"
@@ -70,9 +72,9 @@ TransportManagerImpl::Connection TransportManagerImpl::convert(
 
 TransportManagerImpl::TransportManagerImpl()
   : is_initialized_(false),
-#ifdef TIME_TESTER
+#ifdef TELEMETRY_MONITOR
     metric_observer_(NULL),
-#endif  // TIME_TESTER
+#endif  // TELEMETRY_MONITOR
     connection_id_counter_(0),
     message_queue_("TM MessageQueue", this),
     event_queue_("TM EventQueue", this) {
@@ -99,7 +101,7 @@ TransportManagerImpl::~TransportManagerImpl() {
   LOG4CXX_INFO(logger_, "TransportManager object destroyed");
 }
 
-int TransportManagerImpl::ConnectDevice(const DeviceHandle& device_handle) {
+int TransportManagerImpl::ConnectDevice(const DeviceHandle device_handle) {
   LOG4CXX_TRACE(logger_, "enter. DeviceHandle: " << &device_handle);
   if (!this->is_initialized_) {
     LOG4CXX_ERROR(logger_, "TransportManager is not initialized.");
@@ -109,7 +111,7 @@ int TransportManagerImpl::ConnectDevice(const DeviceHandle& device_handle) {
   }
 
   DeviceUID device_id = converter_.HandleToUid(device_handle);
-  LOG4CXX_DEBUG(logger_, "Convert handle to id " << device_id);
+  LOG4CXX_DEBUG(logger_, "Convert handle to id:" << device_id);
 
   sync_primitives::AutoReadLock lock(device_to_adapter_map_lock_);
   DeviceToAdapterMap::iterator it  = device_to_adapter_map_.find(device_id);
@@ -126,7 +128,7 @@ int TransportManagerImpl::ConnectDevice(const DeviceHandle& device_handle) {
   return err;
 }
 
-int TransportManagerImpl::DisconnectDevice(const DeviceHandle& device_handle) {
+int TransportManagerImpl::DisconnectDevice(const DeviceHandle device_handle) {
   LOG4CXX_TRACE(logger_, "enter. DeviceHandle: " << &device_handle);
   if (!this->is_initialized_) {
     LOG4CXX_ERROR(logger_, "TransportManager is not initialized.");
@@ -135,7 +137,7 @@ int TransportManagerImpl::DisconnectDevice(const DeviceHandle& device_handle) {
     return E_TM_IS_NOT_INITIALIZED;
   }
   DeviceUID device_id = converter_.HandleToUid(device_handle);
-  LOG4CXX_DEBUG(logger_, "Convert handle to id" << device_id);
+  LOG4CXX_DEBUG(logger_, "Convert handle to id:" << device_id);
 
   sync_primitives::AutoReadLock lock(device_to_adapter_map_lock_);
   DeviceToAdapterMap::iterator it  = device_to_adapter_map_.find(device_id);
@@ -150,7 +152,7 @@ int TransportManagerImpl::DisconnectDevice(const DeviceHandle& device_handle) {
   return E_SUCCESS;
 }
 
-int TransportManagerImpl::Disconnect(const ConnectionUID& cid) {
+int TransportManagerImpl::Disconnect(const ConnectionUID cid) {
   LOG4CXX_TRACE(logger_, "enter. ConnectionUID: " << &cid);
   if (!this->is_initialized_) {
     LOG4CXX_ERROR(logger_, "TransportManager is not initialized.");
@@ -198,7 +200,7 @@ int TransportManagerImpl::Disconnect(const ConnectionUID& cid) {
   return E_SUCCESS;
 }
 
-int TransportManagerImpl::DisconnectForce(const ConnectionUID& cid) {
+int TransportManagerImpl::DisconnectForce(const ConnectionUID cid) {
   LOG4CXX_TRACE(logger_, "enter ConnectionUID: " << &cid);
   if (false == this->is_initialized_) {
     LOG4CXX_ERROR(logger_, "TransportManager is not initialized.");
@@ -295,18 +297,18 @@ int TransportManagerImpl::SendMessageToDevice(const ::protocol_handler::RawMessa
     return E_INVALID_HANDLE;
   }
 
-  if (connection->shutDown) {
+  if (connection->shut_down) {
     LOG4CXX_ERROR(logger_, "TransportManagerImpl::Disconnect: Connection is to shut down.");
     LOG4CXX_TRACE(logger_,
                   "exit with E_CONNECTION_IS_TO_SHUTDOWN. Condition: connection->shutDown");
     return E_CONNECTION_IS_TO_SHUTDOWN;
   }
   }
-#ifdef TIME_TESTER
+#ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
     metric_observer_->StartRawMsg(message.get());
   }
-#endif  // TIME_TESTER
+#endif  // TELEMETRY_MONITOR
   this->PostMessage(message);
   LOG4CXX_TRACE(logger_, "exit with E_SUCCESS");
   return E_SUCCESS;
@@ -325,7 +327,7 @@ int TransportManagerImpl::ReceiveEventFromDevice(const TransportAdapterEvent& ev
   return E_SUCCESS;
 }
 
-int TransportManagerImpl::RemoveDevice(const DeviceHandle& device_handle) {
+int TransportManagerImpl::RemoveDevice(const DeviceHandle device_handle) {
   LOG4CXX_TRACE(logger_, "enter. DeviceHandle: " << &device_handle);
   DeviceUID device_id = converter_.HandleToUid(device_handle);
   if (false == this->is_initialized_) {
@@ -554,7 +556,7 @@ void TransportManagerImpl::RemoveConnection(uint32_t id) {
 }
 
 TransportManagerImpl::ConnectionInternal* TransportManagerImpl::GetConnection(
-  const ConnectionUID& id) {
+  const ConnectionUID id) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "ConnectionUID: " << &id);
   for (std::vector<ConnectionInternal>::iterator it = connections_.begin();
@@ -882,11 +884,11 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
       break;
     }
     case TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_DONE: {
-#ifdef TIME_TESTER
+#ifdef TELEMETRY_MONITOR
       if (metric_observer_) {
         metric_observer_->StopRawMsg(event.event_data.get());
       }
-#endif  // TIME_TESTER
+#endif  // TELEMETRY_MONITOR
       sync_primitives::AutoReadLock lock(connections_lock_);
       ConnectionInternal* connection =
           GetConnection(event.device_uid, event.application_id);
@@ -899,8 +901,8 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
         break;
       }
       RaiseEvent(&TransportManagerListener::OnTMMessageSend, event.event_data);
-      if (connection->shutDown && --connection->messages_count == 0) {
-        connection->timer->stop();
+      if (connection->shut_down && --connection->messages_count == 0) {
+        connection->timer->Stop();
         connection->transport_adapter->Disconnect(connection->device,
             connection->application);
       }
@@ -908,11 +910,11 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
       break;
     }
     case TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_FAIL: {
-#ifdef TIME_TESTER
+#ifdef TELEMETRY_MONITOR
       if (metric_observer_) {
         metric_observer_->StopRawMsg(event.event_data.get());
       }
-#endif  // TIME_TESTER
+#endif  // TELEMETRY_MONITOR
       {
       sync_primitives::AutoReadLock lock(connections_lock_);
       ConnectionInternal* connection =
@@ -955,11 +957,11 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
       }
       event.event_data->set_connection_key(connection->id);
       }
-#ifdef TIME_TESTER
+#ifdef TELEMETRY_MONITOR
       if (metric_observer_) {
         metric_observer_->StopRawMsg(event.event_data.get());
       }
-#endif  // TIME_TESTER
+#endif  // TELEMETRY_MONITOR
       RaiseEvent(&TransportManagerListener::OnTMMessageReceived, event.event_data);
       LOG4CXX_DEBUG(logger_, "event_type = ON_RECEIVED_DONE");
       break;
@@ -976,11 +978,10 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
         connections_lock_.Release();
         break;
       }
-      ConnectionUID connection_id = connection->id;
       connections_lock_.Release();
 
       RaiseEvent(&TransportManagerListener::OnTMMessageReceiveFailed,
-                 connection_id, *static_cast<DataReceiveError*>(event.event_error.get()));
+                 *static_cast<DataReceiveError*>(event.event_error.get()));
       LOG4CXX_DEBUG(logger_, "event_type = ON_RECEIVED_FAIL");
       break;
     }
@@ -1013,11 +1014,11 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
   LOG4CXX_TRACE(logger_, "exit");
 }
 
-#ifdef TIME_TESTER
-void TransportManagerImpl::SetTimeMetricObserver(TMMetricObserver* observer) {
+#ifdef TELEMETRY_MONITOR
+void TransportManagerImpl::SetTelemetryObserver(TMTelemetryObserver* observer) {
   metric_observer_ = observer;
 }
-#endif  // TIME_TESTER
+#endif  // TELEMETRY_MONITOR
 
 void TransportManagerImpl::Handle(::protocol_handler::RawMessagePtr msg) {
   LOG4CXX_TRACE(logger_, "enter");
@@ -1058,17 +1059,20 @@ void TransportManagerImpl::Handle(::protocol_handler::RawMessagePtr msg) {
   LOG4CXX_TRACE(logger_, "exit");
 }
 
-TransportManagerImpl::ConnectionInternal::ConnectionInternal(
-  TransportManagerImpl* transport_manager, TransportAdapter* transport_adapter,
-  const ConnectionUID& id, const DeviceUID& dev_id, const ApplicationHandle& app_id,
-  const DeviceHandle& device_handle)
-  : transport_manager(transport_manager),
-    transport_adapter(transport_adapter),
-    timer(new TimerInternal("TM DiscRoutine", this,
-                            &ConnectionInternal::DisconnectFailedRoutine)),
-    shutDown(false),
-    device_handle_(device_handle),
-    messages_count(0) {
+TransportManagerImpl::ConnectionInternal::ConnectionInternal(TransportManagerImpl* transport_manager,
+    TransportAdapter* transport_adapter, const ConnectionUID id,
+    const DeviceUID& dev_id, const ApplicationHandle& app_id,
+    const DeviceHandle device_handle)
+    : transport_manager(transport_manager),
+      transport_adapter(transport_adapter),
+      timer(utils::MakeShared<timer::Timer>(
+                "TM DiscRoutine",
+                new ::timer::TimerTaskImpl<ConnectionInternal> (
+                    this,
+                    &ConnectionInternal::DisconnectFailedRoutine))),
+      shut_down(false),
+      device_handle_(device_handle),
+      messages_count(0) {
   Connection::id = id;
   Connection::device = dev_id;
   Connection::application = app_id;
@@ -1078,8 +1082,8 @@ void TransportManagerImpl::ConnectionInternal::DisconnectFailedRoutine() {
   LOG4CXX_TRACE(logger_, "enter");
   transport_manager->RaiseEvent(&TransportManagerListener::OnDisconnectFailed,
                                 device_handle_, DisconnectDeviceError());
-  shutDown = false;
-  timer->stop();
+  shut_down = false;
+  timer->Stop();
   LOG4CXX_TRACE(logger_, "exit");
 }
 

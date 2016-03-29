@@ -32,6 +32,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 #include <cstring>
 #include <cstdlib>
 
@@ -49,7 +50,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "UsbHandler")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 class UsbHandler::ControlTransferSequenceState {
  public:
@@ -364,16 +365,13 @@ void UsbHandler::UsbThread(){
 #endif
 
 TransportAdapter::Error UsbHandler::Init() {
-#ifdef SP_C9_PRIMA1
-	return TransportAdapter::OK;
-#else
+  LOG4CXX_TRACE(logger_, "enter");
   int libusb_ret = libusb_init(&libusb_context_);
 
   if (LIBUSB_SUCCESS != libusb_ret) {
-	  printf("libusb init failed\n");
-	  fflush(stdout);
     LOG4CXX_ERROR(logger_, "libusb_init failed: " << libusb_ret);
-    LOG4CXX_TRACE(logger_, "exit with TransportAdapter::FAIL. Condition: LIBUSB_SUCCESS != libusb_ret");
+    LOG4CXX_TRACE(logger_,
+                  "exit with TransportAdapter::FAIL. Condition: LIBUSB_SUCCESS != libusb_ret");
     return TransportAdapter::FAIL;
   }
 
@@ -419,8 +417,10 @@ TransportAdapter::Error UsbHandler::Init() {
                  &left_callback_handle_);
 
   if (LIBUSB_SUCCESS != libusb_ret) {
-    LOG4CXX_ERROR(logger_, "libusb_hotplug_register_callback failed: " << libusb_ret);
-    LOG4CXX_TRACE(logger_, "exit with TransportAdapter::FAIL. Condition: LIBUSB_SUCCESS != libusb_ret");
+    LOG4CXX_ERROR(logger_,
+                  "libusb_hotplug_register_callback failed: " << libusb_ret);
+    LOG4CXX_TRACE(logger_,
+                  "exit with TransportAdapter::FAIL. Condition: LIBUSB_SUCCESS != libusb_ret");
     return TransportAdapter::FAIL;
   }
 #endif
@@ -456,7 +456,6 @@ void UsbHandler::Thread() {
            device_handles_to_close_.begin();
          it != device_handles_to_close_.end();
          it = device_handles_to_close_.erase(it)) {
-			libusb_release_interface(*it,0);
       libusb_close(*it);
     }
   }

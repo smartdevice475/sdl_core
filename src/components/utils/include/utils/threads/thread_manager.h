@@ -68,7 +68,7 @@ class ThreadManager : public utils::Singleton<ThreadManager> {
     ThreadDelegate* delegate;
   };
   ThreadManager() {}
-  utils::MessageQueue<ThreadDesc> threads_to_terminate;
+  MessageQueue<ThreadDesc> threads_to_terminate;
  private:
   DISALLOW_COPY_AND_ASSIGN(ThreadManager);
 

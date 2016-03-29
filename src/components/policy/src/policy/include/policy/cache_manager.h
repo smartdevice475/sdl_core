@@ -40,10 +40,12 @@
 #include "policy/pt_ext_representation.h"
 #include "usage_statistics/statistics_manager.h"
 #include "policy/cache_manager_interface.h"
+#include "utils/threads/thread.h"
+#include "utils/threads/thread_delegate.h"
 
 #include "utils/lock.h"
-#include "utils/timer_thread.h"
 #include "utils/conditional_variable.h"
+#include "policy/policy_types.h"
 
 namespace policy {
 
@@ -87,11 +89,10 @@ class CacheManager : public CacheManagerInterface {
   virtual int KilometersBeforeExchange(int current);
 
   /**
-   * @brief Sets kilometers and days after epoch, that passed for recieved
-   * successful PT UPdate
+   * @brief Sets counter value that passed for recieved successful PT UPdate
    */
-  virtual bool SetCountersPassedForSuccessfulUpdate(int kilometers,
-                                                    int days_after_epoch);
+  virtual bool SetCountersPassedForSuccessfulUpdate(Counters counter,
+                                                    int value);
 
   /**
    * Gets value in days before next update policy table
@@ -126,7 +127,7 @@ class CacheManager : public CacheManagerInterface {
   /**
    * @brief Get information about vehicle
    */
-  virtual VehicleData GetVehicleData();
+  virtual const VehicleInfo GetVehicleInfo() const;
 
   /**
    * @brief Allows to update 'vin' field in module_meta table.
@@ -168,7 +169,7 @@ class CacheManager : public CacheManagerInterface {
    * depending on application priority.
    * @param priority Priority of application
    */
-  virtual int GetNotificationsNumber(const std::string& priority);
+  virtual rpc::policy_table_interface_base::NumberOfNotificationsType GetNotificationsNumber(const std::string& priority);
 
   /**
    * @brief Get priority for given application

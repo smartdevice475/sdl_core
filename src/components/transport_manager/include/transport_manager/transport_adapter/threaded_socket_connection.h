@@ -90,6 +90,13 @@ class ThreadedSocketConnection : public Connection {
   TransportAdapter::Error Start();
 
   /**
+   * @brief Checks is queue with frames to send empty or not.
+   *
+   * @return Information about queue is empty or not.
+   */
+  bool IsFramesToSendQueueEmpty() const;
+
+  /**
    * @brief Set variable that hold socket No.
    */
   void set_socket(int socket) {
@@ -181,7 +188,6 @@ class ThreadedSocketConnection : public Connection {
   bool unexpected_disconnect_;
   const DeviceUID device_uid_;
   const ApplicationHandle app_handle_;
-
   threads::Thread* thread_;
 };
 }  // namespace transport_adapter
