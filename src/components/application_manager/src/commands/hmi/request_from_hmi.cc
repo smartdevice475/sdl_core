@@ -68,11 +68,7 @@ void RequestFromHMI::SendResponse(uint32_t correlation_id,
     smart_objects::SmartType_Map);
 
   (*message)[strings::params][strings::function_id] = function_id;
-#ifdef OS_WINCE
-  (*message)[strings::params][strings::message_type] = kResponse;
-#else
   (*message)[strings::params][strings::message_type] = MessageType::kResponse;
-#endif
   (*message)[strings::params][strings::correlation_id] = correlation_id;
   (*message)[strings::params][hmi_response::code] = result_code;
 

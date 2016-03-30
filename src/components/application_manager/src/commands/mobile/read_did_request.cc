@@ -1,6 +1,5 @@
 /*
-
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -31,6 +30,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string>
 #include "application_manager/commands/mobile/read_did_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
@@ -66,11 +66,7 @@ void ReadDIDRequest::Run() {
 
   if (app->IsCommandLimitsExceeded(
         static_cast<mobile_apis::FunctionID::eType>(function_id()),
-#ifdef OS_WINCE
-		application_manager::CONFIG_FILE)) {
-#else
         application_manager::TLimitSource::CONFIG_FILE)) {
-#endif
     LOG4CXX_ERROR(logger_, "ReadDID frequency is too high.");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
@@ -105,7 +101,11 @@ void ReadDIDRequest::on_event(const event_engine::Event& event) {
 
       bool result = mobile_apis::Result::SUCCESS == result_code;
 
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      const std::string return_info =
+          message[strings::msg_params][hmi_response::message].asString();
+
+      SendResponse(result, result_code, return_info.c_str(),
+                   &(message[strings::msg_params]));
       break;
     }
     default: {

@@ -40,9 +40,6 @@
 #include "utils/helpers.h"
 #include "utils/gen_hash.h"
 #include "utils/scope_guard.h"
-#ifdef OS_WINCE
-#include "utils/global.h"
-#endif
 
 namespace {
 const std::string kDatabaseName = "resumption";
@@ -151,26 +148,27 @@ void ResumptionDataDB::SaveApplication(
   DCHECK_OR_RETURN_VOID(application);
   bool application_exist = false;
   const std::string& policy_app_id = application->mobile_app_id();
-  const std::string device_id =
-        MessageHelper::GetDeviceMacAddressForHandle(application->device());
-  LOG4CXX_INFO(logger_, "app_id : " << application->app_id()
-                <<" policy_app_id : " << policy_app_id
-                <<" device_id : " << device_id);
+  const std::string& device_mac = application->mac_address();
+  LOG4CXX_INFO(logger_,
+               "app_id : " << application->app_id() << " policy_app_id : "
+                           << policy_app_id
+                           << " device_id : "
+                           << device_mac);
 
-  if (!CheckExistenceApplication(policy_app_id, device_id, application_exist)) {
+  if (!CheckExistenceApplication(policy_app_id, device_mac, application_exist)) {
     LOG4CXX_ERROR(logger_, "Problem with access to DB");
     return;
   }
 
   if (application->is_application_data_changed()) {
     if (application_exist) {
-      if (!DeleteSavedApplication(policy_app_id, device_id)) {
+      if (!DeleteSavedApplication(policy_app_id, device_mac)) {
         LOG4CXX_ERROR(logger_, "Deleting of application data is not finished");
         return;
       }
     }
 
-    if (!SaveApplicationToDB(application, policy_app_id, device_id)) {
+    if (!SaveApplicationToDB(application, policy_app_id, device_mac)) {
       LOG4CXX_ERROR(logger_, "Saving of application data is not finished");
       return;
     }
@@ -178,7 +176,7 @@ void ResumptionDataDB::SaveApplication(
     application->set_is_application_data_changed(false);
   } else {
     if (application_exist) {
-      if (!UpdateApplicationData(application, policy_app_id, device_id)) {
+      if (!UpdateApplicationData(application, policy_app_id, device_mac)) {
         LOG4CXX_ERROR(logger_, "Updating application data is failed");
         return;
       }
@@ -187,7 +185,7 @@ void ResumptionDataDB::SaveApplication(
       if (Compare<HMILevel::eType, EQ, ONE>(application->hmi_level(),
                                             HMILevel::HMI_FULL,
                                             HMILevel::HMI_LIMITED)) {
-        if (!InsertApplicationData(application, policy_app_id, device_id)) {
+        if (!InsertApplicationData(application, policy_app_id, device_mac)) {
           LOG4CXX_ERROR(logger_, "Saving data of application is failed");
           return;
         }
@@ -1858,15 +1856,6 @@ bool ResumptionDataDB::ExecInsertVrCommands(
      field "idchoice" from table "vrCommandsArray" = 2*/
   for (size_t i = 0; i < length_vr_commands; ++i) {
     insert_vr_command.Bind(0, vr_commands_array[i].asString());
-#ifdef OS_WINCE
-    if (kVRCommandFromCommand == value) {
-      insert_vr_command.Bind(1, primary_key);
-      insert_vr_command.Bind(2);
-    } else if (kVRCommandFromChoice == value) {
-      insert_vr_command.Bind(1);
-      insert_vr_command.Bind(2, primary_key);
-    }
-#else
     if (AccessoryVRCommand::kVRCommandFromCommand == value) {
       insert_vr_command.Bind(1, primary_key);
       insert_vr_command.Bind(2);
@@ -1874,7 +1863,6 @@ bool ResumptionDataDB::ExecInsertVrCommands(
       insert_vr_command.Bind(1);
       insert_vr_command.Bind(2, primary_key);
     }
-#endif
     if (!insert_vr_command.Exec() || !insert_vr_command.Reset()) {
       LOG4CXX_WARN(logger_, "Problem with insert vr_command to DB");
       return false;
@@ -2248,19 +2236,19 @@ bool ResumptionDataDB::InsertChoiceSetData(
   int64_t choice_set_key = 0;
   size_t length_choceset_array = choicesets.length();
   for (size_t i = 0; i < length_choceset_array; ++i) {
-
     if (!ExecInsertApplicationChoiceSet(choice_set_key, choicesets[i])) {
       return false;
     }
 
-    if (!ExecInsertChoice(choice_set_key,
-                         choicesets[i][strings::choice_set])) {
+    if (!ExecInsertChoice(choice_set_key, choicesets[i][strings::choice_set])) {
       return false;
     }
 
-    if (!ExecInsertDataToArray(choice_set_key, application_primary_key,
-                              kInsertApplicationChoiceSetArray)) {
-      LOG4CXX_WARN(logger_, "Problem with insertion data to"
+    if (!ExecInsertDataToArray(choice_set_key,
+                               application_primary_key,
+                               kInsertApplicationChoiceSetArray)) {
+      LOG4CXX_WARN(logger_,
+                   "Problem with insertion data to"
                    " applicationChoiceSetArray table");
       return false;
     }
@@ -2310,12 +2298,8 @@ bool ResumptionDataDB::InsertGlobalPropertiesData(
   SmartMap::iterator it_end = global_properties.map_end();
   bool data_exists = false;
   while (it_begin != it_end) {
-#ifdef OS_WINCE
-	if (SmartType_Null != ((it_begin->second).getType())) {
-#else
     if (SmartType::SmartType_Null != ((it_begin->second).getType())) {
-#endif
-      LOG4CXX_INFO(logger_, "Global properties contains - "<<it_begin->first);
+      LOG4CXX_INFO(logger_, "Global properties contains - " << it_begin->first);
       data_exists = true;
       break;
     }
@@ -2347,13 +2331,8 @@ bool ResumptionDataDB::InsertGlobalPropertiesData(
   CustomBind(
       strings::menu_title, global_properties, insert_global_properties, 1);
 
-#ifdef OS_WINCE
-  if (SmartType_Null ==
-      global_properties[strings::menu_icon].getType()) {
-#else
   if (SmartType::SmartType_Null ==
       global_properties[strings::menu_icon].getType()) {
-#endif
     insert_global_properties.Bind(2);
   } else {
     int64_t image_key = 0;
@@ -2365,11 +2344,7 @@ bool ResumptionDataDB::InsertGlobalPropertiesData(
     }
   }
 
-#ifdef OS_WINCE
-  if (SmartType_Null ==
-#else
   if (SmartType::SmartType_Null ==
-#endif
       global_properties[strings::keyboard_properties].getType()) {
     insert_global_properties.Bind(3);
     insert_global_properties.Bind(4);
@@ -2393,11 +2368,7 @@ bool ResumptionDataDB::InsertGlobalPropertiesData(
   }
 
   global_properties_key = insert_global_properties.LastInsertId();
-#ifdef OS_WINCE
-  if ((SmartType_Null !=
-#else
   if ((SmartType::SmartType_Null !=
-#endif
        global_properties[strings::keyboard_properties].getType()) &&
       (global_properties[strings::keyboard_properties].keyExists(
           strings::limited_character_list))) {
@@ -2411,14 +2382,10 @@ bool ResumptionDataDB::InsertGlobalPropertiesData(
     }
   }
 
-#ifdef OS_WINCE
-  if (SmartType_Null !=
-#else
   if (SmartType::SmartType_Null !=
-#endif
       global_properties[strings::vr_help].getType()) {
     if (!ExecInsertVRHelpItem(global_properties_key,
-                             global_properties[strings::vr_help])) {
+                              global_properties[strings::vr_help])) {
       LOG4CXX_WARN(logger_, "Problem with insert data to vrHelpItem table");
       return false;
     }
@@ -2443,19 +2410,13 @@ bool ResumptionDataDB::ExecInsertHelpTimeoutArray(
   size_t timeout_prompt_length = 0;
   size_t help_prompt_length = 0;
 
-#ifdef OS_WINCE
-  if (SmartType_Null != global_properties[strings::help_prompt].getType()) {
-#else
-  if (SmartType::SmartType_Null != global_properties[strings::help_prompt].getType()) {
-#endif
+  if (SmartType::SmartType_Null !=
+      global_properties[strings::help_prompt].getType()) {
     help_prompt_length = global_properties[strings::help_prompt].length();
   }
 
-#ifdef OS_WINCE
-  if (SmartType_Null != global_properties[strings::timeout_prompt].getType()) {
-#else
-  if (SmartType::SmartType_Null != global_properties[strings::timeout_prompt].getType()) {
-#endif
+  if (SmartType::SmartType_Null !=
+      global_properties[strings::timeout_prompt].getType()) {
     timeout_prompt_length = global_properties[strings::timeout_prompt].length();
   }
   if (0 == timeout_prompt_length && 0 == help_prompt_length) {
@@ -2705,29 +2666,10 @@ bool ResumptionDataDB::InsertApplicationData(
 
 void ResumptionDataDB::CustomBind(const std::string& key,
                                   const smart_objects::SmartObject& so,
-                                  utils::dbms::SQLQuery& query, const int pos) const {
+                                  utils::dbms::SQLQuery& query,
+                                  const int pos) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace smart_objects;
-#ifdef OS_WINCE
-  if (so.keyExists(key) && SmartType_Null != so[key].getType()) {
-	  switch(so[key].getType()) {
-	  case SmartType_Integer:{
-		  query.Bind(pos, so[key].asInt());
-		  break;
-										}
-	  case SmartType_String:{
-		  query.Bind(pos, so[key].asString());
-		  break;
-									   }
-	  default:{
-		  LOG4CXX_WARN(logger_, "Incorrect type");
-		  break;
-			  }
-	  }
-  } else {
-	  query.Bind(pos);
-  }
-#else
   if (so.keyExists(key) && SmartType::SmartType_Null != so[key].getType()) {
     switch (so[key].getType()) {
       case SmartType::SmartType_Integer: {
@@ -2746,7 +2688,6 @@ void ResumptionDataDB::CustomBind(const std::string& key,
   } else {
     query.Bind(pos);
   }
-#endif
 }
 
 bool ResumptionDataDB::PrepareSelectQuery(utils::dbms::SQLQuery& query,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,46 +29,26 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/ui_get_language_response.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/event_engine/event.h"
-#include "interfaces/HMI_API.h"
 
-namespace application_manager {
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICY_HANDLER_INTERFACE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICY_HANDLER_INTERFACE_H_
 
-namespace commands {
+#include "policy/policy_types.h"
 
-UIGetLanguageResponse::UIGetLanguageResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+namespace policy {
 
-UIGetLanguageResponse::~UIGetLanguageResponse() {
-}
+// Current interface created just to be able make unit-testing
+// It should be refactored in task pointed below
+// TODO(AByzhynar) : APPLINK-16112 Create PolicyHandler interface
 
-void UIGetLanguageResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  using namespace hmi_apis;
+class PolicyHandlerInterface {
+ public:
+  virtual ~PolicyHandlerInterface() {}
+  virtual void OnSystemReady() = 0;
+  virtual void PTUpdatedAt(Counters counter, int value) = 0;
+};
 
-  Common_Language::eType language = Common_Language::INVALID_ENUM;
+}  //  namespace policy
 
-  if ((*message_).keyExists(strings::msg_params) &&
-      (*message_)[strings::msg_params].keyExists(hmi_response::language)) {
+#endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICY_HANDLER_INTERFACE_H_
 
-    language = static_cast<Common_Language::eType>(
-             (*message_)[strings::msg_params][hmi_response::language].asInt());
-  }
-
-  ApplicationManagerImpl::instance()->hmi_capabilities().
-      set_active_ui_language(language);
-
-  LOG4CXX_DEBUG(logger_, "Raising event for function_id "
-                << function_id()
-                << " and correlation_id " << correlation_id());
-  event_engine::Event event(FunctionID::UI_GetLanguage);
-  event.set_smart_object(*message_);
-  event.raise();
-}
-
-}  // namespace commands
-
-}  // namespace application_manager

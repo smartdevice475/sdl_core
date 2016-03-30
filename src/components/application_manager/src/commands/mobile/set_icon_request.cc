@@ -91,13 +91,8 @@ void SetIconRequest::Run() {
   msg_params[strings::sync_file_name][strings::value] = full_file_path_for_hmi;
 
   // TODO(VS): research why is image_type hardcoded
-#ifdef OS_WINCE
-  msg_params[strings::sync_file_name][strings::image_type] =
-	  static_cast<int32_t> (SetIconRequest::DYNAMIC);
-#else
   msg_params[strings::sync_file_name][strings::image_type] =
       static_cast<int32_t> (SetIconRequest::ImageType::DYNAMIC);
-#endif
 
   // for further use in on_event function
   (*message_)[strings::msg_params][strings::sync_file_name] =

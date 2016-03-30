@@ -242,7 +242,7 @@ class TransportManagerImpl
 
  protected:
 
-#ifdef OS_WINCE
+#if defined(OS_WIN32) || defined(OS_WINCE)
   template <class Proc>
   void RaiseEvent(Proc proc, DeviceHandle device_handle) {
     for (TransportManagerListenerList::iterator it =

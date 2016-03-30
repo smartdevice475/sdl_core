@@ -48,11 +48,7 @@ GetUrls::~GetUrls() {
 void GetUrls::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject& object = *message_;
-#ifdef OS_WINCE
-  object[strings::params][strings::message_type] = kResponse;
-#else
   object[strings::params][strings::message_type] = MessageType::kResponse;
-#endif
   if (policy::PolicyHandler::instance()->PolicyEnabled()) {
     policy::EndpointUrls endpoints;
     policy::PolicyHandler::instance()->GetServiceUrls(

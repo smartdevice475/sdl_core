@@ -435,7 +435,7 @@ bool ThreadedSocketConnection::Receive() {
 		LOG4CXX_INFO(
 			logger_,
 			"Received " << bytes_read << " bytes for connection " << this);
-		RawMessageSptr frame(
+        protocol_handler::RawMessagePtr frame(
 			new protocol_handler::RawMessage(0, 0, buffer, bytes_read));
 		controller_->DataReceiveDone(device_handle(), application_handle(),
 			frame);
@@ -493,8 +493,14 @@ bool ThreadedSocketConnection::Send() {
   while (!frames_to_send_local.empty()) {
     LOG4CXX_INFO(logger_, "frames_to_send is not empty");
     ::protocol_handler::RawMessagePtr frame = frames_to_send_local.front();
+
+#if defined(OS_WIN32) || defined(OS_WINCE)
+    const ssize_t bytes_sent = ::send(socket_, (char*)frame->data() + offset,
+        frame->data_size() - offset, 0);
+#else
     const ssize_t bytes_sent = ::send(socket_, frame->data() + offset,
                                       frame->data_size() - offset, 0);
+#endif
 
     if (bytes_sent >= 0) {
       LOG4CXX_DEBUG(logger_, "bytes_sent >= 0");

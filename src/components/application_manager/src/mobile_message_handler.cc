@@ -71,36 +71,12 @@ namespace {
   };
 #endif
 }
-CREATE_LOGGERPTR_GLOBAL(logger_, "MobileMessageHandler")
+CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
 application_manager::Message* MobileMessageHandler::HandleIncomingMessageProtocol(
   const protocol_handler::RawMessagePtr message) {
   DCHECK_OR_RETURN(message, NULL);
   application_manager::Message* out_message = NULL;
-#ifdef OS_WINCE
-  switch (message->protocol_version()) {
-  case kV1:
-	  LOG4CXX_DEBUG(logger_, "Protocol version - V1");
-	  out_message = MobileMessageHandler::HandleIncomingMessageProtocolV1(message);
-	  break;
-  case kV2:
-	  LOG4CXX_DEBUG(logger_, "Protocol version - V2");
-	  out_message = MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
-	  break;
-  case kV3:
-	  LOG4CXX_DEBUG(logger_, "Protocol version - V3");
-	  out_message = MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
-	  break;
-  case kV4:
-	  LOG4CXX_DEBUG(logger_, "Protocol version - V4");
-	  out_message = MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
-	  break;
-  default:
-	  LOG4CXX_WARN(logger_, "Can't recognise protocol version");
-	  out_message = NULL;
-	  break;
-  }
-#else
   switch (message->protocol_version()) {
   case ProtocolVersion::kV1:
     LOG4CXX_DEBUG(logger_, "Protocol version - V1");
@@ -123,7 +99,6 @@ application_manager::Message* MobileMessageHandler::HandleIncomingMessageProtoco
     out_message = NULL;
     break;
   }
-#endif
   if (out_message == NULL) {
       LOG4CXX_WARN(logger_, "Message is NULL");
       return NULL;
@@ -151,8 +126,8 @@ protocol_handler::RawMessage* MobileMessageHandler::HandleOutgoingMessageProtoco
     return MobileMessageHandler::HandleOutgoingMessageProtocolV1(message);
   }
   if ((message->protocol_version() == application_manager::kV2) ||
-	  (message->protocol_version() == application_manager::kV3) ||
-	  (message->protocol_version() == application_manager::kV4)) {
+      (message->protocol_version() == application_manager::kV3) ||
+      (message->protocol_version() == application_manager::kV4)) {
     return MobileMessageHandler::HandleOutgoingMessageProtocolV2(message);
   }
   return NULL;
@@ -233,11 +208,10 @@ MobileMessageHandler::HandleIncomingMessageProtocolV2(
 protocol_handler::RawMessage*
 MobileMessageHandler::HandleOutgoingMessageProtocolV1(
   const MobileMessage& message) {
-  LOG4CXX_INFO(logger_,
-               "MobileMessageHandler HandleOutgoingMessageProtocolV1()");
+  LOG4CXX_AUTO_TRACE(logger_);
   std::string messageString = message->json_message();
   if (messageString.length() == 0) {
-    LOG4CXX_INFO(logger_,
+    LOG4CXX_WARN(logger_,
                  "Drop ill-formed message from mobile");
     return NULL;
   }
@@ -256,8 +230,7 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV1(
 protocol_handler::RawMessage*
 MobileMessageHandler::HandleOutgoingMessageProtocolV2(
   const MobileMessage& message) {
-  LOG4CXX_INFO(logger_,
-               "MobileMessageHandler HandleOutgoingMessageProtocolV2()");
+  LOG4CXX_AUTO_TRACE(logger_);
   if (message->json_message().length() == 0) {
     LOG4CXX_ERROR(logger_, "json string is empty.");
   }

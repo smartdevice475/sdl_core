@@ -51,13 +51,8 @@ void OnButtonPressNotification::Run() {
   event_engine::Event event(hmi_apis::FunctionID::Buttons_OnButtonPress);
   event.set_smart_object(*message_);
   event.raise();
-#ifdef OS_WINCE
-  (*message_)[strings::params][strings::function_id] =
-	  static_cast<int>(mobile_apis::FunctionID::OnButtonPressID);
-#else
   (*message_)[strings::params][strings::function_id] =
       static_cast<int>(mobile_apis::FunctionID::eType::OnButtonPressID);
-#endif
   SendNotificationToMobile(message_);
 }
 

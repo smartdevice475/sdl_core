@@ -461,11 +461,7 @@ int TransportManagerImpl::Visibility(const bool& on_off) const {
     } else {
       ret = (*it)->StopClientListening();
     }
-#ifdef OS_WINCE
-    if (TransportAdapter::NOT_SUPPORTED == ret) {
-#else
     if (TransportAdapter::Error::NOT_SUPPORTED == ret) {
-#endif
       LOG4CXX_DEBUG(logger_, "Visibility change is not supported for adapter "
                     << *it << "[" << (*it)->GetDeviceType() << "]");
     }

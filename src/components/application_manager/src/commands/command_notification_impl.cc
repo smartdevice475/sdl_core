@@ -60,13 +60,8 @@ void CommandNotificationImpl::Run() {
 void CommandNotificationImpl::SendNotification() {
   (*message_)[strings::params][strings::protocol_type] = mobile_protocol_type_;
   (*message_)[strings::params][strings::protocol_version] = protocol_version_;
-#ifdef OS_WINCE
-  (*message_)[strings::params][strings::message_type] =
-	  static_cast<int32_t>(application_manager::kNotification);
-#else
   (*message_)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
-#endif
 
   LOG4CXX_INFO(logger_, "SendNotification");
   MessageHelper::PrintSmartObject(*message_);

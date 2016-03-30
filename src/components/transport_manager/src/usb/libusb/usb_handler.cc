@@ -432,7 +432,6 @@ TransportAdapter::Error UsbHandler::Init() {
     return TransportAdapter::FAIL;
   }
   return TransportAdapter::OK;
-#endif
 }
 
 void UsbHandler::Thread() {

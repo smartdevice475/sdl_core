@@ -36,6 +36,11 @@
 #include <stdint.h>
 #include <limits>
 
+#ifdef OS_WIN32
+#undef min
+#undef max
+#endif
+
 namespace utils {
 
 /**

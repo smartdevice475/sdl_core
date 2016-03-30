@@ -29,8 +29,6 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include "utils/file_system.h"
 #include "utils/logger.h"
 
 #if defined(OS_WIN32) || defined(OS_WINCE)
@@ -53,6 +51,8 @@
 #ifdef OS_WINCE
 #include "utils/global.h"
 #endif
+
+#include "utils/file_system.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 

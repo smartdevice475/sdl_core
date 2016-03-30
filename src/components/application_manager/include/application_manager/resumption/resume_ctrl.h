@@ -50,11 +50,10 @@
 #include "application_manager/event_engine/event_observer.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/application.h"
-#include "utils/timer_thread.h"
 #include "resumption_data.h"
+#include "utils/timer.h"
 
 namespace application_manager {
-class ApplicationManagerImpl;
 class Application;
 }
 
@@ -221,7 +220,7 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @return HMI app ID
    */
   uint32_t GetHMIApplicationID(const std::string& policy_app_id,
-                               const std::string& device_id) const;
+                               const std::string& device_mac) const;
   /**
    * @brief SaveDataOnTimer :
    *  Timer callback for persisting ResumptionData each N seconds
@@ -229,12 +228,6 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    */
   void SaveDataOnTimer();
 
-    /**
-     * @brief Timer callback function
-     *
-     */
-    void onTimer();
-	
   /**
    * @brief Updates flag for saving application data
    */
@@ -253,24 +246,6 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @brief Update launch_time_ to current
    */
   void ResetLaunchTime();
-
-  /**
-   * @brief IsLimitedAllowed return true if it is allowed to setup
-   * LIMITTED HmiLevel
-   * (if there are no app with the same type in FULL ot LIMITED))
-   * @return true if allowed otherwise false
-   */
-  bool IsLimitedAllowed();
-
-  /**
-   * @brief ResolveHMILevelConflicts found maximum allowed HMILevel
-   * @param application application to setup  hmi level
-   * @param hmi_level requested to setup
-   * @return maximum allowed HMILevel
-   */
-  mobile_apis::HMILevel::eType ResolveHMILevelConflicts(
-      app_mngr::ApplicationSharedPtr application,
-      const mobile_apis::HMILevel::eType hmi_level);
 
   /**
    * @brief Timer callback for  restoring HMI Level
@@ -298,6 +273,20 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * returns false
    */
   bool Init();
+
+  /**
+   * @brief Notify resume controller about new application
+   * @param policy_app_id - mobile application id
+   * @param device_id - id of device where application is run
+   */
+  void OnAppRegistrationStart(const std::string& policy_app_id,
+                                const std::string& device_id);
+
+  /**
+   * @brief Notify resume controller about delete new application
+   */
+  void OnAppRegistrationEnd();
+
  private:
 
   /**
@@ -450,11 +439,15 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
 
   void AddToResumptionTimerQueue(uint32_t app_id);
 
-  mobile_apis::HMILevel::eType IsHmiLevelFullAllowed(
-      app_mngr::ApplicationConstSharedPtr app);
-
   void LoadResumeData();
-  app_mngr::ApplicationManagerImpl* appMngr();
+
+  /**
+   * @brief Checks, if application data needs to be resumed
+   * @param application Application data from storage
+   * @return true, if data resumption must be skipped, otherwise - false
+   */
+  bool IsAppDataResumptionExpired(
+          const smart_objects::SmartObject& application) const;
 
   /**
    *@brief Mapping applications to time_stamps
@@ -462,16 +455,14 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    *
    */
   mutable sync_primitives::Lock   queue_lock_;
-  timer::TimerThread<ResumeCtrl>  restore_hmi_level_timer_;
-  timer::TimerThread<ResumeCtrl>  save_persistent_data_timer_;
+  timer::Timer restore_hmi_level_timer_;
+  timer::Timer save_persistent_data_timer_;
   typedef std::list<uint32_t>     WaitingForTimerList;
   WaitingForTimerList             waiting_for_timer_;
   bool                            is_resumption_active_;
   bool                            is_data_saved_;
   time_t                          launch_time_;
   utils::SharedPtr<ResumptionData>    resumption_storage_;
-  timer::TimerThread<ResumeCtrl>  timer_;
-  application_manager::ApplicationManagerImpl*         app_mngr_;
 };
 
 }  // namespace resumption

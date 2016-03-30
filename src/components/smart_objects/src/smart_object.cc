@@ -42,6 +42,11 @@
 #include <iterator>
 #include <limits>
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#undef min
+#undef max
+#endif
+
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 

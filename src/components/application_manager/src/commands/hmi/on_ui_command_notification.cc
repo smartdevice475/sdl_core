@@ -48,13 +48,8 @@ OnUICommandNotification::~OnUICommandNotification() {
 void OnUICommandNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-#ifdef OS_WINCE
-  (*message_)[strings::params][strings::function_id] =
-	  static_cast<int32_t>(mobile_apis::FunctionID::OnCommandID);
-#else
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::eType::OnCommandID);
-#endif
 
   (*message_)[strings::msg_params][strings::trigger_source] =
       static_cast<int32_t>(mobile_apis::TriggerSource::TS_MENU);

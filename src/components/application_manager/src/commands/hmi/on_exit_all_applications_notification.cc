@@ -108,11 +108,7 @@ void OnExitAllApplicationsNotification::SendOnSDLPersistenceComplete() {
       new smart_objects::SmartObject(smart_objects::SmartType_Map);
   (*message)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::BasicCommunication_OnSDLPersistenceComplete;
-#ifdef OS_WINCE
-  (*message)[strings::params][strings::message_type] = kNotification;
-#else
   (*message)[strings::params][strings::message_type] = MessageType::kNotification;
-#endif
   (*message)[strings::params][strings::correlation_id] =
       ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
 

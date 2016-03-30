@@ -40,6 +40,7 @@
 #include <unistd.h>
 #else
 #include <arpa/inet.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #include <sys/socket.h>
@@ -201,8 +202,8 @@ void SetKeepaliveOptions(const int fd) {
   int keepidle = 3;  // 3 seconds to disconnection detecting
   int keepcnt = 5;
   int keepintvl = 1;
-  int user_timeout = 7000;  // milliseconds
 #ifdef __linux__
+  int user_timeout = 7000;  // milliseconds
   setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(yes));
   setsockopt(fd, IPPROTO_TCP, TCP_KEEPIDLE, &keepidle, sizeof(keepidle));
   setsockopt(fd, IPPROTO_TCP, TCP_KEEPCNT, &keepcnt, sizeof(keepcnt));
@@ -237,6 +238,7 @@ void SetKeepaliveOptions(const int fd) {
   setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(yes));
   setsockopt(fd, IPPROTO_TCP, TCP_KEEPALIVE, &tval, sizeof(tval));
 #endif  // __QNX__
+#endif
 }
 
 void TcpClientListener::Loop() {
@@ -267,7 +269,7 @@ void TcpClientListener::Loop() {
 #ifdef OS_WINCE
 	  closesocket(connection_fd);
 #else
-	  close(connection_fd);
+      close(connection_fd);
 #endif
       continue;
     }

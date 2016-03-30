@@ -37,6 +37,7 @@
 
 #ifdef __QNX__
 #include <sys/siginfo.h>
+#elif defined(OS_WIN32) || defined(OS_WINCE)
 #else
 #include <signal.h>
 typedef sigval_t sigval;
@@ -47,6 +48,30 @@ typedef sigval_t sigval;
 
 #include "utils/lock.h"
 #include "utils/timer_task.h"
+
+#if defined(OS_WIN32) || defined(OS_WINCE)
+//struct timespec {
+//    long tv_sec;  /* seconds */
+//    long tv_nsec; /* nanoseconds */
+//};
+//struct timeval {
+//    int tv_sec;   /* seconds */
+//    int tv_usec;  /* microseconds */
+//};
+struct itimerspec {
+    struct timespec it_interval; /* timer period */
+    struct timespec it_value;    /* timer expiration */
+};
+struct itimerval {
+    //struct timeval it_interval; /* timer interval */
+    //struct timeval it_value;    /* current value */
+};
+typedef union sigval {
+    int  sival_int;
+    void *sival_ptr;
+}sigval_t;
+typedef uint32_t timer_t;
+#endif
 
 namespace timer {
 typedef uint32_t Milliseconds;

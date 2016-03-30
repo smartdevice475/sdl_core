@@ -65,11 +65,7 @@ void ResponseFromHMI::Run() {
 }
 
 void ResponseFromHMI::SendResponseToMobile(const MessageSharedPtr& message) {
-#ifdef OS_WINCE
-  (*message)[strings::params][strings::message_type] = kResponse;
-#else
   (*message)[strings::params][strings::message_type] = MessageType::kResponse;
-#endif
 
   ApplicationManagerImpl::instance()->ManageMobileCommand(message);
 }
@@ -90,11 +86,7 @@ void ResponseFromHMI::CreateHMIRequest(
       ->GetNextHMICorrelationID();
 
   NsSmartDeviceLink::NsSmartObjects::SmartObject& request = *result;
-#ifdef OS_WINCE
-  request[strings::params][strings::message_type] = kRequest;
-#else
   request[strings::params][strings::message_type] = MessageType::kRequest;
-#endif
   request[strings::params][strings::function_id] = function_id;
   request[strings::params][strings::correlation_id] = hmi_correlation_id_;
   request[strings::params][strings::protocol_version] =

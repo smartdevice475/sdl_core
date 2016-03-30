@@ -289,15 +289,15 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
                         std::max(ui_result_, tts_result_));
       }
     } else {
-		result_code = static_cast<mobile_apis::Result::eType>(
-			std::max(ui_result_, tts_result_));
+      result_code = static_cast<mobile_apis::Result::eType>(
+                      std::max(ui_result_, tts_result_));
     }
 
     SendResponse(result, static_cast<mobile_apis::Result::eType>(result_code),
                  return_info, &(message[strings::msg_params]));
 
     if (!application) {
-      LOG4CXX_DEBUG(logger_, "NULL pointer");
+      LOG4CXX_ERROR(logger_, "NULL pointer");
       return;
     }
 

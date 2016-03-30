@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -40,16 +40,16 @@
 #include <stdint.h>
 
 #include "utils/macro.h"
-#include "utils/lock.h"
 
 namespace sync_primitives {
 class AutoLock;
+class Lock;
 
 namespace impl {
 #if defined(OS_POSIX) || defined(OS_WIN32) || defined(OS_WINCE)
 typedef pthread_cond_t PlatformConditionalVariable;
 #endif
-} // namespace impl
+}  // namespace impl
 
 /*
  * Conditional variable wrapper

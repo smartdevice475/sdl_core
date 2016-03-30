@@ -40,7 +40,7 @@ namespace application_manager {
 
 namespace request_controller {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "RequestController");
+CREATE_LOGGERPTR_GLOBAL(logger_, "RequestController")
 
 uint32_t RequestInfo::HmiConnectoinKey = 0;
 
@@ -93,11 +93,7 @@ RequestInfo::RequestInfo(RequestPtr request,
 
 void application_manager::request_controller::RequestInfo::updateEndTime() {
   end_time_ = date_time::DateTime::getCurrentTime();
-#if defined(OS_WIN32) || defined(OS_WINCE)
-  date_time::DateTime::AddMilliseconds( end_time_, timeout_msec_ * date_time::DateTime::MILLISECONDS_IN_SECOND  );
-#else
-  date_time::DateTime::AddMilliseconds(end_time_, timeout_msec_);
-#endif
+  date_time::DateTime::AddMilliseconds( end_time_, timeout_msec_  );
 }
 
 void RequestInfo::updateTimeOut(const uint64_t& timeout_msec)  {
@@ -107,7 +103,6 @@ void RequestInfo::updateTimeOut(const uint64_t& timeout_msec)  {
 
 bool RequestInfo::isExpired() {
   TimevalStruct curr_time = date_time::DateTime::getCurrentTime();
-  LOG4CXX_DEBUG(logger_, "end_time_ = " << date_time::DateTime::getmSecs(end_time_) << ", curr_time = " << date_time::DateTime::getmSecs(curr_time));
   return date_time::DateTime::getmSecs(end_time_) <=  date_time::DateTime::getmSecs(curr_time);
 }
 

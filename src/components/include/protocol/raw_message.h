@@ -54,17 +54,10 @@ class RawMessage {
    * \param dataSize Message size
    * \param payload_size Received data size
    */
-#ifdef OS_WINCE
-  RawMessage(uint32_t connection_key, uint32_t protocol_version,
-             const uint8_t *const data_param, uint32_t data_size,
-             uint8_t type = kRpc,
-             uint32_t payload_size = 0);
-#else
   RawMessage(uint32_t connection_key, uint32_t protocol_version,
              const uint8_t *const data_param, uint32_t data_size,
              uint8_t type = ServiceType::kRpc,
              uint32_t payload_size = 0);
-#endif
   /**
    * \brief Destructor
    */

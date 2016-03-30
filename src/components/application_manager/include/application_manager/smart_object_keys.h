@@ -412,7 +412,7 @@ const char templates_available[] = "templatesAvailable";
 const char screen_params[] = "screenParams";
 const char num_custom_presets_available[] = "numCustomPresetsAvailable";
 const char urls[] = "urls";
-const char policy_app_id[] = "policyAppId";
+const char policy_app_id[] = "policyAppID";
 const char enabled[] = "enabled";
 
 }  // namespace hmi_response
@@ -427,6 +427,8 @@ const char statistic_type[] = "statisticType";
 const char error[] = "error";
 const char policyfile[] = "policyfile";
 const char is_active[] = "isActive";
+const char is_deactivated[] = "isDeactivated";
+const char event_name[] = "eventName";
 
 }  // namespace hmi_notification
 

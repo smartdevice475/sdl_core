@@ -43,7 +43,7 @@
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 namespace application_manager {
 
-class AMMetricObserver {
+class AMTelemetryObserver {
  public:
   struct MessageMetric {
     TimevalStruct begin;
@@ -53,7 +53,7 @@ class AMMetricObserver {
   typedef utils::SharedPtr<MessageMetric> MessageMetricSharedPtr;
 
   virtual void OnMessage(MessageMetricSharedPtr) = 0;
-  virtual ~AMMetricObserver(){}
+  virtual ~AMTelemetryObserver(){}
 };
 }  // application_manager
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_USAGE_STATISTICS_H_
