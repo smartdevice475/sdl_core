@@ -39,6 +39,11 @@
 #include "utils/lock.h"
 #include "utils/date_time.h"
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#undef min
+#undef max
+#endif
+
 namespace protocol_handler {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")

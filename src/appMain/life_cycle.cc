@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2014, Ford Motor Company
+* Copyright (c) 2016, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -32,12 +32,14 @@
 
 #include "life_cycle.h"
 #include "utils/signals.h"
+#include "utils/make_shared.h"
 #include "config_profile/profile.h"
 #include "resumption/last_state.h"
 
 #ifdef ENABLE_SECURITY
 #include "security_manager/security_manager_impl.h"
 #include "security_manager/crypto_manager_impl.h"
+#include "security_manager/crypto_manager_settings_impl.h"
 #include "application_manager/policies/policy_handler.h"
 #endif  // ENABLE_SECURITY
 
@@ -77,9 +79,9 @@ LifeCycle::LifeCycle()
     , hmi_handler_(NULL)
     , hmi_message_adapter_(NULL)
     , media_manager_(NULL)
-#ifdef TIME_TESTER
-    , time_tester_(NULL)
-#endif  // TIME_TESTER
+#ifdef TELEMETRY_MONITOR
+    , telemetry_monitor_(NULL)
+#endif  // TELEMETRY_MONITOR
 #ifdef DBUS_HMIADAPTER
     , dbus_adapter_(NULL)
     , dbus_adapter_thread_(NULL)
@@ -92,122 +94,60 @@ LifeCycle::LifeCycle()
     , mb_server_thread_(NULL)
     , mb_adapter_thread_(NULL)
 #endif  // MESSAGEBROKER_HMIADAPTER
-#if defined(OS_WIN32) || defined(OS_WINCE)
-  , components_started_(false)
-#endif
-{ }
+{
+}
 
 bool LifeCycle::StartComponents() {
   LOG4CXX_AUTO_TRACE(logger_);
-  transport_manager_ =
-    transport_manager::TransportManagerDefault::instance();
-  DCHECK(transport_manager_ != NULL);
 
+  DCHECK(!transport_manager_);
+  transport_manager_ = transport_manager::TransportManagerDefault::instance();
+  DCHECK(transport_manager_);
+
+  DCHECK(!connection_handler_);
+  connection_handler_ = new connection_handler::ConnectionHandlerImpl(
+                          *profile::Profile::instance(),
+                          *transport_manager_);
+  DCHECK(connection_handler_);
+
+  DCHECK(!protocol_handler_);
   protocol_handler_ =
-    new protocol_handler::ProtocolHandlerImpl(transport_manager_,
-                                              profile::Profile::instance()->message_frequency_time(),
-                                              profile::Profile::instance()->message_frequency_count(),
-                                              profile::Profile::instance()->malformed_message_filtering(),
-                                              profile::Profile::instance()->malformed_frequency_time(),
-                                              profile::Profile::instance()->malformed_frequency_count());
-  DCHECK(protocol_handler_ != NULL);
+      new protocol_handler::ProtocolHandlerImpl(*(profile::Profile::instance()),
+                                                *connection_handler_,
+                                                *connection_handler_,
+                                                *transport_manager_);
+  DCHECK(protocol_handler_);
 
-  connection_handler_ =
-    connection_handler::ConnectionHandlerImpl::instance();
-  DCHECK(connection_handler_ != NULL);
+  DCHECK(!app_manager_);
+  app_manager_ = application_manager::ApplicationManagerImpl::instance();
+  DCHECK(app_manager_);
 
-  app_manager_ =
-    application_manager::ApplicationManagerImpl::instance();
-  DCHECK(app_manager_ != NULL);
   if (!app_manager_->Init()) {
     LOG4CXX_ERROR(logger_, "Application manager init failed.");
     return false;
   }
 
-  hmi_handler_ =
-    hmi_message_handler::HMIMessageHandlerImpl::instance();
-  DCHECK(hmi_handler_ != NULL)
+  DCHECK(!hmi_handler_)
+  hmi_handler_ = new hmi_message_handler::HMIMessageHandlerImpl(
+        *(profile::Profile::instance()));
+  DCHECK(hmi_handler_)
 
 #ifdef ENABLE_SECURITY
-
-
   security_manager_ = new security_manager::SecurityManagerImpl();
+  crypto_manager_ = new security_manager::CryptoManagerImpl(
+        utils::MakeShared<security_manager::CryptoManagerSettingsImpl>(
+          *(profile::Profile::instance()),
+          policy::PolicyHandler::instance()->RetrieveCertificate()));
+  protocol_handler_->AddProtocolObserver(security_manager_);
+  protocol_handler_->set_security_manager(security_manager_);
 
-  // FIXME(EZamakhov): move to Config or in Sm initialization method
-  std::string cert_filename;
-  profile::Profile::instance()->ReadStringValue(
-      &cert_filename,
-      "",
-      security_manager::SecurityManagerImpl::ConfigSection(),
-      "CertificatePath");
+  security_manager_->set_session_observer(connection_handler_);
+  security_manager_->set_protocol_handler(protocol_handler_);
+  security_manager_->set_crypto_manager(crypto_manager_);
+  security_manager_->AddListener(app_manager_);
 
-  std::string ssl_mode;
-  profile::Profile::instance()->ReadStringValue(
-      &ssl_mode,
-      "CLIENT",
-      security_manager::SecurityManagerImpl::ConfigSection(),
-      "SSLMode");
-  crypto_manager_ = new security_manager::CryptoManagerImpl();
-
-  std::string key_filename;
-  profile::Profile::instance()->ReadStringValue(
-      &key_filename,
-      "",
-      security_manager::SecurityManagerImpl::ConfigSection(),
-      "KeyPath");
-
-  std::string ciphers_list;
-  profile::Profile::instance()->ReadStringValue(
-      &ciphers_list,
-      SSL_TXT_ALL,
-      security_manager::SecurityManagerImpl::ConfigSection(),
-      "CipherList");
-
-  bool verify_peer;
-  profile::Profile::instance()->ReadBoolValue(
-      &verify_peer,
-      false,
-      security_manager::SecurityManagerImpl::ConfigSection(),
-      "VerifyPeer");
-
-  std::string protocol_name;
-  profile::Profile::instance()->ReadStringValue(
-      &protocol_name, "TLSv1.2", security_manager::SecurityManagerImpl::ConfigSection(), "Protocol");
-
-  security_manager::Protocol protocol;
-  if (protocol_name == "TLSv1.0") {
-    protocol = security_manager::TLSv1;
-  } else if (protocol_name == "TLSv1.1") {
-    protocol = security_manager::TLSv1_1;
-  } else if (protocol_name == "TLSv1.2") {
-    protocol = security_manager::TLSv1_2;
-  } else if (protocol_name == "SSLv3") {
-    protocol = security_manager::SSLv3;
-  } else {
-    LOG4CXX_ERROR(logger_, "Unknown protocol: " << protocol_name);
-    return false;
-  }
-
-#ifdef MODIFY_FUNCTION_SIGN
-  if (!crypto_manager_->Init(
-      ssl_mode == "SERVER" ? security_manager::SERVER : security_manager::CLIENT,
-          protocol,
-          cert_filename,
-          key_filename,
-          ciphers_list,
-          verify_peer)
-		  ) {
-#else
-  if (!crypto_manager_->Init(
-        ssl_mode == "SERVER" ? security_manager::SERVER : security_manager::CLIENT,
-        protocol,
-        policy::PolicyHandler::instance()->RetrieveCertificate(),
-        profile::Profile::instance()->ciphers_list(),
-        profile::Profile::instance()->verify_peer(),
-        profile::Profile::instance()->ca_cert_path(),
-        profile::Profile::instance()->update_before_hours())
-        ) {
-#endif
+  app_manager_->AddPolicyObserver(crypto_manager_);
+  if (!crypto_manager_->Init()) {
     LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
     return false;
   }
@@ -220,52 +160,38 @@ bool LifeCycle::StartComponents() {
 
   media_manager_ = media_manager::MediaManagerImpl::instance();
 
-  protocol_handler_->set_session_observer(connection_handler_);
   protocol_handler_->AddProtocolObserver(media_manager_);
   protocol_handler_->AddProtocolObserver(app_manager_);
-#ifdef ENABLE_SECURITY
-  protocol_handler_->AddProtocolObserver(security_manager_);
-  protocol_handler_->set_security_manager(security_manager_);
-#endif  // ENABLE_SECURITY
+
   media_manager_->SetProtocolHandler(protocol_handler_);
 
-  connection_handler_->set_transport_manager(transport_manager_);
   connection_handler_->set_protocol_handler(protocol_handler_);
   connection_handler_->set_connection_handler_observer(app_manager_);
 
-// it is important to initialise TimeTester before TM to listen TM Adapters
-#ifdef TIME_TESTER
-  time_tester_ = new time_tester::TimeManager();
-  time_tester_->Init(protocol_handler_);
-#endif  // TIME_TESTER
+// it is important to initialise TelemetryMonitor before TM to listen TM Adapters
+#ifdef TELEMETRY_MONITOR
+  telemetry_monitor_ = new telemetry_monitor::TelemetryMonitor(profile::Profile::instance()->server_address(),
+                                              profile::Profile::instance()->time_testing_port());
+  telemetry_monitor_->Start();
+  telemetry_monitor_->Init(protocol_handler_, app_manager_, transport_manager_);
+#endif  // TELEMETRY_MONITOR
   // It's important to initialise TM after setting up listener chain
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
   app_manager_->set_protocol_handler(protocol_handler_);
   app_manager_->set_connection_handler(connection_handler_);
   app_manager_->set_hmi_message_handler(hmi_handler_);
 
-#ifdef ENABLE_SECURITY
-  security_manager_->set_session_observer(connection_handler_);
-  security_manager_->set_protocol_handler(protocol_handler_);
-  security_manager_->AddListener(app_manager_);
-  security_manager_->set_crypto_manager(crypto_manager_);
-  app_manager_->AddPolicyObserver(crypto_manager_);
-#endif  // ENABLE_SECURITY
-
   transport_manager_->Init();
   // start transport manager
   transport_manager_->Visibility(true);
 
-#if defined(OS_WIN32) || defined(OS_WINCE)
-  components_started_ = true;
-#endif
   return true;
 }
 
 #ifdef MESSAGEBROKER_HMIADAPTER
 bool LifeCycle::InitMessageSystem() {
-  message_broker_ =
-    NsMessageBroker::CMessageBroker::getInstance();
+  DCHECK(!message_broker_)
+  message_broker_ = NsMessageBroker::CMessageBroker::getInstance();
   if (!message_broker_) {
     LOG4CXX_FATAL(logger_, " Wrong pMessageBroker pointer!");
     return false;
@@ -300,16 +226,15 @@ bool LifeCycle::InitMessageSystem() {
   }
 
   mb_adapter_ = new hmi_message_handler::MessageBrokerAdapter(
-    hmi_message_handler::HMIMessageHandlerImpl::instance(),
-    profile::Profile::instance()->server_address(),
-    profile::Profile::instance()->server_port());
+      hmi_handler_,
+      profile::Profile::instance()->server_address(),
+      profile::Profile::instance()->server_port());
 
-    hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
-    mb_adapter_);
-    if (!mb_adapter_->Connect()) {
-      LOG4CXX_FATAL(logger_, "Cannot connect to remote peer!");
-      return false;
-    }
+  hmi_handler_->AddHMIMessageAdapter(mb_adapter_);
+  if (!mb_adapter_->Connect()) {
+    LOG4CXX_FATAL(logger_, "Cannot connect to remote peer!");
+    return false;
+  }
 
   LOG4CXX_INFO(logger_, "Start CMessageBroker thread!");
   mb_thread_ = new System::Thread(
@@ -427,20 +352,13 @@ namespace {
         break;
       case SIGSEGV:
         LOG4CXX_DEBUG(logger_, "SIGSEGV signal has been caught");
-        break;
+        FLUSH_LOGGER();
+        // exit need to prevent endless sending SIGSEGV
+        // http://stackoverflow.com/questions/2663456/how-to-write-a-signal-handler-to-catch-sigsegv
+        abort();
       default:
         LOG4CXX_DEBUG(logger_, "Unexpected signal has been caught");
-        break;
-    }
-    /*
-     * Resend signal to the main thread in case it was
-     * caught by another thread
-     */
-    if(pthread_equal(pthread_self(), main_thread) == 0) {
-      LOG4CXX_DEBUG(logger_, "Resend signal to the main thread");
-      if(pthread_kill(main_thread, sig) != 0) {
-        LOG4CXX_FATAL(logger_, "Send signal to thread error");
-      }
+        exit(EXIT_FAILURE);
     }
   }
 #endif
@@ -449,7 +367,6 @@ namespace {
 
 void LifeCycle::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  main_thread = pthread_self();
 #if defined(OS_WIN32)
   if (!SetConsoleCtrlHandler(HandlerRoutine, TRUE))
   {
@@ -458,70 +375,66 @@ void LifeCycle::Run() {
   }
 #elif defined(OS_WINCE)
 #else
-  // First, register signal handlers
-  if(!::utils::SubscribeToInterruptSignal(&sig_handler) ||
-     !::utils::SubscribeToTerminateSignal(&sig_handler) ||
-     !::utils::SubscribeToFaultSignal(&sig_handler)) {
-    LOG4CXX_FATAL(logger_, "Subscribe to system signals error");
+  // Register signal handlers and wait sys signals
+  // from OS
+  if (!utils::WaitTerminationSignals(&sig_handler)) {
+      LOG4CXX_FATAL(logger_, "Fail to catch system signal!");
   }
-#endif
-  // Now wait for any signal
-#if defined(OS_WIN32) || defined(OS_WINCE)
-  Sleep(INFINITE);
-#else
-  pause();
 #endif
 }
 
-
 void LifeCycle::StopComponents() {
-#if defined(OS_WIN32) || defined(OS_WINCE)
-  if (!components_started_) {
-    LOG4CXX_TRACE(logger_, "exit");
-    LOG4CXX_ERROR(logger_, "Components wasn't started");
-    return;
-  }
-#else
   LOG4CXX_AUTO_TRACE(logger_);
-#endif
+
+  DCHECK_OR_RETURN_VOID(hmi_handler_);
   hmi_handler_->set_message_observer(NULL);
+
+  DCHECK_OR_RETURN_VOID(connection_handler_);
   connection_handler_->set_connection_handler_observer(NULL);
+
+  DCHECK_OR_RETURN_VOID(protocol_handler_);
   protocol_handler_->RemoveProtocolObserver(app_manager_);
+
+  DCHECK_OR_RETURN_VOID(app_manager_);
   app_manager_->Stop();
 
   LOG4CXX_INFO(logger_, "Stopping Protocol Handler");
+  DCHECK_OR_RETURN_VOID(protocol_handler_);
   protocol_handler_->RemoveProtocolObserver(media_manager_);
+
 #ifdef ENABLE_SECURITY
   protocol_handler_->RemoveProtocolObserver(security_manager_);
-  security_manager_->RemoveListener(app_manager_);
+  if (security_manager_) {
+    security_manager_->RemoveListener(app_manager_);
+    LOG4CXX_INFO(logger_, "Destroying Crypto Manager");
+    delete crypto_manager_;
+    LOG4CXX_INFO(logger_, "Destroying Security Manager");
+    delete security_manager_;
+  }
 #endif  // ENABLE_SECURITY
   protocol_handler_->Stop();
 
   LOG4CXX_INFO(logger_, "Destroying Media Manager");
+  DCHECK_OR_RETURN_VOID(media_manager_);
   media_manager_->SetProtocolHandler(NULL);
   media_manager::MediaManagerImpl::destroy();
 
   LOG4CXX_INFO(logger_, "Destroying Transport Manager.");
+  DCHECK_OR_RETURN_VOID(transport_manager_);
   transport_manager_->Visibility(false);
   transport_manager_->Stop();
   transport_manager::TransportManagerDefault::destroy();
 
   LOG4CXX_INFO(logger_, "Stopping Connection Handler.");
-  connection_handler::ConnectionHandlerImpl::instance()->Stop();
+  DCHECK_OR_RETURN_VOID(connection_handler_);
+  connection_handler_->Stop();
 
   LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
+  DCHECK_OR_RETURN_VOID(protocol_handler_);
   delete protocol_handler_;
 
   LOG4CXX_INFO(logger_, "Destroying Connection Handler.");
-  connection_handler::ConnectionHandlerImpl::destroy();
-
-#ifdef ENABLE_SECURITY
-  LOG4CXX_INFO(logger_, "Destroying Crypto Manager");
-  delete crypto_manager_;
-
-  LOG4CXX_INFO(logger_, "Destroying Security Manager");
-  delete security_manager_;
-#endif  // ENABLE_SECURITY
+  delete connection_handler_;
 
   LOG4CXX_INFO(logger_, "Destroying Last State");
   resumption::LastState::destroy();
@@ -547,23 +460,20 @@ void LifeCycle::StopComponents() {
 #endif  // DBUS_HMIADAPTER
 
 #ifdef MESSAGEBROKER_HMIADAPTER
-  if (mb_adapter_) {
-    hmi_handler_->RemoveHMIMessageAdapter(mb_adapter_);
-    mb_adapter_->unregisterController();
-    mb_adapter_->exitReceivingThread();
-    if (mb_adapter_thread_) {
-      mb_adapter_thread_->Stop();
-      mb_adapter_thread_->Join();
-      delete mb_adapter_thread_;
-    }
-    delete mb_adapter_;
+  DCHECK_OR_RETURN_VOID(mb_adapter_);
+  hmi_handler_->RemoveHMIMessageAdapter(mb_adapter_);
+  mb_adapter_->unregisterController();
+  mb_adapter_->exitReceivingThread();
+  if (mb_adapter_thread_) {
+    mb_adapter_thread_->Stop();
+    mb_adapter_thread_->Join();
+    delete mb_adapter_thread_;
   }
-  hmi_message_handler::HMIMessageHandlerImpl::destroy();
+  delete mb_adapter_;
 
-#endif  // MESSAGEBROKER_HMIADAPTER
+  DCHECK_OR_RETURN_VOID(hmi_handler_);
+  delete hmi_handler_;
 
-
-#ifdef MESSAGEBROKER_HMIADAPTER
   LOG4CXX_INFO(logger_, "Destroying Message Broker");
   if (mb_server_thread_) {
     mb_server_thread_->Stop();
@@ -590,18 +500,14 @@ void LifeCycle::StopComponents() {
   delete hmi_message_adapter_;
   hmi_message_adapter_ = NULL;
 
-#ifdef TIME_TESTER
+#ifdef TELEMETRY_MONITOR
   // It's important to delete tester Obcervers after TM adapters destruction
-  if (time_tester_) {
-    time_tester_->Stop();
-    delete time_tester_;
-    time_tester_ = NULL;
+  if (telemetry_monitor_) {
+    telemetry_monitor_->Stop();
+    delete telemetry_monitor_;
+    telemetry_monitor_ = NULL;
   }
-#endif  // TIME_TESTER
-#if defined(OS_WIN32) || defined(OS_WINCE)
-  components_started_ = false;
-  LOG4CXX_TRACE(logger_, "exit");
-#endif
+#endif  // TELEMETRY_MONITOR
 }
 
 }  //  namespace main_namespace

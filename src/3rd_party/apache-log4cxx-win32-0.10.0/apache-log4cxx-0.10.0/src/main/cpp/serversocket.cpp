@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- #ifdef OS_WINCE
+#if defined(OS_WINCE) || defined(OS_WIN32)
 #include <stdlib.h>
 #endif
 #include <log4cxx/helpers/serversocket.h>

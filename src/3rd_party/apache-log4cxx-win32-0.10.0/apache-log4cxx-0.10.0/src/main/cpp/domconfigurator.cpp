@@ -43,7 +43,7 @@
 #include <log4cxx/rolling/rollingfileappender.h>
 #include <log4cxx/rolling/filterbasedtriggeringpolicy.h>
 
-#ifdef OS_WINCE
+#if  defined(OS_WINCE) || defined(OS_WIN32)
 #include "../../../../apr-util/include/apr_xml.h"
 #else
 #include <apr_xml.h>

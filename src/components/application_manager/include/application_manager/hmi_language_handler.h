@@ -35,6 +35,7 @@
 
 #include "application_manager/event_engine/event_observer.h"
 #include "interfaces/HMI_API.h"
+#include "utils/lock.h"
 
 namespace application_manager {
 

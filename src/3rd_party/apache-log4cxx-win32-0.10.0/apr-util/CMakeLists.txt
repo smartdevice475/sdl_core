@@ -57,15 +57,16 @@ buckets/apr_buckets.c
 
 )
 
+add_subdirectory(./xml/expat/)
 
+add_definitions(-DAPR_DECLARE_STATIC)
+add_definitions(-DAPU_DECLARE_STATIC)
 
 add_library("aprutil-1" ${APR_UTIL_SOURCES})
 
-add_subdirectory(./xml/expat/)
-target_link_libraries("aprutil-1" expat)
-
-if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-#target_link_libraries(${PROJECT} ${LIBRARIES})
-#link_library
-#target_link_libraries("lib_msp_vr"  ${soxr-lsr})
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+#list(APPEND LIBRARIES ws2_32 odbc32 kernel32 ) 
 endif()
+
+target_link_libraries("aprutil-1" expat )
+

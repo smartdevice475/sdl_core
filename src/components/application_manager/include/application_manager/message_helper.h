@@ -317,6 +317,16 @@ class MessageHelper {
        const hmi_apis::Common_HMILevel::eType level,
        const bool send_policy_priority = true);
 
+    static void SendDeleteInteractionChoiseSetNotificationToHMI(ApplicationConstSharedPtr app);
+    static void SendUnsubscribeButtonNotificationToHMI(ApplicationConstSharedPtr app);
+    static void SendVRStatusToHMI(const std::string &status);
+    static void SendVRCancelToHMI();
+    static void SendVRCommandHelpToHMI(const std::string &vr_content);
+    static void SendVRExitAppToHMI();
+    static void SendVRSwitchAppToHMI(int app_id, const std::string &app_vr_name);
+    static void SendVRCommandTTSToHMI();
+    static void SendVRResultToHMI(int cmd_id, const std::string &vr_name);
+    static void SendVROnCommandToMobile(int cmd_id, int app_id);
   static void SendOnResumeAudioSourceToHMI(const uint32_t app_id);
 
   /**

@@ -9,6 +9,7 @@ include_directories (
 )
 
 
+
 set (APR_SOURCES
    user/win32/userinfo.c
 user/win32/groupinfo.c
@@ -79,13 +80,12 @@ atomic/win32/apr_atomic.c
 
 )
 
-
+add_definitions(-DAPR_DECLARE_STATIC)
+add_definitions(-DAPU_DECLARE_STATIC)
 
 add_library("apr-1" ${APR_SOURCES})
-
-target_link_libraries("apr-1"  winsock coredll)
-if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-#target_link_libraries(${PROJECT} ${LIBRARIES})
-#link_library
-#target_link_libraries("lib_msp_vr"  ${soxr-lsr})
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+#list(APPEND LIBRARIES  ws2_32 odbc32 kernel32)
 endif()
+#target_link_libraries("apr-1"  ${LIBRARIES})
+

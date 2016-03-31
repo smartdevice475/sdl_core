@@ -404,7 +404,7 @@ typedef  int         gid_t;
 #define APR_THREAD_FUNC  __stdcall
 
 
-#if defined(DOXYGEN) || !defined(WIN32) || defined(OS_WINCE)
+#if defined(DOXYGEN) || !defined(WIN32) 
 
 /**
  * The public APR functions are declared with APR_DECLARE(), so they may

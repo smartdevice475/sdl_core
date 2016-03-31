@@ -71,17 +71,6 @@ int get_rand_from_range(uint32_t from = 0, int to = RAND_MAX) {
 namespace application_manager {
 
 namespace {
-#ifdef OS_WINCE
-  const DeviceTypes::value_type rawData[] = {
-    std::make_pair(std::string("USB_AOA"), hmi_apis::Common_TransportType::USB_AOA),
-    std::make_pair(std::string("USB_IOS"), hmi_apis::Common_TransportType::USB_IOS),
-    std::make_pair(std::string("BLUETOOTH"), hmi_apis::Common_TransportType::BLUETOOTH),
-    std::make_pair(std::string("WIFI"), hmi_apis::Common_TransportType::WIFI)
-  };
-  const int numElems = sizeof(rawData) / sizeof(rawData[0]);
-  DeviceTypes devicesType(rawData, rawData + numElems);
-}
-#else
 DeviceTypes devicesType = {
     std::make_pair(std::string("USB_AOA"),
                    hmi_apis::Common_TransportType::USB_AOA),
@@ -91,7 +80,6 @@ DeviceTypes devicesType = {
                    hmi_apis::Common_TransportType::BLUETOOTH),
     std::make_pair(std::string("WIFI"), hmi_apis::Common_TransportType::WIFI)};
 }
-#endif
 
 
 uint32_t ApplicationManagerImpl::corelation_id_ = 0;
@@ -151,10 +139,11 @@ ApplicationManagerImpl::ApplicationManagerImpl()
   std::srand(std::time(0));
   AddPolicyObserver(this);
 
-#ifdef OS_WINCE
-	dir_type_to_string_map_.insert(std::make_pair(TYPE_STORAGE, "Storage"));
-	dir_type_to_string_map_.insert(std::make_pair(TYPE_SYSTEM, "System"));
-	dir_type_to_string_map_.insert(std::make_pair(TYPE_ICONS, "Icons"));
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  dir_type_to_string_map_.clear();
+  dir_type_to_string_map_.insert(std::make_pair(TYPE_STORAGE, "Storage"));
+  dir_type_to_string_map_.insert(std::make_pair(TYPE_SYSTEM, "System"));
+  dir_type_to_string_map_.insert(std::make_pair(TYPE_ICONS, "Icons"));
 #else
   dir_type_to_string_map_ = {{TYPE_STORAGE, "Storage"},
                              {TYPE_SYSTEM, "System"},

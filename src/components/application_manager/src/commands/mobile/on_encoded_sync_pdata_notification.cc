@@ -39,6 +39,8 @@
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 #include "encryption/Base64.h"
+#include "utils/make_shared.h"
+#include "utils/timer_task_impl.h"
 
 namespace application_manager {
 
@@ -47,7 +49,8 @@ namespace commands {
 OnEncodedSyncPDataNotification::OnEncodedSyncPDataNotification(
     const MessageSharedPtr& message)
  : CommandResponseImpl(message),
-   timer_("", this, &OnEncodedSyncPDataNotification::onTimer) {
+ timer_("", new timer::TimerTaskImpl<OnEncodedSyncPDataNotification>(
+        this, &OnEncodedSyncPDataNotification::onTimer)) {
 }
 
 OnEncodedSyncPDataNotification::~OnEncodedSyncPDataNotification() {
@@ -72,7 +75,7 @@ void OnEncodedSyncPDataNotification::Run() {
   const char* timeout = mobile_notification::syncp_timeout;
   if ((*message_)[strings::msg_params].keyExists(timeout)) {
     ApplicationManagerImpl::instance()->addNotification(this);
-    timer_.start((*message_)[strings::msg_params][timeout].asInt());
+    timer_.Start((*message_)[strings::msg_params][timeout].asInt(), true);
   } else {
     SendEncodedPData();
   }

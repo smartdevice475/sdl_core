@@ -1,4 +1,11 @@
 
+add_definitions(-DLOG4CXX_STATIC)
+add_definitions(-DAPR_DECLARE_STATIC)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  add_definitions(-DHAVE_STRING_H)
+ # add_definitions(-D_WINDOWS_)
+endif()
 
 include_directories (
 ../
@@ -162,9 +169,17 @@ src/main/cpp/appenderattachableimpl.cpp
 )
 
 
+add_definitions(-DAPR_DECLARE_STATIC)
+add_definitions(-DAPU_DECLARE_STATIC)
 
-add_library("log4cxx"  ${LOG4CXX_SOURCES})
+add_library("log4cxx"  ${LOG4CXX_SOURCES} ${APR_UTIL_SOURCES} ${APR_SOURCES} ${EXPAT_SOURCES})
 #add_executable("log4cxx" ${LOG4CXX_SOURCES})
+#
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+list(APPEND LIBRARIES apr-1 aprutil-1 expat ws2_32 wsock32 rpcrt4 advapi32 odbc32 kernel32)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+list(APPEND LIBRARIES  winsock coredll)
+endif()
 
-target_link_libraries("log4cxx"   apr-1 aprutil-1 expat winsock)
+target_link_libraries("log4cxx"  apr-1 aprutil-1 expat  ${LIBRARIES})
 

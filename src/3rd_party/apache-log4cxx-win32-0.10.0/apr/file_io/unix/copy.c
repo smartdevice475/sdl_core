@@ -17,7 +17,7 @@
 #include "apr_arch_file_io.h"
 #include "apr_file_io.h"
 
-#ifdef OS_WINCE
+#if defined(OS_WINCE) || defined(OS_WIN32)
 #define BUFSIZ   120
 #endif
 

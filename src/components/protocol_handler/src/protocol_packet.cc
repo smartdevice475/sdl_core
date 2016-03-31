@@ -146,7 +146,7 @@ size_t ProtocolPacket::ProtocolHeaderValidator::max_payload_size() const {
 
 RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
     const ProtocolHeader& header) const {
-  LOG4CXX_DEBUG(logger_, "Validating header - " << header);
+  LOG4CXX_DEBUG(logger_, "Validating header - " << header.sessionId);
   // expected payload size will be calculated depending
   // on used protocol version
   size_t payload_size = MAXIMUM_FRAME_DATA_V2_SIZE;

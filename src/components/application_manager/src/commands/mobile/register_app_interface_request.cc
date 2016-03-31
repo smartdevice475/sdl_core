@@ -158,6 +158,16 @@ void RegisterAppInterfaceRequest::Run() {
   while (ApplicationManagerImpl::exists() &&
          !ApplicationManagerImpl::instance()->IsStopping() &&
          !ApplicationManagerImpl::instance()->IsHMICooperating()) {
+#if defined(OS_WIN32) || defined(OS_WINCE)
+    LOG4CXX_DEBUG(logger_,
+                  "Waiting for the HMI... conn_key=" << connection_key()
+                                                     << ", correlation_id="
+                                                     << correlation_id()
+                                                     << ", default_timeout="
+                                                     << default_timeout()
+                                                     << ", thread="
+                                                     << pthread_self().p);
+#else
     LOG4CXX_DEBUG(logger_,
                   "Waiting for the HMI... conn_key=" << connection_key()
                                                      << ", correlation_id="
@@ -166,6 +176,7 @@ void RegisterAppInterfaceRequest::Run() {
                                                      << default_timeout()
                                                      << ", thread="
                                                      << pthread_self());
+#endif
     ApplicationManagerImpl::instance()->updateRequestTimeout(
         connection_key(), correlation_id(), default_timeout());
 #if defined(OS_WIN32) || defined(OS_WINCE)

@@ -32,10 +32,8 @@
 
 #ifndef SRC_APPMAIN_LIFE_CYCLE_H_
 #define SRC_APPMAIN_LIFE_CYCLE_H_
-#ifndef OS_WIN32
 #include "utils/macro.h"
 #include "unistd.h"
-#endif
 
 #include "hmi_message_handler/hmi_message_handler_impl.h"
 #ifdef DBUS_HMIADAPTER
@@ -54,8 +52,8 @@
 #include "transport_manager/transport_manager_default.h"
 #include "media_manager/media_manager_impl.h"
 #include "utils/singleton.h"
-#ifdef TIME_TESTER
-#include "time_tester/time_manager.h"
+#ifdef TELEMETRY_MONITOR
+#include "telemetry_monitor/telemetry_monitor.h"
 #endif
 
 //#if ( defined (MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI)  )
@@ -65,10 +63,6 @@
 #  include "networking.h"  // cpplint: Include the directory when naming .h files
 #endif  // MESSAGEBROKER_HMIADAPTER
 #include "system.h"      // cpplint: Include the directory when naming .h files
-
-#ifdef OS_WINCE
-#include "Winsock2.h"
-#endif
 
 #ifdef ENABLE_SECURITY
 namespace security_manager {
@@ -96,7 +90,7 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
 
   private:
     LifeCycle();
-    transport_manager::TransportManager* transport_manager_;
+    transport_manager::TransportManagerImpl* transport_manager_;
     protocol_handler::ProtocolHandlerImpl* protocol_handler_;
     connection_handler::ConnectionHandlerImpl* connection_handler_;
     application_manager::ApplicationManagerImpl* app_manager_;
@@ -105,11 +99,11 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
     security_manager::SecurityManager* security_manager_;
 #endif  // ENABLE_SECURITY
     hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
-    hmi_message_handler::HMIMessageAdapter* hmi_message_adapter_;
+    hmi_message_handler::HMIMessageAdapterImpl* hmi_message_adapter_;
     media_manager::MediaManagerImpl* media_manager_;
-#ifdef TIME_TESTER
-    time_tester::TimeManager* time_tester_;
-#endif  // TIME_TESTER
+#ifdef TELEMETRY_MONITOR
+    telemetry_monitor::TelemetryMonitor* telemetry_monitor_;
+#endif  // TELEMETRY_MONITOR
 #ifdef DBUS_HMIADAPTER
     hmi_message_handler::DBusMessageAdapter* dbus_adapter_;
     System::Thread* dbus_adapter_thread_;
@@ -124,9 +118,7 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
     System::Thread* mb_adapter_thread_;
 #endif  // MESSAGEBROKER_HMIADAPTER
 
-#if defined(OS_WIN32) || defined(OS_WINCE)
-    bool components_started_;
-#endif
+
     FRIEND_BASE_SINGLETON_CLASS(LifeCycle);
     DISALLOW_COPY_AND_ASSIGN(LifeCycle);
 };

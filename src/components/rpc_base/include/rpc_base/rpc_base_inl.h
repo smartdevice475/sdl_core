@@ -219,7 +219,8 @@ Integer<T, minval, maxval>::operator IntType() const {
  */
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 const Range<double> Float<minnum, maxnum, minden, maxden>::range_(
-    (double(minnum)/minden), (double(maxnum)/maxden));
+    (double(minnum) / minden), (double(maxnum) / maxden)) {
+}
 
 
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>

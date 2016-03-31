@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,58 +37,61 @@
 
 #include "utils/signals.h"
 
-namespace utils {
-
+bool utils::UnsibscribeFromTermination() {
+  // Disable some system signals receiving in thread
+  // by blocking those signals
+  // (system signals processes only in the main thread)
+  // Mustn't block all signals!
+  // See "Advanced Programming in the UNIX Environment, 3rd Edition"
+  // (http://poincare.matf.bg.ac.rs/~ivana//courses/ps/sistemi_knjige/pomocno/apue.pdf,
+  // "12.8. Threads and Signals".
 #if defined(OS_WIN32) || defined(OS_WINCE)
-bool SubscribeToTerminateSignal(void (*func)(int32_t p)) {
-  void (*prev_func)(int32_t p);
-#ifdef OS_WINCE
   return true;
 #else
-  prev_func = signal(SIGINT, func);
-  return (SIG_ERR != prev_func);
+  sigset_t signal_set;
+  sigemptyset(&signal_set);
+  sigaddset(&signal_set, SIGINT);
+  sigaddset(&signal_set, SIGTERM);
+
+  return !pthread_sigmask(SIG_BLOCK, &signal_set, NULL);
 #endif
 }
 
-bool ResetSubscribeToTerminateSignal() {
-  void (*prev_func)(int32_t p);
-#ifdef OS_WINCE
-  return true;
+namespace {
+bool CatchSIGSEGV(sighandler_t handler) {
+#if defined(OS_WIN32) || defined(OS_WINCE)
+    return true;
 #else
-  prev_func = signal(SIGINT, SIG_DFL);
-  return (SIG_ERR != prev_func);
-#endif
-}
-
-void ForwardSignal() {
-#ifndef OS_WINCE
-  int32_t signal_id = SIGINT;
-  raise(signal_id);
-#endif
-}
-
-#else
-bool SubscribeToTerminateSignal(sighandler_t func) {
   struct sigaction act;
-  act.sa_handler = func;
+
+  act.sa_handler = handler;
   sigemptyset(&act.sa_mask);
   act.sa_flags = 0;
 
-  bool sigint_subscribed = (sigaction(SIGINT, &act, NULL) == 0);
-  bool sigterm_subscribed = (sigaction(SIGTERM, &act, NULL) == 0);
-
-  return sigint_subscribed && sigterm_subscribed;
-}
-
-bool SubscribeToFaultSignal(sighandler_t func) {
-  struct sigaction act;
-  act.sa_handler = func;
-  sigemptyset(&act.sa_mask);
-  act.sa_flags = SA_RESETHAND; // we only want to catch SIGSEGV once to flush logger queue
-
-  bool sigsegv_subscribed = (sigaction(SIGSEGV, &act, NULL) == 0);
-
-  return sigsegv_subscribed;
-}
+  return !sigaction(SIGSEGV, &act, NULL);
 #endif
-}  //  namespace utils
+}
+}  // namespace
+
+bool utils::WaitTerminationSignals(sighandler_t sig_handler) {
+#if defined(OS_WIN32) || defined(OS_WINCE)
+    return true;
+#else
+  sigset_t signal_set;
+  int sig = -1;
+
+  sigemptyset(&signal_set);
+  sigaddset(&signal_set, SIGINT);
+  sigaddset(&signal_set, SIGTERM);
+
+  if (!CatchSIGSEGV(sig_handler)) {
+    return false;
+  }
+
+  if (!sigwait(&signal_set, &sig)) {
+    sig_handler(sig);
+    return true;
+  }
+  return false;
+#endif
+}

@@ -63,6 +63,14 @@ if(HMIADAPTER STREQUAL "dbus")
     set (DBUS_ADAPTER DBus)
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+set (SOURCES
+    ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_handler_impl.cc
+    ${COMPONENTS_DIR}/hmi_message_handler/src/messagebroker_adapter.cc
+    ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_adapter_impl.cc
+    ${DBUS_SOURCE}
+)
+else()
 set (SOURCES
     ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_handler_impl.cc
     ${COMPONENTS_DIR}/hmi_message_handler/src/messagebroker_adapter.cc
@@ -70,6 +78,7 @@ set (SOURCES
     ${COMPONENTS_DIR}/hmi_message_handler/src/mqueue_adapter.cc
     ${DBUS_SOURCE}
 )
+endif()
 
 set(LIBRARIES
     Utils

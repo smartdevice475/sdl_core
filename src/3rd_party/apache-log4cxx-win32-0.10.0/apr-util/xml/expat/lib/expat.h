@@ -735,7 +735,7 @@ XML_ExpatVersionInfo(void);
 #define XML_MICRO_VERSION 2
 #endif
 
-#ifdef OS_WINCE
+#if    defined(OS_WIN32) || defined(OS_WINCE)
 #define VERSION  "1.2"
 #endif
 

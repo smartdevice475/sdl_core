@@ -130,10 +130,6 @@ endif()
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
 endif()
 
-add_library("transport_manager" ${SOURCES}
-        ${TRANSPORT_MANAGER_SOURCES}
-)
-
 if(BUILD_TESTS)
   add_subdirectory(test)
 endif()

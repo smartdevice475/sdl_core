@@ -321,28 +321,6 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${AM_SOURCE_DIR}/src/commands/hmi/on_event_changed_notification.cc
 )
 
-list (APPEND HMI_COMMANDS_SOURCES
-  ${AM_SOURCE_DIR}/src/commands/hmi/sdl_log_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_unsubscribebutton_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_subscribebutton_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_microphone_recording_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_deleteinteractionchoiceset_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_createinteractionchoiceset_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_search_applist_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_find_applist_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vr_start_record_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vr_cancel_record_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vr_status_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vr_cancel_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vr_help_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vr_exit_app_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vr_switch_app_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vr_command_tts_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vr_result_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_ui_perform_audio_pass_thru_start_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_ui_perform_audio_pass_thru_stop_notification.cc
-)
-
 set (HMI_COMMANDS_SOURCES_JSON
   ${AM_SOURCE_DIR}/src/commands/hmi/vi_get_vehicle_data_request.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/vi_get_vehicle_data_response.cc
@@ -426,10 +404,7 @@ target_link_libraries("ApplicationManager" ${LIBRARIES} AMHMICommandsLibrary
                                                         AMPolicyLibrary)
 
 if(ENABLE_LOG)
-if(MODIFY_FUNCTION_FLAGS)
-else()
   target_link_libraries("ApplicationManager" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
-endif()
 endif()
 
 if(BUILD_TESTS)

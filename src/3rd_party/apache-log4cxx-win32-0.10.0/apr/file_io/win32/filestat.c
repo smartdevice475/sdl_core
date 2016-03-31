@@ -15,7 +15,7 @@
  */
 
 #include "apr.h"
-#ifndef OS_WINCE
+#if defined(OS_WINCE) || defined(OS_WIN32)
 #include <aclapi.h>
 #endif
 #include "apr_private.h"
@@ -25,7 +25,7 @@
 #include "apr_strings.h"
 #include "apr_errno.h"
 #include "apr_time.h"
-#ifndef OS_WINCE
+#if defined(OS_WINCE) || defined(OS_WIN32)
 #include <sys/stat.h>
 #endif
 #include "apr_arch_atime.h"
@@ -67,7 +67,7 @@ static apr_gid_t worldid = NULL;
 static void free_world(void)
 {
     if (worldid) {
-#ifndef	OS_WINCE
+#if defined(OS_WINCE) || defined(OS_WIN32)
         FreeSid(worldid);
 #endif
         worldid = NULL;
@@ -99,7 +99,7 @@ static apr_fileperms_t convert_prot(ACCESS_MASK acc, prot_scope_e scope)
 
 static void resolve_prot(apr_finfo_t *finfo, apr_int32_t wanted, PACL dacl)
 {
-#ifndef OS_WINCE
+#if !(defined(OS_WINCE) || defined(OS_WIN32))
     TRUSTEE_W ident = {NULL, NO_MULTIPLE_TRUSTEE, TRUSTEE_IS_SID};
     ACCESS_MASK acc;
     /*

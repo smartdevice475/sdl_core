@@ -35,8 +35,8 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_SYNC_PDATA_NOTIFICATION_H_
 
 #include "application_manager/commands/command_response_impl.h"
-#include "utils/timer_thread.h"
 #include "utils/macro.h"
+#include "utils/timer.h"
 
 namespace application_manager {
 
@@ -80,7 +80,7 @@ class OnSyncPDataNotification : public CommandResponseImpl {
   void SendPData();
 
   // members
-  timer::TimerThread<OnSyncPDataNotification> timer_;
+  timer::Timer timer_;
 
   DISALLOW_COPY_AND_ASSIGN(OnSyncPDataNotification);
 };

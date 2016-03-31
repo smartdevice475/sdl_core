@@ -21,8 +21,6 @@
 /* @file apu.h
  * @brief APR-Utility main file
  */
-
-#if  defined(WIN32) || defined(OS_WIN32) || defined(OS_WINCE)
 #ifndef APU_H
 #define APU_H
 /**
@@ -69,10 +67,7 @@
  * declarations within headers to properly import the variable.
  */
 #define APU_DECLARE_DATA
-#elif  defined(OS_WIN32) || defined(OS_WINCE)
-#define APU_DECLARE(type)            type __stdcall
-#define APU_DECLARE_NONSTD(type)     type __cdecl
-#define APU_DECLARE_DATA
+
 #elif defined(APU_DECLARE_STATIC)
 #define APU_DECLARE(type)            type __stdcall
 #define APU_DECLARE_NONSTD(type)     type __cdecl
@@ -114,4 +109,3 @@
 #endif
 
 #endif /* APU_H */
-#endif /* WIN32 */

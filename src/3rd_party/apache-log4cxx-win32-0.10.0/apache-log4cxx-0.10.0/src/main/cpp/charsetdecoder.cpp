@@ -24,7 +24,7 @@
 #include <log4cxx/helpers/mutex.h>
 #include <log4cxx/helpers/synchronized.h>
 #include <log4cxx/helpers/pool.h>
-#ifdef OS_WINCE
+#if defined(OS_WINCE) || defined(OS_WIN32)
 #include "../../../../apr-util/include/apr_xlate.h"
 #else
 #include <apr_xlate.h>
