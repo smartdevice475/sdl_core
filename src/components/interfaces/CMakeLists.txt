@@ -78,7 +78,4 @@ if (${HMI_DBUS_API})
   add_library(HMI_API "${CMAKE_CURRENT_BINARY_DIR}/HMI_API_schema.cc")
 endif (${HMI_DBUS_API})
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-else()
 add_dependencies(HMI_API Utils)
-endif()

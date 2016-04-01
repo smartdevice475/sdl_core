@@ -40,23 +40,13 @@ option(EXTENDED_MEDIA_MODE "Turn on and off extended Madia Manager features rela
 option(BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OFF)" OFF)
 option(BUILD_BT_SUPPORT "Bluetooth support" ON)
 option(BUILD_USB_SUPPORT "libusb support" ON)
-option(BUILD_AVAHI_SUPPORT "libavahi support" ON)
-option(BUILD_RWLOCK_SUPPORT "rwlocks support" OFF)
-option(BUILD_BACKTRACE_SUPPORT "backtrace support" OFF)
+option(BUILD_BACKTRACE_SUPPORT "backtrace support" ON)
 option(BUILD_TESTS "Possibility to build and run tests" OFF)
-option(TIME_TESTER "Enable profiling time test util" OFF)
-option(BUILD_TESTS_WITH_HMI "Possibility to build and run HMI tests" OFF)
+option(TELEMETRY_MONITOR "Enable profiling time test util" OFF)
 option(ENABLE_LOG "Logging feature" ON)
 option(ENABLE_GCOV "gcov code coverage feature" OFF)
 option(ENABLE_SANITIZE "Sanitize tool" OFF)
 option(ENABLE_SECURITY "Security Ford protocol protection" ON)
-option(MODIFY_FUNCTION_FLAGS "modify function" ON)
-if(MODIFY_FUNCTION_FLAGS)
-option(BUILD_MANAGESDL_SUPPORT "manage sdl support" OFF)
-endif()
-if(MODIFY_FUNCTION_FLAGS)
-option(BUILD_TARGET_LIBRARY    "build target as library" OFF)
-endif()
 option(ENABLE_HMI_PTU_DECRYPTION "Policy table update parsed by hmi" ON)
 
 set(OS_TYPE_OPTION 	"$ENV{OS_TYPE}")
@@ -80,19 +70,6 @@ if (ARCH_TYPE_OPTION)
   endif ()
 else ()
     set(ARCH_TYPE_OPTION	"x86")
-endif()
-
-set (objcopy "objcopy")
-if(OS_TYPE_OPTION)
-    if(${OS_TYPE_OPTION} STREQUAL "QNX")
-    message(STATUS "Jenkins integration: set build process for QNX")
-    #do not use include after project() command.
-    #Such usecase results in infinite cycle of reinitialization of compiler and other variables
-    INCLUDE("./qnx_6.5.0_linux_x86.cmake")
-    set (objcopy "nto${ARCH_TYPE_OPTION}-objcopy")
-    #tests are not supported yet for QNX build
-    set (BUILD_TESTS OFF)
-    endif()
 endif()
 
 if (HMI_TYPE_OPTION)
@@ -159,7 +136,19 @@ if (SECURITY_OPTION)
   endif()
 endif()
 
-if(NOT CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+set(objcopy "objcopy")
+if (OS_TYPE_OPTION)
+  if (${OS_TYPE_OPTION} STREQUAL "QNX")
+    message(STATUS "Jenkins integration: set build process for QNX")
+    #do not use include after project() command.
+    #Such usecase results in infinite cycle of reinitialization of compiler and other variables
+    INCLUDE("./qnx_6.5.0_linux_x86.cmake")
+    set(objcopy "nto${ARCH_TYPE_OPTION}-objcopy")
+    #tests are not supported yet for QNX build
+    set (BUILD_TESTS OFF)
+  endif()
+endif()
+
 #Jenkins integration section end
 
 add_custom_target(pasa-tarball
@@ -179,7 +168,6 @@ add_custom_target(genivi-tarball
   COMMAND tar -cz -C /tmp/GENIVI -f ${CMAKE_BINARY_DIR}/genivi.tar.gz .
 )
 
-endif()
 
 project (${PROJECT})
 
@@ -191,30 +179,36 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 # flag is handled by CMake
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX" OR CMAKE_SYSTEM_NAME STREQUAL    "Android")
-    set (CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror -Wuninitialized -Wvla")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror -Wno-deprecated-declarations -Wuninitialized -Wvla")
 
-if(ENABLE_SANITIZE)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
-endif()
-if(ENABLE_GCOV)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
-  add_definitions(-DGCOV_ENABLED)
-endif()
-    set (CMAKE_CXX_FLAGS_RELEASE "-fPIC -s -O2") #It will be appended to CMAKE_CXX_FLAGS in release
+  if(ENABLE_SANITIZE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+  endif()
+  if(ENABLE_GCOV)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
+    add_definitions(-DGCOV_ENABLED)
+  endif()
+  
+  set (CMAKE_CXX_FLAGS_RELEASE "-fPIC -s -O2") #It will be appended to CMAKE_CXX_FLAGS in release
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    set (CMAKE_CXX_FLAGS "-g3 -ggdb3 -std=gnu++0x -Werror=return-type -Wuninitialized --coverage -std=c++0x") # -stdlib=libc++ -m32
-    set (CMAKE_CXX_FLAGS_RELEASE "-s -O2") #It will be appended to CMAKE_CXX_FLAGS in release
-    #set (CMAKE_EXE_LINKER_FLAGS "-stdlib=libc++")
+  set (CMAKE_CXX_FLAGS "-g3 -ggdb3 -std=gnu++0x -Werror=return-type -Wuninitialized --coverage -std=c++0x") # -stdlib=libc++ -m32
+  set (CMAKE_CXX_FLAGS_RELEASE "-s -O2") #It will be appended to CMAKE_CXX_FLAGS in release
+  #set (CMAKE_EXE_LINKER_FLAGS "-stdlib=libc++")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    set (CMAKE_CXX_FLAGS "/wd\"4819\" /wd\"4244\" /wd\"4390\" /wd\"4430\" /EHsc /bigobj")
-    set (CMAKE_C_FLAGS ${CMAKE_CXX_FLAGS})  
-    set (CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG") #It will be appended to CMAKE_CXX_FLAGS in release
+  set (CMAKE_CXX_FLAGS "/wd\"4819\" /wd\"4244\" /wd\"4390\" /wd\"4430\" /EHsc /bigobj")
+  set (CMAKE_C_FLAGS ${CMAKE_CXX_FLAGS})  
+  set (CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG") #It will be appended to CMAKE_CXX_FLAGS in release
 elseif(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-    set (CMAKE_CXX_FLAGS "/wd\"4819\" /wd\"4244\" /wd\"4390\" /wd\"4996\"  /EHsc /bigobj /Z7 /GF")
-    set (CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG") #It will be appended to CMAKE_CXX_FLAGS in release
-    set (CMAKE_C_FLAGS ${CMAKE_CXX_FLAGS})  
-    set (CMAKE_EXE_LINKER_FLAGS "/SUBSYSTEM:CONSOLE /ENTRY:")  
+  set (CMAKE_CXX_FLAGS "/wd\"4819\" /wd\"4244\" /wd\"4390\" /wd\"4996\"  /EHsc /bigobj /Z7 /GF")
+  set (CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG") #It will be appended to CMAKE_CXX_FLAGS in release
+  set (CMAKE_C_FLAGS ${CMAKE_CXX_FLAGS})  
+  set (CMAKE_EXE_LINKER_FLAGS "/SUBSYSTEM:CONSOLE /ENTRY:")  
+endif()
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  set(CMAKE_CXX_FLAGS_RELEASE " -DNDEBUG -s -O2")
+  set(CMAKE_CXX_FLAGS_DEBUG   " -DDEBUG -g3 -ggdb3")
 endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -225,65 +219,47 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "QNX")
   set(BUILD_BACKTRACE_SUPPORT OFF)
   set(EXTENDED_MEDIA_MODE OFF)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    add_definitions(-DOS_WIN32)
-    add_definitions(-DWIN32)
-    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-    add_definitions(-DWIN32_LEAN_AND_MEAN)
-    add_definitions(-DASR_HAS_VR)
-    set (BUILD_AVAHI_SUPPORT OFF)
-    set (BUILD_USB_SUPPORT ON)
-    set (BUILD_BT_SUPPORT OFF)
-    set (EXTENDED_MEDIA_MODE OFF)
-    set (ENABLE_LOG ON)
-    set (ENABLE_SECURITY OFF)
-    add_definitions(-DLOG4CXX_STATIC)
-    add_definitions(-DAPR_DECLARE_STATIC)
-    add_definitions(-DAPU_DECLARE_STATIC)
-    add_definitions(-DPTW32_STATIC_LIB)
+  add_definitions(-DOS_WIN32)
+  add_definitions(-DWIN32)
+  add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+  add_definitions(-DWIN32_LEAN_AND_MEAN)
+  add_definitions(-DASR_HAS_VR)
+  add_definitions(-DMODIFY_FUNCTION_SIGN)
+  set (BUILD_AVAHI_SUPPORT OFF)
+  set (BUILD_USB_SUPPORT ON)
+  set (BUILD_BT_SUPPORT OFF)
+  set (EXTENDED_MEDIA_MODE OFF)
+  set (ENABLE_LOG ON)
+  set (ENABLE_SECURITY OFF)
+  add_definitions(-DLOG4CXX_STATIC)
+  add_definitions(-DAPR_DECLARE_STATIC)
+  add_definitions(-DAPU_DECLARE_STATIC)
+  add_definitions(-DPTW32_STATIC_LIB)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-    add_definitions(-D_WIN32_WCE=$(CEVER))
-    add_definitions(-D_CONSOLE)
-    add_definitions(-DUNDER_CE)
-    add_definitions(-D$(ARCHFAM))
-    add_definitions(-D$(_ARCHFAM_))
-    add_definitions(-D$(PLATFORMDEFINES))
-    add_definitions(-DOS_WINCE)
-    add_definitions(-DHAVE_PTW32_CONFIG_H)
-    add_definitions(-D_UNICODE)
-    add_definitions(-DUNICODE)
-    add_definitions(-DWINCE)
-    add_definitions(-D_WIN32)
-    add_definitions(-DLOG4CXX_STATIC)
-    add_definitions(-DAPR_DECLARE_STATIC)
-    set (ENABLE_LOG ON)
-    set (ENABLE_SECURITY OFF)
-    set (BUILD_BT_SUPPORT OFF)
-    set (BUILD_USB_SUPPORT ON)
-    set (BUILD_AVAHI_SUPPORT OFF)
-    set (BUILD_BACKTRACE_SUPPORT OFF)
-    set (EXTENDED_MEDIA_MODE OFF)
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    add_definitions(-DOS_MAC)
-    set (BUILD_BT_SUPPORT OFF)
-    set (BUILD_USB_SUPPORT OFF)
-    set (BUILD_AVAHI_SUPPORT OFF)
-    set (BUILD_BACKTRACE_SUPPORT OFF)
-    set (EXTENDED_MEDIA_MODE OFF)
-elseif(CMAKE_SYSTEM_NAME STREQUAL    "Android")
-    add_definitions(-DOS_LINUX)
-    add_definitions(-DOS_ANDROID)
-    set (BUILD_BT_SUPPORT OFF)
-    set (BUILD_USB_SUPPORT ON)
-    set (BUILD_AVAHI_SUPPORT OFF)
-    set (BUILD_BACKTRACE_SUPPORT OFF)
-endif()
-if(MODIFY_FUNCTION_FLAGS)
-add_definitions(-DMODIFY_FUNCTION_SIGN)
+  add_definitions(-D_WIN32_WCE=$(CEVER))
+  add_definitions(-D_CONSOLE)
+  add_definitions(-DUNDER_CE)
+  add_definitions(-D$(ARCHFAM))
+  add_definitions(-D$(_ARCHFAM_))
+  add_definitions(-D$(PLATFORMDEFINES))
+  add_definitions(-DOS_WINCE)
+  add_definitions(-DHAVE_PTW32_CONFIG_H)
+  add_definitions(-D_UNICODE)
+  add_definitions(-DUNICODE)
+  add_definitions(-DWINCE)
+  add_definitions(-D_WIN32)
+  add_definitions(-DLOG4CXX_STATIC)
+  add_definitions(-DAPR_DECLARE_STATIC)
+  add_definitions(-DMODIFY_FUNCTION_SIGN)
+  set (ENABLE_LOG ON)
+  set (ENABLE_SECURITY OFF)
+  set (BUILD_BT_SUPPORT OFF)
+  set (BUILD_USB_SUPPORT ON)
+  set (BUILD_AVAHI_SUPPORT OFF)
+  set (BUILD_BACKTRACE_SUPPORT OFF)
+  set (EXTENDED_MEDIA_MODE OFF)
 endif()
 
-if(BUILD_TARGET_LIBRARY)
-    add_definitions(-DBUILD_TARGET_LIB)
-endif()
 
 if (BUILD_USB_SUPPORT)
   add_definitions(-DUSB_SUPPORT)
@@ -296,26 +272,6 @@ if (BUILD_BT_SUPPORT)
   message(STATUS "Bluetooth support is enabled")
 endif()
 
-if(BUILD_MME_SUPPORT)
-    add_definitions(-DMME_SUPPORT)
-    if(MME_MQ)
-    add_definitions(-DMME_MQ)
-  endif(MME_MQ)
-endif(BUILD_MME_SUPPORT)
-
-if(BUILD_AVAHI_SUPPORT)
-    if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX" OR CMAKE_SYSTEM_NAME STREQUAL    "Android")
-    add_definitions(-DAVAHI_SUPPORT)
-    # --- Check libavahi-common, libavahi-client availability
-    find_package(Libavahi)
-    message(STATUS "Avahi support is enabled")
-    endif()
-endif()
-
-if(BUILD_RWLOCK_SUPPORT)
-    add_definitions(-DRWLOCK_SUPPORT)
-endif()
-
 if (BUILD_BACKTRACE_SUPPORT)
   add_definitions(-DBACKTRACE_SUPPORT)
 endif()
@@ -326,55 +282,47 @@ if(ENABLE_LOG)
 endif()
 
 if (TELEMETRY_MONITOR)
-    add_definitions(-DTELEMETRY_MONITOR)
-endif()
-
-if(TIME_TESTER)
-    add_definitions(-DTIME_TESTER)
+  add_definitions(-DTELEMETRY_MONITOR)
 endif()
 
 # TODO(AK): check current OS here
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    add_definitions(-DOS_POSIX)
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    add_definitions(-DOS_POSIX)
-elseif(CMAKE_SYSTEM_NAME STREQUAL    "Android")
-    add_definitions(-DOS_POSIX)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  add_definitions(-DOS_POSIX)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 #option(CMAKE_BUILD_TYPE "build type" "Debug")
 #set(CMAKE_BUILD_TYPE "Release")
-    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDEBUG" )
     add_definitions(-DDEBUG)
-    elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+  elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
     set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DRELEASE" )
     add_definitions(-DRELEASE)
-    else()
+  else()
     set (CMAKE_BUILD_TYPE "Debug")
     set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDEBUG" )
     add_definitions(-DDEBUG)
-    endif()
+  endif()
 else()
-    # FIXME(DC): weird logic
-    if(CMAKE_C_FLAGS_DEBUG)
+  # FIXME(DC): weird logic
+  if(CMAKE_C_FLAGS_DEBUG)
     set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDEBUG" )
     add_definitions(-DDEBUG)
-    ELSE (CMAKE_C_FLAGS_DEBUG)
+  else(CMAKE_C_FLAGS_DEBUG)
     set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DRELEASE" )
     add_definitions(-DRELEASE)
-    ENDif(CMAKE_C_FLAGS_DEBUG)
+  endif(CMAKE_C_FLAGS_DEBUG)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
-    if(EXTENDED_MEDIA_MODE)
+  if(EXTENDED_MEDIA_MODE)
     add_definitions(-DEXTENDED_MEDIA_MODE)
     # required to find 'glibconfig.h'
     find_package(PkgConfig)
     pkg_check_modules(GLIB2 REQUIRED glib-2.0)
     add_definitions(${GLIB2_CFLAGS})
-    endif()
+  endif()
 endif()
 
 
@@ -382,141 +330,128 @@ endif()
 
 find_package(PythonInterp)
 if(NOT PYTHONINTERP_FOUND)
-    message(STATUS "Python interpreter is not found")
-    message(STATUS "To install it type in the command line:")
-    message(STATUS "sudo apt-get install python")
-    message(FATAL_ERROR "Exiting!")
+  message(STATUS "Python interpreter is not found")
+  message(STATUS "To install it type in the command line:")
+  message(STATUS "sudo apt-get install python")
+  message(FATAL_ERROR "Exiting!")
 endif(NOT PYTHONINTERP_FOUND)
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX" OR CMAKE_SYSTEM_NAME STREQUAL    "Android")
-    if(HMI STREQUAL "qt")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  if(HMI STREQUAL "qt")
     cmake_minimum_required(VERSION 2.8.11)
     if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-        set (qt_version "4.8.5")
+      set (qt_version "4.8.5")
     else ()
-        set (qt_version "5.1.0")
+      set (qt_version "5.1.0")
     endif()
 
     execute_process(
-        COMMAND ${CMAKE_SOURCE_DIR}/FindQt.sh -v ${qt_version}
-        OUTPUT_VARIABLE qt_bin_dir
+      COMMAND ${CMAKE_SOURCE_DIR}/FindQt.sh -v ${qt_version}
+      OUTPUT_VARIABLE qt_bin_dir
     )
     message(STATUS "Binary directory Qt ${qt_version} is ${qt_bin_dir}")
     set (ENV{PATH} ${qt_bin_dir}:$ENV{PATH})
 
     if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-        find_package(Qt4 ${qt_version} REQUIRED QtCore QtGui QtDBus QtDeclarative)
+      find_package(Qt4 ${qt_version} REQUIRED QtCore QtGui QtDBus QtDeclarative)
     else ()
-        find_package(Qt5Core REQUIRED)
-        find_package(Qt5DBus REQUIRED)
-        find_package(Qt5Qml REQUIRED)
-        find_package(Qt5Quick REQUIRED)
-        set (qmlplugindump_binary ${qt_bin_dir}/qmlplugindump)
+      find_package(Qt5Core REQUIRED)
+      find_package(Qt5DBus REQUIRED)
+      find_package(Qt5Qml REQUIRED)
+      find_package(Qt5Quick REQUIRED)
+      set (qmlplugindump_binary ${qt_bin_dir}/qmlplugindump)
     endif()
-     endif()
+  endif()
 endif()
 
-set (INTEFRACE_GENERATOR "${PROJECT_SOURCE_DIR}/tools/InterfaceGenerator/Generator.py")
-set (INTEFRACE_GENERATOR_CMD ${PYTHON_EXECUTABLE} -B ${INTEFRACE_GENERATOR})
+set(INTEFRACE_GENERATOR "${PROJECT_SOURCE_DIR}/tools/InterfaceGenerator/Generator.py")
+set(INTEFRACE_GENERATOR_CMD ${PYTHON_EXECUTABLE} -B ${INTEFRACE_GENERATOR})
 file(GLOB_RECURSE INTERFACE_GENERATOR_DEPENDENCIES "${PROJECT_SOURCE_DIR}/tools/InterfaceGenerator/*.*")
 
 macro (GenerateInterface arg_xml_name arg_namespace parser_type)
     string(REGEX MATCH "^[a-zA-Z_0-9]*[^.]" file_name ${arg_xml_name})     # TODO: make expression more robust
 
-    set (hpp_file
-    "${CMAKE_CURRENT_BINARY_DIR}/${file_name}.h"
-    "${CMAKE_CURRENT_BINARY_DIR}/${file_name}_schema.h"
+    set(hpp_file
+      "${CMAKE_CURRENT_BINARY_DIR}/${file_name}.h"
+      "${CMAKE_CURRENT_BINARY_DIR}/${file_name}_schema.h"
     )
 
-    set (cpp_file "${CMAKE_CURRENT_BINARY_DIR}/${file_name}_schema.cc")
-    set (full_xml_name "${CMAKE_CURRENT_SOURCE_DIR}/${arg_xml_name}")
+    set(cpp_file "${CMAKE_CURRENT_BINARY_DIR}/${file_name}_schema.cc")
+    set(full_xml_name "${CMAKE_CURRENT_SOURCE_DIR}/${arg_xml_name}")
 
-    if(NOT CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     add_custom_command( OUTPUT ${hpp_file} ${cpp_file}
-        COMMAND ${INTEFRACE_GENERATOR_CMD} ${full_xml_name} ${arg_namespace} ${CMAKE_CURRENT_BINARY_DIR} "--parser-type" "${parser_type}"
-        DEPENDS ${INTERFACE_GENERATOR_DEPENDENCIES} ${full_xml_name}
-        COMMENT "Generating files:\n     ${hpp_file}\n     ${cpp_file}\nfrom:\n     ${arg_xml_name} ..."
-        VERBATIM
-    )
-    else()
-    add_custom_command( OUTPUT ${hpp_file} ${cpp_file}
-        COMMAND ${INTEFRACE_GENERATOR_CMD} ${full_xml_name} ${arg_namespace} ${CMAKE_CURRENT_BINARY_DIR} "--parser-type" "${parser_type}"
-        DEPENDS ${INTERFACE_GENERATOR_DEPENDENCIES} ${full_xml_name}
-        COMMENT ""
-        VERBATIM
-    )
-    endif()
+                        COMMAND ${INTEFRACE_GENERATOR_CMD} ${full_xml_name} ${arg_namespace} ${CMAKE_CURRENT_BINARY_DIR} "--parser-type" "${parser_type}"
+                        DEPENDS ${INTERFACE_GENERATOR_DEPENDENCIES} ${full_xml_name}
+                        COMMENT "Generating files:\n   ${hpp_file}\n   ${cpp_file}\nfrom:\n   ${arg_xml_name} ..."
+                        VERBATIM
+                       )
 
     include_directories (
         ${COMPONENTS_DIR}/smart_objects/include
         ${COMPONENTS_DIR}/formatters/include/
         ${CMAKE_BINARY_DIR}
-     )
+    )
 
-     add_library("${file_name}" ${cpp_file})
-endmacro (GenerateInterface)
+    add_library("${file_name}" ${cpp_file})
+endmacro(GenerateInterface)
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
-    # --- Useful macro
-    macro (create_test NAME SOURCES LIBS)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  # --- Useful macro
+  macro(create_test NAME SOURCES LIBS)
     add_executable("${NAME}" ${CMAKE_SOURCE_DIR}/src/components/test_main.cc ${SOURCES})
     target_link_libraries("${NAME}" ${LIBS})
     target_link_libraries("${NAME}" Utils)
     if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-        add_test(${NAME} ${CMAKE_SOURCE_DIR}/qnx/remote_run_test.sh ${NAME})
+      add_test(${NAME} ${CMAKE_SOURCE_DIR}/qnx/remote_run_test.sh ${NAME})
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        add_test(NAME ${NAME}
-        COMMAND ${NAME} --gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/)
+      add_test(NAME ${NAME}
+      COMMAND ${NAME} --gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/)
     else()
-        add_test(${NAME} ${NAME})
+      add_test(${NAME} ${NAME})
     endif()
-    endmacro (create_test)
+  endmacro(create_test)
 endif()
 
 
 # Include direction and link library
-
-if(MODIFY_FUNCTION_FLAGS)
-include_directories (
-    ${CMAKE_SOURCE_DIR}/include/all
-)
-endif()
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    include_directories (
+  include_directories (
     ${CMAKE_SOURCE_DIR}/include/win32
-    )
-    LINK_DIRECTORIES(
+    ${CMAKE_SOURCE_DIR}/src/3rd_party/apache-log4cxx-win32-0.10.0/apache-log4cxx-0.10.0/src/main/include
+  )
+  LINK_DIRECTORIES(
     ${CMAKE_SOURCE_DIR}/lib/win32
-    )
+  )
 elseif(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-    include_directories (
+  include_directories (
     ${CMAKE_SOURCE_DIR}/include/wince
-    )
-    LINK_DIRECTORIES(
+    ${CMAKE_SOURCE_DIR}/src/3rd_party/apache-log4cxx-win32-0.10.0/apache-log4cxx-0.10.0/src/main/include
+  )
+  LINK_DIRECTORIES(
     ${CMAKE_SOURCE_DIR}/lib/wince
-    )
+  )
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    include_directories (
+  include_directories (
     /usr/local/Cellar/log4cxx/0.10.0/include
     )
-    LINK_DIRECTORIES(
+  LINK_DIRECTORIES(
     /usr/local/Cellar/log4cxx/0.10.0/lib
-    )
+  )
 endif()
 
 # --replace in list macro
-macro (LIST_REPLACE LIST INDEX NEWVALUE)
+macro(LIST_REPLACE LIST INDEX NEWVALUE)
     list(INSERT ${LIST} ${INDEX} ${NEWVALUE})
     MATH(EXPR __INDEX "${INDEX} + 1")
     list (REMOVE_AT ${LIST} ${__INDEX})
-endmacro (LIST_REPLACE)
+endmacro(LIST_REPLACE)
 
 
 # Building application
 
 # --- Type HMI
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
-    if(HMI STREQUAL "qt")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  if(HMI STREQUAL "qt")
     set (QT_HMI ON)
     add_definitions(-DQT_HMI)
     elseif(HMI STREQUAL "web")
@@ -525,8 +460,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX" OR CMA
     else ()
     set (HMI "no")
     add_definitions(-DNO_HMI)
-    endif()
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  endif()
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
     set (WEB_HMI ON)
     add_definitions(-DWEB_HMI)
 endif()
@@ -864,7 +799,6 @@ endif()
                                                                                                                                                                                          
 # Building documentation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX" OR CMAKE_SYSTEM_NAME STREQUAL    "Android")
 # At first creating directory for generated documentation. Unfortunately doxygen
 # cannot generate it byself
 find_package(Doxygen)
@@ -886,9 +820,4 @@ find_package(Doxygen)
     message(STATUS "To enable processing of MscGen comments please install mscgen")
     message(STATUS "sudo apt-get install mscgen")
 endif(DOXYGEN_FOUND)
-endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    set (CMAKE_BUILD_TYPE OFF)
-    message(STATUS "set CMAKE_BUILD_TYPE OFF")
-endif()

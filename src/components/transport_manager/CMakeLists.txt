@@ -109,7 +109,11 @@ if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
 endif()
 
 add_library(${target} ${SOURCES})
-target_link_libraries(${target} ProtocolLibrary)
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  target_link_libraries(${target} ProtocolLibrary pthreadVC2)
+else()
+  target_link_libraries(${target} ProtocolLibrary)
+endif()
 
 if (BUILD_USB_SUPPORT)
   if (CMAKE_SYSTEM_NAME STREQUAL "QNX")

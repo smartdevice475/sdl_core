@@ -102,13 +102,17 @@ vector<string> Backtrace::CallStack() const {
   return callstack;
 }
 
-Thread::Id Backtrace::ThreadId() const {
+threads::PlatformThreadHandle Backtrace::ThreadId() const {
   return thread_id_;
 }
 
 ostream& operator<< (ostream& os, const Backtrace& bt) {
   const vector<string> symbols = bt.CallStack();
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  os<<"Stack trace ("<<bt.ThreadId().p<<")\n";
+#else
   os<<"Stack trace ("<<bt.ThreadId()<<")\n";
+#endif
   if (symbols.empty()) {
     os<<"Not available"<<std::endl;
   } else for (size_t i = 0; i < symbols.size(); ++i) {

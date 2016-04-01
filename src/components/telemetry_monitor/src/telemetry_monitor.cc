@@ -32,6 +32,11 @@
 
 #include "telemetry_monitor/telemetry_monitor.h"
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#include <sys/types.h>
+#include <time.h>
+#include <unistd.h>
+#else
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/select.h>
@@ -39,6 +44,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#endif
 
 #include "transport_manager/transport_manager_default.h"
 #include "utils/resource_usage.h"
@@ -188,11 +194,19 @@ void Streamer::Start() {
   }
 
   int32_t optval = 1;
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  if (-1 == setsockopt(server_socket_fd_, SOL_SOCKET, SO_REUSEADDR,
+      (char*)&optval, sizeof optval)) {
+      LOG4CXX_ERROR(logger_, "Unable to set sockopt");
+      return;
+  }
+#else
   if (-1 == setsockopt(server_socket_fd_, SOL_SOCKET, SO_REUSEADDR,
                        &optval, sizeof optval)) {
     LOG4CXX_ERROR(logger_, "Unable to set sockopt");
     return;
   }
+#endif
 
   sockaddr_in serv_addr_ = { 0 };
   serv_addr_.sin_addr.s_addr = inet_addr(kserver_->ip().c_str());
@@ -216,12 +230,21 @@ void Streamer::ShutDownAndCloseSocket(int32_t socket_fd) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (0 < socket_fd){
     LOG4CXX_INFO(logger_, "Shutdown socket");
+#if defined(OS_WIN32) || defined(OS_WINCE)
+    if (0 == ::shutdown(socket_fd, 2)) {
+        LOG4CXX_ERROR(logger_, "Unable to shutdown socket");
+    }
+    if (0 == close(socket_fd)) {
+        LOG4CXX_ERROR(logger_, "Unable to close socket");
+    }
+#else
     if (-1 == ::shutdown(socket_fd, SHUT_RDWR)) {
-      LOG4CXX_ERROR(logger_, "Unable to shutdown socket");
+        LOG4CXX_ERROR(logger_, "Unable to shutdown socket");
     }
     if (-1 == close(socket_fd)) {
-      LOG4CXX_ERROR(logger_, "Unable to close socket");
+        LOG4CXX_ERROR(logger_, "Unable to close socket");
     }
+#endif
   } else {
     LOG4CXX_WARN(logger_, "Socket in not connected: " << socket_fd);
   }
@@ -274,11 +297,19 @@ bool Streamer::Send(const std::string& msg) {
     return false;
   }
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
   if (-1 == ::send(client_socket_fd_, msg.c_str(),
-                   msg.size(), MSG_NOSIGNAL)) {
-    LOG4CXX_ERROR(logger_, " Unable to send");
-    return false;
+      msg.size(), 0)) {
+      LOG4CXX_ERROR(logger_, " Unable to send");
+      return false;
   }
+#else
+  if (-1 == ::send(client_socket_fd_, msg.c_str(),
+      msg.size(), MSG_NOSIGNAL)) {
+      LOG4CXX_ERROR(logger_, " Unable to send");
+      return false;
+  }
+#endif
   return true;
 }
 

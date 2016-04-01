@@ -1,17 +1,10 @@
 
 include_directories(
-.
+  .
 )
 
 set (SOURCES
   pthread.c
-)
-
-set (HEADERS
-  ./implement.h
-  ./pthread.h
-  ./sched.h
-  ./semaphore.h
 )
 
 add_definitions(-DPTW32_STATIC_LIB)
