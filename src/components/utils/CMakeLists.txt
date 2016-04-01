@@ -78,10 +78,18 @@ set (SOURCES
     ${UTILS_SRC_DIR}/appenders_loader.cc
     ${UTILS_SRC_DIR}/gen_hash.cc
     ${UTILS_SRC_DIR}/convert_utils.cc
-    ${UTILS_SRC_DIR}/custom_string.cc
-    ${UTILS_SRC_DIR}/timer.cc
+    ${UTILS_SRC_DIR}/custom_string.cc    
 )
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  list (APPEND SOURCES
+    ${UTILS_SRC_DIR}/timer_win.cc
+  )
+else()
+  list (APPEND SOURCES
+    ${UTILS_SRC_DIR}/timer.cc
+  )
+endif()
 if(ENABLE_LOG)
   list(APPEND SOURCES
     ${UTILS_SRC_DIR}/push_log.cc
