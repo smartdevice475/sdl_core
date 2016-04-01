@@ -39,6 +39,10 @@
 #include <limits.h>
 #include <stdint.h>
 
+#ifdef OS_WINCE
+#include <winbase.h>
+#endif
+
 #if defined(OS_WIN32) || defined(OS_WINCE)
 #ifndef snprintf
 #define snprintf _snprintf

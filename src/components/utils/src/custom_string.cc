@@ -61,19 +61,27 @@ std::wstring ConvertUTFToWString(const char* str) {
   size_t size = CalculateLengthOfString(str);
   std::vector<wchar_t> wchar_array(size + 1, L'\0');
 
+#ifdef OS_WINCE
+  mbstowcs(&(wchar_array.front()), str, size);
+#else
   std::string current_locale = setlocale(LC_ALL, NULL);
   setlocale(LC_ALL, "");  // system locale
   mbstowcs(&(wchar_array.front()), str, size);
   setlocale(LC_ALL, current_locale.c_str());
+#endif
   return std::wstring(&(wchar_array.front()));
 }
 
 // Converts string to lower case unicode string.
 void ConvertWStringToLowerCase(std::wstring& str) {
+#ifdef OS_WINCE
+  std::transform(str.begin(), str.end(), str.begin(), towlower);
+#else
   const std::string current_locale = setlocale(LC_ALL, NULL);
   setlocale(LC_ALL, "");
   std::transform(str.begin(), str.end(), str.begin(), towlower);
   setlocale(LC_ALL, current_locale.c_str());
+#endif
 }
 }
 

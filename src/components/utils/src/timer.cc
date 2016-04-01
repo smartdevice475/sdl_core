@@ -33,7 +33,9 @@
 #include "utils/timer.h"
 
 #include <ctime>
+#ifndef OS_WINCE
 #include <cerrno>
+#endif
 #include <cstring>
 
 #include "utils/timer_task.h"

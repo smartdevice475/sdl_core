@@ -15,7 +15,7 @@
  */
 
 #include "apr.h"
-#if defined(OS_WINCE) || defined(OS_WIN32)
+#if defined (OS_POSIX) || defined(OS_WIN32)
 #include <aclapi.h>
 #endif
 #include "apr_private.h"
@@ -25,7 +25,7 @@
 #include "apr_strings.h"
 #include "apr_errno.h"
 #include "apr_time.h"
-#if defined(OS_WINCE) || defined(OS_WIN32)
+#if defined (OS_POSIX) || defined(OS_WIN32)
 #include <sys/stat.h>
 #endif
 #include "apr_arch_atime.h"

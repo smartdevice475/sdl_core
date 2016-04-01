@@ -33,7 +33,9 @@
 #include "utils/gen_hash.h"
 #include <cstdlib>
 #include <string>
+#ifndef OS_WINCE
 #include <locale>
+#endif
 #include "utils/custom_string.h"
 
 namespace utils {
@@ -74,6 +76,14 @@ int32_t Djb2HashFromString(const std::string& str_to_hash) {
 
 uint32_t CaseInsensitiveFaq6HashFromString(const char* cstr) {
   uint32_t hash = 0;
+#ifdef OS_WINCE
+  for (; *cstr; ++cstr) {
+    char lower_char = tolower(*cstr);
+    hash += static_cast<uint32_t>(lower_char);
+    hash += (hash << 10);
+    hash ^= (hash >> 6);
+  }
+#else
   std::locale loc;
   for (; *cstr; ++cstr) {
     char lower_char = std::tolower(*cstr, loc);
@@ -81,6 +91,7 @@ uint32_t CaseInsensitiveFaq6HashFromString(const char* cstr) {
     hash += (hash << 10);
     hash ^= (hash >> 6);
   }
+#endif
   hash += (hash << 3);
   hash ^= (hash >> 11);
   hash += (hash << 15);

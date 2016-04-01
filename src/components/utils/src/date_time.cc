@@ -44,9 +44,6 @@
 #if defined(OS_WIN32) || defined(OS_WINCE)
 #include "os/poll_windows.h"
 #endif
-#ifdef OS_WINCE
-#include "utils/global.h"
-#endif
 #if defined(OS_WIN32) || defined(OS_WINCE)
 void clock_gettime(int i, timespec * tm)
 {

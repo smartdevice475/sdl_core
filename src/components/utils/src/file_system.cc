@@ -52,6 +52,9 @@
 
 #include "utils/file_system.h"
 
+#ifdef OS_WINCE
+typedef std::basic_string<wchar_t> wchar_string;
+#endif
 CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 uint64_t file_system::GetAvailableDiskSpace(const std::string& path) {

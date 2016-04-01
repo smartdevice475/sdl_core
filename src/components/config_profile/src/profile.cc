@@ -48,8 +48,14 @@
 #endif  // ENABLE_SECURITY
 
 #ifdef OS_WINCE
+#include <limits>
 #undef errno
 extern int errno;
+#endif
+
+#ifdef OS_WIN32
+#undef min
+#undef max
 #endif
 
 namespace {
@@ -269,9 +275,15 @@ const uint32_t kDefaultAppHmiLevelNoneRequestsTimeScale = 10;
 const uint32_t kDefaultPendingRequestsAmount = 0;
 const uint32_t kDefaultTransportManagerDisconnectTimeout = 0;
 const uint32_t kDefaultApplicationListUpdateTimeout = 1;
+#ifdef OS_WINCE
+const std::pair<uint32_t, uint32_t> kReadDIDFrequency(5, 1);
+const std::pair<uint32_t, uint32_t> kGetVehicleDataFrequency(5, 1);
+const std::pair<uint32_t, uint32_t> kStartStreamRetryAmount(3, 1);
+#else
 const std::pair<uint32_t, uint32_t> kReadDIDFrequency = { 5, 1 };
 const std::pair<uint32_t, uint32_t> kGetVehicleDataFrequency = { 5, 1 };
 const std::pair<uint32_t, uint32_t> kStartStreamRetryAmount = { 3, 1 };
+#endif
 const uint32_t kDefaultMaxThreadPoolSize = 2;
 const int kDefaultIAP2HubConnectAttempts = 0;
 const int kDefaultIAPHubConnectionWaitTimeout = 10000;
@@ -888,11 +900,9 @@ void Profile::UpdateValues() {
                   file_system::CurrentWorkingDirectory().c_str(),
                   kMainSection, kAppConfigFolderKey);
 
-#if !(defined(OS_WIN32))
   if (IsRelativePath(app_config_folder_)) {
     MakeAbsolutePath(app_config_folder_);
   }
-#endif
 
   LOG_UPDATED_VALUE(app_config_folder_, kAppConfigFolderKey, kMainSection);
 
@@ -912,11 +922,9 @@ void Profile::UpdateValues() {
                   file_system::CurrentWorkingDirectory().c_str(),
                   kMainSection, kAppResourseFolderKey);
 
-#if !(defined(OS_WIN32))
   if (IsRelativePath(app_resourse_folder_)) {
     MakeAbsolutePath(app_resourse_folder_);
   }
-#endif
 
   LOG_UPDATED_VALUE(app_resourse_folder_, kAppResourseFolderKey,
                     kMainSection);
@@ -1010,11 +1018,7 @@ void Profile::UpdateValues() {
   ReadUIntValue(&stop_streaming_timeout_, kDefaultStopStreamingTimeout,
                 kMediaManagerSection, kStopStreamingTimeout);
 
-#ifdef OS_WIN32
-  stop_streaming_timeout_ = max(kDefaultStopStreamingTimeout, stop_streaming_timeout_);
-#else
   stop_streaming_timeout_ = std::max(kDefaultStopStreamingTimeout, stop_streaming_timeout_);
-#endif
 
   LOG_UPDATED_VALUE(stop_streaming_timeout_, kStopStreamingTimeout,
                     kHmiSection);
@@ -1742,7 +1746,11 @@ bool Profile::ReadUIntValue(uint16_t* value, uint16_t default_value,
       *value = default_value;
       return false;
     }
-
+    if (user_value > (std::numeric_limits < uint16_t > ::max)())
+    {
+      *value = default_value;
+      return false;
+    }
     *value = static_cast<uint16_t>(user_value);
     return true;
   }
