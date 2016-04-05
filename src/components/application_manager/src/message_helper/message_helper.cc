@@ -67,6 +67,19 @@ namespace {
 typedef std::map<std::string, hmi_apis::Common_AppPriority::eType>
     CommonAppPriorityMap;
 
+#ifdef OS_WINCE
+CommonAppPriorityMap::value_type init_value[] = {
+    CommonAppPriorityMap::value_type("NORMAL", hmi_apis::Common_AppPriority::NORMAL),
+    CommonAppPriorityMap::value_type("COMMUNICATION", hmi_apis::Common_AppPriority::COMMUNICATION),
+    CommonAppPriorityMap::value_type("EMERGENCY", hmi_apis::Common_AppPriority::EMERGENCY),
+    CommonAppPriorityMap::value_type("NAVIGATION", hmi_apis::Common_AppPriority::NAVIGATION),
+    CommonAppPriorityMap::value_type("NONE", hmi_apis::Common_AppPriority::NONE),
+    CommonAppPriorityMap::value_type("VOICECOM", hmi_apis::Common_AppPriority::VOICE_COMMUNICATION),
+    CommonAppPriorityMap::value_type("INVALID_ENUM", hmi_apis::Common_AppPriority::INVALID_ENUM)};
+
+    const int numInit = sizeof(init_value) / sizeof(init_value[0]);
+	CommonAppPriorityMap app_priority_values(init_value, init_value + numInit);
+#else
 CommonAppPriorityMap app_priority_values = {
     {"NORMAL", hmi_apis::Common_AppPriority::NORMAL},
     {"COMMUNICATION", hmi_apis::Common_AppPriority::COMMUNICATION},
@@ -75,7 +88,7 @@ CommonAppPriorityMap app_priority_values = {
     {"NONE", hmi_apis::Common_AppPriority::NONE},
     {"VOICECOM", hmi_apis::Common_AppPriority::VOICE_COMMUNICATION},
     {"INVALID_ENUM", hmi_apis::Common_AppPriority::INVALID_ENUM}};
-
+#endif
 bool ValidateSoftButtons(smart_objects::SmartObject& soft_buttons) {
   using namespace smart_objects;
   for (size_t i = 0; i < soft_buttons.length(); ++i) {

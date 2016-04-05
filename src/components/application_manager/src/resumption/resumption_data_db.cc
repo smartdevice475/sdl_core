@@ -41,6 +41,10 @@
 #include "utils/gen_hash.h"
 #include "utils/scope_guard.h"
 
+#ifdef OS_WINCE
+#include "utils/global.h"
+#endif
+
 namespace {
 const std::string kDatabaseName = "resumption";
 }

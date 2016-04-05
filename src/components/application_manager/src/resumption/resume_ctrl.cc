@@ -51,6 +51,10 @@
 #include "utils/make_shared.h"
 #include "utils/timer_task_impl.h"
 
+#ifdef OS_WINCE
+#include "utils/global.h"
+#endif
+
 namespace resumption {
 using namespace application_manager;
 

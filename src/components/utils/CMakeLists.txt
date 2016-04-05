@@ -37,6 +37,7 @@ include_directories (
   ${COMPONENTS_DIR}/config_profile/include
   ${COMPONENTS_DIR}/media_manager/include
   ${COMPONENTS_DIR}/protocol_handler/include
+  ${COMPONENTS_DIR}/include
   ${CMAKE_SOURCE_DIR}/include
   ${CMAKE_SOURCE_DIR}/src/3rd_party/apache-log4cxx-win32-0.10.0/apr/include
   ${CMAKE_SOURCE_DIR}/src/3rd_party-static/libusbx-1.0.16/libusb
@@ -81,7 +82,13 @@ set (SOURCES
     ${UTILS_SRC_DIR}/custom_string.cc    
 )
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  list (APPEND SOURCES
+    ${UTILS_SRC_DIR}/global.cc
+  )
+endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
   list (APPEND SOURCES
     ${UTILS_SRC_DIR}/timer_win.cc
   )

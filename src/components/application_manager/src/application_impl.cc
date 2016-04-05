@@ -119,10 +119,17 @@ ApplicationImpl::ApplicationImpl(
           new ::timer::TimerTaskImpl<ApplicationImpl>(
               this,
               &ApplicationImpl::OnAudioStreamSuspend)) {
+#ifdef OS_WINCE
+  cmd_number_to_time_limits_[mobile_apis::FunctionID::ReadDIDID] =
+      std::make_pair(date_time::DateTime::getCurrentTime(), 0);
+  cmd_number_to_time_limits_[mobile_apis::FunctionID::GetVehicleDataID] =
+      std::make_pair(date_time::DateTime::getCurrentTime(), 0);
+#else
   cmd_number_to_time_limits_[mobile_apis::FunctionID::ReadDIDID] = {
       date_time::DateTime::getCurrentTime(), 0};
   cmd_number_to_time_limits_[mobile_apis::FunctionID::GetVehicleDataID] = {
       date_time::DateTime::getCurrentTime(), 0};
+#endif
 
   set_mobile_app_id(mobile_app_id);
   set_name(app_name);
@@ -770,7 +777,11 @@ bool ApplicationImpl::IsCommandLimitsExceeded(
           cmd_number_to_time_limits_.find(cmd_id);
       // If no command with cmd_id had been executed yet, just add to limits
       if (cmd_number_to_time_limits_.end() == it) {
+#ifdef OS_WINCE
+        cmd_number_to_time_limits_[cmd_id] = std::make_pair(current, dummy_limit);
+#else
         cmd_number_to_time_limits_[cmd_id] = {current, dummy_limit};
+#endif
         return false;
       }
 

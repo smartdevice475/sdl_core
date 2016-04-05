@@ -39,6 +39,10 @@
 #include "resumption/last_state.h"
 #include "config_profile/profile.h"
 
+#ifdef OS_WINCE
+#include "utils/global.h"
+#endif
+
 namespace resumption {
 
 namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;

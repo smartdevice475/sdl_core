@@ -1,4 +1,4 @@
-
+set (PROJECT "apr-1")
 
 include_directories (
   ./
@@ -7,8 +7,6 @@ include_directories (
   ./include/arch/win32
   ./include/arch/unix
 )
-
-
 
 set (APR_SOURCES
    user/win32/userinfo.c
@@ -85,7 +83,9 @@ add_definitions(-DAPU_DECLARE_STATIC)
 
 add_library("apr-1" ${APR_SOURCES})
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-#list(APPEND LIBRARIES  ws2_32 odbc32 kernel32)
+  target_link_libraries(${PROJECT}  ws2_32 odbc32 kernel32)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  target_link_libraries(${PROJECT}  winsock coredll)
+else()
+  target_link_libraries(${PROJECT}  winsock coredll)
 endif()
-#target_link_libraries("apr-1"  ${LIBRARIES})
-

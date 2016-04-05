@@ -44,6 +44,31 @@
 #if defined(OS_WIN32) || defined(OS_WINCE)
 #include "os/poll_windows.h"
 #endif
+
+#if defined(OS_WINCE)
+static time_t time(time_t* TimeOutPtr)  
+{
+	SYSTEMTIME SytemTime;
+	FILETIME FileTime;
+	time_t Time = 0;
+
+	GetSystemTime( &SytemTime );
+	if( SystemTimeToFileTime( &SytemTime, &FileTime ) )
+	{
+		memcpy( &Time, &FileTime, sizeof( FILETIME ) );
+		// subtract the FILETIME value for 1970-01-01 00:00 (UTC)
+		Time -= 116444736000000000;
+		// convert to seconds
+		Time /= 10000000;
+	}
+	if( TimeOutPtr )
+	{
+		*TimeOutPtr = Time;
+	}
+	return Time;
+}
+#endif
+
 #if defined(OS_WIN32) || defined(OS_WINCE)
 void clock_gettime(int i, timespec * tm)
 {

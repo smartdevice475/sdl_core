@@ -61,6 +61,32 @@ HMILanguageHandler::HMILanguageHandler()  :
   subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnAppRegistered);
 }
 
+#ifdef OS_WINCE
+void HMILanguageHandler::set_language_for(
+    HMILanguageHandler::Interface interface_,
+    hmi_apis::Common_Language::eType language) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::string key = "UNKNOWN";
+  switch (interface_) {
+    case INTERFACE_UI:
+      key = UIKey;
+      break;
+    case INTERFACE_VR:
+      key = VRKey;
+      break;
+    case INTERFACE_TTS:
+      key = TTSKey;
+      break;
+    default:
+      LOG4CXX_WARN(logger_, "Unknown interface has been passed " << interface_);
+      return;
+    }
+  LOG4CXX_DEBUG(logger_, "Setting language " << language
+               << " for interface " << interface_);
+  resumption::LastState::instance()->dictionary[LanguagesKey][key] = language;
+  return;
+}
+#else
 void HMILanguageHandler::set_language_for(
     HMILanguageHandler::Interface interface,
     hmi_apis::Common_Language::eType language) {
@@ -85,7 +111,41 @@ void HMILanguageHandler::set_language_for(
   resumption::LastState::instance()->dictionary[LanguagesKey][key] = language;
   return;
 }
+#endif
 
+#ifdef OS_WINCE
+hmi_apis::Common_Language::eType HMILanguageHandler::get_language_for(
+    HMILanguageHandler::Interface interface_) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace resumption;
+  using namespace hmi_apis;
+  std::string key = "UNKNOWN";
+  switch (interface_) {
+    case INTERFACE_UI:
+      key = UIKey;
+      break;
+    case INTERFACE_VR:
+      key = VRKey;
+      break;
+    case INTERFACE_TTS:
+      key = TTSKey;
+      break;
+    default:
+      LOG4CXX_WARN(logger_, "Unknown interfcase has been passed " << interface_);
+      return Common_Language::INVALID_ENUM;
+  }
+
+  if (LastState::instance()->dictionary.isMember(LanguagesKey)) {
+    if (LastState::instance()->dictionary[LanguagesKey].isMember(key)) {
+      Common_Language::eType language =
+          static_cast<Common_Language::eType>(
+          LastState::instance()->dictionary[LanguagesKey][key].asInt());
+      return language;
+    }
+  }
+  return Common_Language::INVALID_ENUM;
+}
+#else
 hmi_apis::Common_Language::eType HMILanguageHandler::get_language_for(
     HMILanguageHandler::Interface interface) const {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -117,6 +177,7 @@ hmi_apis::Common_Language::eType HMILanguageHandler::get_language_for(
   }
   return Common_Language::INVALID_ENUM;
 }
+#endif
 
 void HMILanguageHandler::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -261,7 +322,7 @@ void HMILanguageHandler::VerifyWithPersistedLanguages() {
                         "mismatch with persisted values.");
 
   ApplicationManagerImpl::ApplicationListAccessor accessor;
-  ApplicationSetIt it = accessor.begin();
+  ApplicationSetConstIt it = accessor.begin();
   for (; accessor.end() != it;) {
     ApplicationConstSharedPtr app = *it++;
 

@@ -36,7 +36,9 @@
 #include <map>
 #include <memory>
 #include <set>
+#ifndef OS_WINCE
 #include <cstdint>
+#endif
 #include <utility>  // std::make_pair
 #include <vector>
 #include "utils/prioritized_queue.h"

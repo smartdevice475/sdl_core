@@ -50,11 +50,12 @@
 #include <cstdio>
 #include <algorithm>
 
+#ifdef OS_WINCE
+#include "utils/global.h"
+#endif
+
 #include "utils/file_system.h"
 
-#ifdef OS_WINCE
-typedef std::basic_string<wchar_t> wchar_string;
-#endif
 CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 uint64_t file_system::GetAvailableDiskSpace(const std::string& path) {
@@ -669,6 +670,15 @@ bool file_system::CopyFile(const std::string& src, const std::string& dst) {
 }
 
 bool file_system::MoveFile(const std::string& src, const std::string& dst) {
+#ifdef OS_WINCE
+  if (!CopyFile(src, dst)) {
+    return false;
+  }
+  if (!DeleteFile(src)) {
+    DeleteFile(dst);
+    return false;
+  }
+#else
   if (std::rename(src.c_str(), dst.c_str()) == 0) {
     return true;
   } else {
@@ -690,5 +700,6 @@ bool file_system::MoveFile(const std::string& src, const std::string& dst) {
     DeleteFile(src);
     return true;
   }
+#endif
   return false;
 }

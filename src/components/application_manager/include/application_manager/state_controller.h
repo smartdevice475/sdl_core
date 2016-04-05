@@ -328,7 +328,7 @@ class StateController : public event_engine::EventObserver {
   template <typename UnaryFunction>
   void ForEachApplication(UnaryFunction func) const {
     DataAccessor<ApplicationSet> accessor = app_mngr_->applications();
-    ApplicationSet::iterator it = accessor.GetData().begin();
+    ApplicationSetConstIt it = accessor.GetData().begin();
     for (; it != accessor.GetData().end(); ++it) {
       ApplicationConstSharedPtr const_app = *it;
       if (const_app) {

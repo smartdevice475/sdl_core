@@ -138,7 +138,7 @@ _CRTIMP extern int errno;
 /*
  * Support EDEADLOCK for compatibiity with older MS-C versions.
  */
-#define EDEADLOCK       EDEADLK
+//#define EDEADLOCK       EDEADLK
 
 #if defined(__cplusplus)
 }

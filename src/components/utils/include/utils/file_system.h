@@ -39,6 +39,10 @@
 #include <vector>
 #include <iostream>
 
+#ifdef OS_WINCE
+#include "utils/global.h"
+#endif
+
 namespace file_system {
 
 

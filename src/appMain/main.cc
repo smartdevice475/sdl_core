@@ -86,11 +86,19 @@ const std::string kLocalHostAddress = "127.0.0.1";
  */
 bool InitHmi() {
   std::string hmi_link = profile::Profile::instance()->link_to_web_hmi();
+#ifdef OS_WINCE
+  LPWIN32_FIND_DATA  sb = {0};
+  if(INVALID_HANDLE_VALUE==FindFirstFile((LPCWSTR)"hmi_link",sb)){
+    LOG4CXX_FATAL(logger_, "File with HMI link doesn't exist!");
+    return false;
+  }
+#else
   struct stat sb;
   if (stat(hmi_link.c_str(), &sb) == -1) {
     LOG4CXX_FATAL(logger_, "HMI index file " << hmi_link << " doesn't exist!");
     return false;
   }
+#endif
   return utils::System(kBrowser, kBrowserName).Add(kBrowserParams).Add(hmi_link)
       .Execute();
 }

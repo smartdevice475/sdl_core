@@ -62,6 +62,10 @@
 #include "usage_statistics/counter.h"
 #include <time.h>
 
+#ifdef OS_WINCE
+#include "utils/global.h"
+#endif
+
 namespace {
 int get_rand_from_range(uint32_t from = 0, int to = RAND_MAX) {
   return std::rand() % to + from;
@@ -71,6 +75,20 @@ int get_rand_from_range(uint32_t from = 0, int to = RAND_MAX) {
 namespace application_manager {
 
 namespace {
+#ifdef OS_WINCE
+DeviceTypes::value_type init_value[] = {
+	DeviceTypes::value_type(std::string("USB_AOA"),
+                   hmi_apis::Common_TransportType::USB_AOA),
+    DeviceTypes::value_type(std::string("USB_IOS"),
+                   hmi_apis::Common_TransportType::USB_IOS),
+    DeviceTypes::value_type(std::string("BLUETOOTH"),
+                   hmi_apis::Common_TransportType::BLUETOOTH),
+    DeviceTypes::value_type(std::string("WIFI"), hmi_apis::Common_TransportType::WIFI)};
+}
+
+const int numInit = sizeof(init_value) / sizeof(init_value[0]);
+DeviceTypes devicesType(init_value, init_value + numInit);
+#else
 DeviceTypes devicesType = {
     std::make_pair(std::string("USB_AOA"),
                    hmi_apis::Common_TransportType::USB_AOA),
@@ -80,7 +98,7 @@ DeviceTypes devicesType = {
                    hmi_apis::Common_TransportType::BLUETOOTH),
     std::make_pair(std::string("WIFI"), hmi_apis::Common_TransportType::WIFI)};
 }
-
+#endif
 
 uint32_t ApplicationManagerImpl::corelation_id_ = 0;
 const uint32_t ApplicationManagerImpl::max_corelation_id_ = UINT_MAX;
@@ -136,7 +154,11 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     , is_low_voltage_(false)
     , is_stopping_(false) {
 
+#ifdef OS_WINCE
+  std::srand(time(0));
+#else
   std::srand(std::time(0));
+#endif
   AddPolicyObserver(this);
 
 #if defined(OS_WIN32) || defined(OS_WINCE)
@@ -889,13 +911,8 @@ ApplicationManagerImpl::apps_waiting_for_registration() const {
 bool ApplicationManagerImpl::IsAppsQueriedFrom(
     const connection_handler::DeviceHandle handle) const {
   sync_primitives::AutoLock lock(apps_to_register_list_lock_);
-#ifdef OS_WINCE
   AppsWaitRegistrationSet::const_iterator it = apps_to_register_.begin();
   AppsWaitRegistrationSet::const_iterator it_end = apps_to_register_.end();
-#else
-  AppsWaitRegistrationSet::iterator it = apps_to_register_.begin();
-  AppsWaitRegistrationSet::const_iterator it_end = apps_to_register_.end();
-#endif
   for (; it != it_end; ++it) {
     if (handle == (*it)->device()) {
       return true;
@@ -3346,7 +3363,11 @@ void ApplicationManagerImpl::OnUpdateHMIAppType(
       smart_objects::SmartType_Array);
   bool flag_diffirence_app_hmi_type = false;
   ApplicationListAccessor accessor;
+#ifdef OS_WINCE
+  for (ApplicationSetConstIt it = accessor.begin(); it != accessor.end(); ++it) {
+#else
   for (ApplicationSetIt it = accessor.begin(); it != accessor.end(); ++it) {
+#endif
     it_app_hmi_types_from_policy = app_hmi_types.find(((*it)->mobile_app_id()));
 
     if (it_app_hmi_types_from_policy != app_hmi_types.end() &&

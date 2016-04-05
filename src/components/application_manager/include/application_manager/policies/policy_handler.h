@@ -37,7 +37,9 @@
 #include <map>
 #include <set>
 #include <vector>
+#ifndef OS_WINCE
 #include <cstdint>
+#endif
 #include "policy/policy_manager.h"
 #include "application_manager/policies/policy_event_observer.h"
 #include "application_manager/policies/delegates/statistics_delegate.h"

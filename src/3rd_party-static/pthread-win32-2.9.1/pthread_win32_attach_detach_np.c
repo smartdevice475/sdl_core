@@ -104,7 +104,7 @@ pthread_win32_process_attach_np ()
   /* strncat is secure - this is just to avoid a warning */
   if(GetSystemDirectory(QuserExDLLPathBuf, sizeof(QuserExDLLPathBuf)) &&
 #ifdef UNICODE
-	 0 == wcsncat_s(QuserExDLLPathBuf, sizeof(QuserExDLLPathBuf), "\\QUSEREX.DLL", 12))
+	 0 == wcsncat_s(QuserExDLLPathBuf, sizeof(QuserExDLLPathBuf), L"\\QUSEREX.DLL", 12))
 #else
      0 == strncat_s(QuserExDLLPathBuf, sizeof(QuserExDLLPathBuf), "\\QUSEREX.DLL", 12))
 #endif

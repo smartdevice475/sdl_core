@@ -132,7 +132,7 @@
 #define PACKAGE_VERSION "1.0.16"
 
 /* type of second poll() argument */
-#if defined(OS_WIN32) || !defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #define POLL_NFDS_TYPE unsigned int
 #else
 #define POLL_NFDS_TYPE nfds_t

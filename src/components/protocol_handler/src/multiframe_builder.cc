@@ -198,7 +198,12 @@ RESULT_CODE MultiFrameBuilder::HandleFirstFrame(const ProtocolFramePtr packet) {
   LOG4CXX_DEBUG(logger_, "Start waiting frames for connection_id: " << connection_id
                 << ", session_id: " << static_cast<int>(session_id)
                 << ", message_id: " << message_id);
+#ifdef OS_WINCE
+  ProtocolFrameData data = {packet, date_time::DateTime::getCurrentTime()};
+  messageId_map[message_id] = data;
+#else
   messageId_map[message_id] = {packet, date_time::DateTime::getCurrentTime()};
+#endif
   return RESULT_OK;
 }
 

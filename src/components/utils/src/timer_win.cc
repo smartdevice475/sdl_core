@@ -33,7 +33,9 @@
 #include "utils/timer.h"
 
 #include <ctime>
+#ifndef OS_WINCE
 #include <cerrno>
+#endif
 #include <cstring>
 
 #include "utils/timer_task.h"
@@ -160,8 +162,8 @@ bool StopPosixTimer(timer_t timer) {
   pthread_cond_signal(&timer->condvar);
   pthread_join(timer->tid, NULL);
   pthread_cond_destroy(&timer->condvar);
-  pthread_mutex_destroy(&timer->status_mutex);
   pthread_mutex_destroy(&timer->cond_mutex);
+  pthread_mutex_destroy(&timer->status_mutex);
   free(timer);
   return true;
 }
