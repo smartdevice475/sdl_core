@@ -62,39 +62,60 @@ void HandlePosixTimer(sigval signal_value) {
 namespace {
 const int kErrorCode = -1;
 
-itimerspec MillisecondsToItimerspec(const timer::Milliseconds miliseconds) {
-  struct itimerspec result;
+timespec MillisecondsToItimerspec(const timer::Milliseconds miliseconds) {
+  struct timespec now;
+  struct timespec wait_interval;
+  clock_gettime(CLOCK_REALTIME, &now);
+  wait_interval.tv_sec = now.tv_sec +
+	(miliseconds / DateTime::MILLISECONDS_IN_SECOND);
+  wait_interval.tv_nsec = now.tv_nsec +
+	(miliseconds %  DateTime::MILLISECONDS_IN_SECOND) *  DateTime::NANOSECONDS_IN_MILLISECOND;
+  wait_interval.tv_sec += wait_interval.tv_nsec / DateTime::NANOSECONDS_IN_MILLISECOND;
+  wait_interval.tv_nsec %= DateTime::NANOSECONDS_IN_MILLISECOND;
+  return wait_interval;
+}
 
-  result.it_value.tv_sec = miliseconds / DateTime::MILLISECONDS_IN_SECOND;
-  result.it_value.tv_nsec = (miliseconds % DateTime::MILLISECONDS_IN_SECOND) *
-                            DateTime::NANOSECONDS_IN_MILLISECOND;
-  result.it_interval.tv_sec = 0;
-  result.it_interval.tv_nsec = 0;
-
-  return result;
+void* pthread_timer_run(void* arg)
+{
+	return NULL;
 }
 
 void* pthread_timer_notify(void* arg)
 {
 	timer_t sig_ = static_cast<timer_t>(arg);
+	printf("lock posix timer\n");
 	pthread_mutex_lock(&sig_->status_mutex);
 	sig_->is_timeroff = false;
 	while (sig_&&!sig_->is_timeroff){
+		printf("wait posix timer\n");
+		struct timespec waittime = MillisecondsToItimerspec(sig_->millionsecs);
 		int32_t result=pthread_cond_timedwait(&sig_->condvar, 
 			&sig_->cond_mutex, 
-			&sig_->timerval.it_value);
+			&waittime);
 		if (result ==ETIMEDOUT){
+			printf("timeout posix timer\n");
 			sig_->sigev_notify_function(sig_->sigev_value);
+			//break;
 		}
+		else{
+			printf("stop posix timer\n");
+			if (sig_->is_timeroff)
+		        break;
+		}
+		if (!sig_->is_repeated)
+			break;
+
 	}
 	sig_->is_timeroff = true;
-	pthread_mutex_lock(&sig_->status_mutex);
+	pthread_mutex_unlock(&sig_->status_mutex);
+	printf("unlock posix timer\n");
 	return NULL;
 }
 
 timer_t StartPosixTimer(timer::Timer& trackable,
-                        const timer::Milliseconds timeout) {
+                        const timer::Milliseconds timeout,bool isrepeated=false) {
   LOG4CXX_AUTO_TRACE(logger_);
+  printf("start posix timer\n");
   int result;
   timer_t internal_timer = NULL;
   internal_timer = (timer_t)malloc(sizeof(timer_struct));
@@ -116,8 +137,8 @@ timer_t StartPosixTimer(timer::Timer& trackable,
 	  free(internal_timer);
 	  return NULL;
   }
-  
-  internal_timer->timerval = MillisecondsToItimerspec(timeout);
+  internal_timer->is_repeated = isrepeated;
+  internal_timer->millionsecs = timeout;
   internal_timer->sigev_value.sival_ptr = static_cast<void*>(&trackable);;
   internal_timer->sigev_notify_function = timer::HandlePosixTimer;
   
@@ -142,7 +163,6 @@ bool StopPosixTimer(timer_t timer) {
   pthread_mutex_destroy(&timer->status_mutex);
   pthread_mutex_destroy(&timer->cond_mutex);
   free(timer);
-  timer = NULL;
   return true;
 }
 }  // namespace
@@ -207,14 +227,14 @@ void timer::Timer::OnTimeout() {
     DCHECK(task_);
     task_->run();
   }
-  sync_primitives::AutoLock auto_lock(lock_);
-  if (is_running_) {
-    const bool stop_result = StopUnsafe();
-    DCHECK_OR_RETURN_VOID(stop_result);
-  }
-  if (repeatable_) {
-    StartUnsafe();
-  }
+  //sync_primitives::AutoLock auto_lock(lock_);
+  //if (is_running_) {
+  //  const bool stop_result = StopUnsafe();
+  //  DCHECK_OR_RETURN_VOID(stop_result);
+  //}
+  //if (repeatable_) {
+  //  StartUnsafe();
+  //}
 }
 
 void timer::Timer::SetTimeoutUnsafe(const timer::Milliseconds timeout) {
@@ -224,7 +244,7 @@ void timer::Timer::SetTimeoutUnsafe(const timer::Milliseconds timeout) {
 void timer::Timer::StartUnsafe() {
   LOG4CXX_DEBUG(logger_, "Creating posix_timer in " << name_);
   // Create new posix timer
-  timer_ = StartPosixTimer(*this, timeout_ms_);
+  timer_ = StartPosixTimer(*this, timeout_ms_,repeatable_);
   DCHECK_OR_RETURN_VOID(timer_);
   is_running_ = true;
 }

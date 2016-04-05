@@ -373,6 +373,7 @@ void LifeCycle::Run() {
 	  LOG4CXX_FATAL(logger_, "Subscribe to system signals error");
 	  return;
   }
+  Sleep(INFINITE);
 #elif defined(OS_WINCE)
 #else
   // Register signal handlers and wait sys signals

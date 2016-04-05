@@ -43,52 +43,18 @@ struct timespec {
 };
 #endif
 
-struct itimerspec {
-	struct timespec it_interval; /* timer period */
-	struct timespec it_value;    /* timer expiration */
-};
-//struct itimerval {
-//	struct timeval it_interval; /* timer interval */
-//	struct timeval it_value;    /* current value */
-//};
 typedef union sigval {
 	int  sival_int;
 	void *sival_ptr;
 }sigval_t;
 
-//typedef int clockid_t;
-//
-//#define SIGEV_NONE    0
-//#define SIGEV_SIGNAL  1
-//#define SIGEV_THREAD  2
-//
-//#define TIMER_ABSTIME  0
-//struct sigevent
-//{
-//	int sigev_notify; //notification type
-//	int sigev_signo; //signal number
-//	union sigval   sigev_value; //signal value
-//	void(*sigev_notify_function)(union sigval);
-//	pthread_attr_t *sigev_notify_attributes;
-//};
-
-//struct timer_struct
-//{
-//	bool isTimerOff;
-//	clockid_t clockid;
-//	pthread_t tid;
-//	struct sigevent sigevt;
-//	pthread_cond_t  condvar;
-//	pthread_mutex_t mutex;
-//	struct itimerspec timerval;
-//	struct itimerspec *timerover;//set NULL
-//};
 struct timer_struct
 {
 	bool is_timeroff;
+	bool is_repeated;
 	union sigval   sigev_value; //signal value
 	void(*sigev_notify_function)(union sigval);
-	struct itimerspec timerval;    /* timer expiration */
+	int millionsecs;    /* timer expiration */
 	pthread_t tid;
 	pthread_cond_t  condvar;
 	pthread_mutex_t cond_mutex;
