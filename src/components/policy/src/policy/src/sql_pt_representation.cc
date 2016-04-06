@@ -354,7 +354,7 @@ InitResult SQLPTRepresentation::Init() {
 #ifdef BUILD_TESTS
       ++open_counter_;
 #endif // BUILD_TESTS
-      if (db_->Open()){
+      if (db_->Open()) {
         LOG4CXX_INFO(logger_, "Database opened.");
         is_opened = true;
         break;

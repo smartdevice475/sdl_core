@@ -456,7 +456,7 @@ ModuleConfig::ModuleConfig(const Json::Value* value__)
     vehicle_model(impl::ValueMember(value__, "vehicle_model")),
     vehicle_year(impl::ValueMember(value__, "vehicle_year")),
     preloaded_date(impl::ValueMember(value__, "preloaded_date")),
-    certificate(impl::ValueMember(value__, "certificate")){
+    certificate(impl::ValueMember(value__, "certificate")) {
 }
 
 void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {

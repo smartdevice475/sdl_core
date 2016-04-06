@@ -820,7 +820,7 @@ void PolicyManagerImpl::Increment(usage_statistics::GlobalCounterId type) {
 }
 
 void PolicyManagerImpl::Increment(const std::string& app_id,
-                                  usage_statistics::AppCounterId type){
+                                  usage_statistics::AppCounterId type) {
   LOG4CXX_DEBUG(logger_, "Increment " << app_id << " AppCounter: " << type);
   cache_->Increment(app_id, type);
 }

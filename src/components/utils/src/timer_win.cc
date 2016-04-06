@@ -64,7 +64,7 @@ void HandlePosixTimer(sigval signal_value) {
 namespace {
 const int kErrorCode = -1;
 
-timespec MillisecondsToItimerspec(const timer::Milliseconds miliseconds) {
+timespec MillisecondsToTimeSpec(const timer::Milliseconds miliseconds) {
   struct timespec now;
   struct timespec wait_interval;
   clock_gettime(CLOCK_REALTIME, &now);
@@ -87,12 +87,12 @@ void* pthread_timer_notify(void* arg)
 	timer_t sig_ = static_cast<timer_t>(arg);
 	pthread_mutex_lock(&sig_->status_mutex);
 	sig_->is_timeroff = false;
-	while (sig_&&!sig_->is_timeroff){
-		struct timespec waittime = MillisecondsToItimerspec(sig_->millionsecs);
+	while (sig_&&!sig_->is_timeroff) {
+        struct timespec waittime = MillisecondsToTimeSpec(sig_->millionsecs);
 		int32_t result=pthread_cond_timedwait(&sig_->condvar, 
 			&sig_->cond_mutex, 
 			&waittime);
-		if (result ==ETIMEDOUT){
+		if (result ==ETIMEDOUT) {
 			sig_->sigev_notify_function(sig_->sigev_value);
 		}
 		else{
@@ -114,7 +114,7 @@ timer_t StartPosixTimer(timer::Timer& trackable,
   int result;
   timer_t internal_timer = NULL;
   internal_timer = (timer_t)malloc(sizeof(timer_struct));
-  if (!internal_timer){
+  if (!internal_timer) {
 	  LOG4CXX_FATAL(logger_,
 		  "Can`t create posix_timer. Error("
 		  << ENOMEM << "): " << strerror(ENOMEM));
@@ -124,7 +124,7 @@ timer_t StartPosixTimer(timer::Timer& trackable,
 
   if ((0 != pthread_mutex_init(&internal_timer->status_mutex, NULL))||
 	  (0 != pthread_mutex_init(&internal_timer->cond_mutex, NULL)) ||
-	  (0 != pthread_cond_init(&internal_timer->condvar, NULL))){
+	  (0 != pthread_cond_init(&internal_timer->condvar, NULL))) {
 	  int error_code = errno;
 	  LOG4CXX_FATAL(logger_,
 		  "Can`t create posix_timer. Error("
@@ -137,7 +137,7 @@ timer_t StartPosixTimer(timer::Timer& trackable,
   internal_timer->sigev_value.sival_ptr = static_cast<void*>(&trackable);;
   internal_timer->sigev_notify_function = timer::HandlePosixTimer;
   
-  if ((result = pthread_create(&internal_timer->tid, NULL, pthread_timer_notify, internal_timer)) != 0){
+  if ((result = pthread_create(&internal_timer->tid, NULL, pthread_timer_notify, internal_timer)) != 0) {
 	  LOG4CXX_FATAL(logger_,
 		  "Can`t create posix_timer. Error("
 		  << result << "): " << strerror(result));
@@ -222,14 +222,6 @@ void timer::Timer::OnTimeout() {
     DCHECK(task_);
     task_->run();
   }
-  //sync_primitives::AutoLock auto_lock(lock_);
-  //if (is_running_) {
-  //  const bool stop_result = StopUnsafe();
-  //  DCHECK_OR_RETURN_VOID(stop_result);
-  //}
-  //if (repeatable_) {
-  //  StartUnsafe();
-  //}
 }
 
 void timer::Timer::SetTimeoutUnsafe(const timer::Milliseconds timeout) {
@@ -239,7 +231,7 @@ void timer::Timer::SetTimeoutUnsafe(const timer::Milliseconds timeout) {
 void timer::Timer::StartUnsafe() {
   LOG4CXX_DEBUG(logger_, "Creating posix_timer in " << name_);
   // Create new posix timer
-  timer_ = StartPosixTimer(*this, timeout_ms_,repeatable_);
+  timer_ = StartPosixTimer(*this, timeout_ms_, repeatable_);
   DCHECK_OR_RETURN_VOID(timer_);
   is_running_ = true;
 }

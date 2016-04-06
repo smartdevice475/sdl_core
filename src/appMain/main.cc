@@ -89,7 +89,7 @@ bool InitHmi() {
   std::string hmi_link = profile::Profile::instance()->link_to_web_hmi();
 #ifdef OS_WINCE
   LPWIN32_FIND_DATA  sb = {0};
-  if(INVALID_HANDLE_VALUE==FindFirstFile((LPCWSTR)"hmi_link",sb)){
+  if(INVALID_HANDLE_VALUE==FindFirstFile((LPCWSTR)"hmi_link",sb)) {
     LOG4CXX_FATAL(logger_, "File with HMI link doesn't exist!");
     return false;
   }

@@ -119,7 +119,7 @@ bool ConditionalVariable::Wait(AutoLock& auto_lock) {
 }
 
 ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
-    AutoLock& auto_lock, int32_t milliseconds){
+    AutoLock& auto_lock, int32_t milliseconds) {
   struct timespec now;
 #if defined(OS_WIN32) || defined(OS_WINCE)
   clock_gettime(CLOCK_REALTIME, &now);

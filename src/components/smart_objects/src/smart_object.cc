@@ -732,7 +732,7 @@ void SmartObject::duplicate(const SmartObject& OtherObject) {
 
   m_type = newType;
 #ifdef OS_WIN32
-  if (m_type != SmartType_Null && m_type != SmartType_Invalid){
+  if (m_type != SmartType_Null && m_type != SmartType_Invalid) {
 	  m_data = newData;
   }
 #else

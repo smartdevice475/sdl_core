@@ -151,7 +151,7 @@ class AutoLock {
     : lock_(lock) { lock_.Acquire(); }
   ~AutoLock()     { lock_.Release();  }
  private:
-  Lock& GetLock(){ return lock_;     }
+  Lock& GetLock() { return lock_;     }
   Lock& lock_;
 
  private:

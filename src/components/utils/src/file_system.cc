@@ -201,8 +201,8 @@ bool file_system::IsDirectory(const std::string& name) {
 #if defined(OS_WIN32)
 	int fileAttri = GetFileAttributes(name.c_str());
 
-	if(fileAttri != -1){
-		if (fileAttri & FILE_ATTRIBUTE_DIRECTORY){
+	if(fileAttri != -1) {
+		if (fileAttri & FILE_ATTRIBUTE_DIRECTORY) {
 			return true;
 		}	
 	}
@@ -212,8 +212,8 @@ bool file_system::IsDirectory(const std::string& name) {
 	Global::toUnicode(name, CP_ACP, strUnicodeData);
 	int fileAttri = GetFileAttributes(strUnicodeData.c_str());
 
-	if(fileAttri != -1){
-		if (fileAttri & FILE_ATTRIBUTE_DIRECTORY){
+	if(fileAttri != -1) {
+		if (fileAttri & FILE_ATTRIBUTE_DIRECTORY) {
 			return true;
 		}	
 	}
@@ -233,7 +233,7 @@ bool file_system::IsDirectory(const std::string& name) {
 bool file_system::DirectoryExists(const std::string& name) {
 #if defined(OS_WIN32)
 	int fileAttri = ::GetFileAttributes(name.c_str());
-	if(fileAttri == -1){
+	if(fileAttri == -1) {
 		return false;
 	}
 	return true;
@@ -241,7 +241,7 @@ bool file_system::DirectoryExists(const std::string& name) {
 	wchar_string strUnicodeData;
 	Global::toUnicode(name, CP_ACP, strUnicodeData);
 	int fileAttri = ::GetFileAttributes(strUnicodeData.c_str());
-	if(fileAttri == -1){
+	if(fileAttri == -1) {
 		return false;
 	}
 	return true;

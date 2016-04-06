@@ -1314,7 +1314,7 @@ std::string ConvertPacketDataToString(const uint8_t *data,
   // Check data for printability
   for (size_t i = 0; i < data_size; ++i) {
 #if defined(OS_WIN32) || defined(OS_WINCE)
-    if (!isprint(text[i])){
+    if (!isprint(text[i])) {
 #else
     if (!std::isprint(text[i], loc)) {
 #endif

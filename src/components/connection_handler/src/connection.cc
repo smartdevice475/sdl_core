@@ -57,7 +57,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "ConnectionHandler")
 Service *Session::FindService(const protocol_handler::ServiceType &service_type) {
   ServiceList::iterator service_it =
       std::find(service_list.begin(), service_list.end(), service_type);
-  if(service_it != service_list.end()){
+  if(service_it != service_list.end()) {
     return &(*service_it);
   }
   return NULL;
@@ -66,7 +66,7 @@ Service *Session::FindService(const protocol_handler::ServiceType &service_type)
 const Service *Session::FindService(const protocol_handler::ServiceType &service_type) const {
   ServiceList::const_iterator service_it =
       std::find(service_list.begin(), service_list.end(), service_type);
-  if(service_it != service_list.end()){
+  if(service_it != service_list.end()) {
     return &(*service_it);
   }
   return NULL;

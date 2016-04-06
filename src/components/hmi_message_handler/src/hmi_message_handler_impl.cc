@@ -46,7 +46,7 @@ HMIMessageHandlerImpl::HMIMessageHandlerImpl(
                    get_settings().thread_min_stack_size()))
   , messages_from_hmi_("HMH FromHMI", this,
                threads::ThreadOptions(
-                   get_settings().thread_min_stack_size())){
+                   get_settings().thread_min_stack_size())) {
 }
 
 HMIMessageHandlerImpl::~HMIMessageHandlerImpl() {

@@ -130,7 +130,7 @@ class ScopeGuardImplBase {
 /**
  * The class which allows to bind some parameter with free function.
  * I.E.
- * void release(char* p){delete p;}
+ * void release(char* p) {delete p;}
  *
  * ScopeGuard guard = MakeGuard(release, p);
  *

@@ -381,7 +381,7 @@ Profile::Profile()
       hash_string_size_(kDefaultHashStringSize),
       use_db_for_resumption_(false),
       attempts_to_open_resumption_db_(kDefaultAttemptsToOpenResumptionDB),
-      open_attempt_timeout_ms_resumption_db_(kDefaultOpenAttemptTimeoutMsResumptionDB){
+      open_attempt_timeout_ms_resumption_db_(kDefaultOpenAttemptTimeoutMsResumptionDB) {
 }
 
 

@@ -86,7 +86,7 @@ PlatformThreadHandle SingleThreadSimpleValidator::creation_thread_id() const
 
 
 SingleThreadValidator::SingleThreadValidator()
-    : owning_thread_id_(Thread::CurrentId()){
+    : owning_thread_id_(Thread::CurrentId()) {
 }
 
 SingleThreadValidator::~SingleThreadValidator() {

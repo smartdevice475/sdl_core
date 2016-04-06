@@ -151,7 +151,7 @@ class CompositeType {
       kInvalidInitialized
     };
     explicit CompositeType(InitializationState init_state);
-    virtual ~CompositeType(){}
+    virtual ~CompositeType() {}
     static InitializationState InitHelper(bool is_next);
     static InitializationState InitHelper(const Json::Value* value,
                                           bool (Json::Value::*type_check)() const);

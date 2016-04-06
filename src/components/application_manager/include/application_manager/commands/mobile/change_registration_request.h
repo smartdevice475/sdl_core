@@ -148,7 +148,7 @@ class ChangeRegistrationRequest : public CommandRequestImpl {
    */
   struct CoincidencePredicateVR {
     explicit CoincidencePredicateVR(const custom_str::CustomString& newItem)
-        : newItem_(newItem){};
+        : newItem_(newItem) {};
 
     bool operator()(const smart_objects::SmartObject& obj) const {
       const custom_str::CustomString& vr_synonym = obj.asCustomString();

@@ -40,7 +40,7 @@
  *
  * @example
  * struct A {
- *   A(int){}
+ *   A(int) {}
  *   A(int, double) {}
  *   A(int, double, std::string) {}
  * }

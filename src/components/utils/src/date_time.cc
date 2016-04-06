@@ -150,7 +150,7 @@ int64_t DateTime::calculateTimeSpan(const TimevalStruct& sinceTime) {
 }
 
 int64_t DateTime::calculateTimeDiff(const TimevalStruct &time1,
-                                    const TimevalStruct &time2){
+                                    const TimevalStruct &time2) {
   const TimevalStruct times1 = ConvertionUsecs(time1);
   const TimevalStruct times2 = ConvertionUsecs(time2);
   TimevalStruct ret;
@@ -204,7 +204,7 @@ TimeCompare date_time::DateTime::compareTime(const TimevalStruct &time1, const T
   return EQUAL;
 }
 
-TimevalStruct date_time::DateTime::ConvertionUsecs(const TimevalStruct &time){
+TimevalStruct date_time::DateTime::ConvertionUsecs(const TimevalStruct &time) {
   if (time.tv_usec >= MICROSECONDS_IN_SECOND) {
     TimevalStruct time1;
     time1.tv_sec = static_cast<int64_t>(time.tv_sec) + (time.tv_usec/MICROSECONDS_IN_SECOND);

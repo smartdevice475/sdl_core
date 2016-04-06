@@ -121,30 +121,30 @@ int ThreadedSocketConnection::CreatePipe()
 	int namelen = sizeof(name);
 	tcp1 = tcp2 = -1;
 	int tcp = socket(AF_INET, SOCK_STREAM, 0);
-	if (tcp == -1){
+	if (tcp == -1) {
 		goto clean;
 	}
-	if (bind(tcp, (sockaddr*)&name, namelen) == -1){
+	if (bind(tcp, (sockaddr*)&name, namelen) == -1) {
 		goto clean;
 	}
-	if (::listen(tcp, 5) == -1){
+	if (::listen(tcp, 5) == -1) {
 		goto clean;
 	}
-	if (getsockname(tcp, (sockaddr*)&name, &namelen) == -1){
+	if (getsockname(tcp, (sockaddr*)&name, &namelen) == -1) {
 		goto clean;
 	}
 	tcp1 = socket(AF_INET, SOCK_STREAM, 0);
-	if (tcp1 == -1){
+	if (tcp1 == -1) {
 		goto clean;
 	}
-	if (-1 == connect(tcp1, (sockaddr*)&name, namelen)){
+	if (-1 == connect(tcp1, (sockaddr*)&name, namelen)) {
 		goto clean;
 	}
 	tcp2 = accept(tcp, (sockaddr*)&name, &namelen);
-	if (tcp2 == -1){
+	if (tcp2 == -1) {
 		goto clean;
 	}
-	if (closesocket(tcp) == -1){
+	if (closesocket(tcp) == -1) {
 		goto clean;
 	}
 	write_fd_ = tcp1;
@@ -153,13 +153,13 @@ int ThreadedSocketConnection::CreatePipe()
 	ioctlsocket(read_fd_, FIONBIO, (u_long FAR*) &iMode);
 	return 0;
 clean:
-	if (tcp != -1){
+	if (tcp != -1) {
 		closesocket(tcp);
 	}
-	if (tcp2 != -1){
+	if (tcp2 != -1) {
 		closesocket(tcp2);
 	}
-	if (tcp1 != -1){
+	if (tcp1 != -1) {
 		closesocket(tcp1);
 	}
 	return -1;
@@ -297,7 +297,7 @@ void ThreadedSocketConnection::Transmit() {
 	FD_SET(socket_, &fdread);
 	FD_SET(read_fd_, &fdread);
 	int ret = select(0, &fdread, NULL, NULL, NULL);
-	if (ret == SOCKET_ERROR){
+	if (ret == SOCKET_ERROR) {
 		Abort();
 		LOG4CXX_INFO(logger_, "if (ret == SOCKET_ERROR) exit");
 		return;
@@ -425,7 +425,7 @@ bool ThreadedSocketConnection::Receive() {
 	int i = 0;
 	do {
 		bytes_read = recv(socket_, (char *)buffer, sizeof(buffer), 0);
-		if (bytes_read > 0){
+		if (bytes_read > 0) {
 			break;
 		}
 		i++;

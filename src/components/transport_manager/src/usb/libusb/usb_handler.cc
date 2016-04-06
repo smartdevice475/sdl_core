@@ -150,7 +150,7 @@ void UsbHandler::DeviceArrived(libusb_device* device_libusb) {
   }
 
 #if defined(OS_WINCE)
-  if(libusb_kernel_driver_active(device_handle_libusb,1)==1){
+  if(libusb_kernel_driver_active(device_handle_libusb,1)==1) {
 	  LOG4CXX_INFO(logger_, "libusb_kernel_driver_active:detach the usb driver");
 	  libusb_detach_kernel_driver(device_handle_libusb,1);
   }
@@ -279,7 +279,7 @@ bool UsbHandler::IsUsbEqual(libusb_device *devd,libusb_device *devs)
 		uint16_t idVendors = descs.idVendor;
 		uint16_t idProductd = descd.idProduct;
 		uint16_t idProducts = descs.idProduct;
-		if (idVendord == 0x18d1 || idVendors == 0x18d1){
+		if (idVendord == 0x18d1 || idVendors == 0x18d1) {
 			LOG4CXX_INFO(logger_, "vid: " << idVendord);
 		}
 		bool bolret = (idVendord == idVendors && idProductd == idProducts);
@@ -296,18 +296,18 @@ bool UsbHandler::IsUsbEqual(libusb_device *devd,libusb_device *devs)
 #endif
 }
 
-void UsbHandler::UsbThread(){
+void UsbHandler::UsbThread() {
 	
 	libusb_set_debug(libusb_context_, LIBUSB_LOG_LEVEL_INFO); 
 	LOG4CXX_INFO(logger_, "UsbThread");
 	fflush(stdout);
-	while (!shutdown_requested_){
+	while (!shutdown_requested_) {
 		libusb_device **devs=NULL;
 		int num=libusb_get_device_list(libusb_context_,&devs);
 
 		//check  exist
 		//LOG4CXX_INFO(logger_,"check exist usb");
-		if(num<0){
+		if(num<0) {
 			LOG4CXX_INFO(logger_, "lisusb_get_device_list:errno = " << num);
 			fflush(stdout);
 		}
@@ -315,16 +315,16 @@ void UsbHandler::UsbThread(){
 		for (Devices::iterator it = devices_.begin(); it != devices_.end(); ++it) {
 			libusb_device *dev=(*it)->GetLibusbDevice();
 			bool exist=false;
-			for(int j=0;j<num;j++){
+			for(int j=0;j<num;j++) {
 				if(IsUsbEqual(dev,devs[j]))
 					exist=true;
 			}
-			if(!exist){
+			if(!exist) {
 				leftDevs.push_back(dev);
 			}
 		}
 
-		for(int i=0;i<leftDevs.size();i++){
+		for(int i=0;i<leftDevs.size();i++) {
 			libusb_device *device=leftDevs[i];
 			LOG4CXX_INFO(logger_, "libusb device left (bus number "
                             << static_cast<int>(libusb_get_bus_number(device))
@@ -336,7 +336,7 @@ void UsbHandler::UsbThread(){
 		//device arrive
 		//LOG4CXX_INFO(logger_,"arrive usb check");
 		std::vector<libusb_device*> arriveDevs;
-		for(int i=0;i<num;i++){
+		for(int i=0;i<num;i++) {
 			libusb_device *device=devs[i];
 			bool exist=false;
 			for (Devices::iterator it = devices_.begin(); it != devices_.end(); ++it) {
@@ -348,7 +348,7 @@ void UsbHandler::UsbThread(){
 				arriveDevs.push_back(device);
 		}
 		//
-		for(int i=0;i<arriveDevs.size();i++){
+		for(int i=0;i<arriveDevs.size();i++) {
 			libusb_device *device=arriveDevs[i];
 			LOG4CXX_INFO(logger_, "libusb device arrived (bus number "
                             << static_cast<int>(libusb_get_bus_number(device))

@@ -53,7 +53,7 @@ class MediaManager {
     virtual void StopStreaming(
         int32_t application_key, protocol_handler::ServiceType service_type) = 0;
 
-    virtual ~MediaManager(){}
+    virtual ~MediaManager() {}
 };
 
 }  // namespace media_manager

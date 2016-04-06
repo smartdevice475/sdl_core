@@ -51,7 +51,7 @@ Device::Device(DeviceHandle device_handle,
     : device_handle_(device_handle),
       user_friendly_name_(user_friendly_name),
       mac_address_(mac_address),
-      connection_type_(connection_type){
+      connection_type_(connection_type) {
     mac_address_ = encryption::MakeHash(mac_address);
     LOG4CXX_DEBUG(logger_,
                   "Device: MAC address - " << mac_address

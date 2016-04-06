@@ -53,7 +53,7 @@ class AMTelemetryObserver {
   typedef utils::SharedPtr<MessageMetric> MessageMetricSharedPtr;
 
   virtual void OnMessage(MessageMetricSharedPtr) = 0;
-  virtual ~AMTelemetryObserver(){}
+  virtual ~AMTelemetryObserver() {}
 };
 }  // application_manager
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_USAGE_STATISTICS_H_
