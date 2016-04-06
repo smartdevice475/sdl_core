@@ -375,6 +375,7 @@ void LifeCycle::Run() {
   }
   Sleep(INFINITE);
 #elif defined(OS_WINCE)
+  Sleep(INFINITE);
 #else
   // Register signal handlers and wait sys signals
   // from OS

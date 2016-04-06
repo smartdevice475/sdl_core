@@ -85,22 +85,17 @@ void* pthread_timer_run(void* arg)
 void* pthread_timer_notify(void* arg)
 {
 	timer_t sig_ = static_cast<timer_t>(arg);
-	printf("lock posix timer\n");
 	pthread_mutex_lock(&sig_->status_mutex);
 	sig_->is_timeroff = false;
 	while (sig_&&!sig_->is_timeroff){
-		printf("wait posix timer\n");
 		struct timespec waittime = MillisecondsToItimerspec(sig_->millionsecs);
 		int32_t result=pthread_cond_timedwait(&sig_->condvar, 
 			&sig_->cond_mutex, 
 			&waittime);
 		if (result ==ETIMEDOUT){
-			printf("timeout posix timer\n");
 			sig_->sigev_notify_function(sig_->sigev_value);
-			//break;
 		}
 		else{
-			printf("stop posix timer\n");
 			if (sig_->is_timeroff)
 		        break;
 		}
@@ -110,14 +105,12 @@ void* pthread_timer_notify(void* arg)
 	}
 	sig_->is_timeroff = true;
 	pthread_mutex_unlock(&sig_->status_mutex);
-	printf("unlock posix timer\n");
 	return NULL;
 }
 
 timer_t StartPosixTimer(timer::Timer& trackable,
                         const timer::Milliseconds timeout,bool isrepeated=false) {
   LOG4CXX_AUTO_TRACE(logger_);
-  printf("start posix timer\n");
   int result;
   timer_t internal_timer = NULL;
   internal_timer = (timer_t)malloc(sizeof(timer_struct));

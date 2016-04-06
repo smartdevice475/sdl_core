@@ -3,7 +3,6 @@
 
 /* Default visibility */
 #if defined(OS_WIN32) || defined(OS_WINCE)
-#define OS_WINDOWS 1
 #define DEFAULT_VISIBILITY
 #else
 #define DEFAULT_VISIBILITY __attribute__((visibility("default")))
@@ -108,7 +107,7 @@
 /* #undef OS_OPENBSD */
 
 /* Windows backend */
-/* #undef OS_WINDOWS */
+/* #undef OS_WIN32 */
 
 /* Name of package */
 #define PACKAGE "libusbx"

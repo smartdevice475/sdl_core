@@ -211,7 +211,7 @@ static inline void usbi_dbg(const char *format, ...)
 /* Internal abstraction for thread synchronization */
 #if defined(THREADS_POSIX)
 #include "os/threads_posix.h"
-#elif defined(OS_WINDOWS) || defined(OS_WINCE)
+#elif defined(OS_WIN32) || defined(OS_WINCE)
 #include <os/threads_windows.h>
 #endif
 
@@ -436,11 +436,11 @@ void usbi_disconnect_device (struct libusb_device *dev);
 #if defined(OS_LINUX) || defined(OS_DARWIN) || defined(OS_OPENBSD)
 #include <unistd.h>
 #include "os/poll_posix.h"
-#elif defined(OS_WINDOWS) || defined(OS_WINCE)
+#elif defined(OS_WIN32) || defined(OS_WINCE)
 #include "os/poll_windows.h"
 #endif
 
-#if (defined(OS_WINDOWS) || defined(OS_WINCE)) && !defined(__GNUC__)
+#if (defined(OS_WIN32) || defined(OS_WINCE)) && !defined(__GNUC__)
 #define snprintf _snprintf
 #define vsnprintf _vsnprintf
 int usbi_gettimeofday(struct timeval *tp, void *tzp);

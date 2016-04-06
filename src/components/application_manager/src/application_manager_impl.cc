@@ -894,7 +894,11 @@ ApplicationConstSharedPtr ApplicationManagerImpl::waiting_app(
 
   HmiAppIdPredicate finder(hmi_id);
   ApplicationSharedPtr result;
+#ifdef OS_WINCE
+  AppsWaitRegistrationSet::const_iterator it_app = std::find_if((AppsWaitRegistrationSet::const_iterator)app_list.begin(), it_end, finder);
+#else
   ApplicationSetConstIt it_app = std::find_if(app_list.begin(), it_end, finder);
+#endif
   if (it_app != it_end) {
     result = *it_app;
   }

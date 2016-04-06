@@ -83,9 +83,9 @@ set(LIBRARIES
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES pthread)
   list(APPEND LIBRARIES dl)
-elif (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Windows")
   list(APPEND LIBRARIES pthreadVC2 ws2_32)
-elseif(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
   list(APPEND LIBRARIES pthreadVC2 ws2)
 endif()
 

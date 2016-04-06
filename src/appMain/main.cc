@@ -57,6 +57,7 @@
 #include "utils/system.h"
 #include "config_profile/profile.h"
 #include "utils/appenders_loader.h"
+#include "utils/file_system.h"
 
 #if defined(EXTENDED_MEDIA_MODE)
 #include <gst/gst.h>
@@ -140,12 +141,22 @@ int32_t main(int32_t argc, char** argv) {
   if ((argc > 1)&&(0 != argv)) {
     profile::Profile::instance()->config_file_name(argv[1]);
   } else {
+#ifdef OS_WINCE
+    profile::Profile::instance()->config_file_name(
+        file_system::CurrentWorkingDirectory() + "\\" + "smartDeviceLink.ini");
+#else
     profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
+#endif
   }
 
   // Logger initialization
+#ifdef OS_WINCE
+  INIT_LOGGER(file_system::CurrentWorkingDirectory() + "/" + "log4cxx.properties",
+              profile::Profile::instance()->logs_enabled());
+#else
   INIT_LOGGER("log4cxx.properties",
               profile::Profile::instance()->logs_enabled());
+#endif
 
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
 
@@ -168,7 +179,6 @@ int32_t main(int32_t argc, char** argv) {
 
   // --------------------------------------------------------------------------
   // Third-Party components initialization.
-
   if (!main_namespace::LifeCycle::instance()->InitMessageSystem()) {
     LOG4CXX_FATAL(logger_, "Failed to init message system");
     main_namespace::LifeCycle::instance()->StopComponents();
