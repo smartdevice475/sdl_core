@@ -103,12 +103,6 @@ void clock_gettime(int i, timespec * tm)
 
 namespace date_time {
 
-#if defined(OS_WIN32) || defined(OS_WINCE)
-#else
-int32_t const DateTime::MILLISECONDS_IN_SECOND;
-int32_t const DateTime::MICROSECONDS_IN_MILLISECONDS;
-#endif
-
 TimevalStruct DateTime::getCurrentTime() {
   TimevalStruct currentTime;
 #if defined(OS_WIN32) || defined(OS_WINCE)

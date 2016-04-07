@@ -33,9 +33,7 @@
 #include "utils/timer.h"
 
 #include <ctime>
-#ifndef OS_WINCE
 #include <cerrno>
-#endif
 #include <cstring>
 
 #include "utils/timer_task.h"
@@ -78,46 +76,46 @@ itimerspec MillisecondsToItimerspec(const timer::Milliseconds miliseconds) {
 
 timer_t StartPosixTimer(timer::Timer& trackable,
                         const timer::Milliseconds timeout) {
-  //LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
   timer_t internal_timer = NULL;
 
-  //sigevent signal_event;
-  //signal_event.sigev_notify = SIGEV_THREAD;
-  //signal_event.sigev_notify_attributes = NULL;
-  //signal_event.sigev_value.sival_ptr = static_cast<void*>(&trackable);
-  //signal_event.sigev_notify_function = timer::HandlePosixTimer;
+  sigevent signal_event;
+  signal_event.sigev_notify = SIGEV_THREAD;
+  signal_event.sigev_notify_attributes = NULL;
+  signal_event.sigev_value.sival_ptr = static_cast<void*>(&trackable);
+  signal_event.sigev_notify_function = timer::HandlePosixTimer;
 
-  //if (timer_create(CLOCK_REALTIME, &signal_event, &internal_timer) ==
-  //    kErrorCode) {
-  //  int error_code = errno;
-  //  LOG4CXX_FATAL(logger_,
-  //                "Can`t create posix_timer. Error("
-  //                    << error_code << "): " << strerror(error_code));
-  //  return NULL;
-  //}
-  //const itimerspec itimer = MillisecondsToItimerspec(timeout);
+  if (timer_create(CLOCK_REALTIME, &signal_event, &internal_timer) ==
+      kErrorCode) {
+    int error_code = errno;
+    LOG4CXX_FATAL(logger_,
+                  "Can`t create posix_timer. Error("
+                      << error_code << "): " << strerror(error_code));
+    return NULL;
+  }
+  const itimerspec itimer = MillisecondsToItimerspec(timeout);
 
-  //if (timer_settime(internal_timer, 0, &itimer, NULL) == kErrorCode) {
-  //  int error_code = errno;
-  //  UNUSED(error_code);
-  //  LOG4CXX_FATAL(logger_,
-  //                "Can`t set timeout to posix_timer. Error("
-  //                    << error_code << "): " << strerror(error_code));
-  //  return NULL;
-  //}
+  if (timer_settime(internal_timer, 0, &itimer, NULL) == kErrorCode) {
+    int error_code = errno;
+    UNUSED(error_code);
+    LOG4CXX_FATAL(logger_,
+                  "Can`t set timeout to posix_timer. Error("
+                      << error_code << "): " << strerror(error_code));
+    return NULL;
+  }
   return internal_timer;
 }
 
 bool StopPosixTimer(timer_t timer) {
   LOG4CXX_AUTO_TRACE(logger_);
-  //const int resultCode = timer_delete(timer);
-  //if (kErrorCode == resultCode) {
-  //  int error_code = errno;
-  //  LOG4CXX_ERROR(logger_,
-  //                "Can`t delete posix_timer. Error("
-  //                    << error_code << "): " << strerror(error_code));
-  //  return false;
-  //}
+  const int resultCode = timer_delete(timer);
+  if (kErrorCode == resultCode) {
+    int error_code = errno;
+    LOG4CXX_ERROR(logger_,
+                  "Can`t delete posix_timer. Error("
+                      << error_code << "): " << strerror(error_code));
+    return false;
+  }
   return true;
 }
 }  // namespace

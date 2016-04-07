@@ -92,7 +92,7 @@ void* pthread_timer_notify(void* arg)
 		int32_t result=pthread_cond_timedwait(&sig_->condvar, 
 			&sig_->cond_mutex, 
 			&waittime);
-		if (result ==ETIMEDOUT) {
+		if (result == ETIMEDOUT) {
 			sig_->sigev_notify_function(sig_->sigev_value);
 		}
 		else{
@@ -105,11 +105,18 @@ void* pthread_timer_notify(void* arg)
 	}
 	sig_->is_timeroff = true;
 	pthread_mutex_unlock(&sig_->status_mutex);
+
+    pthread_cond_destroy(&sig_->condvar);
+    pthread_mutex_destroy(&sig_->cond_mutex);
+    pthread_mutex_destroy(&sig_->status_mutex);
+    delete sig_;
+	
 	return NULL;
 }
 
 timer_t StartPosixTimer(timer::Timer& trackable,
-                        const timer::Milliseconds timeout,bool isrepeated=false) {
+                        const timer::Milliseconds timeout,
+                        bool isrepeated = false) {
   LOG4CXX_AUTO_TRACE(logger_);
   int result;
   timer_t internal_timer = NULL;
@@ -154,10 +161,7 @@ bool StopPosixTimer(timer_t timer) {
   timer->is_timeroff = true;
   pthread_cond_signal(&timer->condvar);
   pthread_join(timer->tid, NULL);
-  pthread_cond_destroy(&timer->condvar);
-  pthread_mutex_destroy(&timer->cond_mutex);
-  pthread_mutex_destroy(&timer->status_mutex);
-  free(timer);
+ 
   return true;
 }
 }  // namespace
