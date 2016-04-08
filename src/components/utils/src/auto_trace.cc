@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OS_WIN32
+#if !defined(OS_WIN32) && !defined(OS_WINCE)
 #include <apr_time.h>
 #include <log4cxx/spi/loggingevent.h>
 #endif

@@ -109,11 +109,7 @@ void TcpTransportAdapter::Store() const {
         if (port != -1) {  // don't want to store incoming applications
           Json::Value application_dictionary;
           char port_record[12];
-#ifdef OS_WIN32
-		  sprintf(port_record, "%d", port);
-#else
           snprintf(port_record, sizeof(port_record), "%d", port);
-#endif
           application_dictionary["port"] = std::string(port_record);
           applications_dictionary.append(application_dictionary);
         }

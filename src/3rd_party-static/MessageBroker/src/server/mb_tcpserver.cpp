@@ -52,8 +52,10 @@ ssize_t TcpServer::Send(int fd, const std::string& data) {
 #else
 	int retVal = send(fd, ptrBuffer, bytesToSend, MSG_NOSIGNAL);
 #endif
-	if(retVal == -1)
-	{
+    if (retVal == -1) {
+      if (EPIPE == errno) {
+        m_purge.push_back(fd);
+      }
       return -1;
     }
     bytesToSend -= retVal;

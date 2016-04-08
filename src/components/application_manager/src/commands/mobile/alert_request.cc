@@ -345,9 +345,9 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
   // app_id
   msg_params[strings::app_id] = app_id;
 #ifdef MODIFY_FUNCTION_SIGN
-	msg_params[strings::duration] = (*message_)[strings::msg_params][strings::duration];
+  msg_params[strings::duration] = (*message_)[strings::msg_params][strings::duration];
 #else
-	msg_params[strings::duration] = default_timeout_;
+  msg_params[strings::duration] = default_timeout_;
 #endif
 
   // NAVI platform progressIndicator

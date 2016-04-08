@@ -67,6 +67,6 @@ endif()
 add_library("Libusb-1.0.16" ${LIBUSB_SOURCES})
 
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX" OR CMAKE_SYSTEM_NAME STREQUAL  "Darwin")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 target_link_libraries("Libusb-1.0.16" udev)
 endif()

@@ -731,7 +731,7 @@ void SmartObject::duplicate(const SmartObject& OtherObject) {
   cleanup_data();
 
   m_type = newType;
-#ifdef OS_WIN32
+#if defined(OS_WIN32) || defined(OS_WINCE)
   if (m_type != SmartType_Null && m_type != SmartType_Invalid) {
 	  m_data = newData;
   }

@@ -84,9 +84,7 @@ bool Thread::Start(bool detach) {
 }
 
 bool Thread::Stop() {
-#ifndef  OS_ANDROID
   pthread_cancel(m_id);
-#endif
   return false;// Android does not support 'pthread_cancel';
 }
 
@@ -95,7 +93,7 @@ bool Thread::Join(void** ret) {
 }
 
 void* Thread::Call(void* arg) {
-#ifndef OS_WIN32
+#if !defined(OS_WIN32)) && !defined(OS_WINCE)
   // Disable system signals receiving in thread
   // by setting empty signal mask
   // (system signals processes only in the main thread)

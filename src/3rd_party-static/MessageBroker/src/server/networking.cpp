@@ -180,13 +180,13 @@ int bind(enum TransportProtocol protocol,
 #endif
       {
 #if defined(OS_WIN32) || defined(OS_WINCE)
-		closesocket(sock);
+      closesocket(sock);
 #else
-		::close(sock);
+      ::close(sock);
 #endif
-        sock = -1;
-        continue;
-      }
+      sock = -1;
+      continue;
+    }
 
     if (sockaddr) {
       memcpy(sockaddr, p->ai_addr, p->ai_addrlen);

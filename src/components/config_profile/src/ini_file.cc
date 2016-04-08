@@ -283,7 +283,7 @@ char ini_write_value(const char *fname,
 	  return FALSE;
   }
 #else
-  remove(fname);  
+  remove(fname);
   if (0 != rename(temp_fname, fname)) {
     remove(temp_fname);
     return FALSE;

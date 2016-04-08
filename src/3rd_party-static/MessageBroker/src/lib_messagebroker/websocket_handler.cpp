@@ -102,7 +102,7 @@ namespace NsMessageBroker
                 "rsv1 = %d, rsv2 = %d, rsv3 = %d, opCode = %u\n",
                 fin, recBuffer[0], parsedBufferPosition + position,
                size, parsedBufferPosition, rsv1, rsv2, rsv3, opCode));
-			   
+
        if ((rsv1)|(rsv2)|(rsv3)) {
          DBG_MSG(("rsv1 or rsv2 or rsv3 is 0 \n"));
          break;
@@ -211,11 +211,11 @@ namespace NsMessageBroker
       if (payload == 126)
       {
 #if defined(OS_WIN32) || defined(OS_WINCE)
-		  Buffer[2] = (unsigned char)(b_size >> 8);
-		  Buffer[3] = (unsigned char)b_size;
+         Buffer[2] = (unsigned char)(b_size >> 8);
+         Buffer[3] = (unsigned char)b_size;
 #else
-		  Buffer[2] = (b_size>>8);
-		  Buffer[3] = b_size;
+         Buffer[2] = (b_size >> 8);
+         Buffer[3] = b_size;
 #endif
       } else if (payload == 127)
       {
