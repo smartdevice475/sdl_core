@@ -211,11 +211,7 @@ bool Thread::Start(bool detach) {
 }
 
 bool Thread::Stop() {
-#if defined(OS_WIN32) || defined(OS_WINCE)
-  return TerminateThread(m_id, (DWORD)-1) == TRUE;
-#else
   return TerminateThread(m_id, (DWORD) - 1);
-#endif
 }
 
 bool Thread::Join(void** ret) {
@@ -265,12 +261,7 @@ bool Mutex::Unlock() {
     return false;
   }
 
-#if defined(OS_WIN32) || defined(OS_WINCE)
-  return ReleaseMutex(m_mutex) == TRUE;
-#else
   return ReleaseMutex(m_mutex);
-#endif
-
 }
 
 #endif

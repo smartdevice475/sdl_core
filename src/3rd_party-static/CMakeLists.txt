@@ -40,9 +40,14 @@ set(MESSAGE_BROKER_INCLUDE_DIRECTORY ${MESSAGE_BROKER_INCLUDE_DIRECTORY} PARENT_
 add_subdirectory(./encryption)
 set(ENCRYPTION_INCLUDE_DIRECTORY ${ENCRYPTION_INCLUDE_DIRECTORY} PARENT_SCOPE)
 
-# --- sqlite3
-add_subdirectory(./sqlite3-3.11.1)
-set(SQLITE3_INCLUDE_DIRECTORY ${SQLITE3_INCLUDE_DIRECTORY} PARENT_SCOPE)
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  # --- sqlite3
+  add_subdirectory(./sqlite3-3.11.1)
+  set(SQLITE3_INCLUDE_DIRECTORY ${SQLITE3_INCLUDE_DIRECTORY} PARENT_SCOPE)
+  
+  # --- pthread-win32
+  add_subdirectory(./pthread-win32-2.9.1)
+endif()
 
 if (BUILD_USB_SUPPORT)
   if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
@@ -52,7 +57,6 @@ if (BUILD_USB_SUPPORT)
   endif()
 endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-    # --- pthread-win32
-    add_subdirectory(./pthread-win32-2.9.1)
+if(BUILD_TESTS)
+  add_subdirectory(test)
 endif()

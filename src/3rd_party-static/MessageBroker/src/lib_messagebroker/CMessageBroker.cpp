@@ -918,14 +918,6 @@ void* CMessageBroker::MethodForThread(void* arg) {
   return NULL;
 }
 
-#ifdef MODIFY_FUNCTION_SIGN
-void CMessageBroker::clearController()
-{
-	p->mpRegistry->clearController();
-	p->mpRegistry->clearSubscriber();
-}
-#endif
-
 bool CMessageBroker_Private::checkMessage(CMessage* pMessage, Json::Value& error) {
   DBG_MSG(("CMessageBroker::checkMessage()\n"));
   Json::Value root;

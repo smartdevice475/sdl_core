@@ -11,6 +11,7 @@
 #if defined(OS_WIN32) || defined(OS_WINCE)
 #ifndef _WINSOCKAPI_
 #include <winsock2.h>
+#include <stdint.h>
 #endif
 #else
 #include <netinet/in.h>
@@ -81,12 +82,8 @@ namespace NsMessageBroker
      unsigned char position = 0; // current buffer position
      unsigned int size = b_size;
 
-#if defined(OS_WIN32) || defined(OS_WINCE)
-     while (0 < size) {
-#else
-	 static uint32_t minimum_heade_size = 4;
+     static uint32_t minimum_heade_size = 4;
      while (minimum_heade_size < size) {
-#endif
 
        bool fin = ((recBuffer[0] & 0x80) | (recBuffer[0] & 0x01)) == 0x81;
        bool rsv1 = (recBuffer[0] & 0x40) == 0x40;

@@ -119,11 +119,7 @@ add_library(${target} SHARED ${SOURCES})
 target_link_libraries(${target} ${LIBRARIES} )
 
 if(ENABLE_LOG)
-if(MODIFY_FUNCTION_FLAGS)
-
-else()
   target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
-endif()
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")

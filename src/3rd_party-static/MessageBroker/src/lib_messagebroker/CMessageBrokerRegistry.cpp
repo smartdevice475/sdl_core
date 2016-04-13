@@ -69,16 +69,6 @@ namespace NsMessageBroker
       removeSubscribersByDescriptor(fd);
    }
 
-   /**
-   * \brief clear controller from the registry.
-   * \param name name of controller.
-   */
-   void CMessageBrokerRegistry::clearController()
-   {
-	   DBG_MSG(("CMessageBrokerRegistry::clearController()\n"));
-	   mControllersList.clear();
-   }
-
    void CMessageBrokerRegistry::removeControllersByDescriptor(const int fd) {
       DBG_MSG(("CMessageBrokerRegistry::removeControllersByDescriptor(%d)\n",
                fd));
@@ -87,7 +77,7 @@ namespace NsMessageBroker
         std::map <std::string, int>::iterator it = mControllersList.begin();
         for (; it != mControllersList.end();) {
           if (it->second == fd) {
-            mControllersList.erase(it);
+            mControllersList.erase(it++);
           } else {
             ++it;
           }
@@ -155,31 +145,8 @@ namespace NsMessageBroker
                }
            }
        }
-   }
 
-   void CMessageBrokerRegistry::deleteSubscriber(std::string name)
-   {
-	   DBG_MSG(("CMessageBrokerRegistry::deleteSubscriber()\n"));
-	   std::pair<std::multimap <std::string, int>::iterator, std::multimap <std::string, int>::iterator> p = mSubscribersList.equal_range(name);
-	   if (p.first != p.second)
-	   {
-		   mSubscribersList.erase(p.first, p.second);
-	   }
-	   DBG_MSG(("Count of subscribers: %d\n", mSubscribersList.size()));
-   }
-
-   void CMessageBrokerRegistry::clearSubscriber()
-   {
-	   DBG_MSG(("CMessageBrokerRegistry::clearSubscriber()\n"));
-	   deleteSubscriber("BasicCommunication.OnAppRegistered");
-	   deleteSubscriber("BasicCommunication.OnAppUnregistered");
-	   deleteSubscriber("BasicCommunication.PlayTone");
-	   deleteSubscriber("UI.ShowNotification");
-	   deleteSubscriber("BasicCommunication.SDLLog");
-	   deleteSubscriber("UI.CreateInteractionChoiceSet");
-	   deleteSubscriber("UI.DeleteInteractionChoiceSet");
-	   deleteSubscriber("UI.SubscribeButton");
-	   deleteSubscriber("UI.UnsubscribeButton");
+       DBG_MSG(("Count of subscribers: %d\n", mSubscribersList.size()));
    }
 
    int CMessageBrokerRegistry::getDestinationFd(std::string name)

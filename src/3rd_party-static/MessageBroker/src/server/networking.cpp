@@ -165,9 +165,7 @@ int bind(enum TransportProtocol protocol,
     on = 0;
 #endif
 
-#ifdef MODIFY_FUNCTION_SIGN
-	  // add INADDR_ANY...
-
+#if defined(OS_WIN32) || defined(OS_WINCE)
 	  ::sockaddr *psockaddr = NULL;
 	  ::sockaddr_in *psockaddrin = (sockaddr_in*)p->ai_addr;
 	  psockaddrin->sin_addr.s_addr = INADDR_ANY;
