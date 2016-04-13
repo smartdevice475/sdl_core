@@ -1452,7 +1452,11 @@ void Profile::UpdateValues() {
                   kDefaultPreloadedPTFileName,
                   kPolicySection, kPreloadedPTKey);
 
+#ifdef OS_WINCE
+  preloaded_pt_file_ = app_config_folder_ + '\\' + preloaded_pt_file_;
+#else
   preloaded_pt_file_ = app_config_folder_ + '/' + preloaded_pt_file_;
+#endif
 
   LOG_UPDATED_VALUE(preloaded_pt_file_, kPreloadedPTKey, kPolicySection);
 
