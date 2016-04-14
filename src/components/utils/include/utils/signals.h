@@ -37,6 +37,9 @@
 typedef void (*sighandler_t) (int);
 #else
 #include <signal.h>
+#if defined(OS_WIN32) || defined(OS_WINCE)
+typedef void(*sighandler_t) (int);
+#endif
 #endif
 
 namespace utils {

@@ -42,12 +42,16 @@ include_directories (
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	include_directories(
 	  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
+	  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/jsoncpp/include
+	  ${COMPONENTS_DIR}/resumption/include
 	)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
     include_directories(
       ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
+	  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/jsoncpp/include
+	  ${COMPONENTS_DIR}/resumption/include
     )
 endif()
 

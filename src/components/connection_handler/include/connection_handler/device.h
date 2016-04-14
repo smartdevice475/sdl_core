@@ -36,7 +36,7 @@
 #include <string>
 #include <map>
 #include <vector>
-
+#include <stdint.h>
 /**
  * \namespace connection_handler
  * \brief SmartDeviceLink connection_handler namespace.

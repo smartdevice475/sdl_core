@@ -36,6 +36,7 @@
 
 #include "utils/lock.h"
 #include "utils/logger.h"
+#include "utils/date_time.h"
 
 namespace {
 const long kNanosecondsPerSecond = 1000000000;

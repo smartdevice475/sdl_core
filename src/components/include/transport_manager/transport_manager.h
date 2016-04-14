@@ -37,6 +37,7 @@
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
 #include "protocol/common.h"
+#include "resumption/last_state.h"
 
 namespace resumption {
 class LastState;

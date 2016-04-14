@@ -87,7 +87,7 @@ class AppStopwatchImpl : public AppStopwatch {
                    const std::string& app_id);
   AppStopwatchImpl(utils::SharedPtr<StatisticsManager> statistics_manager,
                    const std::string& app_id,
-                   std::uint32_t timeout);
+                   uint32_t timeout);
   void Start(AppStopwatchId stopwatch_type) OVERRIDE;
   void Switch(AppStopwatchId stopwatch_type) OVERRIDE;
   void WriteTime() OVERRIDE;
@@ -98,7 +98,7 @@ class AppStopwatchImpl : public AppStopwatch {
   AppStopwatchId stopwatch_type_;
   utils::SharedPtr<StatisticsManager> statistics_manager_;
   timer::Timer timer_;
-  const std::uint32_t time_out_;
+  const uint32_t time_out_;
   DISALLOW_COPY_AND_ASSIGN(AppStopwatchImpl);
 };
 
