@@ -50,6 +50,7 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/src/components
   ${CMAKE_SOURCE_DIR}/src/components/config_profile/include
   ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/table_struct
+  ${COMPONENTS_DIR}/resumption/include
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
@@ -57,7 +58,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	include_directories(
 		${CMAKE_SOURCE_DIR}/include/win32
 		${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
-		${COMPONENTS_DIR}/resumption/include
 	)
 endif()
 
@@ -65,7 +65,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
     include_directories(
       ${CMAKE_SOURCE_DIR}/include/wince
       ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
-	  ${COMPONENTS_DIR}/resumption/include
       ${SQLITE3_INCLUDE_DIRECTORY}
     )
 endif()

@@ -100,6 +100,7 @@ include_directories (
     ${COMPONENTS_DIR}/hmi_message_handler/include/
     ${COMPONENTS_DIR}/formatters/include/
     ${COMPONENTS_DIR}/config_profile/include/
+	${COMPONENTS_DIR}/resumption/include
     ${JSONCPP_INCLUDE_DIRECTORY}
     ${CMAKE_BINARY_DIR}/src/components/
     ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/include/
@@ -111,14 +112,12 @@ include_directories (
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	include_directories(
 	  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
-	  ${COMPONENTS_DIR}/resumption/include
 	)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
     include_directories(
       ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
-	  ${COMPONENTS_DIR}/resumption/include
     )
 endif()
 

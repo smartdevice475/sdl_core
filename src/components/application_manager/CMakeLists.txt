@@ -64,7 +64,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         ${CMAKE_SOURCE_DIR}/src/3rd_party/apache-log4cxx-win32-0.10.0/apr/include/arch/win32
         ${CMAKE_SOURCE_DIR}/src/LibVrMsp/
 	    ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
-		${COMPONENTS_DIR}/resumption/include
     )
 endif()
 
@@ -74,7 +73,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
 	    ${CMAKE_SOURCE_DIR}/include/wince
 	    ${CMAKE_SOURCE_DIR}/src/LibVrMsp/
         ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
-		${COMPONENTS_DIR}/resumption/include
     )
 endif()
   
