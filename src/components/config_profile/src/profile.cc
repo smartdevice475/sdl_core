@@ -135,19 +135,6 @@ const char* kSecurityVerifyPeerKey = "VerifyPeer";
 const char* kBeforeUpdateHours = "UpdateBeforeHours";
 #endif
 
-#ifdef CUSTOMER_PASA
-const char* kHMIHeartBeatTimeoutKey = "HMIHeartBeatTimeout";
-const char* kLoggerSection = "LOGGING";
-const char* kAudioMQPath = "MQAudioPath";
-const char* kLoggerConfigFileKey = "LoggerConfigFile";
-const char* kRemoteLoggingFlagFileKey = "RemoteLoggingFlagFile";
-const char* kRemoteLoggingFlagFilePathKey = "RemoteLoggingFlagFilePath";
-const char* kTargetLogFileHomeDirKey = "TargetLogFileHomeDir";
-const char* kTargetLogFileNamePatternKey = "TargetLogFileNamePattern";
-const char* kTargetBootCountFileKey = "TargetBootCountFile";
-const char* kTargetTmpDirKey = "TargetTmpDir";
-const char* kLogFileMaxSizeKey = "LogFileMaxSize";
-#endif
 const char* kAudioDataStoppedTimeoutKey = "AudioDataStoppedTimeout";
 const char* kVideoDataStoppedTimeoutKey = "VideoDataStoppedTimeout";
 const char* kMixingAudioSupportedKey = "MixingAudioSupported";
@@ -317,7 +304,7 @@ Profile::Profile()
 #endif // WEB_HMI
       app_config_folder_(),
       app_storage_folder_(),
-      app_resourse_folder_(),
+      app_resource_folder_(),
       enable_protocol_4_(false),
       app_icons_folder_(),
       app_icons_folder_max_size_(kDefaultAppIconsFolderMaxSize),
@@ -422,8 +409,8 @@ const std::string& Profile::app_storage_folder() const {
   return app_storage_folder_;
 }
 
-const std::string& Profile::app_resourse_folder() const {
-  return app_resourse_folder_;
+const std::string& Profile::app_resource_folder() const {
+  return app_resource_folder_;
 }
 
 bool Profile::enable_protocol_4() const {
@@ -486,11 +473,11 @@ const uint16_t& Profile::server_port() const {
   return server_port_;
 }
 
-const uint16_t& Profile::video_streaming_port() const {
+const uint16_t Profile::video_streaming_port() const {
   return video_streaming_port_;
 }
 
-const uint16_t& Profile::audio_streaming_port() const {
+const uint16_t Profile::audio_streaming_port() const {
   return audio_streaming_port_;
 }
 
@@ -637,8 +624,7 @@ const std::string& Profile::tts_delimiter() const {
 const std::string& Profile::recording_file_source() const {
   return recording_file_source_;
 }
-
-const std::string&Profile::recording_file_name() const {
+const std::string& Profile::recording_file_name() const {
   return recording_file_name_;
 }
 
@@ -918,15 +904,15 @@ void Profile::UpdateValues() {
   LOG_UPDATED_VALUE(app_storage_folder_, kAppStorageFolderKey, kMainSection);
 
   // Application resourse folder
-  ReadStringValue(&app_resourse_folder_,
+  ReadStringValue(&app_resource_folder_,
                   file_system::CurrentWorkingDirectory().c_str(),
                   kMainSection, kAppResourseFolderKey);
 
-  if (IsRelativePath(app_resourse_folder_)) {
-    MakeAbsolutePath(app_resourse_folder_);
+  if (IsRelativePath(app_resource_folder_)) {
+    MakeAbsolutePath(app_resource_folder_);
   }
 
-  LOG_UPDATED_VALUE(app_resourse_folder_, kAppResourseFolderKey,
+  LOG_UPDATED_VALUE(app_resource_folder_, kAppResourseFolderKey,
                     kMainSection);
 
   // Enable protocol ver.4 parameter

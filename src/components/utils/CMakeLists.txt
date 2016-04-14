@@ -39,7 +39,6 @@ include_directories (
   ${COMPONENTS_DIR}/protocol_handler/include
   ${COMPONENTS_DIR}/include
   ${CMAKE_SOURCE_DIR}/include
-  ${CMAKE_SOURCE_DIR}/src/3rd_party/apache-log4cxx-win32-0.10.0/apr/include
   ${CMAKE_SOURCE_DIR}/src/3rd_party-static/libusbx-1.0.16/libusb
   ${CMAKE_SOURCE_DIR}/src/3rd_party/sqlite3
   ${LOG4CXX_INCLUDE_DIRECTORY}
@@ -51,6 +50,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     ${CMAKE_SOURCE_DIR}/include/win32
     ${CMAKE_SOURCE_DIR}/src/3rd_party/apr-1.5.0/include
     ${CMAKE_SOURCE_DIR}/src/3rd_party/apr-1.5.0/include/arch/win32
+    ${CMAKE_SOURCE_DIR}/src/3rd_party/apache-log4cxx-win32-0.10.0/apr/include
     ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
   )
 elseif(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
@@ -58,6 +58,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
     ${CMAKE_SOURCE_DIR}/include/wince
     ${CMAKE_SOURCE_DIR}/src/3rd_party/apr-1.5.0/include
     ${CMAKE_SOURCE_DIR}/src/3rd_party/apr-1.5.0/include/arch/win32
+    ${CMAKE_SOURCE_DIR}/src/3rd_party/apache-log4cxx-win32-0.10.0/apr/include
     ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
   )
 endif()
@@ -79,7 +80,8 @@ set (SOURCES
     ${UTILS_SRC_DIR}/appenders_loader.cc
     ${UTILS_SRC_DIR}/gen_hash.cc
     ${UTILS_SRC_DIR}/convert_utils.cc
-    ${UTILS_SRC_DIR}/custom_string.cc    
+    ${UTILS_SRC_DIR}/custom_string.cc
+    ${UTILS_SRC_DIR}/timer.cc
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
@@ -88,15 +90,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
   )
 endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-  list (APPEND SOURCES
-    ${UTILS_SRC_DIR}/timer_win.cc
-  )
-else()
-  list (APPEND SOURCES
-    ${UTILS_SRC_DIR}/timer.cc
-  )
-endif()
 if(ENABLE_LOG)
   list(APPEND SOURCES
     ${UTILS_SRC_DIR}/push_log.cc

@@ -35,7 +35,9 @@
 #include "config_profile/profile.h"
 #include "media_manager/video/video_stream_to_file_adapter.h"
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #undef DeleteFile
+#endif
 
 namespace media_manager {
 
@@ -63,7 +65,7 @@ void VideoStreamToFileAdapter::Init() {
   if (thread_->is_running()) {
     LOG4CXX_DEBUG(logger, "Start sending thread");
     const size_t kStackSize = 16384;
-	thread_->start(threads::ThreadOptions(kStackSize));
+    thread_->start(threads::ThreadOptions(kStackSize));
   } else {
     LOG4CXX_WARN(logger, "thread is already running");
   }
@@ -147,8 +149,7 @@ void VideoStreamToFileAdapter::Streamer::threadMain() {
 
   while (!stop_flag_) {
     while (!server_->messages_.empty()) {
-		::protocol_handler::RawMessagePtr msg;
-		server_->messages_.pop(msg);
+      ::protocol_handler::RawMessagePtr msg = server_->messages_.pop();
       if (!msg) {
         LOG4CXX_ERROR(logger, "Null pointer message");
         continue;

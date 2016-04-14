@@ -127,17 +127,6 @@ void UpdateStatusManager::OnPolicyInit(bool is_update_required) {
 
 PolicyTableStatus UpdateStatusManager::GetUpdateStatus() const {
   LOG4CXX_AUTO_TRACE(logger_);
-#ifdef OS_WINCE
-  if (!exchange_in_progress_ && !exchange_pending_ && !update_required_) {
-	  return StatusUpToDate;
-  }
-
-  if (update_required_ && !exchange_in_progress_ && !exchange_pending_) {
-	  return StatusUpdateRequired;
-  }
-
-  return StatusUpdatePending;
-#else
   if (!exchange_in_progress_ && !exchange_pending_ && !update_required_) {
     return PolicyTableStatus::StatusUpToDate;
   }
@@ -147,7 +136,6 @@ PolicyTableStatus UpdateStatusManager::GetUpdateStatus() const {
   }
 
   return PolicyTableStatus::StatusUpdatePending;
-#endif
 }
 
 bool UpdateStatusManager::IsUpdateRequired() const {

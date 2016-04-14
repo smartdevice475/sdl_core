@@ -616,7 +616,7 @@ const std::string file_system::ConvertPathForURL(const std::string& path) {
       char percent_value[size];
 	  sprintf_s(percent_value, size, "%%%x", *it_path);
 #else
-      size_t size = 100;
+      const size_t size = 100;
       char percent_value[size];
       snprintf(percent_value, size, "%%%x", *it_path);
 #endif

@@ -36,7 +36,6 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_DEVICE_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_DEVICE_H_
 
-#include <map>
 #if defined(OS_WIN32) || defined(OS_WINCE)
 #include "pthread.h"
 #include <stdint.h>
@@ -52,6 +51,9 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #endif
+
+#include <map>
+#include <string>
 #include "utils/lock.h"
 
 #if defined(OS_WIN32) || defined(OS_WINCE)

@@ -37,9 +37,9 @@
 #include <unistd.h>
 
 #include "utils/logger.h"
+#include "utils/file_system.h"
 #include "utils/gen_hash.h"
 #include "policy/sql_pt_representation.h"
-#include "utils/file_system.h"
 #include "policy/sql_wrapper.h"
 #include "policy/sql_pt_queries.h"
 #include "policy/policy_helper.h"
@@ -324,7 +324,8 @@ bool SQLPTRepresentation::GetPriority(const std::string& policy_app_id,
   return true;
 }
 
-InitResult SQLPTRepresentation::Init() {
+InitResult SQLPTRepresentation::Init(const PolicySettings *settings) {
+   settings_ = settings;
   LOG4CXX_AUTO_TRACE(logger_);
 #ifdef BUILD_TESTS
   open_counter_ = 0;
@@ -333,11 +334,11 @@ InitResult SQLPTRepresentation::Init() {
     LOG4CXX_ERROR(logger_, "Failed opening database.");
     LOG4CXX_INFO(logger_, "Starting opening retries.");
     const uint16_t attempts =
-        profile::Profile::instance()->attempts_to_open_policy_db();
+        get_settings().attempts_to_open_policy_db();
     LOG4CXX_DEBUG(logger_, "Total attempts number is: " << attempts);
     bool is_opened = false;
     const uint16_t open_attempt_timeout_ms =
-        profile::Profile::instance()->open_attempt_timeout_ms();
+        get_settings().open_attempt_timeout_ms();
 #if defined(OS_WIN32) || defined(OS_WINCE)
 #else
     const useconds_t sleep_interval_mcsec = open_attempt_timeout_ms * 1000;
@@ -346,7 +347,7 @@ InitResult SQLPTRepresentation::Init() {
                   << open_attempt_timeout_ms);
     for (int i = 0; i < attempts; ++i) {
 #if defined(OS_WIN32) || defined(OS_WINCE)
-		Sleep(open_attempt_timeout_ms);
+      Sleep(open_attempt_timeout_ms);
 #else
       usleep(sleep_interval_mcsec);
 #endif
@@ -1346,15 +1347,9 @@ void SQLPTRepresentation::SaveUpdateRequired(bool value) {
   // TODO(AOleynik): Quick fix, will be reworked
   if (!query.Prepare(/*sql_pt::kUpdateFlagUpdateRequired*/
                      "UPDATE `module_meta` SET `flag_update_required` = ?")) {
-#if defined(OS_WIN32)||defined(OS_WINCE)
-	LOG4CXX_WARN(logger_,
-                 "Incorrect update into module meta (update_required): " <<
-                 (errno));
-#else
     LOG4CXX_WARN(logger_,
                  "Incorrect update into module meta (update_required): " <<
                  strerror(errno));
-#endif
     return;
   }
   query.Bind(0, value);

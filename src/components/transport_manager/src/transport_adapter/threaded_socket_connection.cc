@@ -30,16 +30,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if defined(OS_WIN32)
+#include <algorithm>
 #include <errno.h>
 #include <fcntl.h>
 #include <memory.h>
 #include <unistd.h>
-#elif defined(OS_WINCE)
-#include <errno.h>
-#include <memory.h>
-#include <unistd.h>
-#else
+#if !defined(OS_WIN32) && !defined(OS_WINCE)
 #include <sys/types.h>
 #include <sys/socket.h>
 #endif
@@ -284,6 +280,12 @@ void ThreadedSocketConnection::threadMain() {
   }
 }
 
+bool ThreadedSocketConnection::IsFramesToSendQueueEmpty() const {
+  // Check Frames queue is empty or not
+  sync_primitives::AutoLock auto_lock(frames_to_send_mutex_);
+  return frames_to_send_.empty();
+}
+
 void ThreadedSocketConnection::Transmit() {
 #if defined(OS_WIN32) || defined(OS_WINCE)
 	//LOG4CXX_INFO(logger, "begin while(!terminate_flag_)");
@@ -400,13 +402,7 @@ void ThreadedSocketConnection::Transmit() {
   }
 
   // receive data
-#if defined(OS_WIN32) || defined(OS_WINCE)
-    if (0 != poll_fds[0].revents & (POLLIN | POLLPRI)) {
-#elif defined(OS_MAC)
-    if (0 != (poll_fds[0].revents & (POLLIN | POLLPRI))) {
-#else
-  if (0 != poll_fds[0].revents & (POLLIN | POLLPRI)) {
-#endif
+  if (poll_fds[0].revents & (POLLIN | POLLPRI)) {
     const bool receive_ok = Receive();
     if (!receive_ok) {
       LOG4CXX_ERROR(logger_, "Receive() failed ");
@@ -449,7 +445,7 @@ bool ThreadedSocketConnection::Receive() {
 
 	return true;
 #else
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
   uint8_t buffer[4096];
   ssize_t bytes_read = -1;
 

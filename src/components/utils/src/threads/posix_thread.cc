@@ -174,6 +174,10 @@ PlatformThreadHandle Thread::CurrentId() {
   return pthread_self();
 }
 
+bool Thread::IsCurrentThread() const {
+  return pthread_equal(CurrentId(), thread_handle());
+}
+
 bool Thread::start(const ThreadOptions& options) {
   LOG4CXX_AUTO_TRACE(logger_);
 

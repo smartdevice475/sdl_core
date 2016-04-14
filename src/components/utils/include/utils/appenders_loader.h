@@ -35,7 +35,6 @@
 #if defined(OS_WIN32) ||defined(OS_WINCE)
 #include <Windows.h>
 #endif
-#define RTLD_LAZY	1
 
 namespace utils {
 

@@ -35,8 +35,9 @@
 
 #include "application_manager/event_engine/event_observer.h"
 #include "interfaces/HMI_API.h"
-#include "utils/lock.h"
-
+namespace resumption {
+class LastState;
+}
 namespace application_manager {
 
 /**
@@ -69,24 +70,15 @@ public:
    * @param interface Interface
    * @param language Language
    */
-#ifdef OS_WINCE
-  void set_language_for(Interface interface_,
-                        hmi_apis::Common_Language::eType language);
-#else
   void set_language_for(Interface interface,
                         hmi_apis::Common_Language::eType language);
-#endif
 
   /**
    * @brief Gets language for interface
    * @param interface Interface
    * @return Language
    */
-#ifdef OS_WINCE
-  hmi_apis::Common_Language::eType get_language_for(Interface interface_) const;
-#else
   hmi_apis::Common_Language::eType get_language_for(Interface interface) const;
-#endif
 
   void on_event(const event_engine::Event& event) OVERRIDE;
 
@@ -103,10 +95,10 @@ public:
    * @param vr VR language
    * @param tts TTS language
    */
-  void set_default_capabilities_languages(
-          hmi_apis::Common_Language::eType ui,
-          hmi_apis::Common_Language::eType vr,
-          hmi_apis::Common_Language::eType tts);
+  void set_default_capabilities_languages(hmi_apis::Common_Language::eType ui,
+                                          hmi_apis::Common_Language::eType vr,
+                                          hmi_apis::Common_Language::eType tts);
+  void Init(resumption::LastState* value);
 
 private:
   void SendOnLanguageChangeToMobile(uint32_t connection_key);
@@ -181,6 +173,7 @@ private:
    * @brief Indicates if current TTS language has been received from HMI
    */
   bool is_tts_language_received_;
+  resumption::LastState* last_state_;
 };
 
 } // namespace application_manager

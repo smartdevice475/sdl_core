@@ -46,6 +46,7 @@
 #include "utils/gen_hash.h"
 #include "utils/make_shared.h"
 #include "utils/timer_task_impl.h"
+#include "application_manager/policies/policy_handler_interface.h"
 
 namespace {
 
@@ -501,7 +502,7 @@ void ApplicationImpl::WakeUpStreaming(
       MessageHelper::SendOnDataStreaming(ServiceType::kMobileNav, true);
       video_streaming_suspended_ = false;
     }
-    video_stream_suspend_timer_.Start(video_stream_suspend_timeout_, true);
+    video_stream_suspend_timer_.Start(video_stream_suspend_timeout_, false);
   } else if (ServiceType::kAudio == service_type) {
     sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
     if (audio_streaming_suspended_) {
@@ -510,7 +511,7 @@ void ApplicationImpl::WakeUpStreaming(
       MessageHelper::SendOnDataStreaming(ServiceType::kAudio, true);
       audio_streaming_suspended_ = false;
     }
-    audio_stream_suspend_timer_.Start(audio_stream_suspend_timeout_, true);
+    audio_stream_suspend_timer_.Start(audio_stream_suspend_timeout_, false);
   }
 }
 
@@ -764,9 +765,11 @@ bool ApplicationImpl::IsCommandLimitsExceeded(
     // In case of policy table values, there is EVEN limitation for number of
     // commands per minute, e.g. 10 command per minute i.e. 1 command per 6 sec
     case POLICY_TABLE: {
-      uint32_t cmd_limit =
-          application_manager::MessageHelper::GetAppCommandLimit(
-              mobile_app_id_);
+      const policy::PolicyHandlerInterface& policy_handler =
+          ApplicationManagerImpl::instance()->GetPolicyHandler();
+      std::string priority;
+      policy_handler.GetPriority(mobile_app_id(), &priority);
+      uint32_t cmd_limit = policy_handler.GetNotificationsNumber(priority);
 
       if (0 == cmd_limit) {
         return true;
@@ -796,7 +799,7 @@ bool ApplicationImpl::IsCommandLimitsExceeded(
       }
 
 #ifdef OS_WINCE
-	cmd_number_to_time_limits_[cmd_id] = std::make_pair(current, dummy_limit);
+	  cmd_number_to_time_limits_[cmd_id] = std::make_pair(current, dummy_limit);
 #else
       cmd_number_to_time_limits_[cmd_id] = {current, dummy_limit};
 #endif
@@ -844,8 +847,9 @@ void ApplicationImpl::UpdateHash() {
 }
 
 void ApplicationImpl::CleanupFiles() {
-  std::string directory_name =
-      profile::Profile::instance()->app_storage_folder();
+  profile::Profile* profile =
+          profile::Profile::instance();
+  std::string directory_name = profile->app_storage_folder();
   directory_name += "/" + folder_name();
 
   if (file_system::DirectoryExists(directory_name)) {

@@ -39,8 +39,13 @@ include_directories(
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/jsoncpp/include
   ${APR_INCLUDE_DIRECTORY}
-  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
 )
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+include_directories(
+    ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
+  )
+endif()
 
 set (SOURCES
   ${COMPONENTS_DIR}/security_manager/src/security_manager_impl.cc

@@ -137,7 +137,6 @@ include_directories (
   ${LOG4CXX_INCLUDE_DIRECTORY}
   ${CMAKE_SOURCE_DIR}/src/3rd_party/dbus-1.7.8
   ${CMAKE_SOURCE_DIR}/src/3rd_party/dbus-1.7.8/dbus/
-  ${CMAKE_SOURCE_DIR}/src/LibVrMsp
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")

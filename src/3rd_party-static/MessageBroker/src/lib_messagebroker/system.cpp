@@ -93,7 +93,7 @@ bool Thread::Join(void** ret) {
 }
 
 void* Thread::Call(void* arg) {
-#if !defined(OS_WIN32)) && !defined(OS_WINCE)
+#if !defined(OS_WIN32) && !defined(OS_WINCE)
   // Disable system signals receiving in thread
   // by setting empty signal mask
   // (system signals processes only in the main thread)

@@ -36,7 +36,6 @@
 
 #include "utils/lock.h"
 #include "utils/logger.h"
-#include "utils/date_time.h"
 
 namespace {
 const long kNanosecondsPerSecond = 1000000000;
@@ -50,7 +49,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 ConditionalVariable::ConditionalVariable() {
   pthread_condattr_t attrs;
-  int32_t initialized  = pthread_condattr_init(&attrs);
+  int initialized  = pthread_condattr_init(&attrs);
   if (initialized != 0)
     LOG4CXX_ERROR(logger_, "Failed to initialize "
                             "conditional variable attributes");
@@ -68,7 +67,7 @@ ConditionalVariable::ConditionalVariable() {
   if (initialized != 0)
     LOG4CXX_ERROR(logger_, "Failed to initialize "
                             "conditional variable");
-  int32_t rv = pthread_condattr_destroy(&attrs);
+  int rv = pthread_condattr_destroy(&attrs);
   if (rv != 0)
     LOG4CXX_ERROR(logger_, "Failed to destroy "
                             "conditional variable attributes");
@@ -80,14 +79,14 @@ ConditionalVariable::~ConditionalVariable() {
 }
 
 void ConditionalVariable::NotifyOne() {
-  int32_t signaled = pthread_cond_signal(&cond_var_);
+  int signaled = pthread_cond_signal(&cond_var_);
   if (signaled != 0)
     LOG4CXX_ERROR(logger_, "Failed to signal conditional variable");
 
 }
 
 void ConditionalVariable::Broadcast() {
-  int32_t signaled = pthread_cond_broadcast(&cond_var_);
+  int signaled = pthread_cond_broadcast(&cond_var_);
   if (signaled != 0)
     LOG4CXX_ERROR(logger_, "Failed to broadcast conditional variable");
 
@@ -95,7 +94,7 @@ void ConditionalVariable::Broadcast() {
 
 bool ConditionalVariable::Wait(Lock& lock) {
   lock.AssertTakenAndMarkFree();
-  int32_t wait_status = pthread_cond_wait(&cond_var_,
+  int wait_status = pthread_cond_wait(&cond_var_,
                                       &lock.mutex_);
   lock.AssertFreeAndMarkTaken();
   if (wait_status != 0) {
@@ -108,7 +107,7 @@ bool ConditionalVariable::Wait(Lock& lock) {
 bool ConditionalVariable::Wait(AutoLock& auto_lock) {
   Lock& lock = auto_lock.GetLock();
   lock.AssertTakenAndMarkFree();
-  int32_t wait_status = pthread_cond_wait(&cond_var_,
+  int wait_status = pthread_cond_wait(&cond_var_,
                                       &lock.mutex_);
   lock.AssertFreeAndMarkTaken();
   if (wait_status != 0) {
@@ -119,7 +118,7 @@ bool ConditionalVariable::Wait(AutoLock& auto_lock) {
 }
 
 ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
-    AutoLock& auto_lock, int32_t milliseconds) {
+    AutoLock& auto_lock, uint32_t milliseconds){
   struct timespec now;
 #if defined(OS_WIN32) || defined(OS_WINCE)
   clock_gettime(CLOCK_REALTIME, &now);
@@ -137,7 +136,7 @@ ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
   wait_interval.tv_nsec %= kNanosecondsPerSecond;
   Lock& lock = auto_lock.GetLock();
   lock.AssertTakenAndMarkFree();
-  int32_t timedwait_status = pthread_cond_timedwait(&cond_var_,
+  int timedwait_status = pthread_cond_timedwait(&cond_var_,
                                                 &lock.mutex_,
                                                 &wait_interval);
   lock.AssertFreeAndMarkTaken();

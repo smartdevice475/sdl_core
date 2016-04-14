@@ -66,12 +66,8 @@ bool AlertRequest::Init() {
   /* Timeout in milliseconds.
      If omitted a standard value of 10000 milliseconds is used.*/
   if ((*message_)[strings::msg_params].keyExists(strings::duration)) {
-		default_timeout_ =
-#ifdef MODIFY_FUNCTION_SIGN
-			10000000;
-#else
-			(*message_)[strings::msg_params][strings::duration].asUInt();
-#endif
+    default_timeout_ =
+        (*message_)[strings::msg_params][strings::duration].asUInt();
   } else {
     const int32_t def_value = 5000;
     default_timeout_ = def_value;
@@ -279,7 +275,8 @@ bool AlertRequest::Validate(uint32_t app_id) {
   //ProcessSoftButtons checks strings on the contents incorrect character
 
   mobile_apis::Result::eType processing_result =
-      MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
+      MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app,
+          application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler());
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
     LOG4CXX_ERROR(logger_, "INVALID_DATA!");
@@ -344,11 +341,7 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
   }
   // app_id
   msg_params[strings::app_id] = app_id;
-#ifdef MODIFY_FUNCTION_SIGN
-  msg_params[strings::duration] = (*message_)[strings::msg_params][strings::duration];
-#else
   msg_params[strings::duration] = default_timeout_;
-#endif
 
   // NAVI platform progressIndicator
   if ((*message_)[strings::msg_params].keyExists(strings::progress_indicator)) {

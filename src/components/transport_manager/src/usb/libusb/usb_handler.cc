@@ -426,9 +426,9 @@ TransportAdapter::Error UsbHandler::Init() {
 #endif
 
   if (!thread_->start()) {
-    LOG4CXX_INFO(logger_, "monitor thread start failed");
     LOG4CXX_ERROR(logger_, "USB device scanner thread start failed, error code");
-    LOG4CXX_TRACE(logger_, "exit with TransportAdapter::FAIL.");
+    LOG4CXX_TRACE(logger_,
+                  "exit with TransportAdapter::FAIL.");
     return TransportAdapter::FAIL;
   }
   return TransportAdapter::OK;

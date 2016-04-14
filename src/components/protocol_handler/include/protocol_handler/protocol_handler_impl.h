@@ -294,6 +294,9 @@ class ProtocolHandlerImpl
                           uint8_t protocol_version,
                           uint8_t service_type);
 
+
+  SessionObserver &get_session_observer() OVERRIDE;
+
  private:
   void SendEndServicePrivate(int32_t connection_id, uint8_t session_id,
                              uint8_t service_type);

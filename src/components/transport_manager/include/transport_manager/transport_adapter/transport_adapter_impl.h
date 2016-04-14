@@ -43,9 +43,11 @@
 #endif
 #include "utils/lock.h"
 #include "utils/rwlock.h"
+
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/transport_adapter/connection.h"
+#include "resumption/last_state.h"
 
 #ifdef TELEMETRY_MONITOR
 #include "transport_manager/telemetry_observer.h"
@@ -77,7 +79,8 @@ class TransportAdapterImpl : public TransportAdapter,
    **/
   TransportAdapterImpl(DeviceScanner* device_scanner,
                        ServerConnectionFactory* server_connection_factory,
-                       ClientConnectionListener* client_connection_listener);
+                       ClientConnectionListener* client_connection_listener,
+                       resumption::LastState& last_state);
 
   /**
    * @brief Destructor.
@@ -537,6 +540,10 @@ class TransportAdapterImpl : public TransportAdapter,
   TMTelemetryObserver* metric_observer_;
 #endif  // TELEMETRY_MONITOR
 
+  resumption::LastState& last_state() const {
+      return last_state_;
+  }
+
   /**
    * @brief Pointer to the device scanner.
    */
@@ -551,6 +558,8 @@ class TransportAdapterImpl : public TransportAdapter,
    * @brief Pointer to the factory of connections initiated from client.
    */
   ClientConnectionListener* client_connection_listener_;
+
+  resumption::LastState& last_state_;
 };
 
 }  // namespace transport_adapter

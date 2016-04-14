@@ -46,10 +46,16 @@
 #include "json/features.h"
 #include "json/writer.h"
 #include "utils/logger.h"
+#include "utils/gen_hash.h"
+#include "utils/macro.h"
+#include "utils/threads/thread.h"
+#include "utils/threads/thread_delegate.h"
 
 #include "policy/sql_pt_representation.h"
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
 #undef max
+#endif
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -110,7 +116,7 @@ CacheManager::~CacheManager() {
   threads::DeleteThread(backup_thread_);
 }
 
-bool CacheManager::CanAppKeepContext(const std::string &app_id) {
+bool CacheManager::CanAppKeepContext(const std::string& app_id) const {
   CACHE_MANAGER_CHECK(false);
   bool result = true;
   return result;
@@ -128,14 +134,16 @@ uint32_t CacheManager::HeartBeatTimeout(const std::string& app_id) const {
   return result;
 }
 
-bool CacheManager::CanAppStealFocus(const std::string &app_id) {
+
+bool CacheManager::CanAppStealFocus(const std::string& app_id) const {
   CACHE_MANAGER_CHECK(false);
   bool result = true;
   return result;
 }
 
-bool CacheManager::GetDefaultHMI(const std::string &app_id,
-                                 std::string& default_hmi) {
+
+bool CacheManager::GetDefaultHMI(const std::string& app_id,
+                                 std::string& default_hmi) const {
   CACHE_MANAGER_CHECK(false);
   bool result = true;
   return result;
@@ -150,7 +158,7 @@ bool CacheManager::ResetUserConsent() {
 
 bool CacheManager::GetUserPermissionsForDevice(const std::string &device_id,
                                                StringArray& consented_groups,
-                                               StringArray& disallowed_groups) {
+                                               StringArray& disallowed_groups) const {
 
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK(false);
@@ -314,7 +322,7 @@ bool CacheManager::GetPermissionsForApp(const std::string &device_id,
 
 bool CacheManager::GetDeviceGroupsFromPolicies(
   policy_table::Strings& groups,
-  policy_table::Strings& preconsented_groups) {
+  policy_table::Strings& preconsented_groups) const {
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK(false);
   return true;
@@ -451,11 +459,7 @@ void CacheManager::CheckPermissions(const PTString &app_id,
                   hmi_level_e);
 
         if (rpc_param.hmi_levels.end() != hmi_iter) {
-#ifdef OS_WINCE
-          result.hmi_level_permitted = kRpcAllowed;
-#else
           result.hmi_level_permitted = PermitResult::kRpcAllowed;
-#endif
 
           policy_table::Parameters::const_iterator params_iter =
               rpc_param.parameters->begin();
@@ -674,8 +678,8 @@ rpc::policy_table_interface_base::NumberOfNotificationsType CacheManager::GetNot
   return result;
 }
 
-bool CacheManager::GetPriority(const std::string &policy_app_id,
-                               std::string &priority) {
+bool CacheManager::GetPriority(const std::string& policy_app_id,
+                               std::string& priority) const {
   CACHE_MANAGER_CHECK(false);
   if (kDeviceId == policy_app_id) {
     priority = EnumToJsonString(
@@ -1202,10 +1206,11 @@ bool CacheManager::IsApplicationRepresented(const std::string& app_id) const {
   return pt_->policy_table.app_policies_section.apps.end() != iter;
 }
 
-bool CacheManager::Init(const std::string& file_name) {
+bool CacheManager::Init(const std::string& file_name,
+                        const PolicySettings* settings) {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  InitResult init_result = backup_->Init();
+  settings_ = settings;
+  InitResult init_result = backup_->Init(settings);
 
   bool result = true;
   switch (init_result) {
@@ -1227,11 +1232,21 @@ bool CacheManager::Init(const std::string& file_name) {
     } break;
     case InitResult::SUCCESS: {
       LOG4CXX_INFO(logger_, "Policy Table was inited successfully");
+      
       result = LoadFromFile(file_name, *pt_);
-      backup_->UpdateDBVersion();
-      if (result) {
-        Backup();
+     
+      utils::SharedPtr<policy_table::Table> snapshot = GenerateSnapshot();
+      result &= snapshot->is_valid();
+      LOG4CXX_DEBUG(logger_, "Check if snapshot is valid: "
+		             << std::boolalpha << result);
+      if(!result) {
+        rpc::ValidationReport report("policy_table");
+	snapshot->ReportErrors(&report);
+	return result;
       }
+
+      backup_->UpdateDBVersion();
+      Backup();
     } break;
     default: {
       result = false;
@@ -1436,8 +1451,14 @@ void CacheManager::MergeCFM(const policy_table::PolicyTable& new_pt,
   }
 }
 
+const PolicySettings& CacheManager::get_settings() const {
+  DCHECK(settings_);
+
+  return *settings_;
+}
+
 CacheManager::BackgroundBackuper::BackgroundBackuper(CacheManager* cache_manager)
-  : cache_manager_(cache_manager),
+    : cache_manager_(cache_manager),
     stop_flag_(false),
     new_data_available_(false) {
   LOG4CXX_AUTO_TRACE(logger_);

@@ -162,11 +162,7 @@ struct ProcessFunctionalGroup {
       const policy_table::FunctionalGroupings& fg,
       const std::vector<FunctionalGroupPermission>& group_permissions,
       Permissions& data,
-#ifdef OS_WINCE
-      GroupConsent undefined_group_consent = kGroupDisallowed);
-#else
       GroupConsent undefined_group_consent = GroupConsent::kGroupDisallowed);
-#endif
     bool operator()(const StringsValueType& group_name);
   private:
     GroupConsent GetGroupState(const std::string& group_name);

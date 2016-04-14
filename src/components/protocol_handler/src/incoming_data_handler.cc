@@ -50,10 +50,10 @@ void IncomingDataHandler::set_validator(
 
 #ifdef OS_WIN32
 static const size_t MIN_HEADER_SIZE = min(PROTOCOL_HEADER_V1_SIZE,
-	PROTOCOL_HEADER_V2_SIZE);
+                                          PROTOCOL_HEADER_V2_SIZE);
 #else
 static const size_t MIN_HEADER_SIZE = std::min(PROTOCOL_HEADER_V1_SIZE,
-	PROTOCOL_HEADER_V2_SIZE);
+                                               PROTOCOL_HEADER_V2_SIZE);
 #endif
 
 ProtocolFramePtrList IncomingDataHandler::ProcessData(

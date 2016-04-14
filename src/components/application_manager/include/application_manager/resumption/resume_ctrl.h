@@ -50,7 +50,7 @@
 #include "application_manager/event_engine/event_observer.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/application.h"
-#include "resumption_data.h"
+#include "application_manager/resumption/resumption_data.h"
 #include "utils/timer.h"
 
 namespace application_manager {
@@ -58,6 +58,8 @@ class Application;
 }
 
 namespace resumption {
+
+class LastState;
 
 /**
  * @brief Contains logic for storage/restore data of applications.
@@ -272,7 +274,7 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @return true if initialization is success otherwise
    * returns false
    */
-  bool Init();
+  bool Init(LastState &last_state);
 
   /**
    * @brief Notify resume controller about new application

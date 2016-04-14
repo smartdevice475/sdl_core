@@ -47,11 +47,7 @@ ThreadDelegate::~ThreadDelegate() {
 
 void ThreadDelegate::exitThreadMain() {
   if (thread_) {
-#if defined(OS_WIN32) || defined(OS_WINCE)
-    if (thread_->thread_handle().p == pthread_self().p) {
-#else
-    if (thread_->thread_handle() == pthread_self()) {
-#endif
+    if (thread_->IsCurrentThread()) {
       pthread_exit(NULL);
     } else {
       pthread_cancel(thread_->thread_handle());

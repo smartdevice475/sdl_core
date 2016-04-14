@@ -35,6 +35,8 @@
 
 #ifndef OS_WINCE
 #include <cstdint>
+#else
+#include <stdint.h>
 #endif
 #include "protocol/common.h"
 

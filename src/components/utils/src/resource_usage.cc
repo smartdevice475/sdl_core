@@ -10,14 +10,15 @@
 #include <sys/types.h>
 #include <unistd.h>
 #endif
-//#include <sys/resource.h>
-//#include <errno.h>
-//#include <sys/types.h>
-//#include <unistd.h>
-//#include <stdio.h>
-//#include <sstream>
 #if defined(OS_WIN32) || defined(OS_WINCE)
 #include <process.h>
+#else
+#include <sys/resource.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <sstream>
 #endif
 #include "utils/file_system.h"
 

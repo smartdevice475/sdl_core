@@ -88,7 +88,7 @@ bool ResumptionDataDB::Init() {
                   "Open attempt timeout(ms) is: " << open_attempt_timeout_ms);
     for (int i = 0; i < attempts; ++i) {
 #if defined(OS_WIN32) || defined(OS_WINCE)
-		Sleep(open_attempt_timeout_ms);
+      Sleep(open_attempt_timeout_ms);
 #else
       usleep(sleep_interval_mcsec);
 #endif
@@ -282,7 +282,6 @@ void ResumptionDataDB::OnSuspend() {
       LOG4CXX_INFO(logger_, "Data last_ign_off_time was updated");
     }
   }
-  WriteDb();
 }
 
 bool ResumptionDataDB::DeleteAppWithIgnCount(const int application_lifes) {
@@ -660,6 +659,10 @@ void ResumptionDataDB::UpdateHmiLevel(const std::string& policy_app_id,
       WriteDb();
     }
   }
+}
+
+void ResumptionDataDB::Persist() {
+    WriteDb();
 }
 
 bool ResumptionDataDB::RefreshDB() const {

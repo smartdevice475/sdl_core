@@ -86,11 +86,7 @@
 #define APR_HAVE_PROCESS_H       0
 #define APR_HAVE_PTHREAD_H       1
 #define APR_HAVE_SEMAPHORE_H     1
-#if defined(OS_WIN32) || defined(OS_WINCE)
-#define APR_HAVE_SIGNAL_H        0
-#else
 #define APR_HAVE_SIGNAL_H        1
-#endif
 #define APR_HAVE_STDARG_H        1
 #define APR_HAVE_STDINT_H        1
 #define APR_HAVE_STDIO_H         1
@@ -100,26 +96,14 @@
 #define APR_HAVE_SYS_IOCTL_H     1
 #define APR_HAVE_SYS_SENDFILE_H  1
 #define APR_HAVE_SYS_SIGNAL_H    1
-#if defined(OS_WIN32) || defined(OS_WINCE)
-#define APR_HAVE_SYS_SOCKET_H    0
-#else
 #define APR_HAVE_SYS_SOCKET_H    1
-#endif
 #define APR_HAVE_SYS_SOCKIO_H    0
 #define APR_HAVE_SYS_SYSLIMITS_H 0
 #define APR_HAVE_SYS_TIME_H      1
-#if defined(OS_WIN32) || defined(OS_WINCE)
-#define APR_HAVE_SYS_TYPES_H     0
-#else
 #define APR_HAVE_SYS_TYPES_H     1
-#endif
 #define APR_HAVE_SYS_UIO_H       1
 #define APR_HAVE_SYS_UN_H        1
-#if defined(OS_WIN32) || defined(OS_WINCE)
-#define APR_HAVE_SYS_WAIT_H      0
-#else
 #define APR_HAVE_SYS_WAIT_H      1
-#endif
 #define APR_HAVE_TIME_H          1
 #define APR_HAVE_UNISTD_H        1
 #define APR_HAVE_WINDOWS_H       0
@@ -292,17 +276,9 @@ extern "C" {
 #define APR_HAS_UNICODE_FS        0
 #define APR_HAS_PROC_INVOKED      0
 #define APR_HAS_USER              1
-#if defined(OS_WIN32) || defined(OS_WINCE)
 #define APR_HAS_LARGE_FILES       1
-#else
-#define APR_HAS_LARGE_FILES       0
-#endif
 #define APR_HAS_XTHREAD_FILES     0
-#if defined(OS_WIN32) || defined(OS_WINCE)
-#define APR_HAS_OS_UUID           1
-#else
 #define APR_HAS_OS_UUID           0
-#endif
 
 #define APR_PROCATTR_USER_SET_REQUIRES_PASSWORD 0
 
@@ -337,11 +313,8 @@ typedef  unsigned short  apr_uint16_t;
 
 typedef  int             apr_int32_t;
 typedef  unsigned int    apr_uint32_t;
-#if defined(OS_WIN32) || defined(OS_WINCE)
-typedef int socklen_t;
-#endif
 
-#define APR_SIZEOF_VOIDP 8
+#define APR_SIZEOF_VOIDP 4
 
 /*
  * Darwin 10's default compiler (gcc42) builds for both 64 and
@@ -376,23 +349,15 @@ typedef int socklen_t;
  #define UINT64_C(v)  (v ## ULL)
 #endif
 #else
- typedef  long            apr_int64_t;
- typedef  unsigned long   apr_uint64_t;
+ typedef  long long            apr_int64_t;
+ typedef  unsigned long long   apr_uint64_t;
 #endif
 
-#if defined(OS_WIN32) || defined(OS_WINCE)
-typedef  unsigned int    apr_size_t;
-typedef  int			 apr_ssize_t;
-typedef  long            apr_off_t;
-typedef  int             apr_socklen_t;
-typedef  unsigned short  apr_ino_t;
-#else
 typedef  size_t          apr_size_t;
 typedef  ssize_t         apr_ssize_t;
-typedef  off_t           apr_off_t;
+typedef  off64_t           apr_off_t;
 typedef  socklen_t       apr_socklen_t;
-typedef  ino_t           apr_ino_t;
-#endif
+typedef  unsigned long           apr_ino_t;
 
 #if APR_SIZEOF_VOIDP == 8
 typedef  apr_uint64_t            apr_uintptr_t;
@@ -565,25 +530,25 @@ typedef  apr_uint32_t            apr_uintptr_t;
  * configure.in.
  */
 
-#define APR_SSIZE_T_FMT "ld"
+#define APR_SSIZE_T_FMT "d"
 
 /* And APR_SIZE_T_FMT */
-#define APR_SIZE_T_FMT "lu"
+#define APR_SIZE_T_FMT "u"
 
 /* And APR_OFF_T_FMT */
-#define APR_OFF_T_FMT "ld"
+#define APR_OFF_T_FMT APR_INT64_T_FMT
 
 /* And APR_PID_T_FMT */
 #define APR_PID_T_FMT "d"
 
 /* And APR_INT64_T_FMT */
-#define APR_INT64_T_FMT "ld"
+#define APR_INT64_T_FMT "lld"
 
 /* And APR_UINT64_T_FMT */
-#define APR_UINT64_T_FMT "lu"
+#define APR_UINT64_T_FMT "llu"
 
 /* And APR_UINT64_T_HEX_FMT */
-#define APR_UINT64_T_HEX_FMT "lx"
+#define APR_UINT64_T_HEX_FMT "llx"
 
 /*
  * Ensure we work with universal binaries on Darwin
@@ -645,10 +610,7 @@ typedef int apr_wait_t;
 #elif defined(_POSIX_PATH_MAX)
 #define APR_PATH_MAX       _POSIX_PATH_MAX
 #else
-#if defined(OS_WIN32) || defined(OS_WINCE)
-#else
 #error no decision has been made on APR_PATH_MAX for your platform
-#endif
 #endif
 
 #define APR_DSOPATH "LD_LIBRARY_PATH"
