@@ -104,6 +104,9 @@ namespace log4cxx
                         */
                         static log4cxx_time_t getStartTime();
 
+                        /** Return current thread name. */
+                        static const LogString getCurrentThreadName();
+
                         /** Return the threadName of this event. */
                         inline const LogString& getThreadName() const {
                              return threadName;
@@ -244,8 +247,7 @@ namespace log4cxx
                        //
                        LoggingEvent(const LoggingEvent&);
                        LoggingEvent& operator=(const LoggingEvent&);
-                       static const LogString getCurrentThreadName();
-                       
+
                        static void writeProlog(log4cxx::helpers::ObjectOutputStream& os, log4cxx::helpers::Pool& p);
                        
                 };
