@@ -32,7 +32,9 @@
 
 #include <algorithm>
 #include <errno.h>
+#ifndef OS_WINCE
 #include <fcntl.h>
+#endif
 #include <memory.h>
 #include <unistd.h>
 #if !defined(OS_WIN32) && !defined(OS_WINCE)

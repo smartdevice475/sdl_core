@@ -70,15 +70,24 @@ public:
    * @param interface Interface
    * @param language Language
    */
+#ifdef OS_WINCE
+  void set_language_for(Interface interface_,
+                        hmi_apis::Common_Language::eType language);
+#else
   void set_language_for(Interface interface,
                         hmi_apis::Common_Language::eType language);
+#endif
 
   /**
    * @brief Gets language for interface
    * @param interface Interface
    * @return Language
    */
+#ifdef OS_WINCE
+  hmi_apis::Common_Language::eType get_language_for(Interface interface_) const;
+#else
   hmi_apis::Common_Language::eType get_language_for(Interface interface) const;
+#endif
 
   void on_event(const event_engine::Event& event) OVERRIDE;
 

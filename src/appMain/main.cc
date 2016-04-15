@@ -58,6 +58,7 @@
 #include "utils/system.h"
 #include "config_profile/profile.h"
 #include "utils/appenders_loader.h"
+#include "utils/file_system.h"
 
 #if defined(EXTENDED_MEDIA_MODE)
 #include <gst/gst.h>
