@@ -53,6 +53,12 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     ${CMAKE_SOURCE_DIR}/src/3rd_party/apache-log4cxx-win32-0.10.0/apr/include
     ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
   )
+  if(BUILD_TESTS)
+    include_directories(
+      ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/gtest/include
+	  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/include
+    )
+  endif()
 elseif(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
   include_directories(
     ${CMAKE_SOURCE_DIR}/include/wince
@@ -61,6 +67,12 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
     ${CMAKE_SOURCE_DIR}/src/3rd_party/apache-log4cxx-win32-0.10.0/apr/include
     ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
   )
+  if(BUILD_TESTS)
+    include_directories(
+      ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/gtest/include
+	  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/include
+    )
+  endif()
 endif()
 
 set (SOURCES

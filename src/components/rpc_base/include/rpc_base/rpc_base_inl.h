@@ -217,14 +217,15 @@ Integer<T, minval, maxval>::operator IntType() const {
 /*
  * Float class
  */
+#if defined(OS_WIN32) || defined(OS_WINCE)
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 const Range<double> Float<minnum, maxnum, minden, maxden>::range_(
-#if defined(OS_WIN32) || defined(OS_WINCE)
-    (double(minnum)/minden), (double(maxnum)/maxden)){}
+    double(minnum)/minden, double(maxnum)/maxden);
 #else
-    (double(minnum)/minden), (double(maxnum)/maxden));
+template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
+const Range<double> Float<minnum, maxnum, minden, maxden>::range_(
+    (double(minnum) / minden), (double(maxnum) / maxden));
 #endif
-
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 Float<minnum, maxnum, minden, maxden>::Float()
     : PrimitiveType(kUninitialized),

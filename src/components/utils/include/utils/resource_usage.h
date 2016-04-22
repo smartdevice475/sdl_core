@@ -36,6 +36,9 @@
 #if defined(OS_WIN32) || defined(OS_WINCE)
 #include "sched.h"
 #include <stdint.h>
+#ifdef BUILD_TESTS
+#include "gtest/gtest.h"
+#endif
 #else
 #include <sys/resource.h>
 #endif

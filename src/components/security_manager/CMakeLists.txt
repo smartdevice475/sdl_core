@@ -56,8 +56,11 @@ set (SOURCES
 )
 
 add_library(SecurityManager ${SOURCES})
-target_link_libraries(SecurityManager crypto ssl ProtocolHandler jsoncpp ProtocolLibrary)
-
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  target_link_libraries(SecurityManager ssleay32 libeay32 ProtocolHandler jsoncpp ProtocolLibrary)
+else()
+  target_link_libraries(SecurityManager crypto ssl ProtocolHandler jsoncpp ProtocolLibrary)
+endif()
 if(BUILD_TESTS)
   add_subdirectory(test)
 endif()

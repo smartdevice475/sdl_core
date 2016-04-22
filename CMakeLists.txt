@@ -63,6 +63,9 @@ set(SECURITY_OPTION 	"$ENV{SECURITY_MODE}")
 set(COMPONENTS_DIR ${CMAKE_SOURCE_DIR}/src/components)
 set(SNAPSHOT_TAG 	"$ENV{SNAPSHOT_TAG}")
 
+set(CMAKE_CXX_COMPILER   $ENV{CMAKE_CXX_COMPILER})
+set(CMAKE_C_COMPILER     $ENV{CMAKE_C_COMPILER})
+
 if (ARCH_TYPE_OPTION)
   if (NOT (${ARCH_TYPE_OPTION} STREQUAL "x86") AND NOT (${ARCH_TYPE_OPTION} STREQUAL "armv7"))
     message(AUTHOR_WARNING "HW architecture is not defined, using x86. Allowed values are x86/armv7 (case sensitive)")
@@ -230,7 +233,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
   set (BUILD_BT_SUPPORT OFF)
   set (EXTENDED_MEDIA_MODE OFF)
   set (ENABLE_LOG ON)
-  set (ENABLE_SECURITY OFF)
+  set (ENABLE_SECURITY ON)
   add_definitions(-DLOG4CXX_STATIC)
   add_definitions(-DAPR_DECLARE_STATIC)
   add_definitions(-DAPU_DECLARE_STATIC)
@@ -395,7 +398,7 @@ macro (GenerateInterface arg_xml_name arg_namespace parser_type)
     add_library("${file_name}" ${cpp_file})
 endmacro(GenerateInterface)
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
   # --- Useful macro
   macro(create_test NAME SOURCES LIBS)
     add_executable("${NAME}" ${CMAKE_SOURCE_DIR}/src/components/test_main.cc ${SOURCES})
@@ -497,10 +500,13 @@ endif()
 include_directories(
   ${COMPONENTS_DIR}/include
   ${COMPONENTS_DIR}/protocol/include
-if (BUILD_TESTS)
-  ${COMPONENTS_DIR}/include/test
-endif ()
 )
+
+if (BUILD_TESTS)
+include_directories(
+  ${COMPONENTS_DIR}/include/test
+)
+endif ()
 
 # --- 3rd party libs
 INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/src/3rd_party/set_3rd_party_paths.cmake)
@@ -745,7 +751,7 @@ if(ENABLE_SECURITY)
   add_definitions(-DENABLE_SECURITY)
   set(SecurityManagerLibrary SecurityManager)
   set(SecurityManagerIncludeDir ${COMPONENTS_DIR}/security_manager/include)
-  #set(SecurityManagerTestIncludeDir ${CMAKE_SOURCE_DIR}/test/components/security_manager/include)
+  set(SecurityManagerTestIncludeDir ${CMAKE_SOURCE_DIR}/test/components/security_manager/include)
 endif()
 
 if(ENABLE_HMI_PTU_DECRYPTION)
@@ -794,7 +800,7 @@ add_subdirectory(./src/plugins)
 if(BUILD_TESTS)
     # Directory test is deprecated. Use src/components/<name>/test
     include(Dart)
-    add_subdirectory(./test)
+    #add_subdirectory(./test)
 endif()
                                                                                                                                                                                          
 # Building documentation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    

@@ -46,7 +46,7 @@ include_directories(
 set(LIBRARIES
   gmock
   ConfigProfile
-  transport_manager
+  TransportManager
   Utils
   ConfigProfile
   ProtocolLibrary

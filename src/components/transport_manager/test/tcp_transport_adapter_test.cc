@@ -135,7 +135,11 @@ TEST_F(TcpAdapterTest, StoreDataWithSeveralDevicesAndOneApplication) {
   std::string uniq_id[count_dev];
   for (uint32_t i = 0; i < count_dev; i++) {
     char numb[12];
+#if defined(OS_WIN32) || defined(OS_WINCE)
+    snprintf(numb, 12, "%d", i);
+#else
     std::snprintf(numb, 12, "%d", i);
+#endif
     uniq_id[i] = "unique_device_name" + std::string(numb);
     mockdev[i] = new MockTCPDevice(port, uniq_id[i]);
     EXPECT_CALL(*(mockdev[i]), IsSameAs(_)).WillRepeatedly(Return(false));
@@ -188,7 +192,11 @@ TEST_F(TcpAdapterTest, StoreDataWithSeveralDevicesAndSeveralApplications) {
   std::string uniq_id[count_dev];
   for (uint32_t i = 0; i < count_dev; i++) {
     char numb[12];
+#if defined(OS_WIN32) || defined(OS_WINCE)
+    snprintf(numb, 12, "%d", i);
+#else
     std::snprintf(numb, 12, "%d", i);
+#endif
     uniq_id[i] = "unique_device_name" + std::string(numb);
     mockdev[i] = new MockTCPDevice(port, uniq_id[i]);
     EXPECT_CALL(*(mockdev[i]), IsSameAs(_)).WillRepeatedly(Return(false));
@@ -314,7 +322,11 @@ TEST_F(TcpAdapterTest, StoreDataWithSeveralDevices_RestoreData) {
   std::string uniq_id[count_dev];
   for (uint32_t i = 0; i < count_dev; i++) {
     char numb[12];
+#if defined(OS_WIN32) || defined(OS_WINCE)
+    snprintf(numb, 12, "%d", i);
+#else
     std::snprintf(numb, 12, "%d", i);
+#endif
     uniq_id[i] = "unique_device_name" + std::string(numb);
     mockdev[i] = new MockTCPDevice(port, uniq_id[i]);
     EXPECT_CALL(*(mockdev[i]), IsSameAs(_)).WillRepeatedly(Return(false));

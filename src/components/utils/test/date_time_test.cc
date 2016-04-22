@@ -110,8 +110,11 @@ TEST(DateTimeTest, CalculateTimeSpan) {
   const TimevalStruct time = date_time::DateTime::getCurrentTime();
 
   const uint32_t sleep_time_mSec = 10;
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  Sleep(sleep_time_mSec * date_time::DateTime::MICROSECONDS_IN_MILLISECOND);
+#else
   usleep(sleep_time_mSec * date_time::DateTime::MICROSECONDS_IN_MILLISECOND);
-
+#endif
   //assert
   ASSERT_GE(date_time::DateTime::calculateTimeSpan(time), sleep_time_mSec);
 }

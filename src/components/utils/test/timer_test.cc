@@ -58,12 +58,12 @@ class TestTask : public timer::TimerTask {
     lock_monitor.NotifyOne();
   }
 
-  uint GetCallsCount() const {
+  uint32_t GetCallsCount() const {
     return calls_count_;
   }
 
  private:
-  mutable uint calls_count_;
+  mutable uint32_t calls_count_;
 };
 
 class FakeClassWithTimer {
@@ -87,12 +87,12 @@ class FakeClassWithTimer {
     return internal_timer_.is_running();
   }
 
-  uint GetCallsCount() const {
+  uint32_t GetCallsCount() const {
     return calls_count_;
   }
 
  private:
-  uint calls_count_;
+  uint32_t calls_count_;
   timer::Timer internal_timer_;
 };
 }  // namespace
@@ -138,14 +138,14 @@ TEST_F(TimerTest, Start_NoLoop_OneCall) {
 
 TEST_F(TimerTest, Start_Loop_3Calls) {
   // Preconditions
-  uint loops_count = 3u;
+  uint32_t loops_count = 3u;
   single_shot_ = false;
   test_lock.Acquire();
   TestTask* task = new TestTask();
   timer::Timer test_timer(kTimerName, task);
   // Actions
   test_timer.Start(timeout_, single_shot_);
-  for (uint i = loops_count; i; --i) {
+  for (uint32_t i = loops_count; i; --i) {
     lock_monitor.Wait(test_lock);
   }
   test_lock.Release();

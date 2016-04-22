@@ -78,7 +78,11 @@ class MessageMeterTest: public ::testing::TestWithParam<TimePair> {
   void TearDown() OVERRIDE {
   }
   ::utils::MessageMeter<int> meter;
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  TimevalStruct time_range = TimevalStruct{ 0, 0 };
+#else
   TimevalStruct time_range = {0, 0};
+#endif
   int64_t time_range_msecs;
   int usecs;
   int id1, id2, id3;
@@ -207,7 +211,11 @@ TEST_P(MessageMeterTest, Frequency_CountingOverPeriod_CorrectCountOfMessages) {
   int64_t time_span;
   while ((time_span = date_time::DateTime::calculateTimeSpan(start_time))
          < time_range_msecs) {
+#if defined(OS_WIN32) || defined(OS_WINCE)
+    Sleep(time_range_msecs);
+#else
     usleep(time_range_msecs);
+#endif
 
     if (one_message != meter.Frequency(id1) ||
        one_message != meter.Frequency(id2) ||
@@ -228,7 +236,11 @@ TEST_P(MessageMeterTest, CountingOutOfPeriod) {
             meter.TrackMessage(id3));
 
   // sleep more than time range
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  Sleep(time_range_msecs * usecs * 1.1);
+#else
   usleep(time_range_msecs * usecs * 1.1);
+#endif
   EXPECT_EQ(0u,
             meter.Frequency(id1));
   EXPECT_EQ(0u,

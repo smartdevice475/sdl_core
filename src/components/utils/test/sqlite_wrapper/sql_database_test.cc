@@ -213,8 +213,11 @@ TEST(SQLDatabaseTest, IsReadWrite_FirstOpenDBIsRWSecondIsNot) {
   ASSERT_TRUE(db.Open());
   EXPECT_TRUE(db.IsReadWrite());
   db.Close();
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  chmod("test-database.sqlite", 0x00400);
+#else
   chmod("test-database.sqlite", S_IRUSR);
-
+#endif
   //assert
   ASSERT_TRUE(db.Open());
   EXPECT_FALSE(db.IsReadWrite());

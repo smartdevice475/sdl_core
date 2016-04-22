@@ -405,6 +405,6 @@ if(ENABLE_LOG)
 endif()
 
 if(BUILD_TESTS)
-  add_subdirectory(test)
-  add_subdirectory(test/message_helper)
+  #add_subdirectory(test)
+  #add_subdirectory(test/message_helper)
 endif()

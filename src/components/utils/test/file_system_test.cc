@@ -34,7 +34,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
-
+#include <unistd.h>
 #include "gtest/gtest.h"
 #include "utils/file_system.h"
 
@@ -270,7 +270,7 @@ TEST(FileSystemTest, OpenFileWriteInFileStream) {
   // Write data in file
   uint32_t data_size = 4;
   uint8_t* data = new uint8_t[data_size];
-  for (uint i = 0; i < data_size; ++i) {
+  for (uint32_t i = 0; i < data_size; ++i) {
     data[i] = i;
   }
   EXPECT_TRUE(Write(test_file, data, data_size));
@@ -284,7 +284,7 @@ TEST(FileSystemTest, OpenFileWriteInFileStream) {
   EXPECT_FALSE(result.empty());
 
   // Check data
-  for (uint i = 0; i < data_size; ++i) {
+  for (uint32_t i = 0; i < data_size; ++i) {
     EXPECT_EQ(data[i], result[i]);
   }
   delete data;
@@ -306,7 +306,7 @@ TEST(FileSystemTest, CannotWriteInClosedFileStream) {
   // Write data in file
   uint32_t data_size = 4;
   uint8_t* data = new uint8_t[data_size];
-  for (uint i = 0; i < data_size; ++i) {
+  for (uint32_t i = 0; i < data_size; ++i) {
     data[i] = i;
   }
   EXPECT_TRUE(Write(test_file, data, data_size));
@@ -334,7 +334,7 @@ TEST(FileSystemTest, CreateWriteInFileStream_CreateFileAgain_FileRewritten) {
   // Write data in file
   uint32_t data_size = 4;
   uint8_t* data = new uint8_t[data_size];
-  for (uint i = 0; i < data_size; ++i) {
+  for (uint32_t i = 0; i < data_size; ++i) {
     data[i] = i;
   }
   EXPECT_TRUE(Write(test_file, data, data_size));
@@ -367,7 +367,7 @@ TEST(FileSystemTest, CreateFileStream_WriteInFile_FileStreamNotClosed) {
   // Write data in file
   uint32_t data_size = 4;
   std::vector<uint8_t> data;
-  for (uint i = 0; i < data_size; ++i) {
+  for (uint32_t i = 0; i < data_size; ++i) {
     data.push_back(i);
   }
   // Write data in file
@@ -397,7 +397,7 @@ TEST(FileSystemTest,
   // Write data in file
   uint32_t data_size = 4;
   std::vector<uint8_t> data;
-  for (uint i = 0; i < data_size; ++i) {
+  for (uint32_t i = 0; i < data_size; ++i) {
     data.push_back(i);
   }
   // Write data in file
@@ -407,7 +407,7 @@ TEST(FileSystemTest,
 
   // Write in filestream
   uint8_t* data_2 = new uint8_t[data_size];
-  for (uint i = 0; i < data_size; ++i) {
+  for (uint32_t i = 0; i < data_size; ++i) {
     data_2[i] = i + data_size;
   }
   EXPECT_TRUE(Write(test_file, data_2, data_size));
@@ -421,7 +421,7 @@ TEST(FileSystemTest,
 
   // Check data
   EXPECT_EQ(result.size(), data_size);
-  for (uint i = 0; i < data_size; ++i) {
+  for (uint32_t i = 0; i < data_size; ++i) {
     EXPECT_NE(data[i], result[i]);
     EXPECT_EQ(data_2[i], result[i]);
   }
@@ -445,11 +445,11 @@ TEST(FileSystemTest, WriteInFilestreamTwice_FileRewritten) {
 
   uint32_t data_size = 4;
   uint8_t* data = new uint8_t[data_size];
-  for (uint i = 0; i < data_size; ++i) {
+  for (uint32_t i = 0; i < data_size; ++i) {
     data[i] = i;
   }
   uint8_t* data_2 = new uint8_t[data_size];
-  for (uint i = 0; i < data_size; ++i) {
+  for (uint32_t i = 0; i < data_size; ++i) {
     data_2[i] = i + 4;
   }
 
@@ -471,7 +471,7 @@ TEST(FileSystemTest, WriteInFilestreamTwice_FileRewritten) {
   EXPECT_TRUE(ReadBinaryFile("./test file", result));
   EXPECT_FALSE(result.empty());
   // Check data
-  for (uint i = 0; i < data_size; ++i) {
+  for (uint32_t i = 0; i < data_size; ++i) {
     EXPECT_NE(data[i], result[i]);
     EXPECT_EQ(data_2[i], result[i]);
   }
@@ -492,7 +492,7 @@ TEST(FileSystemTest, WriteInFilestreamConsequentially_FileRewritten) {
 
   uint32_t data_size = 4;
   uint8_t* data = new uint8_t[data_size];
-  for (uint i = 0; i < data_size; ++i) {
+  for (uint32_t i = 0; i < data_size; ++i) {
     data[i] = i;
   }
 
@@ -508,7 +508,7 @@ TEST(FileSystemTest, WriteInFilestreamConsequentially_FileRewritten) {
 
   // Write second time
   uint8_t* data_2 = new uint8_t[data_size];
-  for (uint i = 0; i < data_size; ++i) {
+  for (uint32_t i = 0; i < data_size; ++i) {
     data_2[i] = i + 4;
   }
   EXPECT_TRUE(Write(test_file_2, data_2, data_size));
@@ -525,7 +525,7 @@ TEST(FileSystemTest, WriteInFilestreamConsequentially_FileRewritten) {
 
   // Check data
   EXPECT_EQ(result.size(), data_size);
-  for (uint i = 0; i < data_size; ++i) {
+  for (uint32_t i = 0; i < data_size; ++i) {
     EXPECT_NE(data[i], result[i]);
     EXPECT_EQ(data_2[i], result[i]);
   }
@@ -546,7 +546,7 @@ TEST(FileSystemTest, CreateFileTwiceWriteInFileTwice) {
 
   uint32_t data_size = 4;
   std::vector<uint8_t> data;
-  for (uint i = 0; i < data_size; ++i) {
+  for (uint32_t i = 0; i < data_size; ++i) {
     data.push_back(i);
   }
 
@@ -557,7 +557,7 @@ TEST(FileSystemTest, CreateFileTwiceWriteInFileTwice) {
   EXPECT_TRUE(CreateFile("./test file"));
 
   std::vector<uint8_t> data_2;
-  for (uint i = 0; i < data_size; ++i) {
+  for (uint32_t i = 0; i < data_size; ++i) {
     data_2.push_back(i + data_size);
   }
 
@@ -572,7 +572,7 @@ TEST(FileSystemTest, CreateFileTwiceWriteInFileTwice) {
   EXPECT_EQ(data_2, result);
   EXPECT_EQ(result.size(), data_size);
   // Check data
-  for (uint i = 0; i < data_size; ++i) {
+  for (uint32_t i = 0; i < data_size; ++i) {
     EXPECT_NE(data[i], result[i]);
     EXPECT_EQ(data_2[i], result[i]);
   }
@@ -591,14 +591,14 @@ TEST(FileSystemTest, WriteInFileTwiceFileRewritten) {
   // Write data in file
   uint32_t data_size = 4;
   std::vector<uint8_t> data;
-  for (uint i = 0; i < data_size; ++i) {
+  for (uint32_t i = 0; i < data_size; ++i) {
     data.push_back(i);
   }
   EXPECT_TRUE(Write("./test file", data));
 
   // Write data to file again
   std::vector<uint8_t> data_2;
-  for (uint i = 0; i < data_size; ++i) {
+  for (uint32_t i = 0; i < data_size; ++i) {
     data_2.push_back(i + data_size);
   }
   EXPECT_TRUE(Write("./test file", data_2));
@@ -610,7 +610,7 @@ TEST(FileSystemTest, WriteInFileTwiceFileRewritten) {
 
   // Check data
   EXPECT_EQ(data_size, result.size());
-  for (uint i = 0; i < data_size; ++i) {
+  for (uint32_t i = 0; i < data_size; ++i) {
     EXPECT_NE(data[i], result[i]);
     EXPECT_EQ(data_2[i], result[i]);
   }
@@ -674,7 +674,7 @@ TEST(FileSystemTest,
   // Write data in file
   uint32_t data_size = 4;
   std::vector<uint8_t> data;
-  for (uint i = 0; i < data_size; ++i) {
+  for (uint32_t i = 0; i < data_size; ++i) {
     data.push_back(i);
   }
   // Write data in file
@@ -687,7 +687,7 @@ TEST(FileSystemTest,
   delete test_file;
   // Write in file second time
   std::vector<uint8_t> data_2;
-  for (uint i = 0; i < data_size; ++i) {
+  for (uint32_t i = 0; i < data_size; ++i) {
     data_2.push_back(i + data_size);
   }
 
@@ -700,13 +700,13 @@ TEST(FileSystemTest,
   EXPECT_FALSE(result.empty());
 
   std::vector<uint8_t> data_check;
-  for (uint i = 0; i < 2 * data_size; ++i) {
+  for (uint32_t i = 0; i < 2 * data_size; ++i) {
     data_check.push_back(i);
   }
 
   // Check data
   EXPECT_EQ(data_check.size(), result.size());
-  for (uint i = 0; i < 2 * data_size; ++i) {
+  for (uint32_t i = 0; i < 2 * data_size; ++i) {
     EXPECT_EQ(data_check[i], result[i]);
   }
 
@@ -724,7 +724,7 @@ TEST(FileSystemTest, OpenFileStreamForRead_WriteInFileStream) {
   // Write data in file
   uint32_t data_size = 4;
   uint8_t* data = new uint8_t[data_size];
-  for (uint i = 0; i < data_size; ++i) {
+  for (uint32_t i = 0; i < data_size; ++i) {
     data[i] = i;
   }
 
@@ -739,7 +739,7 @@ TEST(FileSystemTest, OpenFileStreamForRead_WriteInFileStream) {
   EXPECT_FALSE(result.empty());
 
   // Check data
-  for (uint i = 0; i < data_size; ++i) {
+  for (uint32_t i = 0; i < data_size; ++i) {
     EXPECT_EQ(data[i], result[i]);
   }
 
@@ -868,7 +868,7 @@ TEST(FileSystemTest, WriteDataAsBinaryData) {
 
   EXPECT_EQ(data.size(), result.size());
 
-  for (uint i = 0; i < result.size(); ++i) {
+  for (uint32_t i = 0; i < result.size(); ++i) {
     EXPECT_EQ(data[i], result[i]);
   }
 
@@ -938,7 +938,7 @@ TEST(FileSystemTest, WriteBinaryData_WriteDataInTheEndOfFile) {
 
   // Compare data
   EXPECT_EQ(data.size(), result.size());
-  for (uint i = 0; i < result.size(); ++i) {
+  for (uint32_t i = 0; i < result.size(); ++i) {
     EXPECT_EQ(data[i], result[i]);
   }
 
@@ -965,7 +965,7 @@ TEST(FileSystemTest, CreateFile_WriteDataWithFlagOpenForReading) {
 
   // Compare data
   EXPECT_EQ(data.size(), result.size());
-  for (uint i = 0; i < result.size(); ++i) {
+  for (uint32_t i = 0; i < result.size(); ++i) {
     EXPECT_EQ(data[i], result[i]);
   }
 
