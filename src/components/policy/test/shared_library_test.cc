@@ -29,7 +29,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#if !defined(OS_WIN32) && !defined(OS_WINCE)
 #include <dlfcn.h>
+#endif
 
 #include "gtest/gtest.h"
 

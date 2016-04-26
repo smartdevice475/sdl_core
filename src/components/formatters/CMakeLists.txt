@@ -59,5 +59,5 @@ add_library("formatters" ${SOURCES}
 )
 
 if(BUILD_TESTS)
-  add_subdirectory(test)
+  #add_subdirectory(test)
 endif()

@@ -45,6 +45,7 @@ set(testSources
 
 set(testLibraries
   gmock
+  Utils
   ConfigProfile
 )
  

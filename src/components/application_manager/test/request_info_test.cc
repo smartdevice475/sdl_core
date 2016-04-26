@@ -38,6 +38,11 @@
 #include "utils/shared_ptr.h"
 #include "utils/make_shared.h"
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#undef max
+#undef min
+#endif
+
 namespace request_info = application_manager::request_controller;
 
 namespace test {

@@ -153,6 +153,30 @@ set(testSources
   include_directories(
     ${AM_SOURCE_DIR}/policy/src/policy/policy_table/table_struct
   )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+set(testLibraries
+  ApplicationManager
+  Utils
+  dbms
+  jsoncpp
+  Policy
+  connectionHandler
+  HMI_API
+  MOBILE_API
+  v4_protocol_v1_2_no_extra
+  SmartObjects
+  formatters
+  gmock_main
+  UsageStatistics
+  ProtocolLibrary
+  ConfigProfile
+  MediaManager
+  Resumption
+  ProtocolHandler
+  SecurityManager
+)
+else()
 set(testLibraries
   ApplicationManager
   Utils
@@ -175,6 +199,7 @@ set(testLibraries
   ProtocolHandler
   SecurityManager
 )
+endif()
 
 set(test_exec_libraries
   HMI_API

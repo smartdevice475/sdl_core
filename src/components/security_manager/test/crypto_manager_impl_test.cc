@@ -47,6 +47,11 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::NiceMock;
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#undef max
+#undef min
+#endif
+
 namespace {
 const size_t kUpdatesBeforeHour = 24;
 const std::string kAllCiphers = "ALL";

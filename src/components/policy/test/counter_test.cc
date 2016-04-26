@@ -129,7 +129,11 @@ TEST(StatisticsManagerSetMethod, AppInfoUpdateMethod_CallTWICE_StatisticsManager
 TEST(StatisticsManagerAddMethod, AppStopwatchStartMethod_CallONCE_StatisticsManagerAddMethodCalledONCE) {
   // Arrange
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  const uint32_t time_out = 1;
+#else
   const std::uint32_t time_out = 1;
+#endif
   AppStopwatchImpl hmi_full_stopwatch(msm, "HelloApp", time_out);
 
   hmi_full_stopwatch.Start(SECONDS_HMI_FULL);
@@ -158,7 +162,11 @@ TEST(StatisticsManagerAddMethod, AppStopwatchSwitchMethod_Call_StatisticsManager
 TEST(StatisticsManagerAddMethod, AppStopwatchSwitchMethod_CallAnd1SecSleepAfter_StatisticsManagerAddMethodCalledWith1SecTimespan) {
   // Arrange
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  const uint32_t time_out = 1;
+#else
   const std::uint32_t time_out = 1;
+#endif
   AppStopwatchImpl hmi_full_stopwatch(msm, "HelloApp", time_out);
 
   // Act

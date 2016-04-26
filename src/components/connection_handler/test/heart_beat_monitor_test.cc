@@ -111,6 +111,15 @@ TEST_F(HeartBeatMonitorTest, KeptAlive) {
 
   const uint32_t session = conn->AddNewSession();
   conn->StartHeartBeat(session);
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  Sleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
+  conn->KeepAlive(session);
+  Sleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
+  conn->KeepAlive(session);
+  Sleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
+  conn->KeepAlive(session);
+  Sleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
+#else
   usleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
   conn->KeepAlive(session);
   usleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
@@ -118,6 +127,7 @@ TEST_F(HeartBeatMonitorTest, KeptAlive) {
   usleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
   conn->KeepAlive(session);
   usleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
+#endif
 }
 
 TEST_F(HeartBeatMonitorTest, NotKeptAlive) {
@@ -129,6 +139,15 @@ TEST_F(HeartBeatMonitorTest, NotKeptAlive) {
   EXPECT_CALL(connection_handler_mock, CloseConnection(_));
 
   conn->StartHeartBeat(session);
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  Sleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
+  conn->KeepAlive(session);
+  Sleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
+  conn->KeepAlive(session);
+  Sleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
+  conn->KeepAlive(session);
+  Sleep(2 * kTimeout * MICROSECONDS_IN_MILLISECONDS + MICROSECONDS_IN_SECOND);
+#else
   usleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
   conn->KeepAlive(session);
   usleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
@@ -136,6 +155,7 @@ TEST_F(HeartBeatMonitorTest, NotKeptAlive) {
   usleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
   conn->KeepAlive(session);
   usleep(2 * kTimeout * MICROSECONDS_IN_MILLISECONDS + MICROSECONDS_IN_SECOND);
+#endif
 }
 
 TEST_F(HeartBeatMonitorTest, TwoSessionsElapsed) {

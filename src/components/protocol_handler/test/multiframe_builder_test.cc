@@ -38,6 +38,11 @@
 #include "utils/make_shared.h"
 #include "protocol_handler/multiframe_builder.h"
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#undef max
+#undef min
+#endif
+
 namespace test {
 namespace components {
 namespace protocol_handler_test {
@@ -506,7 +511,9 @@ TEST_F(MultiFrameBuilderTest, FrameExpired_OneMSec) {
       << "First frame: " << first_frame;
 
   // Wait frame expire
-  usleep(1000);
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  Sleep(1000);
+#endif
   const ProtocolFramePtrList& list = multiframe_builder_.PopMultiframes();
   ASSERT_FALSE(list.empty());
   EXPECT_EQ(first_frame, list.front());

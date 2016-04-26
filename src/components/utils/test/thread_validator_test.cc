@@ -44,8 +44,11 @@ using namespace ::threads;
 
 TEST(ThreadValidatorTest, CompareID_CurrentThreadAndPthread_AreEqual) {
   SingleThreadSimpleValidator object;
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  ASSERT_EQ(object.creation_thread_id().p, pthread_self().p);
+#else
   ASSERT_EQ(object.creation_thread_id(), pthread_self());
-
+#endif
 }
 
 } // namespace utils

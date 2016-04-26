@@ -73,7 +73,7 @@ void prepare_data(uint8_t* data_for_sending, ProtocolPayloadV2& message) {
 
   if (message.data.size() != 0) {
     uint8_t* current_pointer = data_for_sending + offset + message.json.length();
-    u_int32_t binarySize = message.data.size();
+    uint32_t binarySize = message.data.size();
     for (uint32_t i = 0; i < binarySize; ++i) {
       current_pointer[i] = message.data[i];
     }

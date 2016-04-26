@@ -359,6 +359,18 @@ if (${HMI_DBUS_API})
     set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_DBUS})
 endif (${HMI_DBUS_API})
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+set (LIBRARIES
+  HMI_API
+  MOBILE_API
+  v4_protocol_v1_2_no_extra
+  ProtocolLibrary
+  SmartObjects
+  UsageStatistics
+  formatters
+  dbms
+)
+else()
 set (LIBRARIES
   HMI_API
   MOBILE_API
@@ -370,6 +382,7 @@ set (LIBRARIES
   formatters
   dbms
 )
+endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES sqlite3)
@@ -405,6 +418,6 @@ if(ENABLE_LOG)
 endif()
 
 if(BUILD_TESTS)
-  #add_subdirectory(test)
-  #add_subdirectory(test/message_helper)
+  add_subdirectory(test)
+  add_subdirectory(test/message_helper)
 endif()

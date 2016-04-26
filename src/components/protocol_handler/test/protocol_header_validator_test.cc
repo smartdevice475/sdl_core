@@ -37,6 +37,11 @@
 #include "utils/macro.h"
 #include "protocol_handler/protocol_packet.h"
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#undef max
+#undef min
+#endif
+
 namespace {
   const size_t MAXIMUM_FRAME_DATA_V3_SIZE = 131072;
 }
