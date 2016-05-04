@@ -32,7 +32,11 @@
 
 #include "gtest/gtest.h"
 #include "config_profile/ini_file.h"
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#include "utils/file_system_win.h"
+#else
 #include "utils/file_system.h"
+#endif
 
 namespace test {
 namespace components {
@@ -55,7 +59,11 @@ TEST(IniFileTest, WriteItemReadItem) {
 
   EXPECT_TRUE(read_result);
   EXPECT_STREQ(res, value);
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(file_system::DeleteFileWindows("./test_ini_file.ini"));
+#else
   EXPECT_TRUE(file_system::DeleteFile("./test_ini_file.ini"));
+#endif
 }
 
 TEST(IniFileTest, WriteItemWithoutValueReadItem) {
@@ -75,7 +83,11 @@ TEST(IniFileTest, WriteItemWithoutValueReadItem) {
   EXPECT_TRUE(read_result);
   EXPECT_STREQ(res, value);
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(file_system::DeleteFileWindows("./test_ini_file.ini"));
+#else
   EXPECT_TRUE(file_system::DeleteFile("./test_ini_file.ini"));
+#endif
 }
 
 TEST(IniFileTest, WriteSameItemInDifferentChapters) {
@@ -106,7 +118,11 @@ TEST(IniFileTest, WriteSameItemInDifferentChapters) {
   const char *res2 = value2;
   EXPECT_TRUE(read_result2);
   EXPECT_STREQ(res2, res);
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(file_system::DeleteFileWindows("./test_ini_file.ini"));
+#else
   EXPECT_TRUE(file_system::DeleteFile("./test_ini_file.ini"));
+#endif
 }
 
 TEST(IniFileTest, RewriteItem) {
@@ -136,7 +152,11 @@ TEST(IniFileTest, RewriteItem) {
   const char *new_res = new_search_value;
   EXPECT_TRUE(read_result);
   EXPECT_STREQ(new_res, newvalue);
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(file_system::DeleteFileWindows("./test_ini_file.ini"));
+#else
   EXPECT_TRUE(file_system::DeleteFile("./test_ini_file.ini"));
+#endif
 }
 
 TEST(IniFileTest, WriteTwoItemsInOneChapter) {
@@ -170,7 +190,11 @@ TEST(IniFileTest, WriteTwoItemsInOneChapter) {
   const char *res2 = search_value2;
   EXPECT_TRUE(read_result);
   EXPECT_STREQ(res2, value2);
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(file_system::DeleteFileWindows("./test_ini_file.ini"));
+#else
   EXPECT_TRUE(file_system::DeleteFile("./test_ini_file.ini"));
+#endif
 }
 
 TEST(IniFileTest, WriteEmptyItemWithValueReadItem) {

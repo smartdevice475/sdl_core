@@ -39,7 +39,11 @@
 #include "config_profile/profile.h"
 #include "utils/log_message_loop_thread.h"
 #include "utils/threads/message_loop_thread.h"
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#include "utils/file_system_win.h"
+#else
 #include "utils/file_system.h"
+#endif
 #include "utils/threads/thread.h"
 #include "utils/date_time.h"
 #include "utils/logger_status.h"
@@ -56,8 +60,13 @@ void Preconditions() {
   const char* file_name = "AutoTraceTestLogFile.log";
   // Delete file with previous logs
   if (file_system::FileExists(file_name)) {
+#if defined(OS_WIN32) || defined(OS_WINCE)
+    ASSERT_TRUE(file_system::DeleteFileWindows(file_name))
+        << "Can't delete AutoTraceTestLogFile.log";
+#else
     ASSERT_TRUE(file_system::DeleteFile(file_name))
         << "Can't delete AutoTraceTestLogFile.log";
+#endif
   }
 }
 

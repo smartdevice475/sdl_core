@@ -36,7 +36,11 @@
 #include <string>
 #include <unistd.h>
 #include "gtest/gtest.h"
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#include "utils/file_system_win.h"
+#else
 #include "utils/file_system.h"
+#endif
 
 namespace test {
 namespace components {
@@ -62,49 +66,89 @@ StringArray MergeStringsToArray(const std::string& first,
 TEST(FileSystemTest, CreateDeleteDirectory) {
   ASSERT_FALSE(DirectoryExists("./Test directory"));
   // Directory creation
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  CreateDirectoryWindows("./Test directory");
+#else
   CreateDirectory("./Test directory");
+#endif
 
   EXPECT_TRUE(DirectoryExists("./Test directory"));
   EXPECT_TRUE(IsDirectory("./Test directory"));
 
   // Directory removing
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(RemoveDirectoryWindows("./Test directory", false));
+#else
   EXPECT_TRUE(RemoveDirectory("./Test directory", false));
+#endif
   EXPECT_FALSE(DirectoryExists("./Test directory"));
 }
 
 TEST(FileSystemTest, CreateDirectoryTwice) {
   ASSERT_FALSE(DirectoryExists("./Test directory"));
   // Directory creation
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  CreateDirectoryWindows("./Test directory");
+#else
   CreateDirectory("./Test directory");
+#endif
 
   EXPECT_TRUE(DirectoryExists("./Test directory"));
   EXPECT_TRUE(IsDirectory("./Test directory"));
 
   // Create directory second time
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  CreateDirectoryWindows("./Test directory");
+#else
   CreateDirectory("./Test directory");
+#endif
   EXPECT_TRUE(DirectoryExists("./Test directory"));
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  // Directory removing
+  EXPECT_TRUE(RemoveDirectoryWindows("./Test directory", false));
+  // Try to delete directory again
+  EXPECT_FALSE(RemoveDirectoryWindows("./Test directory", false));
+#else
   // Directory removing
   EXPECT_TRUE(RemoveDirectory("./Test directory", false));
   // Try to delete directory again
   EXPECT_FALSE(RemoveDirectory("./Test directory", false));
+#endif
   EXPECT_FALSE(DirectoryExists("./Test directory"));
 }
 
 TEST(FileSystemTest, DeleteDirectoryRecursively) {
   ASSERT_FALSE(DirectoryExists("./Test directory"));
   // Create directories
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  CreateDirectoryWindows("./Test directory");
+  CreateDirectoryWindows("./Test directory/Test directory 2");
+#else
   CreateDirectory("./Test directory");
   CreateDirectory("./Test directory/Test directory 2");
+#endif
 
   // Create file inside directory
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(CreateFileWindows("./Test directory/test file"));
+#else
   EXPECT_TRUE(CreateFile("./Test directory/test file"));
+#endif
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_FALSE(RemoveDirectoryWindows("./Test directory", false));
+#else
   EXPECT_FALSE(RemoveDirectory("./Test directory", false));
+#endif
   EXPECT_TRUE(DirectoryExists("./Test directory"));
   EXPECT_TRUE(IsDirectory("./Test directory"));
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(RemoveDirectoryWindows("./Test directory", true));
+#else
   EXPECT_TRUE(RemoveDirectory("./Test directory", true));
+#endif
   EXPECT_FALSE(DirectoryExists("./Test directory"));
 }
 
@@ -126,7 +170,11 @@ TEST(FileSystemTest, CreateDirectoryRecursivelyDeleteRecursively) {
       IsDirectory("./Test directory/Test directory 2/Test directory 3"));
 
   // Delete recursively
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(RemoveDirectoryWindows("./Test directory", true));
+#else
   EXPECT_TRUE(RemoveDirectory("./Test directory", true));
+#endif
   EXPECT_FALSE(DirectoryExists("./Test directory"));
   EXPECT_FALSE(DirectoryExists("./Test directory/Test directory 2"));
   EXPECT_FALSE(
@@ -163,10 +211,18 @@ TEST(FileSystemTest, TwiceCreateDirectoryRecursivelyDeleteRecursivelyOnce) {
       DirectoryExists("./Test directory/Test directory 2/Test directory 3"));
 
   // Delete recursively
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(RemoveDirectoryWindows("./Test directory", true));
+#else
   EXPECT_TRUE(RemoveDirectory("./Test directory", true));
+#endif
   EXPECT_FALSE(DirectoryExists("./Test directory"));
   // Delete recursively again is impossible
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_FALSE(RemoveDirectoryWindows("./Test directory", true));
+#else
   EXPECT_FALSE(RemoveDirectory("./Test directory", true));
+#endif
 
   EXPECT_FALSE(DirectoryExists("./Test directory"));
   EXPECT_FALSE(DirectoryExists("./Test directory/Test directory 2"));
@@ -177,34 +233,61 @@ TEST(FileSystemTest, TwiceCreateDirectoryRecursivelyDeleteRecursivelyOnce) {
 TEST(FileSystemTest, CreateDeleteFile) {
   ASSERT_FALSE(FileExists("./test file"));
   // File creation
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(CreateFileWindows("./test file"));
+#else
   EXPECT_TRUE(CreateFile("./test file"));
+#endif
   EXPECT_FALSE(IsDirectory("./test file"));
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  // Delete file
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+  // Try to delete file again
+  EXPECT_FALSE(DeleteFileWindows("./test file"));
+#else
   // Delete file
   EXPECT_TRUE(DeleteFile("./test file"));
   // Try to delete file again
   EXPECT_FALSE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
 }
 
 TEST(FileSystemTest, CheckIsDirectory) {
   ASSERT_FALSE(DirectoryExists("./Test directory"));
   // Create directory and check that IsDirectory=true
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  CreateDirectoryWindows("./Test directory");
+#else
   CreateDirectory("./Test directory");
+#endif
   EXPECT_TRUE(IsDirectory("./Test directory"));
 
   // Delete directory and check, that IsDirectory=false
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(RemoveDirectoryWindows("./Test directory", false));
+#else
   EXPECT_TRUE(RemoveDirectory("./Test directory", false));
+#endif
   EXPECT_FALSE(DirectoryExists("./Test directory"));
   EXPECT_FALSE(IsDirectory("./Test directory"));
 
   // Create file and check that IsDirectory=false
   ASSERT_FALSE(FileExists("./test file"));
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(CreateFileWindows("./test file"));
+#else
   EXPECT_TRUE(CreateFile("./test file"));
+#endif
   EXPECT_FALSE(IsDirectory("./test file"));
 
   // Delete file and check that IsDirectory=false
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
   EXPECT_FALSE(IsDirectory("./test file"));
 }
@@ -213,15 +296,27 @@ TEST(FileSystemTest, CreateFileTwice) {
   ASSERT_FALSE(FileExists("./test file"));
 
   // Create file first time
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(CreateFileWindows("./test file"));
+#else
   EXPECT_TRUE(CreateFile("./test file"));
+#endif
   EXPECT_TRUE(FileExists("./test file"));
 
   // Create file second time
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(CreateFileWindows("./test file"));
+#else
   EXPECT_TRUE(CreateFile("./test file"));
+#endif
   EXPECT_TRUE(FileExists("./test file"));
 
   // Delete file
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
 }
 
@@ -237,7 +332,11 @@ TEST(FileSystemTest, CreateOpenCloseFileStream) {
 
   EXPECT_TRUE(FileExists("./test file"));
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
 }
 
@@ -254,9 +353,17 @@ TEST(FileSystemTest, CreateAndOpenFileStreamTwice) {
   EXPECT_TRUE(FileExists("./test file"));
 
   // Create file second time
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(CreateFileWindows("./test file"));
+#else
   EXPECT_TRUE(CreateFile("./test file"));
+#endif
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
 }
 
@@ -290,7 +397,11 @@ TEST(FileSystemTest, OpenFileWriteInFileStream) {
   delete data;
 
   // Delete file
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
 }
 
@@ -320,7 +431,11 @@ TEST(FileSystemTest, CannotWriteInClosedFileStream) {
   EXPECT_TRUE(result.empty());
 
   // Delete file
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
 }
 
@@ -347,13 +462,21 @@ TEST(FileSystemTest, CreateWriteInFileStream_CreateFileAgain_FileRewritten) {
   EXPECT_FALSE(result.empty());
 
   delete data;
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(CreateFileWindows("./test file"));
+#else
   EXPECT_TRUE(CreateFile("./test file"));
+#endif
 
   // Now file is empty
   EXPECT_TRUE(ReadBinaryFile("./test file", result));
   EXPECT_TRUE(result.empty());
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
 }
 
@@ -382,7 +505,11 @@ TEST(FileSystemTest, CreateFileStream_WriteInFile_FileStreamNotClosed) {
   EXPECT_TRUE(ReadBinaryFile("./test file", result));
   EXPECT_FALSE(result.empty());
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
 }
 
@@ -428,7 +555,11 @@ TEST(FileSystemTest,
 
   delete data_2;
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
 }
 
@@ -479,7 +610,11 @@ TEST(FileSystemTest, WriteInFilestreamTwice_FileRewritten) {
   delete data;
   delete data_2;
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
 }
 
@@ -533,7 +668,11 @@ TEST(FileSystemTest, WriteInFilestreamConsequentially_FileRewritten) {
   delete data;
   delete data_2;
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
 }
 
@@ -541,7 +680,11 @@ TEST(FileSystemTest, CreateFileTwiceWriteInFileTwice) {
   ASSERT_FALSE(FileExists("./test file"));
 
   // Create and open file
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(CreateFileWindows("./test file"));
+#else
   EXPECT_TRUE(CreateFile("./test file"));
+#endif
   EXPECT_TRUE(FileExists("./test file"));
 
   uint32_t data_size = 4;
@@ -553,8 +696,13 @@ TEST(FileSystemTest, CreateFileTwiceWriteInFileTwice) {
   // Write data in file
   EXPECT_TRUE(Write("./test file", data));
   // Create file second time
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(CreateFileWindows("./test file"));
+  EXPECT_TRUE(CreateFileWindows("./test file"));
+#else
   EXPECT_TRUE(CreateFile("./test file"));
   EXPECT_TRUE(CreateFile("./test file"));
+#endif
 
   std::vector<uint8_t> data_2;
   for (uint32_t i = 0; i < data_size; ++i) {
@@ -576,8 +724,11 @@ TEST(FileSystemTest, CreateFileTwiceWriteInFileTwice) {
     EXPECT_NE(data[i], result[i]);
     EXPECT_EQ(data_2[i], result[i]);
   }
-
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
 }
 
@@ -585,7 +736,11 @@ TEST(FileSystemTest, WriteInFileTwiceFileRewritten) {
   ASSERT_FALSE(FileExists("./test file"));
 
   // Create and open file
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(CreateFileWindows("./test file"));
+#else
   EXPECT_TRUE(CreateFile("./test file"));
+#endif
   EXPECT_TRUE(FileExists("./test file"));
 
   // Write data in file
@@ -615,14 +770,22 @@ TEST(FileSystemTest, WriteInFileTwiceFileRewritten) {
     EXPECT_EQ(data_2[i], result[i]);
   }
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
 }
 
 TEST(FileSystemTest, WriteDataInTheEndOfFile) {
   ASSERT_FALSE(FileExists("./test file"));
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(CreateFileWindows("./test file"));
+#else
   EXPECT_TRUE(CreateFile("./test file"));
+#endif
   EXPECT_TRUE(FileExists("./test file"));
 
   int32_t data_size = 4;
@@ -659,7 +822,11 @@ TEST(FileSystemTest, WriteDataInTheEndOfFile) {
     EXPECT_EQ(data_check[i], result[i]);
   }
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
 }
 
@@ -710,14 +877,22 @@ TEST(FileSystemTest,
     EXPECT_EQ(data_check[i], result[i]);
   }
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
 }
 
 TEST(FileSystemTest, OpenFileStreamForRead_WriteInFileStream) {
   ASSERT_FALSE(FileExists("./test file"));
   // File creation
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(CreateFileWindows("./test file"));
+#else
   EXPECT_TRUE(CreateFile("./test file"));
+#endif
   std::ofstream* test_file = Open("./test file", std::ios_base::in);
   EXPECT_TRUE(test_file->is_open());
 
@@ -748,7 +923,11 @@ TEST(FileSystemTest, OpenFileStreamForRead_WriteInFileStream) {
 
   EXPECT_TRUE(FileExists("./test file"));
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
 }
 
@@ -760,13 +939,21 @@ TEST(FileSystemTest, WriteFileNotExists) {
   EXPECT_TRUE(Write("./test file", data));
   // File now exists
   ASSERT_TRUE(FileExists("./test file"));
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
 }
 
 TEST(FileSystemTest, WriteFileReadFile) {
   ASSERT_FALSE(FileExists("./test file"));
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(CreateFileWindows("./test file"));
+#else
   EXPECT_TRUE(CreateFile("./test file"));
+#endif
 
   unsigned char tmp[] = {'t', 'e', 's', 't'};
   std::vector<unsigned char> data(tmp, tmp + 4);
@@ -779,13 +966,21 @@ TEST(FileSystemTest, WriteFileReadFile) {
   EXPECT_NE(0u, result.size());
   EXPECT_EQ(check, result);
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
 }
 
 TEST(FileSystemTest, WriteBinaryDataReadBinaryFile) {
   ASSERT_FALSE(FileExists("./test file"));
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(CreateFileWindows("./test file"));
+#else
   EXPECT_TRUE(CreateFile("./test file"));
+#endif
 
   uint8_t tmp[] = {1, 2, 3, 4};
   std::vector<uint8_t> data(tmp, tmp + 4);
@@ -797,13 +992,21 @@ TEST(FileSystemTest, WriteBinaryDataReadBinaryFile) {
   EXPECT_FALSE(result.empty());
   EXPECT_EQ(data, result);
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
 }
 
 TEST(FileSystemTest, WriteBinaryDataTwice_FileRewritten) {
   ASSERT_FALSE(FileExists("./test file"));
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(CreateFileWindows("./test file"));
+#else
   EXPECT_TRUE(CreateFile("./test file"));
+#endif
   EXPECT_TRUE(FileExists("./test file"));
 
   int32_t data_size = 4;
@@ -834,7 +1037,11 @@ TEST(FileSystemTest, WriteBinaryDataTwice_FileRewritten) {
     EXPECT_EQ(data_2[i], result[i]);
   }
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
 }
 
@@ -849,7 +1056,11 @@ TEST(FileSystemTest, WriteBinaryDataFileNotExists) {
 
   EXPECT_TRUE(WriteBinaryFile("./test file", data));
   ASSERT_TRUE(FileExists("./test file"));
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
 }
 
@@ -872,7 +1083,11 @@ TEST(FileSystemTest, WriteDataAsBinaryData) {
     EXPECT_EQ(data[i], result[i]);
   }
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
 }
 
@@ -888,7 +1103,11 @@ TEST(FileSystemTest, WriteEmptyData) {
   EXPECT_TRUE(ReadBinaryFile("./test file", result));
   EXPECT_TRUE(result.empty());
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
 }
 
@@ -905,7 +1124,11 @@ TEST(FileSystemTest, WriteEmptyDataAsBinaryData) {
   EXPECT_TRUE(ReadBinaryFile("./test file", result));
   EXPECT_TRUE(result.empty());
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
 }
 
@@ -942,13 +1165,21 @@ TEST(FileSystemTest, WriteBinaryData_WriteDataInTheEndOfFile) {
     EXPECT_EQ(data[i], result[i]);
   }
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
 }
 
 TEST(FileSystemTest, CreateFile_WriteDataWithFlagOpenForReading) {
   ASSERT_FALSE(FileExists("./test file"));
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(CreateFileWindows("./test file"));
+#else
   EXPECT_TRUE(CreateFile("./test file"));
+#endif
   // Write data in file
   int32_t data_size = 4;
   std::vector<uint8_t> data;
@@ -969,7 +1200,11 @@ TEST(FileSystemTest, CreateFile_WriteDataWithFlagOpenForReading) {
     EXPECT_EQ(data[i], result[i]);
   }
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
 }
 
@@ -989,7 +1224,11 @@ TEST(FileSystemTest,
 
 TEST(FileSystemTest, WriteFileGetSize) {
   ASSERT_FALSE(FileExists("./test file"));
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(CreateFileWindows("./test file"));
+#else
   EXPECT_TRUE(CreateFile("./test file"));
+#endif
   EXPECT_EQ(0, FileSize("./test file"));
 
   unsigned char tmp[] = {'t', 'e', 's', 't'};
@@ -998,14 +1237,22 @@ TEST(FileSystemTest, WriteFileGetSize) {
 
   EXPECT_NE(0, FileSize("./test file"));
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
 }
 
 TEST(FileSystemTest, CreateFileCheckDefaultAccess) {
   // File creation
   ASSERT_FALSE(FileExists("./test file"));
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(CreateFileWindows("./test file"));
+#else
   EXPECT_TRUE(CreateFile("./test file"));
+#endif
 
   // Check accesses
   EXPECT_TRUE(IsAccessible("./test file", R_OK));
@@ -1013,14 +1260,22 @@ TEST(FileSystemTest, CreateFileCheckDefaultAccess) {
   EXPECT_TRUE(IsReadingAllowed("./test file"));
   EXPECT_TRUE(IsWritingAllowed("./test file"));
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
 }
 
 TEST(FileSystemTest, GetFileModificationTime) {
   ASSERT_FALSE(FileExists("./test file"));
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(CreateFileWindows("./test file"));
+#else
   EXPECT_TRUE(CreateFile("./test file"));
+#endif
 
   uint64_t modif_time = GetFileModificationTime("./test file");
   EXPECT_LE(0ul, modif_time);
@@ -1031,20 +1286,33 @@ TEST(FileSystemTest, GetFileModificationTime) {
   EXPECT_LE(0ul, GetFileModificationTime("./test file"));
   EXPECT_LE(modif_time, GetFileModificationTime("./test file"));
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./test file"));
+#else
   EXPECT_TRUE(DeleteFile("./test file"));
+#endif
   EXPECT_FALSE(FileExists("./test file"));
 }
 
 TEST(FileSystemTest, ListFiles) {
   ASSERT_FALSE(DirectoryExists("./Test directory"));
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  CreateDirectoryWindows("./Test directory");
+#else
   CreateDirectory("./Test directory");
+#endif
 
   std::vector<std::string> list;
   list = ListFiles("./Test directory");
   EXPECT_TRUE(list.empty());
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(CreateFileWindows("./Test directory/test file"));
+  EXPECT_TRUE(CreateFileWindows("./Test directory/test file 2"));
+#else
   EXPECT_TRUE(CreateFile("./Test directory/test file"));
   EXPECT_TRUE(CreateFile("./Test directory/test file 2"));
+#endif
 
   list = ListFiles("./Test directory");
   EXPECT_FALSE(list.empty());
@@ -1053,7 +1321,11 @@ TEST(FileSystemTest, ListFiles) {
   EXPECT_EQ("test file", list[0]);
   EXPECT_EQ("test file 2", list[1]);
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(RemoveDirectoryWindows("./Test directory", true));
+#else
   EXPECT_TRUE(RemoveDirectory("./Test directory", true));
+#endif
   EXPECT_FALSE(DirectoryExists("./Test directory"));
 
   EXPECT_FALSE(FileExists("./Test directory/test file"));
@@ -1070,7 +1342,11 @@ TEST(FileSystemTest, ListFilesIncludeSubdirectory) {
   EXPECT_EQ(1u, list.size());
   EXPECT_EQ("Test directory 2", list[0]);
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(RemoveDirectoryWindows("./Test directory", true));
+#else
   EXPECT_TRUE(RemoveDirectory("./Test directory", true));
+#endif
   EXPECT_FALSE(DirectoryExists("./Test directory"));
 }
 
@@ -1082,8 +1358,13 @@ TEST(FileSystemTest, ListFilesDoesNotIncludeFilesInSubdirectory) {
   list = ListFiles("./Test directory");
   EXPECT_FALSE(list.empty());
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(CreateFileWindows("./Test directory/Test directory 2/test file"));
+  EXPECT_TRUE(CreateFileWindows("./Test directory/Test directory 2/test file 2"));
+#else
   EXPECT_TRUE(CreateFile("./Test directory/Test directory 2/test file"));
   EXPECT_TRUE(CreateFile("./Test directory/Test directory 2/test file 2"));
+#endif
 
   list = ListFiles("./Test directory");
   EXPECT_FALSE(list.empty());
@@ -1092,7 +1373,11 @@ TEST(FileSystemTest, ListFilesDoesNotIncludeFilesInSubdirectory) {
   EXPECT_EQ("Test directory 2", list[0]);
   EXPECT_EQ(1u, list.size());
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(RemoveDirectoryWindows("./Test directory", true));
+#else
   EXPECT_TRUE(RemoveDirectory("./Test directory", true));
+#endif
   EXPECT_FALSE(DirectoryExists("./Test directory"));
 }
 
@@ -1101,14 +1386,22 @@ TEST(FileSystemTest, GetAvailableDiskSpace) {
   uint64_t available_space = GetAvailableDiskSpace(".");
   EXPECT_NE(0u, available_space);
   ASSERT_FALSE(DirectoryExists("./Test directory"));
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  CreateDirectoryWindows("./Test directory");
+#else
   CreateDirectory("./Test directory");
+#endif
 
   unsigned char tmp[] = {'t', 'e', 's', 't'};
   std::vector<unsigned char> data(tmp, tmp + 4);
   EXPECT_TRUE(Write("./Test directory/test file", data));
 
   EXPECT_GE(available_space, GetAvailableDiskSpace("."));
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(RemoveDirectoryWindows("./Test directory"));
+#else
   EXPECT_TRUE(RemoveDirectory("./Test directory"));
+#endif
   EXPECT_FALSE(DirectoryExists("./Test directory"));
 }
 
@@ -1123,11 +1416,19 @@ TEST(FileSystemTest, ConvertPathForURL) {
 
 TEST(FileSystemTest, DirectorySize) {
   ASSERT_FALSE(DirectoryExists("./Test directory"));
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  CreateDirectoryWindows("./Test directory");
+#else
   CreateDirectory("./Test directory");
+#endif
   EXPECT_TRUE(DirectoryExists("./Test directory"));
   // Get size of empty directory
   EXPECT_EQ(0u, DirectorySize("./Test directory"));
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(CreateFileWindows("./Test directory/test file"));
+#else
   EXPECT_TRUE(CreateFile("./Test directory/test file"));
+#endif
 
   // Get size of nonempty directory with empty file
   EXPECT_EQ(0u, DirectorySize("./Test directory"));
@@ -1139,19 +1440,36 @@ TEST(FileSystemTest, DirectorySize) {
   // Get size of nonempty directory with nonempty file
   EXPECT_NE(0u, DirectorySize("./Test directory"));
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(DeleteFileWindows("./Test directory/test file"));
+#else
   EXPECT_TRUE(DeleteFile("./Test directory/test file"));
+#endif
   EXPECT_EQ(0u, DirectorySize("./Test directory"));
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(RemoveDirectoryWindows("./Test directory"));
+#else
   EXPECT_TRUE(RemoveDirectory("./Test directory"));
+#endif
   EXPECT_FALSE(DirectoryExists("./Test directory"));
 }
 
 TEST(FileSystemTest, DeleteAllContentInDirectory) {
   ASSERT_FALSE(DirectoryExists("./Test directory"));
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  CreateDirectoryWindows("./Test directory");
+#else
   CreateDirectory("./Test directory");
+#endif
 
   // Create files in directory
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(CreateFileWindows("./Test directory/test file"));
+  EXPECT_TRUE(CreateFileWindows("./Test directory/test file 2"));
+#else
   EXPECT_TRUE(CreateFile("./Test directory/test file"));
   EXPECT_TRUE(CreateFile("./Test directory/test file 2"));
+#endif
 
   EXPECT_TRUE(FileExists("./Test directory/test file"));
   EXPECT_TRUE(FileExists("./Test directory/test file 2"));
@@ -1182,7 +1500,11 @@ TEST(FileSystemTest, DeleteAllContentInDirectory) {
 
   EXPECT_TRUE(DirectoryExists("./Test directory"));
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  EXPECT_TRUE(RemoveDirectoryWindows("./Test directory", true));
+#else
   EXPECT_TRUE(RemoveDirectory("./Test directory", true));
+#endif
   EXPECT_FALSE(DirectoryExists("./Test directory"));
 }
 
@@ -1226,7 +1548,11 @@ TEST(FileSystemTest, GetAbsolutePath_ValidRelPaths_CorrectAbsolutePath) {
   }
   // Cleanup after test case
   if (DirectoryExists(rel_path[0])) {
+#if defined(OS_WIN32) || defined(OS_WINCE)
+    RemoveDirectoryWindows(rel_path[0], true);
+#else
     RemoveDirectory(rel_path[0], true);
+#endif
   }
 }
 
@@ -1253,7 +1579,11 @@ TEST(FileSystemTest,
   }
   // Cleanup after test case
   if (DirectoryExists(rel_path[0])) {
+#if defined(OS_WIN32) || defined(OS_WINCE)
+    RemoveDirectoryWindows(rel_path[0], true);
+#else
     RemoveDirectory(rel_path[0], true);
+#endif
   }
 }
 

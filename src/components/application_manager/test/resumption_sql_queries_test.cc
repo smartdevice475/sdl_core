@@ -39,7 +39,11 @@
 
 #include "sqlite_wrapper/sql_database.h"
 #include "sqlite_wrapper/sql_query.h"
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#include "utils/file_system_win.h"
+#else
 #include "utils/file_system.h"
+#endif
 #include "config_profile/profile.h"
 #include "resumption_sql_queries.h"
 #include "policy/sql_pt_queries.h"
@@ -124,7 +128,11 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
     db_->Close();
     delete db_;
     string file_to_delete = kDatabaseName + ".sqlite";
+#if defined(OS_WIN32) || defined(OS_WINCE)
+    file_system::DeleteFileWindows(file_to_delete);
+#else
     file_system::DeleteFile(file_to_delete);
+#endif
   }
   void TearDown() { DeleteTablesData();
                   }

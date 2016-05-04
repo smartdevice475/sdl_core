@@ -39,7 +39,11 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "protocol_handler/protocol_handler.h"
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#include "utils/file_system_win.h"
+#else
 #include "utils/file_system.h"
+#endif
 #include "utils/logger.h"
 #include "utils/helpers.h"
 #if defined(EXTENDED_MEDIA_MODE)
@@ -202,7 +206,11 @@ void MediaManagerImpl::StartMicrophoneRecording(
 #else
   if (file_system::FileExists(file_path)) {
     LOG4CXX_INFO(logger_, "File " << output_file << " exists, removing");
+#if defined(OS_WIN32) || defined(OS_WINCE)
+    if (file_system::DeleteFileWindows(file_path)) {
+#else
     if (file_system::DeleteFile(file_path)) {
+#endif
       LOG4CXX_INFO(logger_, "File " << output_file << " removed");
     }
     else {

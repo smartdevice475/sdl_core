@@ -64,7 +64,6 @@ GTEST_API_ void LogWithLocation(testing::internal::LogSeverity severity,
   Log(severity, s.str(), 0);
 }
 
-#if !defined(OS_WIN32) && !defined(OS_WINCE)
 // Unlock internal mutex and wait for a while
 void UnlockAndSleep(const long usecs) {
   g_gmock_mutex.Unlock();
@@ -73,25 +72,43 @@ void UnlockAndSleep(const long usecs) {
   ::std::ostringstream s;
   s << "Sleeping for " << 0.001 * usecs << "mSecs" << ::std::endl;
   Log(testing::internal::kInfo, s.str(), 0);
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  Sleep(usecs);
+#else
   usleep(usecs);
+#endif
   g_gmock_mutex.Lock();
 }
 
 // Return time structure with the current date/time stamp
 timeval GetCurrentTime() {
   timeval now;
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  time_t now_time;
+
+  now_time = time(NULL);
+  now.tv_sec = now_time / 1000;
+  now.tv_usec = now_time % 1000 * 1000;
+#else
   gettimeofday(&now, NULL);
+#endif
   return now;
 }
 
 // Unlock internal mutex and wait for a while
 long UsecsElapsed(const timeval start_time) {
+#if defined(OS_WIN32) || defined(OS_WINCE)
+    time_t start_tm = start_time.tv_sec * 1000 + start_time.tv_usec / 1000;
+    time_t now_tm= time(NULL);
+    time_t priviously_elapsed = now_tm - start_tm;
+    return priviously_elapsed * 1000;
+#else
   timeval now = GetCurrentTime();
   timeval priviously_elapsed;
   timersub(&now, &start_time, &priviously_elapsed);
   return priviously_elapsed.tv_sec*1000000L + priviously_elapsed.tv_usec;
-}
 #endif
+}
 
 // Constructs an ExpectationBase object.
 ExpectationBase::ExpectationBase(const char* a_file,
@@ -358,7 +375,6 @@ const char* UntypedFunctionMockerBase::Name() const
   return name;
 }
 
-#if !defined(OS_WIN32) && !defined(OS_WINCE)
 // Returns the time of this mock method registering.  Must be called
 // after RegisterOwner() has been called.
 timeval UntypedFunctionMockerBase::RegisteredTime() const
@@ -369,7 +385,6 @@ timeval UntypedFunctionMockerBase::RegisteredTime() const
          "been called.");
   return registered_time_;
 }
-#endif
 
 // Calculates the result of invoking this mock function with the given
 // arguments, prints it, and returns it.  The caller is responsible
@@ -548,7 +563,6 @@ bool UntypedFunctionMockerBase::VerifyAndClearExpectationsLocked()
   return expectations_met;
 }
 
-#if !defined(OS_WIN32) && !defined(OS_WINCE)
 ExpectationResult UntypedFunctionMockerBase::VerifyExpectationsLocked()
     GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
   g_gmock_mutex.AssertHeld();
@@ -565,7 +579,6 @@ ExpectationResult UntypedFunctionMockerBase::VerifyExpectationsLocked()
   }
   return Satisfied;
 }
-#endif
 }  // namespace internal
 
 // Class Mock.
@@ -764,7 +777,6 @@ bool Mock::VerifyAndClearExpectationsLocked(void* mock_obj)
   return expectations_met;
 }
 
-#if !defined(OS_WIN32) && !defined(OS_WINCE)
 bool Mock::AsyncVerifyAndClearExpectations(int timeout_msec)
     GTEST_EXCLUSIVE_LOCK_REQUIRED_(internal::g_gmock_mutex) {
   internal::MutexLock l(&internal::g_gmock_mutex);
@@ -866,7 +878,6 @@ bool Mock::AsyncVerifyAndClearExpectationsLocked(const int timeout_msec_in)
   // needed by ClearDefaultActionsLocked().
   return expectations_met;
 }
-#endif
 
 // Registers a mock object and a mock method it owns.
 void Mock::Register(const void* mock_obj,

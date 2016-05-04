@@ -60,7 +60,7 @@ size_t client_buf_len;
 const std::string kFordCipher = SSL3_TXT_RSA_DES_192_CBC3_SHA;
 #else
 // Used cipher from ford protocol requirement
-const std::string kFordCipher = TLS1_TXT_RSA_WITH_AES_256_GCM_SHA384;
+const std::string kFordCipher = "TLS1_TXT_RSA_WITH_AES_256_GCM_SHA384";
 #endif
 }  // namespace
 

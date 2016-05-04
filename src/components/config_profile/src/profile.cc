@@ -41,7 +41,11 @@
 #include "config_profile/ini_file.h"
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#include "utils/file_system_win.h"
+#else
 #include "utils/file_system.h"
+#endif
 
 #ifdef ENABLE_SECURITY
 #include <openssl/ssl.h>

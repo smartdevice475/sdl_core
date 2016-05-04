@@ -153,8 +153,7 @@ TEST_F(ProtocolPacketTest, SerializePacketWithWrongServiceType) {
 
 TEST_F(ProtocolPacketTest, SetPacketWithDiffFrameType) {
   uint8_t frame_type;
-  for (frame_type = FRAME_TYPE_CONTROL + 1;
-       frame_type <= FRAME_TYPE_MAX_VALUE;
+  for (frame_type = FRAME_TYPE_CONTROL + 1; frame_type <= FRAME_TYPE_MAX_VALUE;
        ++frame_type) {
     RawMessagePtr res = GetRawMessage(PROTOCOL_VERSION_3, frame_type, kControl);
     EXPECT_EQ(PROTOCOL_VERSION_3, res->protocol_version());
@@ -207,7 +206,7 @@ TEST_F(ProtocolPacketTest, SetData) {
 }
 
 TEST_F(ProtocolPacketTest, DeserializeZeroPacket) {
-  uint8_t message[] = {};
+  uint8_t message[] = {0};
   ProtocolPacket protocol_packet;
   RESULT_CODE res = protocol_packet.deserializePacket(message, 0);
   EXPECT_EQ(RESULT_OK, res);
@@ -238,11 +237,15 @@ TEST_F(ProtocolPacketTest, DeserializePacket_FrameTypeFirst_ResultOK) {
                        zero_test_data_element_,
                        zero_test_data_element_,
                        zero_test_data_element_,
+                       zero_test_data_element_,
+                       zero_test_data_element_,
+                       zero_test_data_element_,
+                       zero_test_data_element_,
+                       zero_test_data_element_,
+                       zero_test_data_element_,
+                       zero_test_data_element_,
+                       zero_test_data_element_,
                        data_size,
-                       zero_test_data_element_,
-                       zero_test_data_element_,
-                       zero_test_data_element_,
-                       zero_test_data_element_,
                        zero_test_data_element_};
   ProtocolPacket protocol_packet;
   // Act

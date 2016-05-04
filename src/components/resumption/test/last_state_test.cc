@@ -35,7 +35,11 @@
 #include <memory>
 #include "resumption/last_state.h"
 #include "config_profile/profile.h"
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#include "utils/file_system_win.h"
+#else
 #include "utils/file_system.h"
+#endif
 #include "utils/shared_ptr.h"
 #include "utils/make_shared.h"
 
@@ -49,15 +53,27 @@ using namespace ::Json;
 class LastStateTest : public ::testing::Test {
  protected:
   void SetUp() OVERRIDE {
+#if defined(OS_WIN32) || defined(OS_WINCE)
+    file_system::DeleteFileWindows("./app_info_storage");
+#else
     file_system::DeleteFile("./app_info_storage");
+#endif
     last_state_ = std::auto_ptr<resumption::LastState>(
           new resumption::LastState("app_storage_folder", "app_info_storage"));
-    ASSERT_TRUE(file_system::CreateFile("./app_info.dat"));
+#if defined(OS_WIN32) || defined(OS_WINCE)
+    ASSERT_TRUE(file_system::CreateFileWindows("./app_info.dat"));
+#else
+	ASSERT_TRUE(file_system::CreateFile("./app_info.dat"));
+#endif
     profile::Profile::instance()->UpdateValues();
   }
 
   void TearDown() OVERRIDE {
+#if defined(OS_WIN32) || defined(OS_WINCE)
+    EXPECT_TRUE(file_system::DeleteFileWindows("./app_info.dat"));
+#else
     EXPECT_TRUE(file_system::DeleteFile("./app_info.dat"));
+#endif
   }
   std::auto_ptr<resumption::LastState> last_state_;
 };

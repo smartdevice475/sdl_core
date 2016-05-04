@@ -41,7 +41,11 @@
 #include "protocol_handler/protocol_handler.h"
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#include "utils/file_system_win.h"
+#else
 #include "utils/file_system.h"
+#endif
 #include "utils/logger.h"
 #include "utils/gen_hash.h"
 #include "utils/make_shared.h"
@@ -865,11 +869,19 @@ void ApplicationImpl::CleanupFiles() {
       if ((app_files_it == app_files_.end()) ||
           (!app_files_it->second.is_persistent)) {
         LOG4CXX_INFO(logger_, "DeleteFile file " << file_name);
+#if defined(OS_WIN32) || defined(OS_WINCE)
+        file_system::DeleteFileWindows(file_name);
+#else
         file_system::DeleteFile(file_name);
+#endif
       }
     }
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+    file_system::RemoveDirectoryWindows(directory_name, false);
+#else
     file_system::RemoveDirectory(directory_name, false);
+#endif
   }
   app_files_.clear();
 }

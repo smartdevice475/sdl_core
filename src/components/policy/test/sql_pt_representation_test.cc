@@ -47,7 +47,11 @@
 #include "config_profile/profile.h"
 #include "utils/sqlite_wrapper/sql_database.h"
 #include "utils/sqlite_wrapper/sql_error.h"
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#include "utils/file_system_win.h"
+#else
 #include "utils/file_system.h"
+#endif
 #include "utils/system.h"
 #include "utils/make_shared.h"
 #include "utils/shared_ptr.h"
@@ -331,7 +335,11 @@ class SQLPTRepresentationTest2 : public ::testing::Test {
                                , kAttemptsToOpenPolicyDB(8u){}
 
   virtual void SetUp() {
+#if defined(OS_WIN32) || defined(OS_WINCE)
+    file_system::CreateDirectoryWindows(kAppStorageFolder);
+#else
     file_system::CreateDirectory(kAppStorageFolder);
+#endif
     chmod(kAppStorageFolder.c_str(), 00000);
     profile::Profile::instance()->config_file_name("smartDeviceLink3.ini");
     ON_CALL(policy_settings_, app_storage_folder()).WillByDefault(ReturnRef(kAppStorageFolder));
@@ -342,7 +350,11 @@ class SQLPTRepresentationTest2 : public ::testing::Test {
 
   virtual void TearDown() {
     profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
-    file_system::RemoveDirectory(kAppStorageFolder,true);
+#if defined(OS_WIN32) || defined(OS_WINCE)
+    file_system::RemoveDirectoryWindows(kAppStorageFolder,true);
+#else
+    file_system::RemoveDirectory(kAppStorageFolder, true);
+#endif
     delete reps;
   }
 

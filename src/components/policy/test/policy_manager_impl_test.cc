@@ -48,7 +48,11 @@
 #include "policy/mock_policy_settings.h"
 
 #include "utils/macro.h"
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#include "utils/file_system_win.h"
+#else
 #include "utils/file_system.h"
+#endif
 #include "utils/date_time.h"
 #include "utils/make_shared.h"
 
@@ -152,7 +156,11 @@ class PolicyManagerImplTest2 : public ::testing::Test {
   const std::string kAppStorageFolder = "storage1";
 
   void SetUp() OVERRIDE {
+#if defined(OS_WIN32) || defined(OS_WINCE)
+    file_system::CreateDirectoryWindows("storage1");
+#else
     file_system::CreateDirectory("storage1");
+#endif
 
     profile::Profile::instance()->config_file_name("smartDeviceLink2.ini");
     manager = new PolicyManagerImpl();

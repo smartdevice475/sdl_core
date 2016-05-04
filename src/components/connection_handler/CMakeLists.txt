@@ -68,5 +68,5 @@ add_library(connectionHandler ${SOURCES})
 target_link_libraries(connectionHandler encryption)
 
 if(BUILD_TESTS)
-    #add_subdirectory(test)
+    add_subdirectory(test)
 endif()

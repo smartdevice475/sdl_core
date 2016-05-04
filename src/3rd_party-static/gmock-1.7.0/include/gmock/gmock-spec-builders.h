@@ -62,6 +62,8 @@
 
 #if defined(OS_POSIX)
 #include <sys/time.h>
+#elif defined(OS_WIN32) || defined(OS_WINCE)
+#include <winsock.h>
 #endif
 
 #include <map>
@@ -124,7 +126,6 @@ GTEST_API_ GTEST_DECLARE_STATIC_MUTEX_(g_gmock_mutex);
 // Untyped base class for ActionResultHolder<R>.
 class UntypedActionResultHolderBase;
 
-#if defined(OS_WIN32) || defined(OS_WINCE)
 // Expectation results enum
 enum ExpectationResult {
   // Some expectations are not satisfied
@@ -134,7 +135,6 @@ enum ExpectationResult {
   // Some expectations are over satisfied
   OverSaturated
 };
-#endif
 
 // Abstract base class of FunctionMockerBase.  This is the
 // type-agnostic part of the function mocker interface.  Its pure
@@ -150,13 +150,11 @@ class GTEST_API_ UntypedFunctionMockerBase {
   bool VerifyAndClearExpectationsLocked()
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex);
 
-#if defined(OS_WIN32) || defined(OS_WINCE)
   // Verifies that all expectations on this mock function have been
   // satisfied. Does not report failures.
   // Returns ExpectationResult value.
   ExpectationResult VerifyExpectationsLocked()
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex);
-#endif
 
   // Clears the ON_CALL()s set on this mock function.
   virtual void ClearDefaultActionsLocked()
@@ -231,12 +229,10 @@ class GTEST_API_ UntypedFunctionMockerBase {
   const char* Name() const
       GTEST_LOCK_EXCLUDED_(g_gmock_mutex);
 
-#if !defined(OS_WIN32) && !defined(OS_WINCE)
   // Returns the time of this mock registering.  Must be called after
   // RegisterOwner() has been called.
   timeval RegisteredTime() const
       GTEST_LOCK_EXCLUDED_(g_gmock_mutex);
-#endif
 
   // Returns the result of invoking this mock function with the given
   // arguments.  This function can be safely called from multiple
@@ -265,11 +261,9 @@ class GTEST_API_ UntypedFunctionMockerBase {
   // method has been called.
   const char* name_;  // Protected by g_gmock_mutex.
 
-#if !defined(OS_WIN32) && !defined(OS_WINCE)
   // Time of the function registering.
   // Only valid after RegisterOwner() has been called.
   timeval registered_time_;  // Protected by g_gmock_mutex.
-#endif
 
   // All default action specs for this function mocker.
   UntypedOnCallSpecs untyped_on_call_specs_;
@@ -426,13 +420,11 @@ class GTEST_API_ Mock {
   static bool VerifyAndClear(void* mock_obj)
       GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
 
-#if defined(OS_WIN32) || defined(OS_WINCE)
   // Asynchronously verifies all expectations of all registered mock objects
   // and clears there default actions and expectations.  Returns true if the
   // verification was successful.
   static bool AsyncVerifyAndClearExpectations(int timeout)
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(internal::g_gmock_mutex);
-#endif
 
  private:
   friend class internal::UntypedFunctionMockerBase;
@@ -483,13 +475,11 @@ class GTEST_API_ Mock {
   static bool VerifyAndClearExpectationsLocked(void* mock_obj)
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(internal::g_gmock_mutex);
 
-#if defined(OS_WIN32) || defined(OS_WINCE)
   // Asynchronously verifies that all expectations of all registered
   // mock objects have been satisfied.  Reports one or more Google
   // Test non-fatal failures and returns false if not.
   static bool AsyncVerifyAndClearExpectationsLocked(int timeout_msec)
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(internal::g_gmock_mutex);
-#endif
 
   // Clears all ON_CALL()s set on the given mock object.
   static void ClearDefaultActionsLocked(void* mock_obj)

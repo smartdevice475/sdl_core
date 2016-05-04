@@ -35,7 +35,11 @@
 #include <map>
 
 #include "json/json.h"
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#include "utils/file_system_win.h"
+#else
 #include "utils/file_system.h"
+#endif
 #include "interfaces/HMI_API.h"
 #include "config_profile/profile.h"
 #include "smart_objects/smart_object.h"

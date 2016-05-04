@@ -51,7 +51,11 @@
 #include "connection_handler/connection_handler_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "smart_objects/enum_schema_item.h"
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#include "utils/file_system_win.h"
+#else
 #include "utils/file_system.h"
+#endif
 #include "utils/macro.h"
 #include "utils/logger.h"
 #include "utils/make_shared.h"

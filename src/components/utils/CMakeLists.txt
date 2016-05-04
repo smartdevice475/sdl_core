@@ -75,6 +75,28 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
   endif()
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+set (SOURCES
+    ${UTILS_SRC_DIR}/bitstream.cc
+    ${UTILS_SRC_DIR}/conditional_variable_posix.cc
+    ${UTILS_SRC_DIR}/file_system_win.cc
+    ${UTILS_SRC_DIR}/threads/posix_thread.cc   
+    ${UTILS_SRC_DIR}/threads/thread_delegate.cc
+    ${UTILS_SRC_DIR}/threads/thread_validator.cc
+    ${UTILS_SRC_DIR}/threads/async_runner.cc
+    ${UTILS_SRC_DIR}/lock_posix.cc
+    ${UTILS_SRC_DIR}/rwlock_posix.cc
+    ${UTILS_SRC_DIR}/date_time.cc
+    ${UTILS_SRC_DIR}/signals_linux.cc
+    ${UTILS_SRC_DIR}/system.cc
+    ${UTILS_SRC_DIR}/resource_usage.cc
+    ${UTILS_SRC_DIR}/appenders_loader.cc
+    ${UTILS_SRC_DIR}/gen_hash.cc
+    ${UTILS_SRC_DIR}/convert_utils.cc
+    ${UTILS_SRC_DIR}/custom_string.cc
+    ${UTILS_SRC_DIR}/timer.cc
+)
+else()
 set (SOURCES
     ${UTILS_SRC_DIR}/bitstream.cc
     ${UTILS_SRC_DIR}/conditional_variable_posix.cc
@@ -95,6 +117,7 @@ set (SOURCES
     ${UTILS_SRC_DIR}/custom_string.cc
     ${UTILS_SRC_DIR}/timer.cc
 )
+endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
   list (APPEND SOURCES

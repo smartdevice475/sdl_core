@@ -31,10 +31,8 @@
  */
 
 #include "create_smartSchema.h"
-namespace test {
-namespace components {
-namespace formatters {
 
+using namespace test::components::formatters;
 using namespace NsSmartDeviceLink::NsJSONHandler::strings;
 using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
 using namespace NsSmartDeviceLink::NsSmartObjects;
@@ -116,6 +114,9 @@ const AppTypeTest::eType EnumConversionHelper<AppTypeTest::eType>::enum_values_[
       test::components::formatters::AppTypeTest::MEDIA,
     };
 
+namespace test {
+namespace components {
+namespace formatters {
 CSmartSchema initObjectSchema() {
   std::set<TestType::eType> resultCode_allowedEnumSubsetValues;
   resultCode_allowedEnumSubsetValues.insert(

@@ -41,7 +41,11 @@ Copyright (c) 2013, Ford Motor Company
 #include "application_manager/policies/policy_handler_interface.h"
 #include "interfaces/MOBILE_API.h"
 #include "config_profile/profile.h"
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#include "utils/file_system_win.h"
+#else
 #include "utils/file_system.h"
+#endif
 #include "formatters/CFormatterJsonBase.h"
 #include "json/json.h"
 #include "utils/helpers.h"
@@ -591,7 +595,11 @@ void SystemRequest::on_event(const event_engine::Event& event) {
       }
 
       if (!processing_file_.empty()) {
+#if defined(OS_WIN32) || defined(OS_WINCE)
+        file_system::DeleteFileWindows(processing_file_);
+#else
         file_system::DeleteFile(processing_file_);
+#endif
         processing_file_.clear();
       }
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));

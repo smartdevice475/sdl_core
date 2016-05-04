@@ -36,7 +36,11 @@
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/application_impl.h"
 #include "config_profile/profile.h"
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#include "utils/file_system_win.h"
+#else
 #include "utils/file_system.h"
+#endif
 
 namespace application_manager {
 

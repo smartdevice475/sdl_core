@@ -51,6 +51,7 @@ using protocol_handler::ServiceType;
 
 class MediaManagerImplTest : public ::testing::Test {
  protected:
+  MediaManagerImplTest(){}
   const ::testing::NiceMock<MockMediaManagerSettings>
       mock_media_manager_settings_;
   const std::string kDefaultValue_ = "";

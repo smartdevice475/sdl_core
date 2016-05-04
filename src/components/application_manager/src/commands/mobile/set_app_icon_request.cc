@@ -37,7 +37,11 @@
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#include "utils/file_system_win.h"
+#else
 #include "utils/file_system.h"
+#endif
 #include "utils/helpers.h"
 
 namespace application_manager {
@@ -171,7 +175,11 @@ void SetAppIconRequest::CopyToIconStorage(
   }
 
   const std::string icon_path = icon_storage + "/" + app->mobile_app_id();
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  if (!file_system::CreateFileWindows(icon_path)) {
+#else
   if (!file_system::CreateFile(icon_path)) {
+#endif
     LOG4CXX_ERROR(logger_, "Can't create icon: " << icon_path);
     return;
   }
@@ -210,7 +218,11 @@ void SetAppIconRequest::RemoveOldestIcons(const std::string& storage,
     }
     const std::string file_name = icon_modification_time.begin()->second;
     const std::string file_path = storage + "/" + file_name;
+#if defined(OS_WIN32) || defined(OS_WINCE)
+    if (!file_system::DeleteFileWindows(file_path)) {
+#else
     if (!file_system::DeleteFile(file_path)) {
+#endif
       LOG4CXX_DEBUG(logger_, "Error while deleting icon " << file_path);
     }
     icon_modification_time.erase(icon_modification_time.begin());

@@ -45,7 +45,11 @@
 #include "policy/cache_manager.h"
 #include "config_profile/profile.h"
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#include "utils/file_system_win.h"
+#else
 #include "utils/file_system.h"
+#endif
 
 namespace policy {
 
@@ -1580,7 +1584,11 @@ bool SQLPTRepresentation::SetIsDefault(const std::string& app_id,
 }
 
 void SQLPTRepresentation::RemoveDB() const {
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  file_system::DeleteFileWindows(db_->get_path());
+#else
   file_system::DeleteFile(db_->get_path());
+#endif
 }
 
 bool SQLPTRepresentation::IsDBVersionActual() const {
