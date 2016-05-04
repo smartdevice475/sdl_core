@@ -60,6 +60,8 @@
     #define CREATE_LOGGERPTR_LOCAL(logger_var, logger_name) \
       log4cxx::LoggerPtr logger_var = log4cxx::LoggerPtr(log4cxx::Logger::getLogger(logger_name));
 
+    #define ENABLE_LOGGER(logs_enabled)   logger::set_logs_enabled(logs_enabled)
+
     #define INIT_LOGGER(file_name, logs_enabled) \
       log4cxx::PropertyConfigurator::configure(file_name); \
       logger::set_logs_enabled(logs_enabled);
