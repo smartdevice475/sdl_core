@@ -14,7 +14,11 @@ namespace policy {
 
 class PolicyListener;
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+class __declspec(dllexport) UpdateStatusManager {
+#else
 class UpdateStatusManager {
+#endif
  public:
   /**
    * @brief Constructor

@@ -63,8 +63,6 @@ set(testLibraries
   gmock
   Utils
   Policy
-  jsoncpp
-  policy_struct
   UsageStatistics
 )
 

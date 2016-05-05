@@ -50,7 +50,11 @@ class SQLDatabase;
 
 namespace policy {
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+class __declspec(dllexport) SQLPTRepresentation : public virtual PTRepresentation {
+#else
 class SQLPTRepresentation : public virtual PTRepresentation {
+#endif
   public:
     SQLPTRepresentation();
     ~SQLPTRepresentation();

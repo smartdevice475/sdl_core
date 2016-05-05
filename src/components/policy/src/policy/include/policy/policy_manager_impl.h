@@ -55,7 +55,11 @@ namespace policy_table = rpc::policy_table_interface_base;
 namespace policy {
 struct CheckAppPolicy;
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+class __declspec(dllexport) PolicyManagerImpl : public PolicyManager {
+#else
 class PolicyManagerImpl : public PolicyManager {
+#endif
   public:
     PolicyManagerImpl();
     virtual void set_listener(PolicyListener* listener);

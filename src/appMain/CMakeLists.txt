@@ -75,6 +75,7 @@ set(LIBRARIES
   MessageBroker
   ${BROKER_LIBRARIES}
   Utils
+  Policy
   jsoncpp
   ConfigProfile
   Resumption
