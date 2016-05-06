@@ -125,6 +125,7 @@ template<typename T, class Q = std::queue<T> > class MessageQueue {
     /**
      *\brief Platform specific syncronisation variable
      */
+    mutable sync_primitives::Lock shutting_down_lock_;
     mutable sync_primitives::Lock queue_lock_;
     sync_primitives::ConditionalVariable queue_new_items_;
 };
@@ -161,6 +162,7 @@ template<typename T, class Q> bool MessageQueue<T, Q>::empty() const {
 }
 
 template<typename T, class Q> bool MessageQueue<T, Q>::IsShuttingDown() const {
+  sync_primitives::AutoLock auto_lock(shutting_down_lock_);
   return shutting_down_;
 }
 
@@ -188,7 +190,9 @@ template<typename T, class Q> bool MessageQueue<T, Q>::pop(T& element) {
 
 template<typename T, class Q> void MessageQueue<T, Q>::Shutdown() {
   sync_primitives::AutoLock auto_lock(queue_lock_);
+  shutting_down_lock_.Acquire();
   shutting_down_ = true;
+  shutting_down_lock_.Release();
   if (!queue_.empty()) {
     Queue empty_queue;
     std::swap(queue_, empty_queue);
@@ -198,7 +202,9 @@ template<typename T, class Q> void MessageQueue<T, Q>::Shutdown() {
 
 template<typename T, class Q> void MessageQueue<T, Q>::Reset() {
   sync_primitives::AutoLock auto_lock(queue_lock_);
+  shutting_down_lock_.Acquire();
   shutting_down_ = false;
+  shutting_down_lock_.Release();
   if (!queue_.empty()) {
     Queue empty_queue;
     std::swap(queue_, empty_queue);

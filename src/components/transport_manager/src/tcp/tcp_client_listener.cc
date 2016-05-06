@@ -251,8 +251,8 @@ void TcpClientListener::Loop() {
                                      &client_address_size);
     if (thread_stop_requested_) {
       LOG4CXX_DEBUG(logger_, "thread_stop_requested_");
-#ifdef OS_WINCE
-	  closesocket(connection_fd);
+#if defined(OS_WIN32) || defined(OS_WINCE)
+      closesocket(connection_fd);
 #else
       close(connection_fd);
 #endif
@@ -266,8 +266,8 @@ void TcpClientListener::Loop() {
 
     if (AF_INET != client_address.sin_family) {
       LOG4CXX_DEBUG(logger_, "Address of connected client is invalid");
-#ifdef OS_WINCE
-	  closesocket(connection_fd);
+#if defined(OS_WIN32) || defined(OS_WINCE)
+      closesocket(connection_fd);
 #else
       close(connection_fd);
 #endif
