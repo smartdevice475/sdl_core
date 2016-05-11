@@ -33,7 +33,12 @@
 #include "utils/file_system.h"
 #include "utils/logger.h"
 
+#ifdef OS_ANDROID
+#include <sys/statfs.h>
+#else
 #include <sys/statvfs.h>
+#endif
+
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sstream>
@@ -48,8 +53,17 @@
 CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 uint64_t file_system::GetAvailableDiskSpace(const std::string& path) {
-  struct statvfs fsInfo = { 0 };
+#ifdef OS_ANDROID
+  struct statfs fsInfo;//statvfs
+#else
+	struct statvfs fsInfo;
+#endif
+  memset(reinterpret_cast<void*>(&fsInfo), 0, sizeof(fsInfo));
+#ifdef OS_ANDROID
+  if (statfs(path.c_str(), &fsInfo) == 0) {
+#else
   if (statvfs(path.c_str(), &fsInfo) == 0) {
+#endif
     return fsInfo.f_bsize * fsInfo.f_bfree;
   } else {
     return 0;

@@ -53,9 +53,19 @@ ConditionalVariable::ConditionalVariable() {
   if (initialized != 0)
     LOG4CXX_ERROR(logger_, "Failed to initialize "
                             "conditional variable attributes");
+
+#ifdef OS_WIN32
+//
+#elif defined(OS_MAC)
+//
+#elif defined(OS_ANDROID)
+//
+#else
   pthread_condattr_setclock(&attrs, CLOCK_MONOTONIC);
+#endif
+
   initialized = pthread_cond_init(&cond_var_, &attrs);
-  if (initialized != 0)
+  if (initialized != 0)	
     LOG4CXX_ERROR(logger_, "Failed to initialize "
                             "conditional variable");
   int32_t rv = pthread_condattr_destroy(&attrs);

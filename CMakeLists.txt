@@ -32,6 +32,22 @@ cmake_minimum_required(VERSION 2.8.0)
 
 set (PROJECT smartDeviceLinkCore)
 
+#compiler set
+#message(STATUS ${CMAKE_SYSTEM_NAME})
+if(SYSTEM_NAME STREQUAL "Android")
+SET(CMAKE_SYSTEM_NAME Android)
+endif()
+
+#when build on android plat,you should set -DCOMPILER_PATH=your compiler root path
+if(CMAKE_SYSTEM_NAME STREQUAL "Android")
+if(NOT COMPILER_PATH)
+SET(COMPILER_PATH "/opt/android-9-toolchain")
+endif()
+message(STATUS "Current cross compiler path is ${COMPILER_PATH}")
+SET(CMAKE_CXX_COMPILER "${COMPILER_PATH}/bin/arm-linux-androideabi-g++")
+SET(CMAKE_C_COMPILER "${COMPILER_PATH}/bin/arm-linux-androideabi-gcc")
+endif()
+
 #Jenkins integration section
 #dont modify this section if you dont know details about integration with Jenkins!!!
 set (HMI "web" CACHE STRING "HMI type")
@@ -44,13 +60,20 @@ option(BUILD_AOA_SUPPORT "libaoa support" OFF)
 option(BUILD_MME_SUPPORT "Apple devices support" OFF)
 option(BUILD_AVAHI_SUPPORT "libavahi support" OFF)
 option(BUILD_RWLOCK_SUPPORT "rwlocks support" OFF)
-option(BUILD_BACKTRACE_SUPPORT "backtrace support" ON)
+option(BUILD_BACKTRACE_SUPPORT "backtrace support" OFF)
 option(BUILD_TESTS "Possibility to build and run tests" OFF)
-option(TIME_TESTER "Enable profiling time test util" ON)
-option(ENABLE_LOG "Logging feature" ON)
+option(TIME_TESTER "Enable profiling time test util" OFF)
+option(ENABLE_LOG "Logging feature" OFF)
 option(ENABLE_GCOV "gcov code coverage feature" OFF)
-option(ENABLE_SECURITY "Security Ford protocol protection" ON)
+option(ENABLE_SECURITY "Security Ford protocol protection" OFF)
 option(EXTENDED_POLICY_FLAG "Build with specific features and extended functionality" OFF)
+option(MODIFY_FUNCTION_FLAGS "modify function" ON)
+if(MODIFY_FUNCTION_FLAGS)
+option(BUILD_MANAGESDL_SUPPORT "manage sdl support" OFF)
+endif()
+if(MODIFY_FUNCTION_FLAGS)
+option(BUILD_TARGET_LIBRARY    "build target as library" OFF)
+endif()
 
 set(OS_TYPE_OPTION 	"$ENV{OS_TYPE}")
 set(DEBUG_OPTION 	"$ENV{DEBUG}")
@@ -177,7 +200,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 # flag is handled by CMake
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
-set(CMAKE_CXX_FLAGS "-fPIC -g3 -ggdb3 -std=gnu++0x -Wall -Werror -Wuninitialized")
+set(CMAKE_CXX_FLAGS "-fPIC -g3 -ggdb3 -std=gnu++0x -Wall -Werror=return-type -Wuninitialized")
 if (ENABLE_GCOV)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
   add_definitions(-DGCOV_ENABLED)
@@ -197,8 +220,26 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "QNX")
   SET(BUILD_AVAHI_SUPPORT OFF)
   SET(BUILD_BACKTRACE_SUPPORT OFF)
   SET(EXTENDED_MEDIA_MODE OFF)
+elseif(CMAKE_SYSTEM_NAME STREQUAL  "Android")
+  add_definitions(-DOS_LINUX)
+  add_definitions(-DOS_ANDROID)
+  #add_definitions(-DOS_POSIX)
+  #add_definitions(-DCUSTOM_LOG)
+  #add_definitions(-DENABLE_LOG)
+  #SET(BUILD_BT_SUPPORT OFF)
+  #SET(BUILD_USB_SUPPORT ON)
+  #SET(BUILD_AVAHI_SUPPORT OFF)
+  #SET(BUILD_BACKTRACE_SUPPORT OFF)
+  #SET(ENABLE_LOG OFF)
 endif()
 
+if(MODIFY_FUNCTION_FLAGS)
+add_definitions(-DMODIFY_FUNCTION_SIGN)
+endif()
+
+if(BUILD_TARGET_LIBRARY)
+add_definitions(-DBUILD_TARGET_LIB)
+endif()
 
 if (BUILD_USB_SUPPORT)
   add_definitions(-DUSB_SUPPORT)
@@ -390,10 +431,38 @@ endif()
 include_directories(
   ${CMAKE_SOURCE_DIR}/src/components/include
   ${CMAKE_SOURCE_DIR}/src/components/protocol/include
+  ${CMAKE_SOURCE_DIR}/src/3rd_party/apr-1.5.0/include
 )
 
 # --- 3rd party libs
 INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/src/3rd_party/set_3rd_party_paths.cmake)
+
+# Include direction and link library for log4cxx
+if(MODIFY_FUNCTION_FLAGS)
+if(ENABLE_LOG)
+	MESSAGE(STATUS "smartDeviceLinkCore LOG4CXX_INCLUDE_DIRECTORY ${LOG4CXX_INCLUDE_DIRECTORY}")
+	MESSAGE(STATUS "smartDeviceLinkCore LOG4CXX_BUILD_INCLUDE_DIRECTORY ${LOG4CXX_BUILD_INCLUDE_DIRECTORY}")
+	
+	if(CMAKE_SYSTEM_NAME STREQUAL  "WindowsCE"  OR CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	include_directories (
+		${LOG4CXX_INCLUDE_DIRECTORY}
+	)
+	else()
+	include_directories (
+		${LOG4CXX_INCLUDE_DIRECTORY}
+		${LOG4CXX_BUILD_INCLUDE_DIRECTORY}
+	)
+	endif()
+	MESSAGE(STATUS "smartDeviceLinkCore APR_LIBS_DIRECTORY ${LOG4CXX_LIBS_DIRECTORY}")
+	MESSAGE(STATUS "smartDeviceLinkCore APR_UTIL_LIBS_DIRECTORY ${LOG4CXX_LIBS_DIRECTORY}")
+	MESSAGE(STATUS "smartDeviceLinkCore LOG4CXX_LIBS_DIRECTORY ${LOG4CXX_LIBS_DIRECTORY}")
+	LINK_DIRECTORIES(
+		${APR_LIBS_DIRECTORY}
+		${APR_UTIL_LIBS_DIRECTORY}
+		${LOG4CXX_LIBS_DIRECTORY}
+	)
+endif()
+endif()
 
 set(3RD_PARTY_SOURCE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/3rd_party)
 set(3RD_PARTY_BINARY_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/3rd_party)

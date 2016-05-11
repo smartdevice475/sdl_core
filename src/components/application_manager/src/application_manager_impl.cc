@@ -94,7 +94,11 @@ ApplicationManagerImpl::ApplicationManagerImpl()
                                       this,
                                       &ApplicationManagerImpl::OnTimerSendTTSGlobalProperties,
                                       true) {
-    std::srand(std::time(0));
+#ifdef OS_ANDROID
+	srand(std::time(0));
+#else
+	std::srand(std::time(0));
+#endif
 }
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {

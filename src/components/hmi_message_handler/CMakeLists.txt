@@ -22,6 +22,14 @@ IF (HMIADAPTER STREQUAL "dbus")
     set (DBUS_ADAPTER DBus)
 ENDIF ()
 
+if(MODIFY_FUNCTION_FLAGS)
+set (SOURCES
+    ./src/hmi_message_handler_impl.cc
+    ./src/messagebroker_adapter.cc
+    ./src/hmi_message_adapter.cc
+    ${DBUS_SOURCE}
+)
+else()
 set (SOURCES
     ./src/hmi_message_handler_impl.cc
     ./src/messagebroker_adapter.cc
@@ -29,6 +37,7 @@ set (SOURCES
     ./src/mqueue_adapter.cc
     ${DBUS_SOURCE}
 )
+endif()
 
 set (LIBRARIES
   Utils

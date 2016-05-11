@@ -83,23 +83,28 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES dl)
 endif()
 
-if (BUILD_BT_SUPPORT)
-  list(APPEND LIBRARIES bluetooth)
+if(MODIFY_FUNCTION_FLAGS)
+if(ENABLE_LOG)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX" OR CMAKE_SYSTEM_NAME STREQUAL "Windows"  OR CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
+  list(APPEND LIBRARIES log4cxx)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  list(APPEND LIBRARIES log4cxx apr-1 aprutil-1 expat winsock)
 endif()
-if (BUILD_AVAHI_SUPPORT)
-  list(APPEND LIBRARIES avahi-client avahi-common)
-endif()
-if (BUILD_USB_SUPPORT)
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  list(APPEND LIBRARIES Libusb-1.0.16)
 endif()
 endif()
 
-if(ENABLE_LOG)
-  list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
-  list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
-  list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
-  list(APPEND LIBRARIES expat -L${EXPAT_LIBS_DIRECTORY})
+if (BUILD_BT_SUPPORT)
+  if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
+	list(APPEND LIBRARIES bluetooth)
+  endif()
+endif()
+if (BUILD_AVAHI_SUPPORT)
+	list(APPEND LIBRARIES avahi-client avahi-common)
+endif()
+if (BUILD_USB_SUPPORT)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Android" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE" OR CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  list(APPEND LIBRARIES Libusb-1.0.16)
+endif()
 endif()
 
 include_directories (
@@ -129,7 +134,7 @@ include_directories (
   ${CMAKE_BINARY_DIR}/src/components/policy/src/policy
   ${CMAKE_SOURCE_DIR}
   ${default_media_inc}
-  ${LOG4CXX_INCLUDE_DIRECTORY}
+  ##${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
 add_custom_target(gitversion
@@ -149,12 +154,22 @@ set (SOURCES
   gitversion.cc
 )
 
+if(BUILD_TARGET_LIBRARY)
+set (HEADERS
+  main.h
+)
+endif()
+
 
 if( NOT CMAKE_BUILD_TYPE )
   set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build. Options are: None, Debug, Release, RelWithDebInfo, MinSizeRel." FORCE)
 endif()
 
+if(BUILD_TARGET_LIBRARY)
+add_library(${PROJECT} SHARED ${HEADERS} ${SOURCES})
+else()
 add_executable(${PROJECT} ${SOURCES})
+endif()
 target_link_libraries(${PROJECT} ${LIBRARIES})
 
 
@@ -211,6 +226,27 @@ include_directories (
     MediaManager
     Resumption
   )
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  list(APPEND LIBRARIES pthreadVC2 ws2_32)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  list(APPEND LIBRARIES pthreadVC2 ws2)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+  #list(APPEND LIBRARIES pthread)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  list(APPEND LIBRARIES apr-1 aprutil-1)
+  list(APPEND LIBRARIES pthread dl)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "QNX")
+  list(APPEND LIBRARIES apr-1 aprutil-1)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Android")
+  if(ENABLE_LOG)
+    list(APPEND LIBRARIES dl apr-1 aprutil-1)
+  else()
+    list(APPEND LIBRARIES dl)
+  endif()
+else()
+  list(APPEND LIBRARIES pthread)
+endif()
 
 if(ENABLE_LOG)
   list(APPEND test_exec_libraries log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
@@ -279,6 +315,7 @@ install(
     ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
   DESTINATION bin
 )
+
 if (${WEB_HMI})
   if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/hmi_link DESTINATION bin)

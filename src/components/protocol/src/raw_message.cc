@@ -32,7 +32,11 @@
 
 #include "protocol/raw_message.h"
 
+#ifndef OS_ANDROID
 #include <memory.h>
+#else
+#include <string.h>
+#endif
 
 namespace protocol_handler {
 

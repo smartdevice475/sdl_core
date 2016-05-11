@@ -255,7 +255,13 @@ void UsbConnection::Finalise() {
     }
   }
   while (waiting_in_transfer_cancel_ || waiting_out_transfer_cancel_) {
+#ifdef OS_ANDROID
+    usleep(150000);
+#elif defined(OS_WIN32)
+	  ::Sleep(150);
+#else
     pthread_yield();
+#endif
   }
   LOG4CXX_TRACE(logger_, "exit");
 }

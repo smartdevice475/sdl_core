@@ -117,10 +117,14 @@
 #define THREADS_POSIX 1
 
 /* timerfd headers available */
+#if defined(OS_LINUX) && !defined(OS_ANDROID)
 #define USBI_TIMERFD_AVAILABLE 1
+#endif
 
 /* Use udev for device enumeration/hotplug */
+#if defined(OS_LINUX) && !defined(OS_ANDROID)
 #define USE_UDEV 1
+#endif
 
 /* Version number of package */
 #define VERSION "1.0.16"

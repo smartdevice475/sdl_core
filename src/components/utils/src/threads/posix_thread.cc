@@ -188,13 +188,17 @@ void Thread::stop() {
   if (delegate_ && !delegate_->exitThreadMain()) {
     if (thread_handle_ != pthread_self()) {
       LOG4CXX_WARN(logger_, "Cancelling thread #" << thread_handle_);
+#ifndef   OS_ANDROID
       const int pthread_result = pthread_cancel(thread_handle_);
       if (pthread_result != EOK) {
         LOG4CXX_WARN(logger_,
                      "Couldn't cancel thread (#" << thread_handle_ << " \"" << name_ <<
                      "\") from thread #" << pthread_self() << ". Error code = "
                      << pthread_result << " (\"" << strerror(pthread_result) << "\")");
-      }
+		}
+#else		
+        LOG4CXX_INFO(logger_,"thread exit");
+#endif
     } else {
       LOG4CXX_ERROR(logger_,
                     "Couldn't cancel the same thread (#" << thread_handle_
@@ -210,10 +214,12 @@ bool Thread::Id::operator==(const Thread::Id& other) const {
 }
 
 std::ostream& operator<<(std::ostream& os, const Thread::Id& thread_id) {
+#ifndef OS_ANDROID
   char name[32];
   if(pthread_getname_np(thread_id.Handle(), name, 32) == 0) {
     os << name;
   }
+#endif
   return os;
 }
 

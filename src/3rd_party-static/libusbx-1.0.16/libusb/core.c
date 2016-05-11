@@ -2061,6 +2061,7 @@ void usbi_log_v(struct libusb_context *ctx, enum libusb_log_level level,
 
 #ifdef __ANDROID__
 	int prio;
+/*
 	switch (level) {
 	case LOG_LEVEL_INFO:
 		prio = ANDROID_LOG_INFO;
@@ -2078,8 +2079,27 @@ void usbi_log_v(struct libusb_context *ctx, enum libusb_log_level level,
 		prio = ANDROID_LOG_UNKNOWN;
 		break;
 	}
+*/
 
-	__android_log_vprint(prio, "LibUsb", format, args);
+	switch (level) {
+	case LIBUSB_LOG_LEVEL_INFO:
+		prio = ANDROID_LOG_INFO;
+		break;
+	case LIBUSB_LOG_LEVEL_WARNING:
+		prio = ANDROID_LOG_WARN;
+		break;
+	case LIBUSB_LOG_LEVEL_ERROR:
+		prio = ANDROID_LOG_ERROR;
+		break;
+	case LIBUSB_LOG_LEVEL_DEBUG:
+		prio = ANDROID_LOG_DEBUG;
+		break;
+	default:
+		prio = ANDROID_LOG_UNKNOWN;
+		break;
+	}
+
+	//__android_log_vprint(prio, "LibUsb", format, args);
 #else
 	usbi_gettimeofday(&now, NULL);
 	if ((global_debug) && (!has_debug_header_been_displayed)) {

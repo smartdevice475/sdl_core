@@ -231,7 +231,13 @@ bool PolicyHandler::LoadPolicyLibrary() {
   }
   dl_handle_ = dlopen(kLibrary.c_str(), RTLD_LAZY);
 
+#ifdef OS_WIN32
+  DWORD error_string = GetLastError();
+#elif defined(OS_ANDROID)
+  const char* error_string = dlerror();
+#else
   char* error_string = dlerror();
+#endif
   if (error_string == NULL) {
     if (CreateManager()) {
       policy_manager_->set_listener(this);
@@ -251,7 +257,13 @@ bool PolicyHandler::PolicyEnabled() {
 bool PolicyHandler::CreateManager() {
   typedef PolicyManager* (*CreateManager)();
   CreateManager create_manager = reinterpret_cast<CreateManager>(dlsym(dl_handle_, "CreateManager"));
+#ifdef OS_WIN32
+  DWORD error_string = GetLastError();
+#elif defined(OS_ANDROID)
+  const char* error_string = dlerror();
+#else
   char* error_string = dlerror();
+#endif
   if (error_string == NULL) {
     policy_manager_ = create_manager();
   } else {

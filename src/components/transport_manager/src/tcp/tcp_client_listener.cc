@@ -39,10 +39,12 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <sys/types.h>
+#ifndef  OS_ANDROID
 #include <sys/sysctl.h>
+#endif
 #include <sys/socket.h>
 #ifdef __linux__
-#  include <linux/tcp.h>
+#include <linux/tcp.h>
 #else  // __linux__
 #  include <sys/time.h>
 #  include <netinet/in.h>
@@ -105,8 +107,10 @@ void SetKeepaliveOptions(const int fd) {
   setsockopt(fd, IPPROTO_TCP, TCP_KEEPIDLE, &keepidle, sizeof(keepidle));
   setsockopt(fd, IPPROTO_TCP, TCP_KEEPCNT, &keepcnt, sizeof(keepcnt));
   setsockopt(fd, IPPROTO_TCP, TCP_KEEPINTVL, &keepintvl, sizeof(keepintvl));
+#ifndef OS_ANDROID
   setsockopt(fd, IPPROTO_TCP, TCP_USER_TIMEOUT, &user_timeout,
              sizeof(user_timeout));
+#endif
 #elif defined(__QNX__)  // __linux__
   // TODO (KKolodiy): Out of order!
   const int kMidLength = 4;

@@ -112,7 +112,11 @@ bool System::Execute(bool wait) {
       return false;
     }
     case 0: {  // Child process
+#ifdef OS_ANDROID
+      int32_t fd_dev0 = open("/dev/null", O_RDWR,S_IWUSR);// S_IWRITE
+#else
       int32_t fd_dev0 = open("/dev/null", O_RDWR, S_IWRITE);
+#endif
       if (0 > fd_dev0) {
         LOG4CXX_FATAL(logger_, "Open dev0 failed!");
         return false;

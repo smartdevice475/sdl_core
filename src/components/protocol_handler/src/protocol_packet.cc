@@ -31,7 +31,11 @@
  */
 
 #include <stdint.h>
+#ifndef OS_ANDROID
 #include <memory.h>
+#else
+#include <string.h>
+#endif
 #include <new>
 #include "protocol_handler/protocol_packet.h"
 #include "utils/macro.h"

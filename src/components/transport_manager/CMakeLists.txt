@@ -11,9 +11,15 @@ include_directories (
   ${LIBUSB_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
+
 if (BUILD_BT_SUPPORT)
   include_directories(
   )
+  if(CMAKE_SYSTEM_NAME STREQUAL "Android")
+    include_directories(
+      ${CMAKE_SOURCE_DIR}/src/3rd_party-static/bluez-libs-3.36/include
+    )
+  endif()
 endif()
 
 set (SOURCES
@@ -50,7 +56,7 @@ if (BUILD_USB_SUPPORT)
     ./src/usb/usb_connection_factory.cc
     ./src/usb/usb_device_scanner.cc
   )
-  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
     list (APPEND SOURCES
     ./src/usb/libusb/usb_handler.cc
     ./src/usb/libusb/usb_connection.cc

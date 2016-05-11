@@ -82,7 +82,9 @@ bool Thread::Start(bool detach) {
 }
 
 bool Thread::Stop() {
+#ifndef  OS_ANDROID
   pthread_cancel(m_id);
+#endif
   return false;// Android does not support 'pthread_cancel';
 }
 

@@ -41,6 +41,8 @@
 #include <bluetooth/sdp_lib.h>
 #include <bluetooth/rfcomm.h>
 
+#include <errno.h>
+
 #include "transport_manager/bluetooth/bluetooth_device.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 

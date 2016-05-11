@@ -698,7 +698,11 @@ void CacheManager::CopyInternalParams(const std::string &from,
 
 long CacheManager::ConvertSecondsToMinute(int seconds) {
   const float seconds_in_minute = 60.0;
+#ifdef OS_ANDROID
+  return round(seconds / seconds_in_minute);
+#else
   return std::round(seconds / seconds_in_minute);
+#endif
 }
 
 bool CacheManager::SetDefaultPolicy(const std::string &app_id) {

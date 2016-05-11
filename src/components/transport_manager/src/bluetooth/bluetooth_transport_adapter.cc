@@ -49,6 +49,9 @@
 #include "transport_manager/bluetooth/bluetooth_connection_factory.h"
 #include "transport_manager/bluetooth/bluetooth_device.h"
 
+#ifdef OS_ANDROID
+#include <stdlib.h>
+#endif
 #include "utils/logger.h"
 
 namespace transport_manager {
