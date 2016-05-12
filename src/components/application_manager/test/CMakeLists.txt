@@ -51,12 +51,21 @@ if (BUILD_TESTS)
   file(COPY "${AM_SOURCE_DIR}/test/mock/include/application_manager/application_manager_impl.h"
        DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/mock/include/application_manager/)
 
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  FOREACH(infileName ${AMINCLUDE_TO_BE_MOCKED})
+  file(RELATIVE_PATH rel "${AM_SOURCE_DIR}/" ${infileName})
+  execute_process(
+    COMMAND "${CMAKE_COMMAND}" "-E" "copy" "${infileName}" "${CMAKE_CURRENT_BINARY_DIR}/mock/${rel}"
+  )
+  ENDFOREACH(infileName)
+else()
   FOREACH(infileName ${AMINCLUDE_TO_BE_MOCKED})
   file(RELATIVE_PATH rel "${AM_SOURCE_DIR}/" ${infileName})
   execute_process(
     COMMAND "${CMAKE_COMMAND}" "-E" "create_symlink" "${infileName}" "${CMAKE_CURRENT_BINARY_DIR}/mock/${rel}"
   )
   ENDFOREACH(infileName)
+endif()
 
 # Replace include for mocking singltone
 get_property(the_include_dirs DIRECTORY "" PROPERTY INCLUDE_DIRECTORIES)

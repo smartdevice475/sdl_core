@@ -47,6 +47,7 @@
 #endif
 #ifdef OS_WINCE
 #define strerror(x) x
+#pragma warning(disable:4482)
 #endif
 #endif  // ENABLE_LOG
 
