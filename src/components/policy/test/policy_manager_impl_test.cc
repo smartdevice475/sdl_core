@@ -49,10 +49,7 @@
 
 #include "utils/macro.h"
 #if defined(OS_WIN32) || defined(OS_WINCE)
-#include "utils/file_system_win.h"
-#else
 #include "utils/file_system.h"
-#endif
 #include "utils/date_time.h"
 #include "utils/make_shared.h"
 

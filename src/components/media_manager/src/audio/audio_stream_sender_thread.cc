@@ -44,11 +44,7 @@
 #include "application_manager/application_impl.h"
 #include "smart_objects/smart_object.h"
 #include "interfaces/MOBILE_API.h"
-#if defined(OS_WIN32) || defined(OS_WINCE)
-#include "utils/file_system_win.h"
-#else
 #include "utils/file_system.h"
-#endif
 #include "utils/logger.h"
 #include "media_manager/media_manager_settings.h"
 #include "media_manager/audio/audio_stream_sender_thread.h"

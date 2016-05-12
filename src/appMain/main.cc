@@ -58,11 +58,7 @@
 #include "utils/system.h"
 #include "config_profile/profile.h"
 #include "utils/appenders_loader.h"
-#if defined(OS_WIN32) || defined(OS_WINCE)
-#include "utils/file_system_win.h"
-#else
 #include "utils/file_system.h"
-#endif
 
 #if defined(EXTENDED_MEDIA_MODE)
 #include <gst/gst.h>

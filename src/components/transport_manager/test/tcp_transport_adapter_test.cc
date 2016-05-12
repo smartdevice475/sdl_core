@@ -72,8 +72,8 @@ class TestTCPTransportAdapter : public TcpTransportAdapter {
 
 class TcpAdapterTest : public ::testing::Test {
  protected:
-  TcpAdapterTest():last_state_("app_storage_folder",
-                               "app_info_storage"){}
+  TcpAdapterTest():last_state_("app_storage_folder", "app_info_storage")
+                  , string_port("12345"){}
   static void SetUpTestCase() {
     ::profile::Profile::instance()->config_file_name(
         "smartDeviceLink_test.ini");
@@ -85,8 +85,8 @@ class TcpAdapterTest : public ::testing::Test {
   }
 
   resumption::LastState  last_state_;
-  const uint32_t port = 12345;
-  const std::string string_port = "12345";
+  const static uint32_t port = 12345;
+  const std::string string_port;
 };
 
 TEST_F(TcpAdapterTest, StoreDataWithOneDeviceAndOneApplication) {
@@ -101,7 +101,12 @@ TEST_F(TcpAdapterTest, StoreDataWithOneDeviceAndOneApplication) {
   EXPECT_EQ(uniq_id, devList[0]);
 
   const int app_handle = 1;
+#ifdef OS_WINCE
+  std::vector<int> intList;
+  intList.push_back(app_handle);
+#else
   std::vector<int> intList = {app_handle};
+#endif
   EXPECT_CALL(*mockdev, GetApplicationList()).WillOnce(Return(intList));
 
   ConnectionSPtr mock_connection = new MockConnection();
@@ -151,7 +156,12 @@ TEST_F(TcpAdapterTest, StoreDataWithSeveralDevicesAndOneApplication) {
   EXPECT_EQ(uniq_id[0], devList[0]);
 
   const int app_handle = 1;
+#ifdef OS_WINCE
+  std::vector<int> intList;
+  intList.push_back(app_handle);
+#else
   std::vector<int> intList = {app_handle};
+#endif
 
   ConnectionSPtr mock_connection = new MockConnection();
   for (uint32_t i = 0; i < count_dev; i++) {
@@ -209,7 +219,14 @@ TEST_F(TcpAdapterTest, StoreDataWithSeveralDevicesAndSeveralApplications) {
 
   const uint32_t connection_count = 3;
   const int app_handle[connection_count] = {1, 2, 3};
+#ifdef OS_WINCE
+  std::vector<int> intList;
+  intList.push_back(app_handle[0]);
+  intList.push_back(app_handle[1]);
+  intList.push_back(app_handle[2]);
+#else
   std::vector<int> intList = {app_handle[0], app_handle[1], app_handle[2]};
+#endif
   const std::string ports[connection_count] = {"11111", "67890", "98765"};
   const int int_port[connection_count] = {11111, 67890, 98765};
   ConnectionSPtr mock_connection = new MockConnection();
@@ -255,7 +272,11 @@ TEST_F(TcpAdapterTest, StoreData_ConnectionNotExist_DataNotStored) {
   std::vector<std::string> devList = transport_adapter.GetDeviceList();
   ASSERT_EQ(1u, devList.size());
   EXPECT_EQ(uniq_id, devList[0]);
+#ifdef OS_WINCE
+  std::vector<int> intList;
+#else
   std::vector<int> intList = {};
+#endif
   EXPECT_CALL(*mockdev, GetApplicationList()).WillOnce(Return(intList));
 
   EXPECT_CALL(transport_adapter, FindDevice(uniq_id)).WillOnce(Return(mockdev));
@@ -292,7 +313,12 @@ TEST_F(TcpAdapterTest, StoreDataWithOneDevice_RestoreData) {
   EXPECT_EQ(uniq_id, devList[0]);
 
   const int app_handle = 1;
+#ifdef OS_WINCE
+  std::vector<int> intList;
+  intList.push_back(app_handle);
+#else
   std::vector<int> intList = {app_handle};
+#endif
   EXPECT_CALL(*mockdev, GetApplicationList()).WillOnce(Return(intList));
 
   ConnectionSPtr mock_connection = new MockConnection();
@@ -338,7 +364,12 @@ TEST_F(TcpAdapterTest, StoreDataWithSeveralDevices_RestoreData) {
   EXPECT_EQ(uniq_id[0], devList[0]);
 
   const int app_handle = 1;
+#ifdef OS_WINCE
+  std::vector<int> intList;
+  intList.push_back(app_handle);
+#else
   std::vector<int> intList = {app_handle};
+#endif
 
   ConnectionSPtr mock_connection = new MockConnection();
   for (uint32_t i = 0; i < count_dev; i++) {

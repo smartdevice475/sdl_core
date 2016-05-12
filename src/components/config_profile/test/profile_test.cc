@@ -35,11 +35,7 @@
 
 #include "gtest/gtest.h"
 #include "config_profile/profile.h"
-#if defined(OS_WIN32) || defined(OS_WINCE)
-#include "utils/file_system_win.h"
-#else
 #include "utils/file_system.h"
-#endif
 #include "utils/threads/thread.h"
 
 namespace test {

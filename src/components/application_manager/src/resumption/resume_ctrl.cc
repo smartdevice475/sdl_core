@@ -37,11 +37,7 @@
 #include "application_manager/application_manager_impl.h"
 
 #include "config_profile/profile.h"
-#if defined(OS_WIN32) || defined(OS_WINCE)
-#include "utils/file_system_win.h"
-#else
 #include "utils/file_system.h"
-#endif
 #include "connection_handler/connection_handler_impl.h"
 #include "application_manager/message_helper.h"
 #include "connection_handler/connection.h"

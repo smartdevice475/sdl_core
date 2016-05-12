@@ -37,12 +37,7 @@
 #include "application_manager/application_impl.h"
 #include "config_profile/profile.h"
 #include "application_manager/mobile_command_factory.h"
-#if defined(OS_WIN32) || defined(OS_WINCE)
-#include "utils/file_system_win.h"
-#else
 #include "utils/file_system.h"
-#endif
-
 namespace application_manager {
 
 namespace commands {

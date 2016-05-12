@@ -33,6 +33,10 @@
 #include "sqlite_wrapper/sql_error.h"
 #include "sqlite_wrapper/sql_database.h"
 
+#ifdef OS_WINCE
+#include "utils/file_system.h"
+#endif
+
 using ::utils::dbms::SQLError;
 using ::utils::dbms::SQLDatabase;
 
@@ -82,7 +86,11 @@ TEST(SQLDatabaseTest, OpenCloseFile_OpenAndCloseSpecifiedDB_ActsWithoutError) {
   //assert
   EXPECT_FALSE(IsError(db.LastError()));
 
+#ifdef OS_WINCE
+  file_system::DeleteFileWindows("test-database.sqlite");
+#else
   remove("test-database.sqlite");
+#endif
 }
 
 TEST(SQLDatabaseTest, OpenDBTwice_NoError) {
@@ -213,8 +221,11 @@ TEST(SQLDatabaseTest, IsReadWrite_FirstOpenDBIsRWSecondIsNot) {
   ASSERT_TRUE(db.Open());
   EXPECT_TRUE(db.IsReadWrite());
   db.Close();
-#if defined(OS_WIN32) || defined(OS_WINCE)
+#if defined(OS_WIN32)
   chmod("test-database.sqlite", 0x00400);
+#elif defined(OS_WINCE)
+  // TODO:
+  // chmod("test-database.sqlite", 0x00400);
 #else
   chmod("test-database.sqlite", S_IRUSR);
 #endif
@@ -223,7 +234,11 @@ TEST(SQLDatabaseTest, IsReadWrite_FirstOpenDBIsRWSecondIsNot) {
   EXPECT_FALSE(db.IsReadWrite());
 
   db.Close();
+#ifdef OS_WINCE
+  file_system::DeleteFileWindows("test-database.sqlite");
+#else
   remove("test-database.sqlite");
+#endif
 }
 
 }  // namespace dbms

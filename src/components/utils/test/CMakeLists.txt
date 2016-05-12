@@ -40,6 +40,13 @@ include_directories (
   ${COMPONENTS_DIR}/utils/test/include
 )
 
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+include_directories(
+    ${COMPONENTS_DIR}/utils/include
+    ${CMAKE_SOURCE_DIR}/src/3rd_party-static/sdk_ext/include
+)
+endif()
+
 set(testSources
   messagemeter_test.cc
   file_system_test.cc
@@ -71,6 +78,7 @@ set(testLibraries
   Utils
   Policy
   ConfigProfile
+  sdk_ext
 )
 
 include_directories(${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct)

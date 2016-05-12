@@ -52,11 +52,7 @@
 #include "formatters/CFormatterJsonSDLRPCv1.h"
 #include "config_profile/profile.h"
 #include "utils/threads/thread.h"
-#if defined(OS_WIN32) || defined(OS_WINCE)
-#include "utils/file_system_win.h"
-#else
 #include "utils/file_system.h"
-#endif
 #include "utils/helpers.h"
 #include "utils/make_shared.h"
 #include "utils/timer_task_impl.h"

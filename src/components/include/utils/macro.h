@@ -59,6 +59,7 @@
   friend utils::deleters::Deleter<TypeName>::~Deleter()
 
 #ifndef ASSERT
+#define __DBGAPI_H__
 #ifdef DEBUG
   #define ASSERT(condition) \
     FLUSH_LOGGER(); \

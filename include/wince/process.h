@@ -22,7 +22,7 @@
 #ifndef __wcecompat__PROCESS_H__
 #define __wcecompat__PROCESS_H__
 
-#include <winsock.h>
+#include <winsock2.h>
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -78,11 +78,7 @@ class MessageMeterTest: public ::testing::TestWithParam<TimePair> {
   void TearDown() OVERRIDE {
   }
   ::utils::MessageMeter<int> meter;
-#if defined(OS_WIN32) || defined(OS_WINCE)
-  TimevalStruct time_range = TimevalStruct{ 0, 0 };
-#else
-  TimevalStruct time_range = {0, 0};
-#endif
+  TimevalStruct time_range;
   int64_t time_range_msecs;
   int usecs;
   int id1, id2, id3;
@@ -90,13 +86,21 @@ class MessageMeterTest: public ::testing::TestWithParam<TimePair> {
 
 TEST(MessageMeterTest, DefaultTimeRange) {
   const ::utils::MessageMeter<int> default_meter;
+#ifdef OS_WINCE
+  const TimevalStruct time_second = {1, 0};
+#else
   const TimevalStruct time_second {1, 0};
+#endif
   EXPECT_EQ(time_second, default_meter.time_range());
 }
 
 TEST(MessageMeterTest, TimeRangeSetter) {
   ::utils::MessageMeter<int> meter;
+#ifdef OS_WINCE
+  TimevalStruct time_range = {0, 0};
+#else
   TimevalStruct time_range {0, 0};
+#endif
   const int test_count_secs = 1000;
   // Skip 1000th msec value as wrong for TimevalStruct
   const int test_count_msecs = 999;
@@ -121,7 +125,11 @@ TEST(MessageMeterTest, AddingWithNullTimeRange) {
   ::utils::MessageMeter<int> meter;
   const int id1 = 1;
   const int id2 = 2;
+#ifdef OS_WINCE
+  const TimevalStruct null_time_range = {0, 0};
+#else
   const TimevalStruct null_time_range {0, 0};
+#endif
   meter.set_time_range(null_time_range);
   for (int i = 0; i < 10000; ++i) {
     // 1st Connection

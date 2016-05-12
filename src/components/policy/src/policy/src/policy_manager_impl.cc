@@ -41,11 +41,7 @@
 #include "policy/policy_table.h"
 #include "policy/pt_representation.h"
 #include "policy/policy_helper.h"
-#if defined(OS_WIN32) || defined(OS_WINCE)
-#include "utils/file_system_win.h"
-#else
 #include "utils/file_system.h"
-#endif
 #include "utils/logger.h"
 #include "utils/date_time.h"
 #include "utils/make_shared.h"

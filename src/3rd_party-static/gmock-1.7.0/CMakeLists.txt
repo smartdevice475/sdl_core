@@ -66,6 +66,13 @@ include_directories("${gmock_SOURCE_DIR}/include"
                     # Test sources.
                     "${gtest_SOURCE_DIR}")
 
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+include_directories(
+  ${CMAKE_SOURCE_DIR}/src/components/utils/include
+  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/sdk_ext/include
+)
+endif()
+
 ########################################################################
 #
 # Defines the gmock & gmock_main libraries.  User tests should link

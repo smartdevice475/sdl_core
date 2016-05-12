@@ -48,6 +48,10 @@
 # include <unistd.h>  // NOLINT
 #endif
 
+#ifdef OS_WINCE
+#include "time_ext.h"
+#endif
+
 namespace testing {
 namespace internal {
 
@@ -794,7 +798,11 @@ bool Mock::AsyncVerifyAndClearExpectationsLocked(const int timeout_msec_in)
 
   // TODO(ezamakhov@gmail.com): refactor the next loops
   bool expectations_met = true;
+#ifdef OS_WINCE
+  timeval first_register_time = {0, 0};
+#else
   timeval first_register_time {0, 0};
+#endif
   int timeout_msec = timeout_msec_in;
   for (MockObjectRegistry::StateMap::iterator mock_it = state_map.begin();
       state_map.end() != mock_it; ++mock_it) {

@@ -65,6 +65,8 @@ public:
 	static void fromUnicode(const wchar_string &wstrSrc, unsigned int nCodePage, std::string &strOut);
 	static void anyMultiToUtf8Multi(const std::string &strSrc, std::string &strOut);
 	static void utf8MultiToAnsiMulti(const std::string &strSrc, std::string &strOut);
+    static std::wstring Global::StringToWString(const std::string &str);
+    static std::string Global::WStringToString(const std::wstring &wstr);
 #ifdef OS_WINCE
 	// time
 	static time_t time(time_t* TimeOutPtr);

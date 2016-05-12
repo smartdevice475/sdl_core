@@ -41,11 +41,7 @@
 #include "protocol_handler/protocol_handler.h"
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
-#if defined(OS_WIN32) || defined(OS_WINCE)
-#include "utils/file_system_win.h"
-#else
 #include "utils/file_system.h"
-#endif
 #include "utils/logger.h"
 #include "utils/gen_hash.h"
 #include "utils/make_shared.h"

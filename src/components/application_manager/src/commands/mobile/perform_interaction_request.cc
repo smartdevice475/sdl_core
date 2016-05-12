@@ -40,11 +40,7 @@
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
-#if defined(OS_WIN32) || defined(OS_WINCE)
-#include "utils/file_system_win.h"
-#else
 #include "utils/file_system.h"
-#endif
 #include "utils/helpers.h"
 #include "utils/custom_string.h"
 

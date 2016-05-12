@@ -40,6 +40,8 @@ set(LIBRARIES
   gmock
   ApplicationManager
   connectionHandler
+  sdk_ext
+  ws2
 )
 
 set(SOURCES

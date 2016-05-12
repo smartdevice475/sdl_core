@@ -40,6 +40,10 @@ set(MESSAGE_BROKER_INCLUDE_DIRECTORY ${MESSAGE_BROKER_INCLUDE_DIRECTORY} PARENT_
 add_subdirectory(./encryption)
 set(ENCRYPTION_INCLUDE_DIRECTORY ${ENCRYPTION_INCLUDE_DIRECTORY} PARENT_SCOPE)
 
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+add_subdirectory(./sdk_ext)
+endif()
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
   # --- sqlite3
   add_subdirectory(./sqlite3-3.11.1)

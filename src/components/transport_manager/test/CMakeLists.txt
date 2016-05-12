@@ -52,6 +52,8 @@ set(LIBRARIES
   ProtocolLibrary
   Resumption
   jsoncpp
+  sdk_ext
+  ws2
 )
 
 if (BUILD_USB_SUPPORT)

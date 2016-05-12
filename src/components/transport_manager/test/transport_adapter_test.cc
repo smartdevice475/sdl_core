@@ -302,7 +302,12 @@ TEST_F(TransportAdapterTest, ConnectDevice_ServerNotAdded_DeviceAdded) {
   EXPECT_EQ(uniq_id, devList[0]);
 
   int app_handle = 1;
+#ifdef OS_WINCE
+  std::vector<int> intList;
+  intList.push_back(app_handle);
+#else
   std::vector<int> intList = {app_handle};
+#endif
   EXPECT_CALL(*mockdev, GetApplicationList()).WillOnce(Return(intList));
 
   TransportAdapter::Error res = transport_adapter.ConnectDevice(uniq_id);
@@ -346,7 +351,12 @@ TEST_F(TransportAdapterTest, ConnectDevice_DeviceAdded) {
 
 
   int app_handle = 1;
+#ifdef OS_WINCE
+  std::vector<int> intList;
+  intList.push_back(app_handle);
+#else
   std::vector<int> intList = {app_handle};
+#endif
   EXPECT_CALL(*mockdev, GetApplicationList()).WillOnce(Return(intList));
 
   EXPECT_CALL(*serverMock, IsInitialised()).WillOnce(Return(true));
@@ -377,7 +387,12 @@ TEST_F(TransportAdapterTest, ConnectDevice_DeviceAddedTwice) {
 
 
   int app_handle = 1;
+#ifdef OS_WINCE
+  std::vector<int> intList;
+  intList.push_back(app_handle);
+#else
   std::vector<int> intList = {app_handle};
+#endif
   EXPECT_CALL(*mockdev, GetApplicationList()).WillOnce(Return(intList));
 
   EXPECT_CALL(*serverMock, IsInitialised()).WillOnce(Return(true));
@@ -445,7 +460,12 @@ TEST_F(TransportAdapterTest, DisconnectDevice_DeviceAddedConnectionCreated) {
   EXPECT_EQ(uniq_id, devList[0]);
 
 
+#ifdef OS_WINCE
+  std::vector<int> intList;
+  intList.push_back(app_handle);
+#else
   std::vector<int> intList = {app_handle};
+#endif
   EXPECT_CALL(*mockdev, GetApplicationList()).WillOnce(Return(intList));
 
   EXPECT_CALL(*serverMock, IsInitialised()).WillOnce(Return(true));
@@ -485,7 +505,12 @@ TEST_F(TransportAdapterTest, DeviceDisconnected) {
   ASSERT_EQ(1u, devList.size());
   EXPECT_EQ(uniq_id, devList[0]);
 
+#ifdef OS_WINCE
+  std::vector<int> intList;
+  intList.push_back(app_handle);
+#else
   std::vector<int> intList = {app_handle};
+#endif
   EXPECT_CALL(*mockdev, GetApplicationList()).WillOnce(Return(intList));
 
   EXPECT_CALL(*serverMock, IsInitialised()).WillOnce(Return(true));
@@ -709,7 +734,12 @@ TEST_F(TransportAdapterTest, GetDeviceAndApplicationLists) {
   EXPECT_EQ(uniq_id, devList[0]);
 
   int app_handle = 1;
+#ifdef OS_WINCE
+  std::vector<int> intList;
+  intList.push_back(app_handle);
+#else
   std::vector<int> intList = {app_handle};
+#endif
   EXPECT_CALL(*mockdev, GetApplicationList()).WillOnce(Return(intList));
   std::vector<int> res = transport_adapter.GetApplicationList(uniq_id);
   ASSERT_EQ(1u, res.size());

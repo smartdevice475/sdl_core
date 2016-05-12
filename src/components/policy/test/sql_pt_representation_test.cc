@@ -48,10 +48,7 @@
 #include "utils/sqlite_wrapper/sql_database.h"
 #include "utils/sqlite_wrapper/sql_error.h"
 #if defined(OS_WIN32) || defined(OS_WINCE)
-#include "utils/file_system_win.h"
-#else
 #include "utils/file_system.h"
-#endif
 #include "utils/system.h"
 #include "utils/make_shared.h"
 #include "utils/shared_ptr.h"

@@ -33,6 +33,10 @@
 #include "gtest/gtest.h"
 #include "generated_code_with_sqlite_test.h"
 
+#ifdef OS_WINCE
+#include "utils/file_system.h"
+#endif
+
 namespace rpc {
 
 class GeneratedCodeTest : public ::testing::Test {
@@ -48,7 +52,11 @@ class GeneratedCodeTest : public ::testing::Test {
   }
 
   static void TearDownTestCase() {
+#ifdef OS_WINCE
+    file_system::DeleteFileWindows((kDatabaseName + ".sqlite").c_str());
+#else
     remove((kDatabaseName + ".sqlite").c_str());
+#endif
   }
 
   static const std::string kDatabaseName;

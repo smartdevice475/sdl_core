@@ -38,6 +38,10 @@
 #include "sqlite_wrapper/sql_database.h"
 #include "sqlite_wrapper/sql_query.h"
 
+#ifdef OS_WINCE
+#include "utils/file_system.h"
+#endif
+
 using ::utils::dbms::SQLError;
 using ::utils::dbms::SQLDatabase;
 using ::utils::dbms::SQLQuery;
@@ -61,7 +65,11 @@ class SQLQueryTest : public ::testing::Test {
 
   static void TearDownTestCase() {
     sqlite3_close(conn);
+#ifdef OS_WINCE
+    file_system::DeleteFileWindows((kDatabaseName + ".sqlite").c_str());
+#else
     remove((kDatabaseName + ".sqlite").c_str());
+#endif
   }
 
   void SetUp() {

@@ -35,6 +35,8 @@
 #if defined(OS_WIN32) || defined(OS_WINCE)
 #include <Windows.h>
 #include <sstream>
+#include <Shlobj.h>
+#include <Shlwapi.h>
 #else
 #include <sys/statvfs.h>
 #include <sys/stat.h>
@@ -153,6 +155,23 @@ uint32_t file_system::DirectorySize(const std::string& path) {
 #endif
 }
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+std::string file_system::CreateDirectoryWindows(const std::string& name) {
+	if (!DirectoryExists(name)) {
+#if defined(OS_WIN32)
+		::CreateDirectory(name.c_str(), NULL);
+#elif defined(OS_WINCE)
+		wchar_string strUnicodeData;
+		Global::toUnicode(name, CP_ACP, strUnicodeData);
+		::CreateDirectory(strUnicodeData.c_str(), NULL);
+#else
+		mkdir(name.c_str(), S_IRWXU);
+#endif
+	}
+	return name;
+
+}
+#else
 std::string file_system::CreateDirectory(const std::string& name) {
 	if (!DirectoryExists(name)) {
 #if defined(OS_WIN32)
@@ -168,6 +187,7 @@ std::string file_system::CreateDirectory(const std::string& name) {
 	return name;
 
 }
+#endif
 
 bool file_system::CreateDirectoryRecursively(const std::string& path) {
   size_t pos = 0;
@@ -357,20 +377,62 @@ std::string file_system::CurrentWorkingDirectory() {
   
 }
 
-bool file_system::DeleteFile(const std::string& name) {
+std::string file_system::GetAbsolutePath(const std::string& path) {
 #if defined(OS_WIN32)
-	return ::DeleteFile(name.c_str()) == TRUE ? true : false;
+    char RootPath[MAX_PATH] = {0};
+    char AbsPath[MAX_PATH] = {0};
+
+    GetModuleFileName(NULL, RootPath, sizeof(RootPath);
+
+    if (!PathIsRelative(path.c_str()))
+    {
+        return "";
+    }
+
+    PathCombine(AbsPath, path.c_str(), RootPath);
+
+    return std::string(AbsPath);
+
 #elif defined(OS_WINCE)
+  std::wstring RelativePath = Global::StringToWString(path);
+  WCHAR AbsolutePath[MAX_PATH] = {0};
+  WCHAR RootPath[MAX_PATH] = {0};
+
+  ::GetModuleFileName(NULL, RootPath, sizeof(RootPath));
+
+  if (!PathIsRelative(RelativePath.c_str())) return "";
+
+  PathCombine(AbsolutePath, RelativePath.c_str(), RootPath);
+
+  return Global::WStringToString(AbsolutePath);
+#else
+  char abs_path[PATH_MAX];
+  if (NULL == realpath(path.c_str(), abs_path)) {
+    return std::string();
+  }
+
+  return std::string(abs_path);
+#endif
+}
+
+#if defined(OS_WIN32)
+bool file_system::DeleteFileWindows(const std::string& name) {
+	return ::DeleteFile(name.c_str()) == TRUE ? true : false;
+}
+#elif defined(OS_WINCE)
+bool file_system::DeleteFileWindows(const std::string& name) {
 	wchar_string strUnicodeData;
 	Global::toUnicode(name, CP_ACP, strUnicodeData);
 	return ::DeleteFile(strUnicodeData.c_str()) == TRUE ? true : false;
+}
 #else
+bool file_system::DeleteFile(const std::string& name) {
   if (FileExists(name) && IsAccessible(name, W_OK)) {
     return !remove(name.c_str());
   }
   return false;
-#endif
 }
+#endif
 
 void file_system::remove_directory_content(const std::string& directory_name) {
 #if defined(OS_WIN32)
@@ -425,15 +487,21 @@ void file_system::remove_directory_content(const std::string& directory_name) {
 #endif
 }
 
-bool file_system::RemoveDirectory(const std::string& directory_name,
-                                  bool is_recursively) {
 #if defined(OS_WIN32)
+bool file_system::RemoveDirectoryWindows(const std::string& directory_name,
+                                  bool is_recursively) {
 	return ::RemoveDirectory(directory_name.c_str()) == TRUE ? true : false;
+}
 #elif defined(OS_WINCE)
+bool file_system::RemoveDirectoryWindows(const std::string& directory_name,
+                                  bool is_recursively) {
 	wchar_string strUnicodeData;
 	Global::toUnicode(directory_name, CP_ACP, strUnicodeData);
 	return ::RemoveDirectory(strUnicodeData.c_str()) == TRUE ? true : false;
+}
 #else
+bool file_system::RemoveDirectory(const std::string& directory_name,
+                                  bool is_recursively) {
 	if (DirectoryExists(directory_name)
 		&& IsAccessible(directory_name, W_OK)) {
 		if (is_recursively) {
@@ -443,8 +511,8 @@ bool file_system::RemoveDirectory(const std::string& directory_name,
     return !rmdir(directory_name.c_str());
   }
   return false;
-#endif
 }
+#endif
 
 bool file_system::IsAccessible(const std::string& name, int32_t how) {
 #if defined(OS_WIN32) || defined(OS_WINCE)
@@ -628,6 +696,21 @@ const std::string file_system::ConvertPathForURL(const std::string& path) {
   return converted_path;
 }
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+bool file_system::CreateFileWindows(const std::string& path) {
+#if defined(OS_WINCE) || defined(OS_MAC)
+  std::ofstream file(path.c_str());
+#else
+  std::ofstream file(path);
+#endif
+  if (!(file.is_open())) {
+    return false;
+  } else {
+    file.close();
+    return true;
+  }
+}
+#else
 bool file_system::CreateFile(const std::string& path) {
 #if defined(OS_WINCE) || defined(OS_MAC)
   std::ofstream file(path.c_str());
@@ -641,7 +724,7 @@ bool file_system::CreateFile(const std::string& path) {
     return true;
   }
 }
-
+#endif
 
 uint64_t file_system::GetFileModificationTime(const std::string& path) {
 #if defined(OS_WIN32) || defined(OS_WINCE)
@@ -658,24 +741,34 @@ uint64_t file_system::GetFileModificationTime(const std::string& path) {
 }
 
 bool file_system::CopyFile(const std::string& src, const std::string& dst) {
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  if (!FileExists(src) || FileExists(dst) || !CreateFileWindows(dst)) {
+    return false;
+  }
+#else
   if (!FileExists(src) || FileExists(dst) || !CreateFile(dst)) {
     return false;
   }
+#endif
   std::vector<uint8_t> data;
   if (!ReadBinaryFile(src, data) || !WriteBinaryFile(dst, data)) {
+#if defined(OS_WIN32) || defined(OS_WINCE)
+    DeleteFileWindows(dst);
+#else
     DeleteFile(dst);
+#endif
     return false;
   }
   return true;
 }
 
 bool file_system::MoveFile(const std::string& src, const std::string& dst) {
-#ifdef OS_WINCE
+#if defined(OS_WIN32) || defined(OS_WINCE)
   if (!CopyFile(src, dst)) {
     return false;
   }
-  if (!DeleteFile(src)) {
-    DeleteFile(dst);
+  if (!DeleteFileWindows(src)) {
+    DeleteFileWindows(dst);
     return false;
   }
 #else

@@ -58,11 +58,7 @@
 #include "application_manager/usage_statistics.h"
 #include "policy/policy_types.h"
 #include "interfaces/MOBILE_API.h"
-#if defined(OS_WIN32) || defined(OS_WINCE)
-#include "utils/file_system_win.h"
-#else
 #include "utils/file_system.h"
-#endif
 #include "utils/scope_guard.h"
 #include "utils/make_shared.h"
 

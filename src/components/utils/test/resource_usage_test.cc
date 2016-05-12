@@ -35,11 +35,7 @@
 #include "utils/macro.h"
 
 #include "utils/resource_usage.h"
-#if defined(OS_WIN32) || defined(OS_WINCE)
-#include "utils/file_system_win.h"
-#else
 #include "utils/file_system.h"
-#endif
 
 namespace utils {
 

@@ -37,6 +37,8 @@
 #include "utils/shared_ptr.h"
 #include "policy/policy_types.h"
 
+#pragma warning(disable: 4482)
+
 namespace policy {
 class PolicyManagerImpl;
 

@@ -145,35 +145,35 @@ class StateControllerTest : public ::testing::Test {
 
   am::ApplicationSharedPtr simple_app_;
   NiceMock<MockApplication>* simple_app_ptr_;
-  uint32_t simple_app_id_ = 1721;
+  static const uint32_t simple_app_id_ = 1721;
 
   am::ApplicationSharedPtr navi_app_;
   NiceMock<MockApplication>* navi_app_ptr_;
-  uint32_t navi_app_id_ = 1762;
+  static const uint32_t navi_app_id_ = 1762;
 
   am::ApplicationSharedPtr media_app_;
   NiceMock<MockApplication>* media_app_ptr_;
-  uint32_t media_app_id_ = 1801;
+  static const uint32_t media_app_id_ = 1801;
 
   am::ApplicationSharedPtr vc_app_;
   NiceMock<MockApplication>* vc_app_ptr_;
-  uint32_t vc_app_id_ = 1825;
+  static const uint32_t vc_app_id_ = 1825;
 
   am::ApplicationSharedPtr media_navi_app_;
   NiceMock<MockApplication>* media_navi_app_ptr_;
-  uint32_t media_navi_app_id_ = 1855;
+  static const uint32_t media_navi_app_id_ = 1855;
 
   am::ApplicationSharedPtr media_vc_app_;
   NiceMock<MockApplication>* media_vc_app_ptr_;
-  uint32_t media_vc_app_id_ = 1881;
+  static const uint32_t media_vc_app_id_ = 1881;
 
   am::ApplicationSharedPtr navi_vc_app_;
   NiceMock<MockApplication>* navi_vc_app_ptr_;
-  uint32_t navi_vc_app_id_ = 1894;
+  static const uint32_t navi_vc_app_id_ = 1894;
 
   am::ApplicationSharedPtr media_navi_vc_app_;
   NiceMock<MockApplication>* media_navi_vc_app_ptr_;
-  uint32_t media_navi_vc_app_id_ = 1922;
+  static const uint32_t media_navi_vc_app_id_ = 1922;
 
   std::vector<am::HmiStatePtr> valid_states_for_audio_app_;
   std::vector<am::HmiStatePtr> valid_states_for_not_audio_app_;
@@ -452,11 +452,16 @@ class StateControllerTest : public ::testing::Test {
     // application properties, i.e. is_media_application flag from RAI and
     // AppHMITypes (NAVIGATION, etc.). Most likely logic should be changed
     // after conclusion on APPLINK-20231
+#ifdef OS_WINCE
+    std::vector<am::ApplicationSharedPtr>::iterator app;
+    // TODO:
+#else
     std::vector<am::ApplicationSharedPtr>::iterator app  =
         std::find_if(
           applications_list_.begin(),
           applications_list_.end(),
           [app_id](am::ApplicationSharedPtr a){return app_id == a->app_id();});
+#endif
 
     if (app == applications_list_.end()) {
       return APP_TYPE_NON_MEDIA;

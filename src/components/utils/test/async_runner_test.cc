@@ -38,6 +38,10 @@
 
 #include "gtest/gtest.h"
 
+#ifdef OS_WINCE
+#include "time_ext.h"
+#endif
+
 namespace test {
 namespace components {
 namespace utils {
@@ -79,7 +83,11 @@ class AsyncRunnerTest : public ::testing::Test {
   AsyncRunner *asr_pt_;
 
   void CreateThreadsArray() {
+#ifdef OS_WINCE
+    srand(time(NULL));
+#else
     srand(std::time(NULL));
+#endif
     kDelegatesNum_ = (rand() % 20 + 1);
     delegates_ = new TestThreadDelegate*[kDelegatesNum_];
   }

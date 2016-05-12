@@ -32,10 +32,7 @@
 
 #include "utils/logger.h"
 #if defined(OS_WIN32) || defined(OS_WINCE)
-#include "utils/file_system_win.h"
-#else
 #include "utils/file_system.h"
-#endif
 #include "config_profile/profile.h"
 #include "media_manager/video/video_stream_to_file_adapter.h"
 

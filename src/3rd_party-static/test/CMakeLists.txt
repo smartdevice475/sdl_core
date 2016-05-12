@@ -37,6 +37,8 @@ include_directories (
 set(LIBRARIES
     gmock 
     jsoncpp
+    sdk_ext
+    ws2
 )
 
 set (SOURCES

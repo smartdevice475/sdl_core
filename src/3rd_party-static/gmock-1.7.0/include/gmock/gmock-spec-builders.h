@@ -63,7 +63,7 @@
 #if defined(OS_POSIX)
 #include <sys/time.h>
 #elif defined(OS_WIN32) || defined(OS_WINCE)
-#include <winsock.h>
+#include <winsock2.h>
 #endif
 
 #include <map>

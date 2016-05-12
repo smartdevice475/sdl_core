@@ -214,6 +214,20 @@ time_t Global::time(time_t* TimeOutPtr)
 }
 #endif
 
+std::wstring Global::StringToWString(const std::string &str)
+ {
+     std::wstring wstr(str.length(),L' ');
+     std::copy(str.begin(), str.end(), wstr.begin());
+     return wstr; 
+ }
+ 
+std::string Global::WStringToString(const std::wstring &wstr)
+ {
+     std::string str(wstr.length(), ' ');
+     std::copy(wstr.begin(), wstr.end(), str.begin());
+     return str; 
+ }
+
 Global::Global()
 {
 }

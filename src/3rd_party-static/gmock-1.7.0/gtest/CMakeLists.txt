@@ -56,6 +56,13 @@ include_directories(
   ${gtest_SOURCE_DIR}/include
   ${gtest_SOURCE_DIR})
 
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+include_directories(
+  ${CMAKE_SOURCE_DIR}/src/components/utils/include
+  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/sdk_ext/include
+)
+endif()
+
 # Where Google Test's libraries can be found.
 link_directories(${gtest_BINARY_DIR}/src)
 

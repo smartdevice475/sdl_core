@@ -33,11 +33,7 @@
 
 #include "application_manager/commands/mobile/on_system_request_notification.h"
 #include "interfaces/MOBILE_API.h"
-#if defined(OS_WIN32) || defined(OS_WINCE)
-#include "utils/file_system_win.h"
-#else
 #include "utils/file_system.h"
-#endif
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/policies/policy_handler_interface.h"
 

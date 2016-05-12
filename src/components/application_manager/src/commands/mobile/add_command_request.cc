@@ -36,11 +36,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application.h"
 #include "application_manager/message_helper.h"
-#if defined(OS_WIN32) || defined(OS_WINCE)
-#include "utils/file_system_win.h"
-#else
 #include "utils/file_system.h"
-#endif
 #include "utils/helpers.h"
 #include "utils/custom_string.h"
 

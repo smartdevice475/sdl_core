@@ -43,6 +43,8 @@
 #include "utils/global.h"
 #endif
 
+#pragma warning(disable: 4482)
+
 namespace file_system {
 
 
@@ -74,7 +76,11 @@ uint32_t FileSize(const std::string& path);
  * @param name path to directory
  * @return path to created directory.
  */
+#if defined(OS_WIN32) || defined(OS_WINCE)
+std::string CreateDirectoryWindows(const std::string& name);
+#else
 std::string CreateDirectory(const std::string& name);
+#endif
 
 /**
  * @brief Creates directory recursively
@@ -163,8 +169,11 @@ std::string GetAbsolutePath(const std::string& path);
   * @param name path to file
   * @return returns true if the file is successfully deleted.
   */
+#if defined(OS_WIN32) || defined(OS_WINCE)
+bool DeleteFileWindows(const std::string& name);
+#else
 bool DeleteFile(const std::string& name);
-
+#endif
 /**
  * @brief Removes directory.
  *
@@ -172,8 +181,13 @@ bool DeleteFile(const std::string& name);
  * @param is_recursively true if you need delete directory recursively, otherwise false.
  * @return returns true if the directory is successfully deleted.
  */
+#if defined(OS_WIN32) || defined(OS_WINCE)
+bool RemoveDirectoryWindows(const std::string& directory_name,
+                     bool is_recursively = true);
+#else
 bool RemoveDirectory(const std::string& directory_name,
                      bool is_recursively = true);
+#endif
 
 /**
   * @brief Check access rights
@@ -243,7 +257,11 @@ const std::string ConvertPathForURL(const std::string& path);
   * @param name path to file
   * @return if result success return true
 */
+#if defined(OS_WIN32) || defined(OS_WINCE)
+bool CreateFileWindows(const std::string& path);
+#else
 bool CreateFile(const std::string& path);
+#endif
 
 /**
  * @brief Get modification time of file

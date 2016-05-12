@@ -50,6 +50,11 @@
 #include <sstream>
 #include <vector>
 
+#ifdef OS_WINCE
+#include "time_ext.h"
+#include "utils/file_system.h"
+#endif
+
 #if GTEST_OS_LINUX
 
 // TODO(kenton@google.com): Use autoconf to detect availability of
@@ -3542,7 +3547,11 @@ class ScopedPrematureExitFile {
 
   ~ScopedPrematureExitFile() {
     if (premature_exit_filepath_ != NULL && *premature_exit_filepath_ != '\0') {
+#ifdef OS_WINCE
+      file_system::DeleteFileWindows(premature_exit_filepath_);
+#else
       remove(premature_exit_filepath_);
+#endif
     }
   }
 

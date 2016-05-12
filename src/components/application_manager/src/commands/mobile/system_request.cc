@@ -41,11 +41,7 @@ Copyright (c) 2013, Ford Motor Company
 #include "application_manager/policies/policy_handler_interface.h"
 #include "interfaces/MOBILE_API.h"
 #include "config_profile/profile.h"
-#if defined(OS_WIN32) || defined(OS_WINCE)
-#include "utils/file_system_win.h"
-#else
 #include "utils/file_system.h"
-#endif
 #include "formatters/CFormatterJsonBase.h"
 #include "json/json.h"
 #include "utils/helpers.h"

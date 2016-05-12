@@ -36,11 +36,7 @@
 #include <string>
 #include <unistd.h>
 #include "gtest/gtest.h"
-#if defined(OS_WIN32) || defined(OS_WINCE)
-#include "utils/file_system_win.h"
-#else
 #include "utils/file_system.h"
-#endif
 
 namespace test {
 namespace components {
