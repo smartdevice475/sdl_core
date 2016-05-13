@@ -42,7 +42,7 @@ endif()
 set (LIBRARIES
   Utils
   ${DBUS_ADAPTER}
-  ${RTLIB}
+#  ${RTLIB}
 )
 
 add_library("HMIMessageHandler" ${SOURCES})

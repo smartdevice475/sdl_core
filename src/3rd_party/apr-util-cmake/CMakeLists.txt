@@ -48,6 +48,9 @@ set(COMMON_CONFIGURE_FLAGS
 
 if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
   set(CONFIGURE_FLAGS "--host=${CMAKE_SYSTEM_PROCESSOR}-nto-qnx" ${COMMON_CONFIGURE_FLAGS})
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Android")
+  MESSAGE(STATUS "apr-util --host=arm-linux-androideabi")
+  set(CONFIGURE_FLAGS "--host=arm-linux-androideabi" ${COMMON_CONFIGURE_FLAGS})
 else()
   set(CONFIGURE_FLAGS ${COMMON_CONFIGURE_FLAGS})
 endif()
