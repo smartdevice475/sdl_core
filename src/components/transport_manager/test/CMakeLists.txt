@@ -52,9 +52,11 @@ set(LIBRARIES
   ProtocolLibrary
   Resumption
   jsoncpp
-  sdk_ext
-  ws2
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  list(APPEND LIBRARIES sdk_ext ws2)
+endif()
 
 if (BUILD_USB_SUPPORT)
   list(APPEND LIBRARIES Libusb-1.0.16)

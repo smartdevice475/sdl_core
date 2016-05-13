@@ -123,8 +123,13 @@ TEST_F(IncomingDataHandlerTest, DataForUnknownConnection) {
   EXPECT_TRUE(actual_frames.empty());
 
   AppendPacketToTMData(ProtocolPacket());
+#ifdef OS_WINCE
+  actual_frames = data_handler.ProcessData(RawMessage(uid_unknown, 0, tm_data, tm_data.size()),
+                                           &result_code, &malformed_count);
+#else
   actual_frames = data_handler.ProcessData(RawMessage(uid_unknown, 0, tm_data.data(), tm_data.size()),
                                            &result_code, &malformed_count);
+#endif
   EXPECT_EQ(RESULT_FAIL, result_code);
   EXPECT_EQ(malformed_count, 0u);
   EXPECT_TRUE(actual_frames.empty());

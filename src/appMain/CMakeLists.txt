@@ -87,7 +87,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Windows")
   list(APPEND LIBRARIES pthreadVC2 ws2_32)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-  list(APPEND LIBRARIES pthreadVC2 ws2)
+  list(APPEND LIBRARIES pthreadVC2 sdk_ext ws2)
 endif()
 
 if (BUILD_BT_SUPPORT)

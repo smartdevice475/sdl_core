@@ -151,7 +151,7 @@ class SSLHandshakeTest : public testing::Test {
                           const std::string& ciphers_list,
                           const bool verify_peer,
                           const std::string& ca_certificate_path) {
-    std::ifstream cert(cert_filename);
+    std::ifstream cert(cert_filename.c_str());
     std::stringstream ss;
     if (cert.is_open()){
       ss << cert.rdbuf();
@@ -184,7 +184,7 @@ class SSLHandshakeTest : public testing::Test {
                           const std::string& ciphers_list,
                           const bool verify_peer,
                           const std::string& ca_certificate_path) {
-    std::ifstream cert(cert_filename);
+    std::ifstream cert(cert_filename.c_str());
     std::stringstream certificate;
     if (cert.is_open()) {
       certificate << cert.rdbuf();

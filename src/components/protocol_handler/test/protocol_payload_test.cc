@@ -116,7 +116,13 @@ TEST(ProtocolPayloadTest, ExtractCorrectProtocolWithDataWithoutJSON) {
   prot_payload_test.header.rpc_function_id = 2;
   prot_payload_test.header.json_size = 0;
   prot_payload_test.header.rpc_type = kRpcTypeNotification;
+#ifdef OS_WINCE
+  prot_payload_test.data.push_back(1);
+  prot_payload_test.data.push_back(2);
+  prot_payload_test.data.push_back(3);
+#else
   prot_payload_test.data = {1, 2, 3};
+#endif
 
   const size_t data_for_sending_size = PROTOCOL_HEADER_V2_SIZE +
                                        prot_payload_test.data.size() +
@@ -189,7 +195,13 @@ TEST(ProtocolPayloadTest, ExtractCorrectProtocolWithDataWithJSON) {
   prot_payload_test.header.correlation_id = 1;
   prot_payload_test.header.rpc_function_id = 2;
   prot_payload_test.header.rpc_type = kRpcTypeRequest;
+#ifdef OS_WINCE
+  prot_payload_test.data.push_back(1);
+  prot_payload_test.data.push_back(2);
+  prot_payload_test.data.push_back(3);
+#else
   prot_payload_test.data = {1, 2, 3};
+#endif
 
   std::string expect_output_json_string =
       "{\n \" : {\n \"name\" : \"\",\n\"parameters\" : \"\"\n}\n}\n";
@@ -232,7 +244,13 @@ TEST(ProtocolPayloadTest, ExtractProtocolWithJSONWithDataWithWrongPayloadSize) {
   prot_payload_test.header.rpc_function_id = 2;
 
   prot_payload_test.header.rpc_type = kRpcTypeResponse;
+#ifdef OS_WINCE
+  prot_payload_test.data.push_back(1);
+  prot_payload_test.data.push_back(2);
+  prot_payload_test.data.push_back(3);
+#else
   prot_payload_test.data = {1, 2, 3};
+#endif
 
   std::string expect_output_json_string =
       "{\n \" : {\n \"name\" : \"\",\n\"parameters\" : \"\"\n}\n}\n";

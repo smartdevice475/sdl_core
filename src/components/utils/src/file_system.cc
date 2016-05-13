@@ -382,14 +382,15 @@ std::string file_system::GetAbsolutePath(const std::string& path) {
     char RootPath[MAX_PATH] = {0};
     char AbsPath[MAX_PATH] = {0};
 
-    GetModuleFileName(NULL, RootPath, sizeof(RootPath);
+    // TODO:
+    //GetModuleFileName(NULL, RootPath, sizeof(RootPath);
 
-    if (!PathIsRelative(path.c_str()))
-    {
-        return "";
-    }
+    //if (!PathIsRelative(path.c_str()))
+    //{
+    //    return "";
+    //}
 
-    PathCombine(AbsPath, path.c_str(), RootPath);
+    //PathCombine(AbsPath, path.c_str(), RootPath);
 
     return std::string(AbsPath);
 
@@ -400,9 +401,10 @@ std::string file_system::GetAbsolutePath(const std::string& path) {
 
   ::GetModuleFileName(NULL, RootPath, sizeof(RootPath));
 
-  if (!PathIsRelative(RelativePath.c_str())) return "";
+  // TODO:
+  //if (!PathIsRelative(RelativePath.c_str())) return "";
 
-  PathCombine(AbsolutePath, RelativePath.c_str(), RootPath);
+  //PathCombine(AbsolutePath, RelativePath.c_str(), RootPath);
 
   return Global::WStringToString(AbsolutePath);
 #else

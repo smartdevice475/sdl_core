@@ -78,8 +78,11 @@ set(testLibraries
   Utils
   Policy
   ConfigProfile
-  sdk_ext
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  list(APPEND testLibraries sdk_ext)
+endif()
 
 include_directories(${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct)
 

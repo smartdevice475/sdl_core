@@ -49,6 +49,10 @@ set(testLibraries
   ConfigProfile
 )
  
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  list(APPEND testLibraries sdk_ext ws2)
+endif()
+
 file(COPY smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY smartDeviceLink_invalid_pairs.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

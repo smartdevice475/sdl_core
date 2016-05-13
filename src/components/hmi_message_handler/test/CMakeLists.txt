@@ -46,6 +46,10 @@ set(LIBRARIES
     ConfigProfile
 )
 
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  list(APPEND LIBRARIES sdk_ext ws2)
+endif()
+
 set(SOURCES 
 ${COMPONENTS_DIR}/hmi_message_handler/test/hmi_message_handler_impl_test.cc
 ${COMPONENTS_DIR}/hmi_message_handler/test/hmi_message_adapter_test.cc

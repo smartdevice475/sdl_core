@@ -178,7 +178,7 @@ class SSLTest : public testing::Test {
     delete client_manager_;
   }
 
-  const size_t kMaximumPayloadSize = 1000u;
+  static const size_t kMaximumPayloadSize = 1000u;
   security_manager::CryptoManager* crypto_manager_;
   security_manager::CryptoManager* client_manager_;
   utils::SharedPtr<NiceMock<security_manager_test::MockCryptoManagerSettings>>

@@ -35,7 +35,6 @@
 #include <memory>
 #include "resumption/last_state.h"
 #include "config_profile/profile.h"
-#if defined(OS_WIN32) || defined(OS_WINCE)
 #include "utils/file_system.h"
 #include "utils/shared_ptr.h"
 #include "utils/make_shared.h"

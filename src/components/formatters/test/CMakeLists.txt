@@ -49,6 +49,10 @@ set(LIBRARIES
   jsoncpp
 )
 
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  list(APPEND LIBRARIES sdk_ext ws2)
+endif()
+
 set(SOURCES
   ${COMPONENTS_DIR}/formatters/test/src/SmartFactoryTestHelper.cc
   ${COMPONENTS_DIR}/formatters/test/CSmartFactory_test.cc

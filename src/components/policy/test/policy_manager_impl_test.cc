@@ -48,7 +48,6 @@
 #include "policy/mock_policy_settings.h"
 
 #include "utils/macro.h"
-#if defined(OS_WIN32) || defined(OS_WINCE)
 #include "utils/file_system.h"
 #include "utils/date_time.h"
 #include "utils/make_shared.h"
@@ -134,7 +133,8 @@ class PolicyManagerImplTest2 : public ::testing::Test {
       , app_id2("1766825573")
       , dev_id1("XXX123456789ZZZ")
       , dev_id2("08-00-27-CE-76-FE")
-      , PTU_request_types(Json::arrayValue) {}
+      , PTU_request_types(Json::arrayValue)
+      , kAppStorageFolder("storage1"){}
 
  protected:
   PolicyManagerImpl* manager;
@@ -150,7 +150,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
   Json::Value PTU_request_types;
   static const bool in_memory_;
   NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
-  const std::string kAppStorageFolder = "storage1";
+  const std::string kAppStorageFolder;
 
   void SetUp() OVERRIDE {
 #if defined(OS_WIN32) || defined(OS_WINCE)
@@ -180,7 +180,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
 
   const Json::Value GetPTU(std::string file_name) {
     // Get PTU
-    std::ifstream ifile(file_name);
+    std::ifstream ifile(file_name.c_str());
     Json::Reader reader;
     std::string json;
     Json::Value root(Json::objectValue);

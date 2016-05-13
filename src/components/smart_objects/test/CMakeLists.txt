@@ -38,12 +38,23 @@ include_directories (
   ${JSONCPP_INCLUDE_DIRECTORY}
 )
 
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+include_directories(
+    ${COMPONENTS_DIR}/utils/include
+    ${CMAKE_SOURCE_DIR}/src/3rd_party-static/sdk_ext/include
+)
+endif()
+
 set(LIBRARIES
     gmock_main
     SmartObjects
     formatters
-    jsoncpp   
+    jsoncpp
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  list(APPEND LIBRARIES sdk_ext ws2)
+endif()
 
 set(SOURCES
   ${COMPONENTS_DIR}/smart_objects/test/SmartObjectDraft_test.cc

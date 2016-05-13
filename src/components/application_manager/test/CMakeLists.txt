@@ -51,7 +51,7 @@ if (BUILD_TESTS)
   file(COPY "${AM_SOURCE_DIR}/test/mock/include/application_manager/application_manager_impl.h"
        DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/mock/include/application_manager/)
 
-if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
   FOREACH(infileName ${AMINCLUDE_TO_BE_MOCKED})
   file(RELATIVE_PATH rel "${AM_SOURCE_DIR}/" ${infileName})
   execute_process(
@@ -93,6 +93,13 @@ include_directories(
   ${COMPONENTS_DIR}/application_manager/test/state_controller/include/
   ${COMPONENTS_DIR}
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+include_directories(
+    ${COMPONENTS_DIR}/utils/include
+    ${CMAKE_SOURCE_DIR}/src/3rd_party-static/sdk_ext/include
+)
+endif()
 
 set(testSources
     ${AM_TEST_DIR}/mobile_message_handler_test.cc
@@ -163,7 +170,6 @@ set(testSources
     ${AM_SOURCE_DIR}/policy/src/policy/policy_table/table_struct
   )
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
 set(testLibraries
   ApplicationManager
   Utils
@@ -185,29 +191,12 @@ set(testLibraries
   ProtocolHandler
   SecurityManager
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  list(APPEND testLibraries sdk_ext)
 else()
-set(testLibraries
-  ApplicationManager
-  Utils
-  dbms
-  jsoncpp
-  Policy
-  connectionHandler
-  HMI_API
-  MOBILE_API
-  v4_protocol_v1_2_no_extra
-  SmartObjects
-  formatters
-  gmock_main
-  UsageStatistics
-  dl
-  ProtocolLibrary
-  ConfigProfile
-  MediaManager
-  Resumption
-  ProtocolHandler
-  SecurityManager
-)
+  list(APPEND testLibraries dl)
 endif()
 
 set(test_exec_libraries

@@ -51,10 +51,10 @@ using protocol_handler::ServiceType;
 
 class MediaManagerImplTest : public ::testing::Test {
  protected:
-  MediaManagerImplTest(){}
+  MediaManagerImplTest() : kDefaultValue_(""){}
   const ::testing::NiceMock<MockMediaManagerSettings>
       mock_media_manager_settings_;
-  const std::string kDefaultValue_ = "";
+  const std::string kDefaultValue_;
 };
 
 TEST_F(MediaManagerImplTest, PlayA2DPSource) {

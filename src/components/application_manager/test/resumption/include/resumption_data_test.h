@@ -52,6 +52,7 @@ using namespace mobile_apis;
 
 class ResumptionDataTest : public ::testing::Test {
  protected:
+  ResumptionDataTest() : device_id_("12345") {}
   // Check structure in saved application
   void CheckSavedApp(sm::SmartObject& saved_data);
 
@@ -65,12 +66,12 @@ class ResumptionDataTest : public ::testing::Test {
   std::string mobile_app_id_;
   std::string mac_address_;
   size_t ign_off_count_;
-  const size_t tts_chunks_count = 4;
+  static const size_t tts_chunks_count = 4;
 
   size_t grammar_id_;
   std::string hash_;
   bool is_audio_;
-  const connection_handler::DeviceHandle device_handle_ = 10;
+  static const connection_handler::DeviceHandle device_handle_ = 10;
 
   sm::SmartObject* help_prompt_;
   sm::SmartObject* timeout_prompt_;
@@ -106,13 +107,13 @@ class ResumptionDataTest : public ::testing::Test {
   void CheckVRTitle(sm::SmartObject& res_list);
   void CheckSubscriptions(sm::SmartObject& res_list);
 
-  const size_t count_of_commands = 5;
-  const size_t count_of_choice = 2;
-  const size_t count_of_choice_sets = 4;
-  const size_t count_of_submenues = 3;
-  const size_t count_of_files = 8;
-  const size_t count_of_vrhelptitle = 2;
-  const std::string device_id_ = "12345";
+  static const size_t count_of_commands = 5;
+  static const size_t count_of_choice = 2;
+  static const size_t count_of_choice_sets = 4;
+  static const size_t count_of_submenues = 3;
+  static const size_t count_of_files = 8;
+  static const size_t count_of_vrhelptitle = 2;
+  const std::string device_id_;
 
   am::CommandsMap test_commands_map;
   am::SubMenuMap test_submenu_map;

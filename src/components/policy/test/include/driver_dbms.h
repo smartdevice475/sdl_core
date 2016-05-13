@@ -38,6 +38,10 @@
 #  include <sqlite3.h>
 #endif  // __QNX__
 
+#ifdef OS_WINCE
+#include "utils/file_system.h"
+#endif
+
 namespace test {
 namespace components {
 namespace policy {
@@ -117,7 +121,11 @@ class DBMS {
   }
   void Close() {
     sqlite3_close(conn_);
+#ifdef OS_WINCE
+    file_system::DeleteFileWindows(file_name_.c_str());
+#else
     remove(file_name_.c_str());
+#endif
   }
   bool Exec(const char* query) {
     return SQLITE_OK == sqlite3_exec(conn_, query, NULL, NULL, NULL);

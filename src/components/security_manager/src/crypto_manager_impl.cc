@@ -47,6 +47,10 @@
 #include "utils/macro.h"
 #include "utils/scope_guard.h"
 
+#ifdef OS_WINCE
+#include "time_ext.h"
+#endif
+
 #define TLS1_1_MINIMAL_VERSION            0x1000103fL
 #define CONST_SSL_METHOD_MINIMAL_VERSION  0x00909000L
 

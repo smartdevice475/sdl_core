@@ -40,9 +40,11 @@ set(LIBRARIES
   gmock
   ApplicationManager
   connectionHandler
-  sdk_ext
-  ws2
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  list(APPEND LIBRARIES sdk_ext ws2)
+endif()
 
 set(SOURCES
     state_controller_test.cc

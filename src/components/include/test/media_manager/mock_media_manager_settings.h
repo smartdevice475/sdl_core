@@ -47,8 +47,8 @@ class MockMediaManagerSettings : public ::media_manager::MediaManagerSettings {
   MOCK_CONST_METHOD0(video_server_type, const std::string&());
   MOCK_CONST_METHOD0(audio_server_type, const std::string&());
   MOCK_CONST_METHOD0(server_address, const std::string&());
-  MOCK_CONST_METHOD0(video_streaming_port, const std::uint16_t());
-  MOCK_CONST_METHOD0(audio_streaming_port, const std::uint16_t());
+  MOCK_CONST_METHOD0(video_streaming_port, const uint16_t());
+  MOCK_CONST_METHOD0(audio_streaming_port, const uint16_t());
   MOCK_CONST_METHOD0(named_video_pipe_path, const std::string&());
   MOCK_CONST_METHOD0(named_audio_pipe_path, const std::string&());
   MOCK_CONST_METHOD0(video_stream_file, const std::string&());

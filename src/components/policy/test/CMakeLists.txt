@@ -59,6 +59,13 @@ if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
     )
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+include_directories(
+    ${COMPONENTS_DIR}/utils/include
+    ${CMAKE_SOURCE_DIR}/src/3rd_party-static/sdk_ext/include
+)
+endif()
+
 set(testLibraries
   gmock
   Utils

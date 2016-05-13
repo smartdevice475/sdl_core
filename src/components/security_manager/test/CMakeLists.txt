@@ -39,6 +39,17 @@ include_directories(
   ${JSONCPP_INCLUDE_DIRECTORY}
 )
 
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+include_directories(
+    ${COMPONENTS_DIR}/utils/include
+    ${CMAKE_SOURCE_DIR}/src/3rd_party-static/sdk_ext/include
+)
+endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  list(APPEND LIBRARIES sdk_ext ws2)
+endif()
+
 set(SOURCES
   ${COMPONENTS_DIR}/security_manager/test/crypto_manager_impl_test.cc
   ${COMPONENTS_DIR}/security_manager/test/security_manager_test.cc
@@ -52,6 +63,10 @@ set(LIBRARIES
   gmock
   ${SecurityManagerLibrary}
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  list(APPEND LIBRARIES sdk_ext)
+endif()
 
 set(CERT_LIST 
   ${CMAKE_SOURCE_DIR}/mycert.pem

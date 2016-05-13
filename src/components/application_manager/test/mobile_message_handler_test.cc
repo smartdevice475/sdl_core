@@ -43,6 +43,10 @@
 #include "protocol/raw_message.h"
 #include "utils/make_shared.h"
 
+#ifdef OS_WINCE
+#include "time_ext.h"
+#endif
+
 namespace application_manager {
 namespace test {
 

@@ -51,6 +51,10 @@ set(LIBRARIES
     Utils
 )
 
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  list(APPEND LIBRARIES sdk_ext ws2)
+endif()
+
 set(SOURCES
     #message_helper_test.cc
 )

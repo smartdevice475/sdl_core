@@ -253,7 +253,7 @@ class ConnectionHandlerTest : public ::testing::Test {
   std::string device_name_;
   std::string mac_address_;
 
-  const uint32_t heartbeat_timeout = 100u;
+  static const uint32_t heartbeat_timeout = 100u;
   std::vector<int> protected_services_;
   std::vector<int> unprotected_services_;
 };

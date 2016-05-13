@@ -50,7 +50,7 @@ namespace policy {
 }
 
 TEST(SharedLibraryTest, FullTest_OpenLibrarySetSymbolCloseLibrary_ExpectActsWithoutErrors) {
-#if defined(OS_WIN32) || defined(OS_WINCE)
+#if defined(OS_WIN32)
     //Arrange
     const std::string kLib = "..\\src\\policy\\Policy.dll";
     HINSTANCE handle = LoadLibrary(kLib.c_str());
@@ -61,6 +61,22 @@ TEST(SharedLibraryTest, FullTest_OpenLibrarySetSymbolCloseLibrary_ExpectActsWith
 
     //Act
     const std::string kSymbol = "CreateManager";
+    void* symbol = GetProcAddress(handle, kSymbol.c_str());
+
+    //Assert
+    EXPECT_FALSE(IsError((void*)GetLastError()));
+    EXPECT_TRUE(symbol);
+#elif defined(OS_WINCE)
+    //Arrange
+    const std::wstring kLib = L"..\\src\\policy\\Policy.dll";
+    HINSTANCE handle = LoadLibrary(kLib.c_str());
+
+    //Assert
+    EXPECT_FALSE(IsError((void*)GetLastError()));
+    ASSERT_TRUE(handle);
+
+    //Act
+    const std::wstring kSymbol = L"CreateManager";
     void* symbol = GetProcAddress(handle, kSymbol.c_str());
 
     //Assert

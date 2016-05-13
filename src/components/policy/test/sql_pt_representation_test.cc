@@ -47,7 +47,6 @@
 #include "config_profile/profile.h"
 #include "utils/sqlite_wrapper/sql_database.h"
 #include "utils/sqlite_wrapper/sql_error.h"
-#if defined(OS_WIN32) || defined(OS_WINCE)
 #include "utils/file_system.h"
 #include "utils/system.h"
 #include "utils/make_shared.h"
@@ -337,7 +336,9 @@ class SQLPTRepresentationTest2 : public ::testing::Test {
 #else
     file_system::CreateDirectory(kAppStorageFolder);
 #endif
+#if !defined(OS_WINCE)
     chmod(kAppStorageFolder.c_str(), 00000);
+#endif
     profile::Profile::instance()->config_file_name("smartDeviceLink3.ini");
     ON_CALL(policy_settings_, app_storage_folder()).WillByDefault(ReturnRef(kAppStorageFolder));
     ON_CALL(policy_settings_, open_attempt_timeout_ms()).WillByDefault(Return(kOpenAttemptTimeoutMs));
