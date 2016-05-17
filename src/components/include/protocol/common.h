@@ -52,6 +52,41 @@ const uint8_t PROTOCOL_HEADER_V1_SIZE = 8;
  */
 const uint8_t PROTOCOL_HEADER_V2_SIZE = 12;
 
+#ifdef OS_WINCE
+/**
+ *\brief Protocol versions constants
+ * First 4-bit field of AppLink protocol packet
+ */
+  /**
+   *\brief Constant: number of protocol version (1).
+   */
+  const unsigned int PROTOCOL_VERSION_1 = 0x01;
+  /**
+   *\brief Constant: number of protocol version (2).
+   * Has difference with v.1 in Mobile_API.xml and frame Header difference
+   * Support SSL with Encryption, Video and Audio services
+   */
+  const unsigned int PROTOCOL_VERSION_2 = 0x02;
+  /**
+   *\brief Constant: number of protocol version (3).
+   * Has no difference with v.2 in Mobile_API.xml and frame Header difference
+   * Support SSL with Encryption, Video and Audio services
+   * Support ControlFrame, End Service to/from mobile support, HeartBeat feature
+   */
+  const unsigned int PROTOCOL_VERSION_3 = 0x03;
+  /**
+   *@brief Constant: number of protocol version (4).
+   * This protocol is compatibility with version 3
+   * Support SSL with Encryption, Video and Audio services
+   * Support ControlFrame, End Service to/from mobile support, HeartBeat feature,
+   * SDL4.0 feature.
+   */
+  const unsigned int PROTOCOL_VERSION_4 = 0x04;
+  /**
+   *\brief Maximum value of packet version field (size 4-bit) specified AppLink Protocol v.7
+   */
+  const unsigned int PROTOCOL_VERSION_MAX = 0x0F;
+#else
 /**
  *\brief Protocol versions constants
  * First 4-bit field of AppLink protocol packet
@@ -88,6 +123,7 @@ enum {
    */
   PROTOCOL_VERSION_MAX = 0x0F
 };
+#endif
 
 /**
  *\brief Flag of protection packet
@@ -96,6 +132,101 @@ enum {
 const bool PROTECTION_ON  = true;
 const bool PROTECTION_OFF = false;
 
+#ifdef OS_WINCE
+/**
+ *\brief Protocol frame type constants
+ * 3-bit field of AppLink protocol packet
+ */
+  /**
+  *\brief Constant: Control type of frame
+  */
+  const unsigned int FRAME_TYPE_CONTROL = 0x00;
+  /**
+  *\brief Constant: Single type of frame.
+  */
+  const unsigned int FRAME_TYPE_SINGLE = 0x01;
+  /**
+  *\brief Constant: First frame for multiple frames
+  */
+  const unsigned int FRAME_TYPE_FIRST = 0x02;
+  /**
+  *\brief Constant: Consecutive type of frame for multiple frames
+  */
+  const unsigned int FRAME_TYPE_CONSECUTIVE = 0x03;
+  /**
+   *\brief Maximum value of frame type field (size 3-bit)
+   */
+  const unsigned int FRAME_TYPE_MAX_VALUE = 0x07;
+
+/**
+ *\brief Protocol frame info
+ * 8-bit field of AppLink protocol packet
+ */
+  // Frame type FRAME_TYPE_CONTROL (0x0)
+  /**
+   *\brief Hartbeat frame type
+   */
+  const unsigned int FRAME_DATA_HEART_BEAT = 0x00;
+  /**
+   *\brief Start service frame
+   */
+  const unsigned int FRAME_DATA_START_SERVICE = 0x01;
+  /**
+   *\brief Start service acknowledgement frame
+   */
+  const unsigned int FRAME_DATA_START_SERVICE_ACK = 0x02;
+  /**
+   *\brief Start service not acknowledgement frame
+   */
+  const unsigned int FRAME_DATA_START_SERVICE_NACK = 0x03;
+  /**
+   *\brief End service request frame
+   */
+  const unsigned int FRAME_DATA_END_SERVICE = 0x04;
+  /**
+   * \brief End service acknowledgement frame
+   */
+  const unsigned int FRAME_DATA_END_SERVICE_ACK = 0x05;
+  /**
+   *\brief End service not acknowledgement frame
+   */
+  const unsigned int FRAME_DATA_END_SERVICE_NACK = 0x06;
+  /**
+   *\brief Service data ACK frame
+   */
+  const unsigned int FRAME_DATA_SERVICE_DATA_ACK = 0xFE;
+  /**
+   *\brief Frame is for heart beat ack
+   */
+  const unsigned int FRAME_DATA_HEART_BEAT_ACK = 0xFF;
+
+  // Frame type FRAME_TYPE_SINGLE (0x2)
+  /**
+   *\brief Single frame has reserver frame data value 0x0
+   */
+  const unsigned int FRAME_DATA_SINGLE = 0x00;
+
+  // Frame type FRAME_TYPE_FIRST (0x3)
+  /**
+   *\brief First frame has reserver frame data value 0x0
+   */
+  const unsigned int FRAME_DATA_FIRST = 0x00;
+
+  // Frame type FRAME_TYPE_CONSECUTIVE (0x3)
+  /**
+   *\brief Marks last frame in mutliframe message
+   */
+  const unsigned int FRAME_DATA_LAST_CONSECUTIVE = 0x00;
+  /**
+   *\brief Maximum of consecutive frame numbers after which count has to roll over to 0x01
+   */
+  const unsigned int FRAME_DATA_MAX_CONSECUTIVE = 0xFF;
+
+  /**
+   *\brief Maximum value of frame info field (size 8-bit)
+   */
+  const unsigned int FRAME_DATA_MAX_VALUE = 0xFF;
+#else
 /**
  *\brief Protocol frame type constants
  * 3-bit field of AppLink protocol packet
@@ -193,6 +324,7 @@ enum {
    */
   FRAME_DATA_MAX_VALUE = 0xFF
 };
+#endif
 
 /**
  *\brief If FRAME_TYPE_CONTROL: Constant: Default maximum size of one frame

@@ -54,7 +54,7 @@ bool CheckRegularMatches(const ProtocolPacket& packet,
                          testing::MatchResultListener& result_listener,
                          uint8_t ExpectedFrameType,
                          uint8_t ExpectedFrameData,
-                         uint8_t ExpectedEncryption) {
+                         bool ExpectedEncryption) {
   if (result != protocol_handler::RESULT_OK) {
     result_listener << "Error while message deserialization.";
     return false;

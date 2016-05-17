@@ -56,14 +56,9 @@ if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
       ${CMAKE_SOURCE_DIR}/include/wince
       ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
       ${SQLITE3_INCLUDE_DIRECTORY}
+      ${COMPONENTS_DIR}/utils/include
+      ${CMAKE_SOURCE_DIR}/src/3rd_party-static/sdk_ext/include
     )
-endif()
-
-if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-include_directories(
-    ${COMPONENTS_DIR}/utils/include
-    ${CMAKE_SOURCE_DIR}/src/3rd_party-static/sdk_ext/include
-)
 endif()
 
 set(testLibraries
@@ -72,6 +67,10 @@ set(testLibraries
   Policy
   UsageStatistics
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  list(APPEND testLibraries sdk_ext)
+endif()
 
 set(testSources
   counter_test.cc

@@ -223,7 +223,7 @@ class ConnectionHandlerTest : public ::testing::Test {
   void ChangeProtocol(const int connectionId,
                       const int session_id,
                       const uint8_t protocol_version) {
-    ConnectionList connection_list = connection_handler_->getConnectionList();
+    const ConnectionList& connection_list = connection_handler_->getConnectionList();
 
     ConnectionList::const_iterator conn_it =
         (connection_handler_->getConnectionList()).find(connectionId);

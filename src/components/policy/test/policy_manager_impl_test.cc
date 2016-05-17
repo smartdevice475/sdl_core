@@ -301,8 +301,9 @@ class PolicyManagerImplTest2 : public ::testing::Test {
       const std::string& ucp_std_string =
           static_cast<const std::string&>(ucp_string);
       // Multimap inserting
-      input_multimap.insert(std::pair<std::string, policy_table::Rpcs&>(
-          ucp_std_string, rpcs_ref));
+      // TODO:
+      // input_multimap.insert(std::pair<std::string, policy_table::Rpcs&>(
+      //    ucp_std_string, rpcs_ref));
     }
   }
 

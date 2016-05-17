@@ -124,7 +124,7 @@ TEST_F(IncomingDataHandlerTest, DataForUnknownConnection) {
 
   AppendPacketToTMData(ProtocolPacket());
 #ifdef OS_WINCE
-  actual_frames = data_handler.ProcessData(RawMessage(uid_unknown, 0, tm_data, tm_data.size()),
+  actual_frames = data_handler.ProcessData(RawMessage(uid_unknown, 0, &tm_data[0], tm_data.size()),
                                            &result_code, &malformed_count);
 #else
   actual_frames = data_handler.ProcessData(RawMessage(uid_unknown, 0, tm_data.data(), tm_data.size()),

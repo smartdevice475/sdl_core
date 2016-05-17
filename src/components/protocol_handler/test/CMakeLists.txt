@@ -49,6 +49,10 @@ set (LIBRARIES
   ProtocolLibrary
 )
 
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  list(APPEND LIBRARIES sdk_ext ws2)
+endif()
+
 set (SOURCES
   incoming_data_handler_test.cc
   protocol_header_validator_test.cc

@@ -189,7 +189,11 @@ TEST_F(ProtocolPacketTest, AppendDataToPacketWithNonZeroSize) {
   EXPECT_EQ(RESULT_OK, res);
   EXPECT_EQ(zero_test_data_element_, protocol_packet.data()[0]);
   EXPECT_EQ(kRpc, protocol_packet.data()[1]);
+#ifdef OS_WINCE
+  EXPECT_EQ((unsigned int)FRAME_DATA_LAST_CONSECUTIVE, protocol_packet.data()[2]);
+#else
   EXPECT_EQ(FRAME_DATA_LAST_CONSECUTIVE, protocol_packet.data()[2]);
+#endif
   EXPECT_EQ(session_id, protocol_packet.data()[3]);
 }
 
@@ -201,7 +205,11 @@ TEST_F(ProtocolPacketTest, SetData) {
   protocol_packet.set_data(some_data, sizeof(some_data));
   EXPECT_EQ(zero_test_data_element_, protocol_packet.data()[0]);
   EXPECT_EQ(kRpc, protocol_packet.data()[1]);
+#ifdef OS_WINCE
+  EXPECT_EQ((unsigned int)FRAME_DATA_HEART_BEAT, protocol_packet.data()[2]);
+#else
   EXPECT_EQ(FRAME_DATA_HEART_BEAT, protocol_packet.data()[2]);
+#endif
   EXPECT_EQ(session_id, protocol_packet.data()[3]);
 }
 
@@ -253,7 +261,11 @@ TEST_F(ProtocolPacketTest, DeserializePacket_FrameTypeFirst_ResultOK) {
       protocol_packet.deserializePacket(message, PROTOCOL_HEADER_V2_SIZE);
   uint8_t frame_type = protocol_packet.frame_type();
   // Assert
+#ifdef OS_WINCE
+  EXPECT_EQ((unsigned int)FRAME_TYPE_FIRST, frame_type);
+#else
   EXPECT_EQ(FRAME_TYPE_FIRST, frame_type);
+#endif
   EXPECT_EQ(RESULT_OK, res);
 }
 

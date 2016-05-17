@@ -53,6 +53,10 @@ set(LIBRARIES
     TransportManager
 )
 
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  list(APPEND LIBRARIES sdk_ext ws2)
+endif()
+
 set(SOURCES
     connection_handler_impl_test.cc
     connection_test.cc
