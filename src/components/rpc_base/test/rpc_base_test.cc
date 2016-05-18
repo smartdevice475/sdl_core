@@ -184,7 +184,15 @@ TEST(ValidatedTypes, TestArrayInitializingConstructor) {
   std::vector<std::string> strings;
   strings.push_back("One");
   strings.push_back("Two");
+#ifdef OS_WINCE
+  Array<String<1, 5>, 2, 10> arr;
+
+  for (int i = 0; i < strings.size(); i++) {
+      arr.push_back(strings[i]);
+  }
+#else
   Array<String<1, 5>, 2, 10> arr(strings);
+#endif
   ASSERT_TRUE(arr.is_initialized());
   ASSERT_RPCTYPE_VALID(arr);
 }

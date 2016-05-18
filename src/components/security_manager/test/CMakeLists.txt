@@ -46,10 +46,6 @@ include_directories(
 )
 endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-  list(APPEND LIBRARIES sdk_ext ws2)
-endif()
-
 set(SOURCES
   ${COMPONENTS_DIR}/security_manager/test/crypto_manager_impl_test.cc
   ${COMPONENTS_DIR}/security_manager/test/security_manager_test.cc
@@ -65,7 +61,7 @@ set(LIBRARIES
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-  list(APPEND LIBRARIES sdk_ext)
+  list(APPEND LIBRARIES sdk_ext ws2)
 endif()
 
 set(CERT_LIST 

@@ -43,6 +43,10 @@ set(LIBRARIES
   jsoncpp
 )
 
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  list(APPEND LIBRARIES sdk_ext ws2)
+endif()
+
 set(SOURCES
   rpc_base_json_test.cc
   rpc_base_test.cc
