@@ -66,7 +66,7 @@ option(TIME_TESTER "Enable profiling time test util" OFF)
 option(ENABLE_LOG "Logging feature" OFF)
 option(ENABLE_GCOV "gcov code coverage feature" OFF)
 option(ENABLE_SECURITY "Security Ford protocol protection" OFF)
-option(EXTENDED_POLICY_FLAG "Build with specific features and extended functionality" ON)
+option(EXTENDED_POLICY_FLAG "Build with specific features and extended functionality" OFF)
 option(MODIFY_FUNCTION_FLAGS "modify function" ON)
 if(MODIFY_FUNCTION_FLAGS)
 option(BUILD_MANAGESDL_SUPPORT "manage sdl support" OFF)
@@ -214,6 +214,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-fPIC -s -O2") #It will be appended to CMAKE_CXX_FL
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   add_definitions(-DOS_LINUX)
+  SET(BUILD_BT_SUPPORT OFF)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "QNX")
   add_definitions(-DOS_QNX)
   SET(BUILD_BT_SUPPORT OFF)
@@ -378,6 +379,36 @@ macro(LIST_REPLACE LIST INDEX NEWVALUE)
     list (REMOVE_AT ${LIST} ${__INDEX})
 endmacro(LIST_REPLACE)
 
+
+# Include direction and link library
+
+if(MODIFY_FUNCTION_FLAGS)
+include_directories (
+${CMAKE_SOURCE_DIR}/include/all
+)
+endif()
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+include_directories (
+${CMAKE_SOURCE_DIR}/include/win32
+)
+LINK_DIRECTORIES(
+${CMAKE_SOURCE_DIR}/lib/win32
+)
+elseif (CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+include_directories (
+${CMAKE_SOURCE_DIR}/include/wince
+)
+LINK_DIRECTORIES(
+${CMAKE_SOURCE_DIR}/lib/wince
+)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+include_directories (
+/usr/local/Cellar/log4cxx/0.10.0/include
+)
+LINK_DIRECTORIES(
+/usr/local/Cellar/log4cxx/0.10.0/lib
+)
+endif()
 
 # Building application
 

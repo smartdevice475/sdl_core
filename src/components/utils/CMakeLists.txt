@@ -44,7 +44,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
     )
 endif()
 
-add_library("Utils" SHARED ${SOURCES})
+#add_library("Utils" SHARED ${SOURCES})
+add_library("Utils" ${SOURCES})
+
 
 if(ENABLE_LOG)
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})

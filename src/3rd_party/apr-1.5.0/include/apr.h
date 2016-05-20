@@ -71,7 +71,7 @@
 
 #define APR_HAVE_ARPA_INET_H     1
 #define APR_HAVE_CONIO_H         0
-#define APR_HAVE_CRYPT_H         1
+#define APR_HAVE_CRYPT_H         0
 #define APR_HAVE_CTYPE_H         1
 #define APR_HAVE_DIRENT_H        1
 #define APR_HAVE_ERRNO_H         1
@@ -95,10 +95,10 @@
 #define APR_HAVE_STRINGS_H       1
 #define APR_HAVE_SYS_IOCTL_H     1
 #define APR_HAVE_SYS_SENDFILE_H  1
-#define APR_HAVE_SYS_SIGNAL_H    1
+#define APR_HAVE_SYS_SIGNAL_H    0
 #define APR_HAVE_SYS_SOCKET_H    1
 #define APR_HAVE_SYS_SOCKIO_H    0
-#define APR_HAVE_SYS_SYSLIMITS_H 0
+#define APR_HAVE_SYS_SYSLIMITS_H 1
 #define APR_HAVE_SYS_TIME_H      1
 #define APR_HAVE_SYS_TYPES_H     1
 #define APR_HAVE_SYS_UIO_H       1
@@ -209,33 +209,33 @@ extern "C" {
  */
 
 #define APR_HAVE_SHMEM_MMAP_TMP     1
-#define APR_HAVE_SHMEM_MMAP_SHM     1
-#define APR_HAVE_SHMEM_MMAP_ZERO    1
-#define APR_HAVE_SHMEM_SHMGET_ANON  1
-#define APR_HAVE_SHMEM_SHMGET       1
+#define APR_HAVE_SHMEM_MMAP_SHM     0
+#define APR_HAVE_SHMEM_MMAP_ZERO    0
+#define APR_HAVE_SHMEM_SHMGET_ANON  0
+#define APR_HAVE_SHMEM_SHMGET       0
 #define APR_HAVE_SHMEM_MMAP_ANON    1
 #define APR_HAVE_SHMEM_BEOS         0
 
-#define APR_USE_SHMEM_MMAP_TMP     0
+#define APR_USE_SHMEM_MMAP_TMP     1
 #define APR_USE_SHMEM_MMAP_SHM     0
 #define APR_USE_SHMEM_MMAP_ZERO    0
 #define APR_USE_SHMEM_SHMGET_ANON  0
-#define APR_USE_SHMEM_SHMGET       1
+#define APR_USE_SHMEM_SHMGET       0
 #define APR_USE_SHMEM_MMAP_ANON    1
 #define APR_USE_SHMEM_BEOS         0
 
 #define APR_USE_FLOCK_SERIALIZE           0 
-#define APR_USE_SYSVSEM_SERIALIZE         1
+#define APR_USE_SYSVSEM_SERIALIZE         0
 #define APR_USE_POSIXSEM_SERIALIZE        0
-#define APR_USE_FCNTL_SERIALIZE           0
+#define APR_USE_FCNTL_SERIALIZE           1
 #define APR_USE_PROC_PTHREAD_SERIALIZE    0 
 #define APR_USE_PTHREAD_SERIALIZE         1 
 
 #define APR_HAS_FLOCK_SERIALIZE           1
-#define APR_HAS_SYSVSEM_SERIALIZE         1
-#define APR_HAS_POSIXSEM_SERIALIZE        1
+#define APR_HAS_SYSVSEM_SERIALIZE         0
+#define APR_HAS_POSIXSEM_SERIALIZE        0
 #define APR_HAS_FCNTL_SERIALIZE           1
-#define APR_HAS_PROC_PTHREAD_SERIALIZE    1
+#define APR_HAS_PROC_PTHREAD_SERIALIZE    0
 
 #define APR_PROCESS_LOCK_IS_GLOBAL        0
 
@@ -258,7 +258,7 @@ extern "C" {
 #define APR_HAVE_STRNICMP       0
 #define APR_HAVE_STRSTR         1
 #define APR_HAVE_MEMCHR         1
-#define APR_HAVE_STRUCT_RLIMIT  1
+#define APR_HAVE_STRUCT_RLIMIT  0
 #define APR_HAVE_UNION_SEMUN    0
 #define APR_HAVE_SCTP           0
 #define APR_HAVE_IOVEC          1
@@ -302,7 +302,7 @@ extern "C" {
 
 /* Is the O_NONBLOCK flag inherited from listening sockets?
 */
-#define APR_O_NONBLOCK_INHERITED 0
+#define APR_O_NONBLOCK_INHERITED 1
 
 /* Typedefs that APR needs. */
 
@@ -314,7 +314,7 @@ typedef  unsigned short  apr_uint16_t;
 typedef  int             apr_int32_t;
 typedef  unsigned int    apr_uint32_t;
 
-#define APR_SIZEOF_VOIDP 8
+#define APR_SIZEOF_VOIDP 4
 
 /*
  * Darwin 10's default compiler (gcc42) builds for both 64 and
@@ -349,15 +349,15 @@ typedef  unsigned int    apr_uint32_t;
  #define UINT64_C(v)  (v ## ULL)
 #endif
 #else
- typedef  long            apr_int64_t;
- typedef  unsigned long   apr_uint64_t;
+ typedef  long long            apr_int64_t;
+ typedef  unsigned long long   apr_uint64_t;
 #endif
 
 typedef  size_t          apr_size_t;
 typedef  ssize_t         apr_ssize_t;
 typedef  off_t           apr_off_t;
 typedef  socklen_t       apr_socklen_t;
-typedef  ino_t           apr_ino_t;
+typedef  unsigned long           apr_ino_t;
 
 #if APR_SIZEOF_VOIDP == 8
 typedef  apr_uint64_t            apr_uintptr_t;
@@ -530,25 +530,25 @@ typedef  apr_uint32_t            apr_uintptr_t;
  * configure.in.
  */
 
-#define APR_SSIZE_T_FMT "ld"
+#define APR_SSIZE_T_FMT "d"
 
 /* And APR_SIZE_T_FMT */
-#define APR_SIZE_T_FMT "lu"
+#define APR_SIZE_T_FMT "u"
 
 /* And APR_OFF_T_FMT */
-#define APR_OFF_T_FMT "ld"
+#define APR_OFF_T_FMT APR_INT64_T_FMT
 
 /* And APR_PID_T_FMT */
-#define APR_PID_T_FMT "d"
+#define APR_PID_T_FMT APR_INT64_T_FMT
 
 /* And APR_INT64_T_FMT */
-#define APR_INT64_T_FMT "ld"
+#define APR_INT64_T_FMT "lld"
 
 /* And APR_UINT64_T_FMT */
-#define APR_UINT64_T_FMT "lu"
+#define APR_UINT64_T_FMT "llu"
 
 /* And APR_UINT64_T_HEX_FMT */
-#define APR_UINT64_T_HEX_FMT "lx"
+#define APR_UINT64_T_HEX_FMT "llx"
 
 /*
  * Ensure we work with universal binaries on Darwin

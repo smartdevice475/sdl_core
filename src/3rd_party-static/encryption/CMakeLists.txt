@@ -13,4 +13,7 @@ set (SOURCES
 set (LIBRARIES crypto)
 
 add_library("encryption" ${SOURCES})
+if (CMAKE_SYSTEM_NAME STREQUAL "Android")
+else()
 target_link_libraries("encryption" "${LIBRARIES}")
+endif()

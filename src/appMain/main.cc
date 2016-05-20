@@ -64,7 +64,9 @@
 #include "networking.h"  // cpplint: Include the directory when naming .h files
 
 // ----------------------------------------------------------------------------
-
+#ifdef BUILD_TARGET_LIB
+#include <main.h>
+#endif
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "appMain")
 
@@ -140,7 +142,11 @@ bool InitHmi() {
  * \param argv array of arguments
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
+#ifndef BUILD_TARGET_LIB
 int32_t main(int32_t argc, char** argv) {
+#else
+int32_t sdl_start(int32_t argc,char** argv){
+#endif
 
   // --------------------------------------------------------------------------
   // Logger initialization
@@ -238,3 +244,15 @@ int32_t main(int32_t argc, char** argv) {
 
   return EXIT_SUCCESS;
 }
+
+
+#ifdef BUILD_TARGET_LIB
+void sdl_stop(){
+	//main_namespace::LifeCycle::instance()->StopComponents();
+}
+
+void sdl_set_videostream_callback(fun_SetMediaVideoStreamSendCallback func)
+{
+	SetMediaVideoStreamSendCallback(func);
+}
+#endif
