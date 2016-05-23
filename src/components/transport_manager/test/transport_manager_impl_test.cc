@@ -315,7 +315,11 @@ class TransportManagerImplTest : public ::testing::Test {
 
   utils::SharedPtr<TransportManagerListenerMock> mock_transport_manager_listener_;
 
-  const static ApplicationHandle application_id_ = 1;
+#ifdef OS_WINCE
+  static const ApplicationHandle application_id_ = 1;
+#else
+  const ApplicationHandle application_id_ = 1;
+#endif
 
   ConnectionUID connection_key_;
   RawMessagePtr test_message_;

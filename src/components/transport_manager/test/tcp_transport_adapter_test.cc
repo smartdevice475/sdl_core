@@ -85,7 +85,11 @@ class TcpAdapterTest : public ::testing::Test {
   }
 
   resumption::LastState  last_state_;
-  const static uint32_t port = 12345;
+#ifdef OS_WINCE
+  static const uint32_t port = 12345;
+#else
+  const uint32_t port = 12345;
+#endif
   const std::string string_port;
 };
 

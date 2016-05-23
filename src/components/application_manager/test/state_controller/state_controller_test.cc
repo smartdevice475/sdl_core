@@ -143,6 +143,7 @@ class StateControllerTest : public ::testing::Test {
   DataAccessor<am::ApplicationSet> applications_;
   am::StateController state_ctrl_;
 
+#ifdef OS_WINCE
   am::ApplicationSharedPtr simple_app_;
   NiceMock<MockApplication>* simple_app_ptr_;
   static const uint32_t simple_app_id_ = 1721;
@@ -174,6 +175,39 @@ class StateControllerTest : public ::testing::Test {
   am::ApplicationSharedPtr media_navi_vc_app_;
   NiceMock<MockApplication>* media_navi_vc_app_ptr_;
   static const uint32_t media_navi_vc_app_id_ = 1922;
+#else
+  am::ApplicationSharedPtr simple_app_;
+  NiceMock<MockApplication>* simple_app_ptr_;
+  const uint32_t simple_app_id_ = 1721;
+
+  am::ApplicationSharedPtr navi_app_;
+  NiceMock<MockApplication>* navi_app_ptr_;
+  const uint32_t navi_app_id_ = 1762;
+
+  am::ApplicationSharedPtr media_app_;
+  NiceMock<MockApplication>* media_app_ptr_;
+  const uint32_t media_app_id_ = 1801;
+
+  am::ApplicationSharedPtr vc_app_;
+  NiceMock<MockApplication>* vc_app_ptr_;
+  const uint32_t vc_app_id_ = 1825;
+
+  am::ApplicationSharedPtr media_navi_app_;
+  NiceMock<MockApplication>* media_navi_app_ptr_;
+  const uint32_t media_navi_app_id_ = 1855;
+
+  am::ApplicationSharedPtr media_vc_app_;
+  NiceMock<MockApplication>* media_vc_app_ptr_;
+  const uint32_t media_vc_app_id_ = 1881;
+
+  am::ApplicationSharedPtr navi_vc_app_;
+  NiceMock<MockApplication>* navi_vc_app_ptr_;
+  const uint32_t navi_vc_app_id_ = 1894;
+
+  am::ApplicationSharedPtr media_navi_vc_app_;
+  NiceMock<MockApplication>* media_navi_vc_app_ptr_;
+  const uint32_t media_navi_vc_app_id_ = 1922;
+#endif
 
   std::vector<am::HmiStatePtr> valid_states_for_audio_app_;
   std::vector<am::HmiStatePtr> valid_states_for_not_audio_app_;

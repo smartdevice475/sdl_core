@@ -64,7 +64,11 @@ class EventEngineTest : public testing::Test {
   const application_manager::event_engine::Event::EventID event_id2;
   const application_manager::event_engine::Event::EventID event_id3;
   MockEventObserver event_observer_mock_;
+#ifdef OS_WINCE
   static const int32_t correlation_id = 1121;
+#else
+  const int32_t correlation_id = 1121;
+#endif
   smart_objects::SmartObject smart_object_with_type_notification;
   smart_objects::SmartObject smart_object_with_type_response;
   smart_objects::SmartObject smart_object_with_type_error_response;

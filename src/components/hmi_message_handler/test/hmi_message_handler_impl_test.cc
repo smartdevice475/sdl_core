@@ -55,7 +55,11 @@ class HMIMessageHandlerImplTest : public ::testing::Test {
   hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
   hmi_message_handler::MockHMIMessageObserver* mock_hmi_message_observer_;
   testing::NiceMock<MockHMIMessageHandlerSettings> mock_hmi_message_handler_settings;
+#ifdef OS_WINCE
   static const uint64_t stack_size =1000u;
+#else
+  const uint64_t stack_size =1000u;
+#endif
 
   virtual void SetUp() OVERRIDE {
     ON_CALL(mock_hmi_message_handler_settings, thread_min_stack_size())

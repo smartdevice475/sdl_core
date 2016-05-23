@@ -91,7 +91,11 @@ class ProtocolPacketTest : public ::testing::Test {
     return prot_packet.serializePacket();
   }
 
+#ifdef OS_WINCE
   static const uint8_t zero_test_data_element_ = 0x0u;
+#else
+  const uint8_t zero_test_data_element_ = 0x0u;
+#endif
   uint32_t some_message_id_;
   uint32_t some_session_id_;
   ConnectionID some_connection_id_;
