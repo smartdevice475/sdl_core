@@ -46,8 +46,13 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsC
 include_directories(
     ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
     ${COMPONENTS_DIR}/utils/include
-    ${CMAKE_SOURCE_DIR}/src/3rd_party-static/sdk_ext/include
   )
+endif()
+
+if (CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+include_directories(
+  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/sdk_ext/include
+)
 endif()
 
 set (SOURCES

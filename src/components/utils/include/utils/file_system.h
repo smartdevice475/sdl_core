@@ -40,10 +40,9 @@
 #include <iostream>
 
 #ifdef OS_WINCE
+#pragma warning(disable: 4482)
 #include "utils/global.h"
 #endif
-
-#pragma warning(disable: 4482)
 
 namespace file_system {
 
