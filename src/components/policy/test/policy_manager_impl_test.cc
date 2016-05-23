@@ -293,13 +293,13 @@ class PolicyManagerImplTest2 : public ::testing::Test {
         fg_table.end();
     for (; fg_itter != fg_itter_end; ++fg_itter) {
       // RPCS getting
-      policy_table::Rpcs& rpcs_ref = fg_itter->second;
+      // policy_table::Rpcs& rpcs_ref = fg_itter->second;
       // User_consent_prompt getting
-      rpc::Optional<rpc::String<1, 255> >& optional_ref =
-          rpcs_ref.user_consent_prompt;
-      rpc::String<1, 255>& ucp_string = *optional_ref;
-      const std::string& ucp_std_string =
-          static_cast<const std::string&>(ucp_string);
+      // rpc::Optional<rpc::String<1, 255> >& optional_ref =
+      //     rpcs_ref.user_consent_prompt;
+      // rpc::String<1, 255>& ucp_string = *optional_ref;
+      //const std::string& ucp_std_string =
+      //    static_cast<const std::string&>(ucp_string);
       // Multimap inserting
       // TODO:
       // input_multimap.insert(std::pair<std::string, policy_table::Rpcs&>(
