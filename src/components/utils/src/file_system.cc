@@ -201,11 +201,11 @@ bool file_system::CreateDirectoryRecursively(const std::string& path) {
 #endif
     if (!DirectoryExists(path.substr(0, pos))) {
 #if defined(OS_WIN32)
-	if (0 != ::CreateDirectory(path.substr(0, pos).c_str(), NULL)) {
+	if (0 == ::CreateDirectory(path.substr(0, pos).c_str(), NULL)) {
 #elif defined(OS_WINCE)
 	wchar_string strUnicodeData;
 	Global::toUnicode(path.substr(0, pos), CP_ACP, strUnicodeData);
-	if (0 != ::CreateDirectory(strUnicodeData.c_str(), NULL)) {
+	if (0 == ::CreateDirectory(strUnicodeData.c_str(), NULL)) {
 #else
       if (0 != mkdir(path.substr(0, pos).c_str(), S_IRWXU)) {
 #endif

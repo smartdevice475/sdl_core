@@ -69,14 +69,14 @@ pthread_equal (pthread_t t1, pthread_t t2)
    * We also accept NULL == NULL - treating NULL as a thread
    * for this special case, because there is no error that we can return.
    */
-#ifdef OS_WINCE
+#if defined(OS_WIN32) || defined(OS_WINCE)
   ptw32_thread_t* pt1 = t1.p;
   ptw32_thread_t* pt2 = t2.p;
 
   if (pt1 && pt2) {
-      return pt1->thread == pt2->thread;
+    return pt1->thread == pt2->thread;
   } else {
-      return 0;
+    return 0;
   }
 #else
   result = ( t1.p == t2.p && t1.x == t2.x );

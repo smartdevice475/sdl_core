@@ -55,6 +55,7 @@ __declspec(dllexport) policy::PolicyManager* CreateManager() {
 #else
 policy::PolicyManager* CreateManager() {
 #endif
+  ENABLE_LOGGER(profile::Profile::instance()->logs_enabled());
   return new policy::PolicyManagerImpl();
 }
 
