@@ -72,21 +72,20 @@ static time_t time(time_t* TimeOutPtr)
 #if defined(OS_WIN32) || defined(OS_WINCE)
 void clock_gettime(int i, timespec * tm)
 {
-	if (i == CLOCK_MONOTONIC)
-	{
+	if (i == CLOCK_MONOTONIC) {
 		unsigned __int64 cur = GetTickCount();
 		tm->tv_sec = cur / 1000;
 		tm->tv_nsec = (cur % 1000) * 1000;
 	}
-	else if (i == CLOCK_REALTIME)
-	{
+	else if (i == CLOCK_REALTIME) {
 		time_t t;
 		::time(&t);
 		tm->tv_sec = t;
 		tm->tv_nsec = 0;
 	}
-	else
-		assert(false);
+    else {
+        assert(false);
+    }
 }
 #elif defined(OS_MAC)
 void clock_gettime(int i, timespec * tm)
@@ -107,7 +106,7 @@ TimevalStruct DateTime::getCurrentTime() {
   TimevalStruct currentTime;
 #if defined(OS_WIN32) || defined(OS_WINCE)
   timespec tm;
-  clock_gettime(CLOCK_REALTIME, &tm);
+  clock_gettime(CLOCK_MONOTONIC, &tm);
   currentTime.tv_sec = (long)tm.tv_sec;
   currentTime.tv_usec = tm.tv_nsec;
 #else
