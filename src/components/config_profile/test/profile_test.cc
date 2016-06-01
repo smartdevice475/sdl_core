@@ -535,9 +535,17 @@ TEST_F(ProfileTest, StringValueIncludeSlashesAndRussianLetters) {
   EXPECT_EQ(tts_delimiter_, Profile::instance()->tts_delimiter());
   std::string server_address = "127.0.0.1 + слово";
   EXPECT_EQ(server_address, profile::Profile::instance()->server_address());
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  app_resource_folder = "\\new folder/";
+#else
   app_resource_folder = "/new folder/";
+#endif
   EXPECT_EQ(current_dir+app_resource_folder, Profile::instance()->app_resource_folder());
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  app_storage_folder = "\\\" \"";
+#else
   app_storage_folder = "/\" \"";
+#endif
   EXPECT_EQ(current_dir+app_storage_folder, Profile::instance()->app_storage_folder());
 
   // Update config file
