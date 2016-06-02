@@ -662,8 +662,11 @@ bool file_system::WriteBinaryFile(const std::string& name,
                                   const std::vector<uint8_t>& contents) {
   using namespace std;
   ofstream output(name.c_str(), ios_base::binary | ios_base::trunc);
-  output.write(reinterpret_cast<const char*>(&contents.front()),
-               contents.size());
+
+  if (!contents.empty()) {
+      output.write(reinterpret_cast<const char*>(&contents.front()),
+          contents.size());
+  }
   return output.good();
 }
 
