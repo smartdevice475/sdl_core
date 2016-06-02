@@ -194,6 +194,11 @@ bool file_system::CreateDirectoryRecursively(const std::string& path) {
   bool ret_val = true;
   std::string fp = path;
 
+  // Replace all symbol '/' with '\'
+  for (std::string::iterator it = fp.begin(); it != fp.end(); it++) {
+      if (*it == '/') *it = '\\';
+  }
+
 #if defined(OS_WIN32)
   if (fp.substr(fp.length() - 1, 1) != "\\") fp = fp + "\\";
   while (ret_val == true && pos <= fp.length()) {
@@ -452,13 +457,30 @@ bool file_system::DeleteFile(const std::string& name) {
 
 void file_system::remove_directory_content(const std::string& directory_name) {
 #if defined(OS_WIN32)
-	::RemoveDirectory(directory_name.c_str());
-	::CreateDirectory(directory_name.c_str(), NULL);
+    WIN32_FIND_DATA fData;
+
+    HANDLE hFind = FindFirstFile((directory_name + "\\*.*").c_str(), &fData);
+
+    if (hFind == INVALID_HANDLE_VALUE) return;
+
+    do {
+        if (fData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+            if (std::string(fData.cFileName) != "." && std::string(fData.cFileName) != "..") {
+				remove_directory_content(directory_name + "\\" + fData.cFileName);
+				RemoveDirectory((directory_name + "\\" + fData.cFileName).c_str());
+            }
+        }
+        else {
+			DeleteFile((directory_name + "\\" + fData.cFileName).c_str());
+        }
+	} while (FindNextFile(hFind, &fData));
+
+    FindClose(hFind);
 #elif defined(OS_WINCE)
-	wchar_string strUnicodeData;
-	Global::toUnicode(directory_name, CP_ACP, strUnicodeData);
-	::RemoveDirectory(strUnicodeData.c_str());
-	::CreateDirectory(strUnicodeData.c_str(), NULL);
+    wchar_string strUnicodeData;
+    Global::toUnicode(directory_name, CP_ACP, strUnicodeData);
+    ::RemoveDirectory(strUnicodeData.c_str());
+    ::CreateDirectory(strUnicodeData.c_str(), NULL);
 #else
   int32_t return_code = 0;
   DIR* directory = NULL;
@@ -503,26 +525,27 @@ void file_system::remove_directory_content(const std::string& directory_name) {
 #endif
 }
 
-#if defined(OS_WIN32)
+#if defined(OS_WIN32) || defined(OS_WINCE)
 bool file_system::RemoveDirectoryWindows(const std::string& directory_name,
                                   bool is_recursively) {
-	return ::RemoveDirectory(directory_name.c_str()) == TRUE ? true : false;
-}
-#elif defined(OS_WINCE)
-bool file_system::RemoveDirectoryWindows(const std::string& directory_name,
-                                  bool is_recursively) {
-	wchar_string strUnicodeData;
-	Global::toUnicode(directory_name, CP_ACP, strUnicodeData);
-	return ::RemoveDirectory(strUnicodeData.c_str()) == TRUE ? true : false;
+    if (DirectoryExists(directory_name)
+        && IsAccessible(directory_name, W_OK)) {
+        if (is_recursively) {
+            remove_directory_content(directory_name);
+        }
+
+        return ::RemoveDirectory(directory_name.c_str()) == TRUE ? true : false;
+    }
+    return false;
 }
 #else
 bool file_system::RemoveDirectory(const std::string& directory_name,
                                   bool is_recursively) {
-	if (DirectoryExists(directory_name)
-		&& IsAccessible(directory_name, W_OK)) {
-		if (is_recursively) {
-			remove_directory_content(directory_name);
-		}
+    if (DirectoryExists(directory_name)
+        && IsAccessible(directory_name, W_OK)) {
+        if (is_recursively) {
+            remove_directory_content(directory_name);
+        }
 
     return !rmdir(directory_name.c_str());
   }
@@ -532,9 +555,9 @@ bool file_system::RemoveDirectory(const std::string& directory_name,
 
 bool file_system::IsAccessible(const std::string& name, int32_t how) {
 #if defined(OS_WIN32) || defined(OS_WINCE)
-	return true;
+    return true;
 #else
-	return !access(name.c_str(), how);
+    return !access(name.c_str(), how);
 #endif
 }
 
@@ -550,25 +573,21 @@ std::vector<std::string> file_system::ListFiles(
     const std::string& directory_name) {
   std::vector<std::string> listFiles;
 #if defined(OS_WIN32)
-		WIN32_FIND_DATA ffd;
-		HANDLE hFind = ::FindFirstFile(directory_name.c_str(), &ffd);
+    WIN32_FIND_DATA ffd;
+    HANDLE hFind = ::FindFirstFile((directory_name + "\\*.*").c_str(), &ffd);
 
-		if (INVALID_HANDLE_VALUE == hFind)
-		{
-			return listFiles;
-		}
+    if (INVALID_HANDLE_VALUE == hFind) return listFiles;
 
-		// List all the files in the directory with some info about them.
+    // List all the files in the directory with some info about them.
 
-		do
-		{
-			if (!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
-			{
-				listFiles.push_back(ffd.cFileName);
-			}
-		} while (FindNextFile(hFind, &ffd) != 0);
+    do {
+        if (std::string(ffd.cFileName) != "." && std::string(ffd.cFileName) != "..") {
+            listFiles.push_back(ffd.cFileName);
+        }
+    }
+    while (FindNextFile(hFind, &ffd));
 
-		FindClose(hFind);
+	FindClose(hFind);
 #elif defined(OS_WINCE)
 		WIN32_FIND_DATA ffd;
 		wchar_string strUnicodeData;
