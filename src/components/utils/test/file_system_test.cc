@@ -1508,7 +1508,13 @@ TEST(FileSystemTest, GetAbsolutePath) {
   const std::string& abs_path = GetAbsolutePath(".");
   // Getting absolute current path from system
   const std::string& absolute_current_path = CurrentWorkingDirectory();
+#if defined(OS_WIN32)
+  EXPECT_EQ('\\', abs_path[2]);
+#elif defined(OS_WINCE)
+  EXPECT_EQ('\\', abs_path[0]);
+#else
   EXPECT_EQ('/', abs_path[0]);
+#endif
   EXPECT_EQ(absolute_current_path, abs_path);
 }
 
@@ -1536,8 +1542,13 @@ TEST(FileSystemTest, GetAbsolutePath_ValidRelPaths_CorrectAbsolutePath) {
   // Check
   for (size_t i = 0; i < rel_path.size(); ++i) {
     // Concating rel_path to current dir path
+#if defined(OS_WIN32) || defined(OS_WINCE)
+    const std::string& correct_absolute_path =
+        absolute_current_dir + "\\" + rel_path[i];
+#else
     const std::string& correct_absolute_path =
         absolute_current_dir + "/" + rel_path[i];
+#endif
     // Get absolute path for rel dir
     const std::string& path_for_check = GetAbsolutePath(rel_path[i]);
     EXPECT_EQ(correct_absolute_path, path_for_check);

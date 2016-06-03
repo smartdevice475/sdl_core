@@ -36,6 +36,8 @@
 #  include <sys/types.h>
 #endif
 #if defined(OS_WIN32) || defined(OS_WINCE)
+#include "windows.h"
+#include "process.h"
 #else
 #  include <sys/wait.h>
 #endif
@@ -119,8 +121,28 @@ bool System::Execute(bool wait) {
 #else  // __QNX__
 #if defined(OS_WIN32) || defined(OS_WINCE)
 bool System::Execute(bool wait) {
-	wait;
-	return true;
+    bool bRet = true;
+    PROCESS_INFORMATION pi;
+    STARTUPINFO si = { sizeof(si) };
+
+    bRet = CreateProcess(
+        NULL,
+        (LPSTR)command_.c_str(),
+        NULL,
+        NULL,
+        FALSE,   
+        0,
+        NULL,
+        NULL,
+        &si,
+        &pi                 
+        ) ? true : false;
+
+    if (bRet && wait) {
+        WaitForSingleObject(pi.hProcess, INFINITE);
+    }
+
+    return bRet;
 }
 #elif defined(OS_MAC)
 bool System::Execute(bool wait) {

@@ -115,7 +115,11 @@ if (BUILD_BACKTRACE_SUPPORT)
   list(APPEND testSources back_trace_test.cc)
 endif()
 
-file(COPY testscript.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  file(COPY testscript.bat DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+else()
+  file(COPY testscript.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+endif()
 file(COPY log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 

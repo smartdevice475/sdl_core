@@ -111,7 +111,7 @@ TEST(DateTimeTest, CalculateTimeSpan) {
 
   const uint32_t sleep_time_mSec = 10;
 #if defined(OS_WIN32) || defined(OS_WINCE)
-  Sleep(sleep_time_mSec * date_time::DateTime::MICROSECONDS_IN_MILLISECOND);
+  Sleep(sleep_time_mSec);
 #else
   usleep(sleep_time_mSec * date_time::DateTime::MICROSECONDS_IN_MILLISECOND);
 #endif

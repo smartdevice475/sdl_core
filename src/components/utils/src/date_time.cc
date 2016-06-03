@@ -129,7 +129,7 @@ int64_t date_time::DateTime::getSecs(const TimevalStruct &time) {
 int64_t DateTime::getmSecs(const TimevalStruct &time) {
   const TimevalStruct times = ConvertionUsecs(time);
   return static_cast<int64_t>(times.tv_sec) * MILLISECONDS_IN_SECOND
-      + times.tv_usec / MICROSECONDS_IN_MILLISECOND;
+      + times.tv_usec / NANOSECONDS_IN_MICROSECOND;
 }
 
 int64_t DateTime::getuSecs(const TimevalStruct &time) {

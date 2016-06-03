@@ -37,6 +37,7 @@
 #include <sstream>
 #include <Shlobj.h>
 #include <Shlwapi.h>
+#pragma comment(lib, "shlwapi.lib")
 #else
 #include <sys/statvfs.h>
 #include <sys/stat.h>
@@ -99,7 +100,17 @@ uint64_t file_system::GetAvailableDiskSpace(const std::string& path) {
 
 uint32_t file_system::FileSize(const std::string &path) {
 #if defined(OS_WIN32) || defined(OS_WINCE)
-	return 1024 * 1024;
+    uint32_t uSz = 0;
+    if (file_system::FileExists(path)) {
+        std::ifstream ifile;
+        ifile.open(path.c_str());
+        if (ifile.is_open()) {
+            ifile.seekg(0, std::ios::end);
+            uSz = ifile.tellg();
+        }
+        ifile.clear();
+    }
+    return uSz;
 #else
   if (file_system::FileExists(path)) {
     struct stat file_info;
@@ -113,7 +124,27 @@ uint32_t file_system::FileSize(const std::string &path) {
 
 uint32_t file_system::DirectorySize(const std::string& path) {
 #if defined(OS_WIN32) || defined(OS_WINCE)
-	return 1024 * 1024;
+    uint32_t uSz = 0;
+    WIN32_FIND_DATA fData;
+
+    HANDLE hFind = FindFirstFile((path + "\\*.*").c_str(), &fData);
+
+    if (hFind == INVALID_HANDLE_VALUE) return uSz;
+
+    do {
+        if (fData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+            if (std::string(fData.cFileName) != "." && std::string(fData.cFileName) != "..") {
+                DirectorySize(path + "\\" + fData.cFileName);
+            }
+        }
+        else {
+            uSz += (fData.nFileSizeHigh * (MAXDWORD + 1)) + fData.nFileSizeLow;
+        }
+    } while (FindNextFile(hFind, &fData));
+
+    FindClose(hFind);
+
+    return uSz;
 #else
   uint32_t size = 0;
   int32_t return_code = 0;
@@ -398,21 +429,20 @@ std::string file_system::CurrentWorkingDirectory() {
 
 std::string file_system::GetAbsolutePath(const std::string& path) {
 #if defined(OS_WIN32)
-    char RootPath[MAX_PATH] = {0};
-    char AbsPath[MAX_PATH] = {0};
+    std::string strRet;
+    if (!DirectoryExists(path)) return "";
 
-    // TODO:
-    //GetModuleFileName(NULL, RootPath, sizeof(RootPath);
+    char curPath[MAX_PATH] = { 0 };
+    GetCurrentDirectory(MAX_PATH, curPath);
 
-    //if (!PathIsRelative(path.c_str()))
-    //{
-    //    return "";
-    //}
+    char AbsPath[MAX_PATH] = { 0 };
+    PathCombine(AbsPath, curPath, path.c_str());
 
-    //PathCombine(AbsPath, path.c_str(), RootPath);
+    strRet = AbsPath;
+    strRet.erase(strRet.find_last_not_of('/') + 1);
+    strRet.erase(strRet.find_last_not_of('\\') + 1);
 
-    return std::string(AbsPath);
-
+    return strRet;
 #elif defined(OS_WINCE)
   std::wstring RelativePath = Global::StringToWString(path);
   WCHAR AbsolutePath[MAX_PATH] = {0};
