@@ -77,7 +77,7 @@ void UnlockAndSleep(const long usecs) {
   s << "Sleeping for " << 0.001 * usecs << "mSecs" << ::std::endl;
   Log(testing::internal::kInfo, s.str(), 0);
 #if defined(OS_WIN32) || defined(OS_WINCE)
-  Sleep(usecs);
+  Sleep(usecs / 1000);
 #else
   usleep(usecs);
 #endif
@@ -85,14 +85,13 @@ void UnlockAndSleep(const long usecs) {
 }
 
 // Return time structure with the current date/time stamp
+#undef GetCurrentTime
 timeval GetCurrentTime() {
   timeval now;
 #if defined(OS_WIN32) || defined(OS_WINCE)
-  time_t now_time;
-
-  now_time = time(NULL);
-  now.tv_sec = now_time / 1000;
-  now.tv_usec = now_time % 1000 * 1000;
+  unsigned __int64 cur = GetTickCount();
+  now.tv_sec = cur / 1000;
+  now.tv_usec = (cur % 1000) * 1000;
 #else
   gettimeofday(&now, NULL);
 #endif
@@ -102,10 +101,19 @@ timeval GetCurrentTime() {
 // Unlock internal mutex and wait for a while
 long UsecsElapsed(const timeval start_time) {
 #if defined(OS_WIN32) || defined(OS_WINCE)
-    time_t start_tm = start_time.tv_sec * 1000 + start_time.tv_usec / 1000;
-    time_t now_tm= time(NULL);
-    time_t priviously_elapsed = now_tm - start_tm;
-    return priviously_elapsed * 1000;
+    timeval now_tm;
+    unsigned __int64 cur = GetTickCount();
+    now_tm.tv_sec = cur / 1000;
+    now_tm.tv_usec = (cur % 1000) * 1000;
+
+    time_t priviously_elapsed = (now_tm.tv_sec - start_time.tv_sec)* 1000000 
+        + (now_tm.tv_usec - start_time.tv_usec);
+
+    if (priviously_elapsed < 0)
+    {
+        printf("error.\n");
+    }
+    return priviously_elapsed / 1000;
 #else
   timeval now = GetCurrentTime();
   timeval priviously_elapsed;
@@ -327,7 +335,9 @@ void UntypedFunctionMockerBase::RegisterOwner(const void* mock_obj)
     mock_obj_ = mock_obj;
   }
   Mock::Register(mock_obj, this);
-#if !defined(OS_WIN32) && !defined(OS_WINCE)
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  registered_time_ = GetCurrentTime();
+#else
   gettimeofday(&registered_time_, NULL);
 #endif
 }

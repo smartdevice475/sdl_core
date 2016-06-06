@@ -68,6 +68,7 @@ class ConnectionHandlerTest : public ::testing::Test {
     connection_handler_ = new ConnectionHandlerImpl(
         mock_connection_handler_settings, mock_transport_manager);
     uid_ = 1u;
+    start_session_id_ = 1u;
     connection_key_ = connection_handler_->KeyFromPair(0, 0u);
     protected_services_.clear();
     unprotected_services_.clear();
