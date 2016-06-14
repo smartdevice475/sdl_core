@@ -37,7 +37,6 @@
 #include <sstream>
 #include <Shlobj.h>
 #include <Shlwapi.h>
-#pragma comment(lib, "shlwapi.lib")
 #else
 #include <sys/statvfs.h>
 #include <sys/stat.h>
@@ -52,6 +51,10 @@
 #include <cstddef>
 #include <cstdio>
 #include <algorithm>
+
+#ifdef OS_WIN32
+#pragma comment(lib, "shlwapi.lib")
+#endif
 
 #ifdef OS_WINCE
 #include "utils/global.h"
@@ -123,7 +126,7 @@ uint32_t file_system::FileSize(const std::string &path) {
 }
 
 uint32_t file_system::DirectorySize(const std::string& path) {
-#if defined(OS_WIN32) || defined(OS_WINCE)
+#if defined(OS_WIN32)
     uint32_t uSz = 0;
     WIN32_FIND_DATA fData;
 
@@ -135,6 +138,30 @@ uint32_t file_system::DirectorySize(const std::string& path) {
         if (fData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
             if (std::string(fData.cFileName) != "." && std::string(fData.cFileName) != "..") {
                 DirectorySize(path + "\\" + fData.cFileName);
+            }
+        }
+        else {
+            uSz += (fData.nFileSizeHigh * (MAXDWORD + 1)) + fData.nFileSizeLow;
+        }
+    } while (FindNextFile(hFind, &fData));
+
+    FindClose(hFind);
+
+    return uSz;
+#elif defined(OS_WINCE)
+    uint32_t uSz = 0;
+    WIN32_FIND_DATA fData;
+    std::wstring tmpStr;
+
+    Global::toUnicode((path + "\\*.*"), CP_ACP, tmpStr);
+    HANDLE hFind = FindFirstFile(tmpStr.c_str(), &fData);
+
+    if (hFind == INVALID_HANDLE_VALUE) return uSz;
+
+    do {
+        if (fData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+            if (std::wstring(fData.cFileName) != L"." && std::wstring(fData.cFileName) != L"..") {
+                DirectorySize(path + "\\" + Global::WStringToString(fData.cFileName));
             }
         }
         else {
@@ -555,7 +582,7 @@ void file_system::remove_directory_content(const std::string& directory_name) {
 #endif
 }
 
-#if defined(OS_WIN32) || defined(OS_WINCE)
+#if defined(OS_WIN32)
 bool file_system::RemoveDirectoryWindows(const std::string& directory_name,
                                   bool is_recursively) {
     if (DirectoryExists(directory_name)
@@ -565,6 +592,21 @@ bool file_system::RemoveDirectoryWindows(const std::string& directory_name,
         }
 
         return ::RemoveDirectory(directory_name.c_str()) == TRUE ? true : false;
+    }
+    return false;
+}
+#elif defined(OS_WINCE)
+bool file_system::RemoveDirectoryWindows(const std::string& directory_name,
+                                  bool is_recursively) {
+    if (DirectoryExists(directory_name)
+        && IsAccessible(directory_name, W_OK)) {
+        if (is_recursively) {
+            remove_directory_content(directory_name);
+        }
+
+        std::wstring tmpStr;
+        Global::toUnicode(directory_name, CP_ACP, tmpStr);
+        return ::RemoveDirectory(tmpStr.c_str()) == TRUE ? true : false;
     }
     return false;
 }

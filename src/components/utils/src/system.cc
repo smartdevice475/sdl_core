@@ -56,6 +56,10 @@
 #include "utils/logger.h"
 #include "utils/system.h"
 
+#ifdef OS_WINCE
+#include "utils/global.h"
+#endif
+
 namespace utils {
 
 CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
@@ -119,7 +123,7 @@ bool System::Execute(bool wait) {
 }
 
 #else  // __QNX__
-#if defined(OS_WIN32) || defined(OS_WINCE)
+#if defined(OS_WIN32)
 bool System::Execute(bool wait) {
     bool bRet = true;
     PROCESS_INFORMATION pi;
@@ -128,6 +132,34 @@ bool System::Execute(bool wait) {
     bRet = CreateProcess(
         NULL,
         (LPSTR)command_.c_str(),
+        NULL,
+        NULL,
+        FALSE,   
+        0,
+        NULL,
+        NULL,
+        &si,
+        &pi                 
+        ) ? true : false;
+
+    if (bRet && wait) {
+        WaitForSingleObject(pi.hProcess, INFINITE);
+    }
+
+    return bRet;
+}
+#elif defined(OS_WINCE)
+bool System::Execute(bool wait) {
+    bool bRet = true;
+    PROCESS_INFORMATION pi;
+    STARTUPINFO si = { sizeof(si) };
+
+    std::wstring tmpStr;
+    Global::toUnicode(command_, CP_ACP, tmpStr);
+
+    bRet = CreateProcess(
+        NULL,
+        (LPWSTR)tmpStr.c_str(),
         NULL,
         NULL,
         FALSE,   
