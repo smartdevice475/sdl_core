@@ -85,7 +85,7 @@ endif()
 
 if(MODIFY_FUNCTION_FLAGS)
 if(ENABLE_LOG)
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX" OR CMAKE_SYSTEM_NAME STREQUAL "Windows"  OR CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX" OR CMAKE_SYSTEM_NAME STREQUAL "Windows"  OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   list(APPEND LIBRARIES log4cxx)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
   list(APPEND LIBRARIES log4cxx apr-1 aprutil-1 expat winsock)
@@ -134,7 +134,7 @@ include_directories (
   ${CMAKE_BINARY_DIR}/src/components/policy/src/policy
   ${CMAKE_SOURCE_DIR}
   ${default_media_inc}
-  ##${LOG4CXX_INCLUDE_DIRECTORY}
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
 add_custom_target(gitversion
@@ -239,11 +239,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "QNX")
   list(APPEND LIBRARIES apr-1 aprutil-1)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Android")
-  if(ENABLE_LOG)
-    list(APPEND LIBRARIES dl apr-1 aprutil-1)
-  else()
-    list(APPEND LIBRARIES dl)
-  endif()
+  list(APPEND LIBRARIES dl)
 else()
   list(APPEND LIBRARIES pthread)
 endif()

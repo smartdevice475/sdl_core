@@ -41,6 +41,10 @@
 
 #include "utils/logger.h"
 
+#ifdef MODIFY_FUNCTION_SIGN
+#include <unistd.h>
+#endif
+
 namespace transport_manager {
 namespace transport_adapter {
 
@@ -113,6 +117,17 @@ void UsbHandler::DeviceArrived(libusb_device* device_libusb) {
 
   libusb_device_handle* device_handle_libusb;
   libusb_ret = libusb_open(device_libusb, &device_handle_libusb);
+#if defined(MODIFY_FUNCTION_SIGN)&&defined(OS_ANDROID)
+	int  count=0;
+	while(libusb_ret==LIBUSB_ERROR_ACCESS||libusb_ret==LIBUSB_ERROR_NO_DEVICE){
+		LOG_CUSTOM(logger_,"libusb_reopen failed: " << libusb_error_name(libusb_ret));
+		usleep(500000);
+		libusb_ret = libusb_open(device_libusb, &device_handle_libusb);
+		count++;
+		if(count>20)
+			break;
+	}
+#endif
   if (libusb_ret != LIBUSB_SUCCESS) {
     LOG4CXX_ERROR(logger_, "libusb_open failed: " << libusb_error_name(libusb_ret));
     LOG4CXX_TRACE(logger_, "exit. Condition: libusb_ret != LIBUSB_SUCCESS");
@@ -138,6 +153,12 @@ void UsbHandler::DeviceArrived(libusb_device* device_libusb) {
     }
   }
 
+#if  defined(OS_ANDROID) || defined(OS_WIN32)
+  if(libusb_kernel_driver_active(device_handle_libusb,1)==1){
+		LOG4CXX_INFO(logger_, "libusb_kernel_driver_active:detach the usb driver");
+		libusb_detach_kernel_driver(device_handle_libusb,1);
+	}
+#endif
   libusb_ret = libusb_claim_interface(device_handle_libusb, 0);
   if (LIBUSB_SUCCESS != libusb_ret) {
     LOG4CXX_INFO(logger_, "libusb_claim_interface failed: " << libusb_error_name(libusb_ret));

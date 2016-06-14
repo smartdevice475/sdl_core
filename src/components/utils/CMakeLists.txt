@@ -25,11 +25,13 @@ set (SOURCES
 )
 
 if(ENABLE_LOG)
+if(!CUSTOM_LOG)
   list(APPEND SOURCES
     ./src/push_log.cc
     ./src/log_message_loop_thread.cc
     ./src/logger_status.cc
   )
+endif()
 endif()
 
 if (BUILD_BACKTRACE_SUPPORT)
@@ -49,11 +51,13 @@ add_library("Utils" ${SOURCES})
 
 
 if(ENABLE_LOG)
+if(!CUSTOM_LOG)
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
   list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
   list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
   target_link_libraries("Utils" ${LIBRARIES})
   ADD_DEPENDENCIES(Utils install-3rd_party_logger)
+endif()
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")

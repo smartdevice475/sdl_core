@@ -363,6 +363,10 @@ void RequestController::onTimer() {
       probably_expired = pending_request_set_.begin();
       break;
     }
+else
+{
+++probably_expired;
+}
   }
   UpdateTimer();
   LOG4CXX_TRACE_EXIT(logger_);

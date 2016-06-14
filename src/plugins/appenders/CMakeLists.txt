@@ -41,7 +41,9 @@ include_directories(
 
 add_library(${target} MODULE ${SOURCES})
 
+if(!CUSTOM_LOG)
 target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+endif()
 
 install(TARGETS ${target}
   DESTINATION bin

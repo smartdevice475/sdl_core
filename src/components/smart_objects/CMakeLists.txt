@@ -21,6 +21,8 @@ set (SOURCES
 add_library("SmartObjects" ${SOURCES})
 
 if(ENABLE_LOG)
+if(!CUSTOM_LOG)
   target_link_libraries("SmartObjects" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+endif()
 endif()
 

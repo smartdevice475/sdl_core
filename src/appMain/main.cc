@@ -185,7 +185,9 @@ int32_t sdl_start(int32_t argc,char** argv){
     if (!utils::System("./init_policy.sh").Execute(true)) {
       LOG4CXX_ERROR(logger_, "Failed initialization of policy database");
 #ifdef ENABLE_LOG
+#ifndef CUSTOM_LOG
       logger::LogMessageLoopThread::destroy();
+#endif
 #endif
       DEINIT_LOGGER();
       exit(EXIT_FAILURE);
@@ -196,7 +198,9 @@ int32_t sdl_start(int32_t argc,char** argv){
   if (!main_namespace::LifeCycle::instance()->StartComponents()) {
     main_namespace::LifeCycle::instance()->StopComponents();
 #ifdef ENABLE_LOG
-    logger::LogMessageLoopThread::destroy();
+#ifndef CUSTOM_LOG
+      logger::LogMessageLoopThread::destroy();
+#endif
 #endif
     DEINIT_LOGGER();
     exit(EXIT_FAILURE);
@@ -220,7 +224,9 @@ int32_t sdl_start(int32_t argc,char** argv){
       if (!InitHmi()) {
         main_namespace::LifeCycle::instance()->StopComponents();
 #ifdef ENABLE_LOG
-        logger::LogMessageLoopThread::destroy();
+#ifndef CUSTOM_LOG
+      logger::LogMessageLoopThread::destroy();
+#endif
 #endif
         DEINIT_LOGGER();
         exit(EXIT_FAILURE);
@@ -238,7 +244,9 @@ int32_t sdl_start(int32_t argc,char** argv){
 
   LOG4CXX_INFO(logger_, "Application successfully stopped");
 #ifdef ENABLE_LOG
-  logger::LogMessageLoopThread::destroy();
+#ifndef CUSTOM_LOG
+      logger::LogMessageLoopThread::destroy();
+#endif
 #endif
   DEINIT_LOGGER();
 

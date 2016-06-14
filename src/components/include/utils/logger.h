@@ -44,7 +44,59 @@
   #include "utils/logger_status.h"
 #endif  // ENABLE_LOG
 
+#if !defined(CUSTOM_LOG)
+  #include <log4cxx/logger.h>
+  #include <log4cxx/propertyconfigurator.h>
+#else
+    #include <fstream>
+    #include <ostream>
+#endif
+
 #ifdef ENABLE_LOG
+#if defined(CUSTOM_LOG)
+
+	#define CREATE_LOGGERPTR_GLOBAL(logger_var, logger_name)
+	#define CREATE_LOGGERPTR_LOCAL(logger_var, logger_name)
+    #define INIT_LOGGER(file_name)
+    #define DEINIT_LOGGER(file_name)
+    #define LOG4CXX_IS_TRACE_ENABLED(logger) false
+    
+   #define  LOGE(MSG)    {std::ofstream ff("/sdcard/sdllog.txt",std::iostream::out|std::iostream::app); time_t tick = time(NULL);struct tm tm;char s[100];tm = *localtime(&tick);strftime(s, sizeof(s), "%H:%M:%S", &tm);ff<<"["<<s<<"]["<<__FILE__<<"]["<<__FUNCTION__<<"][Line:"<<__LINE__<<"]"<<MSG;ff.flush();ff.close();}
+
+
+	#define LOG_CUSTOM(logger,message) LOGE(message<<"\n") 
+		
+	#define LOG4CXX_INFO(logger,message) //LOGE(message<<"\n") 
+	#define LOG4CXX_ERROR(logger,message)
+	#define LOG4CXX_TRACE(logger,message) //LOGE(message<<"\n")
+	#define LOG4CXX_WARN(logger,message) 
+	#define LOG4CXX_DEBUG(logger,message)
+	#define LOG4CXX_FATAL(logger,message)
+		
+		
+    #define LOG4CXX_INFO_EXT(logger, logEvent) //LOGE(__PRETTY_FUNCTION__<<": "<<logEvent<<"\n")
+    #define LOG4CXX_INFO_STR_EXT(logger, logEvent) //LOGE(__PRETTY_FUNCTION__ << ": " << logEvent<<"\n")
+
+    #define LOG4CXX_TRACE_EXT(logger, logEvent) //LOGE(TYPE_TRACE_EXT,__PRETTY_FUNCTION__ << ": " << logEvent<<"\n")
+    #define LOG4CXX_TRACE_STR_EXT(logger, logEvent)  //LOGE(__PRETTY_FUNCTION__ << ": " << logEvent<<"\n")
+    #define LOG4CXX_DEBUG_EXT(logger, logEvent)    //LOGE(__PRETTY_FUNCTION__ << ": " << logEvent<<"\n")
+    #define LOG4CXX_DEBUG_STR_EXT(logger, logEvent)  //LOGE(__PRETTY_FUNCTION__ << ": " << logEvent<<"\n")
+    #define LOG4CXX_WARN_EXT(logger, logEvent)   //LOGE(__PRETTY_FUNCTION__ << ": " << logEvent<<"\n")
+    #define LOG4CXX_WARN_STR_EXT(logger, logEvent)   //LOGE(__PRETTY_FUNCTION__ << ": " << logEvent<<"\n")
+
+    #define LOG4CXX_ERROR_EXT(logger, logEvent)    //LOGE(__PRETTY_FUNCTION__ << ": " << logEvent<<"\n")
+    #define LOG4CXX_ERROR_STR_EXT(logger, logEvent)    //LOGE(__PRETTY_FUNCTION__ << ": " << logEvent<<"\n")
+
+    #define LOG4CXX_FATAL_EXT(logger, logEvent)   //LOGE(TYPE_FATAL_EXT,__PRETTY_FUNCTION__ << ": " << logEvent<<"\n") //LOG4CXX_FATAL(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
+    #define LOG4CXX_FATAL_STR_EXT(logger, logEvent)   //LOGE(__PRETTY_FUNCTION__ << ": " << logEvent<<"\n") //LOG4CXX_FATAL_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
+
+    #define LOG4CXX_TRACE_ENTER(logger)   //LOGE("ENTER:"<<__PRETTY_FUNCTION__<<"\n")//LOG4CXX_TRACE(logger, "ENTER: " << __PRETTY_FUNCTION__ )
+    #define LOG4CXX_TRACE_EXIT(logger)    //LOGE("EXIT:"<<__PRETTY_FUNCTION__<<"\n")
+    #define LOG4CXX_ERROR_WITH_ERRNO(logger, message)    //LOGE(message << ", error code " << errno << " (" << strerror(errno) << ")"<<"\n")
+	
+#else // OS_Android
+
+#define LOG_CUSTOM(logger,message)
 
     #define CREATE_LOGGERPTR_GLOBAL(logger_var, logger_name) \
       namespace { \
@@ -119,7 +171,11 @@
      #define LOG4CXX_WARN_WITH_ERRNO(logger, message) \
        LOG4CXX_WARN(logger, message << ", error code " << errno << " (" << strerror(errno) << ")")
 
+#endif
+
 #else // ENABLE_LOG is OFF
+
+#define LOG_CUSTOM(logger,message)
 
     #define CREATE_LOGGERPTR_GLOBAL(logger_var, logger_name)
 
@@ -175,6 +231,7 @@
 
     #define LOG4CXX_TRACE_ENTER(logger)
     #define LOG4CXX_TRACE_EXIT(logger)
+
 #endif  // ENABLE_LOG
 
 #endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOGGER_H_

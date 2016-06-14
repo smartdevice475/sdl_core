@@ -82,10 +82,12 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "QNX")
 endif()
 
 if(ENABLE_LOG)
+if(!CUSTOM_LOG)
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
   list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
   list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
   list(APPEND LIBRARIES expat -L${EXPAT_LIBS_DIRECTORY})
+endif()
 endif()
 
 add_library("ApplicationManagerTest" ${mockedSources} ${testSources} ${AM_SOURCES})
