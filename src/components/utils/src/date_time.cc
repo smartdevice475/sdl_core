@@ -106,9 +106,9 @@ TimevalStruct DateTime::getCurrentTime() {
   TimevalStruct currentTime;
 #if defined(OS_WIN32) || defined(OS_WINCE)
   timespec tm;
-  clock_gettime(CLOCK_MONOTONIC, &tm);
+  clock_gettime(CLOCK_REALTIME, &tm);
   currentTime.tv_sec = (long)tm.tv_sec;
-  currentTime.tv_usec = tm.tv_nsec;
+  currentTime.tv_usec = tm.tv_nsec/1000;
 #else
 #ifdef OS_MAC
     struct timezone timeZone;
@@ -129,7 +129,7 @@ int64_t date_time::DateTime::getSecs(const TimevalStruct &time) {
 int64_t DateTime::getmSecs(const TimevalStruct &time) {
   const TimevalStruct times = ConvertionUsecs(time);
   return static_cast<int64_t>(times.tv_sec) * MILLISECONDS_IN_SECOND
-      + times.tv_usec / NANOSECONDS_IN_MICROSECOND;
+      + times.tv_usec / MICROSECONDS_IN_MILLISECOND;
 }
 
 int64_t DateTime::getuSecs(const TimevalStruct &time) {
