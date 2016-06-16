@@ -2,6 +2,8 @@ BIN_ROOT="../"
 DES_PATH="./test_bin"
 BIN_TYPE="Release"
 
+mkdir ${DES_PATH}
+
 rm -rf ${DES_PATH}/*
 
 mkdir \
