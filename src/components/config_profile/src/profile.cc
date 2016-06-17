@@ -1628,11 +1628,19 @@ bool Profile::ReadValue(std::string* value, const char* const pSection,
 
   char buf[INI_LINE_LEN + 1];
   *buf = '\0';
+#ifdef OS_WINCE
+  if ((0 != ini_read_value((file_system::CurrentWorkingDirectory() + "\\" + config_file_name_).c_str(), pSection, pKey, buf))
+      && ('\0' != *buf)) {
+    *value = buf;
+    ret = true;
+  }
+#else
   if ((0 != ini_read_value(config_file_name_.c_str(), pSection, pKey, buf))
       && ('\0' != *buf)) {
     *value = buf;
     ret = true;
   }
+#endif
   return ret;
 }
 
@@ -1790,21 +1798,21 @@ bool Profile::ReadUIntValue(uint64_t* value, uint64_t default_value,
 }
 
 bool Profile::StringToNumber(const std::string& input, uint64_t& output) const {
+#ifdef OS_WINCE
+  output = _atoi64(input.c_str());
+#else
   const char* input_value = input.c_str();
   char* endptr;
   const int8_t base = 10;
   errno = 0;
-#ifdef OS_WINCE
-  uint32_t user_value = strtoul(input_value, &endptr, base);
-#else
   uint64_t user_value = strtoull(input_value, &endptr, base);
-#endif
   bool is_real_zero_value =
       (!user_value && endptr != input_value && *endptr == '\0');
   if (!is_real_zero_value && (!user_value || errno == ERANGE)) {
     return false;
   }
   output = user_value;
+#endif
   return true;
 }
 

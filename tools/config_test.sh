@@ -2,9 +2,9 @@ BIN_ROOT="../"
 DES_PATH="./test_bin"
 BIN_TYPE="Release"
 
-mkdir ${DES_PATH}
+rm -rf ${DES_PATH}
 
-rm -rf ${DES_PATH}/*
+mkdir ${DES_PATH}
 
 mkdir \
 ${DES_PATH}/test_JSONCPP \
@@ -68,6 +68,7 @@ cp ${BIN_ROOT}/src/components/smart_objects/test/${BIN_TYPE}/smart_object_test.e
 #transport_manager_test
 cp ${BIN_ROOT}/src/components/transport_manager/test/${BIN_TYPE}/transport_manager_test.exe ${DES_PATH}/transport_manager_test
 cp ${BIN_ROOT}/src/components/transport_manager/test/*.ini ${DES_PATH}/transport_manager_test
+cp ${BIN_ROOT}/bin/msvcr90.dll ${DES_PATH}/transport_manager_test
 #utils_test
 cp ${BIN_ROOT}/src/components/utils/test/${BIN_TYPE}/utils_test.exe ${DES_PATH}/utils_test
 cp ${BIN_ROOT}/src/components/utils/test/*.ini ${DES_PATH}/utils_test
