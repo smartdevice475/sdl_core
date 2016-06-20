@@ -1,6 +1,8 @@
 @echo off
 set UT_PATH=UT
 set DES_PATH=test_bin
+
+rd /s /q %UT_PATH%
 mkdir %UT_PATH%
 
 echo [01/18] application_manager_test
@@ -36,7 +38,7 @@ echo [15/18] state_controller_test
 echo [16/18] test_JSONCPP
 .\%DES_PATH%\test_JSONCPP\test_JSONCPP.exe > %UT_PATH%\test_JSONCPP.txt
 echo [17/18] transport_manager_test
-.\%DES_PATH%\transport_manager_test\transport_manager_test.exe transport_manager_test.txt
+.\%DES_PATH%\transport_manager_test\transport_manager_test.exe > %UT_PATH%\transport_manager_test.txt
 echo [18/18] utils_test
 .\%DES_PATH%\utils_test\utils_test.exe > %UT_PATH%\utils_test.txt
 @echo on

@@ -41,6 +41,7 @@
 
 #ifdef OS_WINCE
 #include <winbase.h>
+#include "utils/global.h"
 #endif
 
 #if defined(OS_WIN32) || defined(OS_WINCE)
@@ -211,7 +212,7 @@ char ini_write_value(const char *fname,
 #ifndef OS_WINCE
   tmpnam(temp_fname);
 #endif
-  if (0 == (wr_fp = fopen(temp_fname, "w"))) {
+  if (0 == (wr_fp = fopen(fname, "w"))) {
      fclose(rd_fp);
      return FALSE;
   }
@@ -278,10 +279,11 @@ char ini_write_value(const char *fname,
   fclose(wr_fp);
   fclose(rd_fp);
 #ifdef OS_WINCE
-  if (!DeleteAndRenameFile((LPCTSTR)fname,(LPCTSTR)temp_fname))
-  {
-	  DeleteFile((LPCTSTR)temp_fname);
-	  return FALSE;
+  if (DeleteFile(Global::StringToWString(std::string(fname)).c_str())) {
+      if (!MoveFile(Global::StringToWString(std::string(temp_fname)).c_str(),
+          Global::StringToWString(std::string(fname)).c_str())) {
+        return FALSE;
+      }
   }
 #else
   remove(fname);

@@ -487,8 +487,11 @@ class StateControllerTest : public ::testing::Test {
     // AppHMITypes (NAVIGATION, etc.). Most likely logic should be changed
     // after conclusion on APPLINK-20231
 #ifdef OS_WINCE
-    std::vector<am::ApplicationSharedPtr>::iterator app;
-    // TODO:
+    std::vector<am::ApplicationSharedPtr>::iterator app  = applications_list_.begin();
+    
+    for (; app != applications_list_.end(); app++) {
+        if (app_id == app->get()->app_id()) break;
+    }
 #else
     std::vector<am::ApplicationSharedPtr>::iterator app  =
         std::find_if(
