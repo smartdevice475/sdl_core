@@ -347,7 +347,11 @@ void TimerThread<T>::TimerLooperDelegate::threadMain() {
 
 template <class T>
 bool TimerThread<T>::TimerDelegate::exitThreadMain() {
+#ifdef MODIFY_FUNCTION_SIGN
   sync_primitives::AutoLock auto_lock(state_lock_);
+#else
+  sync_primitives::AutoLock auto_lock(state_lock_);
+#endif
   stop_flag_ = true;
   termination_condition_.NotifyOne();
   return true;

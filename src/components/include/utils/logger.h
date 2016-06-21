@@ -55,6 +55,13 @@
 #ifdef ENABLE_LOG
 #if defined(CUSTOM_LOG)
 
+#undef LOG4CXX_INFO
+#undef LOG4CXX_ERROR
+#undef LOG4CXX_TRACE
+#undef LOG4CXX_WARN
+#undef LOG4CXX_DEBUG
+#undef LOG4CXX_FATAL
+
 	#define CREATE_LOGGERPTR_GLOBAL(logger_var, logger_name)
 	#define CREATE_LOGGERPTR_LOCAL(logger_var, logger_name)
     #define INIT_LOGGER(file_name)
@@ -64,9 +71,10 @@
    #define  LOGE(MSG)    {std::ofstream ff("/sdcard/sdllog.txt",std::iostream::out|std::iostream::app); time_t tick = time(NULL);struct tm tm;char s[100];tm = *localtime(&tick);strftime(s, sizeof(s), "%H:%M:%S", &tm);ff<<"["<<s<<"]["<<__FILE__<<"]["<<__FUNCTION__<<"][Line:"<<__LINE__<<"]"<<MSG;ff.flush();ff.close();}
 
 
+
 	#define LOG_CUSTOM(logger,message) LOGE(message<<"\n") 
 		
-	#define LOG4CXX_INFO(logger,message) //LOGE(message<<"\n") 
+	#define LOG4CXX_INFO(logger,message) //LOGE(message<<"\n")
 	#define LOG4CXX_ERROR(logger,message)
 	#define LOG4CXX_TRACE(logger,message) //LOGE(message<<"\n")
 	#define LOG4CXX_WARN(logger,message) 
@@ -76,7 +84,6 @@
 		
     #define LOG4CXX_INFO_EXT(logger, logEvent) //LOGE(__PRETTY_FUNCTION__<<": "<<logEvent<<"\n")
     #define LOG4CXX_INFO_STR_EXT(logger, logEvent) //LOGE(__PRETTY_FUNCTION__ << ": " << logEvent<<"\n")
-
     #define LOG4CXX_TRACE_EXT(logger, logEvent) //LOGE(TYPE_TRACE_EXT,__PRETTY_FUNCTION__ << ": " << logEvent<<"\n")
     #define LOG4CXX_TRACE_STR_EXT(logger, logEvent)  //LOGE(__PRETTY_FUNCTION__ << ": " << logEvent<<"\n")
     #define LOG4CXX_DEBUG_EXT(logger, logEvent)    //LOGE(__PRETTY_FUNCTION__ << ": " << logEvent<<"\n")
