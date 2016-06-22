@@ -188,8 +188,9 @@ char ini_write_value(const char *fname,
 
 #if USE_MKSTEMP
   {
-    const char *temp_str = "./";
+    char             *temp_str;
     int32_t fd = -1;
+    temp_str = static_cast<char*>(getenv("TMPDIR"));
     if (temp_str) {
       snprintf(temp_fname, PATH_MAX,
                "%s/ini.XXXXXX", temp_str);
@@ -209,10 +210,12 @@ char ini_write_value(const char *fname,
     }
   }
 #else   // #if USE_MKSTEMP
-#ifndef OS_WINCE
+#ifdef OS_WINCE
+  snprintf(temp_fname, INI_LINE_LEN, "%s.tmp", fname);
+#else
   tmpnam(temp_fname);
 #endif
-  if (0 == (wr_fp = fopen(fname, "w"))) {
+  if (0 == (wr_fp = fopen(temp_fname, "w"))) {
      fclose(rd_fp);
      return FALSE;
   }
