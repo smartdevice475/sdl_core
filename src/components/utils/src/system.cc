@@ -154,12 +154,9 @@ bool System::Execute(bool wait) {
     PROCESS_INFORMATION pi;
     STARTUPINFO si = { sizeof(si) };
 
-    std::wstring tmpStr;
-    Global::toUnicode(command_, CP_ACP, tmpStr);
-
     bRet = CreateProcess(
         NULL,
-        (LPWSTR)tmpStr.c_str(),
+        (LPWSTR)Global::StringToWString(command_).c_str(),
         NULL,
         NULL,
         FALSE,   

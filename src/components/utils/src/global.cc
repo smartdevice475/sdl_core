@@ -31,12 +31,12 @@
 */
 
 #if defined(OS_WIN32) || defined(OS_WINCE)
-#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #else
 #include <memory.h>
 #endif
 #include "utils/global.h"
+#include "vector"
 
 #ifdef OS_WINCE
 time_t time(time_t* TimeOutPtr){
@@ -227,6 +227,67 @@ std::string Global::WStringToString(const std::wstring &wstr)
      std::copy(wstr.begin(), wstr.end(), str.begin());
      return str; 
  }
+
+std::wstring Global::RelativePathToAbsPath(const std::wstring RelativePath)
+{
+  std::wstring strRet;
+  std::vector<std::wstring> ItemPath;
+
+  wchar_t tmpStr[MAX_PATH] = {0};
+  wchar_t *p1, *p2, *pEnd;
+
+  GetModuleFileNameW(NULL, tmpStr, MAX_PATH);
+  
+  p1 = tmpStr;
+  p2 = tmpStr;
+  pEnd = wcsrchr(tmpStr, L'\\');
+
+  for (; p2 <= pEnd; p2++) {
+    if ((*p2 == L'\\' || *p2 == L'/' || p2 == pEnd) && p1 < p2) {
+      ItemPath.push_back(std::wstring(p1, p2 - p1));
+      p1 = p2 + 1;
+    }
+  }
+
+  if (RelativePath.size() > MAX_PATH - 1) return L"";
+
+  int iSz = swprintf_s(tmpStr, MAX_PATH, L"%s", RelativePath.c_str());
+
+  p1 = tmpStr;
+  p2 = tmpStr;
+  pEnd = &tmpStr[iSz];
+
+  for (; p2 <= pEnd; p2++) {
+    if ((*p2 == L'\\' || *p2 == L'/'  || p2 == pEnd) && p1 < p2) {
+      std::wstring tmpStr = std::wstring(p1, p2 - p1);
+      if (tmpStr == L".") {
+      }
+      else if (tmpStr == L"..") {
+        ItemPath.pop_back();
+      }
+      else {
+        ItemPath.push_back(tmpStr);
+      }
+      p1 = p2 + 1;
+    }
+  }
+
+  for (std::vector<std::wstring>::iterator it = ItemPath.begin(); it != ItemPath.end(); it++) {
+    strRet += *it + L"\\";
+  }
+  strRet.erase(--strRet.end());
+
+  return strRet;
+}
+
+std::string Global::RelativePathToAbsPath(const std::string RelativePath)
+{
+  std::wstring tmp;
+  
+  tmp = RelativePathToAbsPath(Global::StringToWString(RelativePath));
+
+  return Global::WStringToString(tmp);
+}
 
 Global::Global()
 {

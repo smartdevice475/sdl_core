@@ -88,7 +88,6 @@ TEST(FileSystemTest, CreateDirectoryTwice) {
 #else
   CreateDirectory("./Test directory");
 #endif
-
   EXPECT_TRUE(DirectoryExists("./Test directory"));
   EXPECT_TRUE(IsDirectory("./Test directory"));
 
@@ -182,7 +181,6 @@ TEST(FileSystemTest, TwiceCreateDirectoryRecursivelyDeleteRecursivelyOnce) {
   // Create directories recursively
   EXPECT_TRUE(CreateDirectoryRecursively(
       "./Test directory/Test directory 2/Test directory 3"));
-
   // Check that all directories are created
   EXPECT_TRUE(DirectoryExists("./Test directory"));
   EXPECT_TRUE(IsDirectory("./Test directory"));
