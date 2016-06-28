@@ -69,6 +69,7 @@ struct tm* localtime(const time_t* clock);
 struct tm * __cdecl gmtime(const time_t *clock);
 size_t strftime(char *s, size_t maxs, const char *f, const struct tm *t);
 time_t mktime(struct tm* pt);
+int gettimeofday(struct timeval *tv, struct timezone *tz);
 
 #define tzset _tzset;
 #define timegm mktime

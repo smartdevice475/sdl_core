@@ -99,7 +99,7 @@ uint64_t file_system::GetAvailableDiskSpace(const std::string& path) {
 }
 
 uint32_t file_system::FileSize(const std::string &path) {
-#if defined(OS_WIN32) || defined(OS_WINCE)
+#if defined(OS_WIN32)
     uint32_t uSz = 0;
     if (file_system::FileExists(path)) {
         std::ifstream ifile;
@@ -111,6 +111,24 @@ uint32_t file_system::FileSize(const std::string &path) {
         ifile.clear();
     }
     return uSz;
+#elif defined(OS_WINCE)
+  uint32_t uSz = 0;
+  std::string absPath = path;
+
+  if (absPath[0] != '\\' && absPath[0] != '/') {
+    absPath = Global::RelativePathToAbsPath(absPath);
+  }
+
+  if (file_system::FileExists(absPath)) {
+      std::ifstream ifile;
+      ifile.open(absPath.c_str());
+      if (ifile.is_open()) {
+          ifile.seekg(0, std::ios::end);
+          uSz = ifile.tellg();
+      }
+      ifile.clear();
+  }
+  return uSz;
 #else
   if (file_system::FileExists(path)) {
     struct stat file_info;
@@ -149,15 +167,20 @@ uint32_t file_system::DirectorySize(const std::string& path) {
     uint32_t uSz = 0;
     WIN32_FIND_DATA fData;
     std::wstring tmpStr;
+    std::string absPath = path;
 
-    HANDLE hFind = FindFirstFile(Global::StringToWString(path + "\\*.*").c_str(), &fData);
+    if (absPath[0] != '\\' && absPath[0] != '/') {
+      absPath = Global::RelativePathToAbsPath(absPath);
+    }
+
+    HANDLE hFind = FindFirstFile(Global::StringToWString(absPath + "\\*.*").c_str(), &fData);
 
     if (hFind == INVALID_HANDLE_VALUE) return uSz;
 
     do {
         if (fData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
             if (std::wstring(fData.cFileName) != L"." && std::wstring(fData.cFileName) != L"..") {
-                DirectorySize(path + "\\" + Global::WStringToString(fData.cFileName));
+                DirectorySize(absPath + "\\" + Global::WStringToString(fData.cFileName));
             }
         }
         else {
@@ -500,9 +523,18 @@ std::string file_system::GetAbsolutePath(const std::string& path) {
 
   return strRet;
 #elif defined(OS_WINCE)
-  std::wstring strRet = Global::RelativePathToAbsPath(Global::StringToWString(path));
+  std::string absPath = path;
+
+  if (absPath[0] != '\\' && absPath[0] != '/') {
+    absPath = Global::RelativePathToAbsPath(absPath);
+  }
   
-  return Global::WStringToString(strRet);
+  if (DirectoryExists(absPath)) {
+    return absPath;
+  }
+  else {
+    return "";
+  }
 #else
   char abs_path[PATH_MAX];
   if (NULL == realpath(path.c_str(), abs_path)) {
@@ -638,7 +670,7 @@ bool file_system::RemoveDirectoryWindows(const std::string& directory_name,
             remove_directory_content(directory_name);
         }
 
-        return ::RemoveDirectory(directory_name.c_str()) == TRUE ? true : false;
+        return ::RemoveDirectory(directory_name.c_str()) == TRUE;
     }
     return false;
 }
@@ -721,7 +753,7 @@ std::vector<std::string> file_system::ListFiles(
     absName = Global::RelativePathToAbsPath(absName);
   }
 
-  HANDLE hFind = ::FindFirstFile(Global::StringToWString(absName).c_str(), &ffd);
+  HANDLE hFind = ::FindFirstFile(Global::StringToWString(absName + "\\*.*").c_str(), &ffd);
 
   if (INVALID_HANDLE_VALUE == hFind)
   {
@@ -783,7 +815,17 @@ std::vector<std::string> file_system::ListFiles(
 bool file_system::WriteBinaryFile(const std::string& name,
                                   const std::vector<uint8_t>& contents) {
   using namespace std;
+#ifdef OS_WINCE
+  std::string absName = name;
+
+  if (absName[0] != '\\' && absName[0] != '/') {
+    absName = Global::RelativePathToAbsPath(absName);
+  }
+
+  ofstream output(absName.c_str(), ios_base::binary | ios_base::trunc);
+#else
   ofstream output(name.c_str(), ios_base::binary | ios_base::trunc);
+#endif
 
   if (!contents.empty()) {
       output.write(reinterpret_cast<const char*>(&contents.front()),
@@ -829,15 +871,30 @@ bool file_system::ReadBinaryFile(const std::string& name,
 }
 
 bool file_system::ReadFile(const std::string& name, std::string& result) {
-#if defined(OS_WIN32) || defined(OS_WINCE)
-	if (!FileExists(name) || !IsAccessible(name, 0)) {
-#else
-  if (!FileExists(name) || !IsAccessible(name, R_OK)) {
-#endif
+#if defined(OS_WIN32)
+  if (!FileExists(name) || !IsAccessible(name, 0)) {
     return false;
   }
 
   std::ifstream file(name.c_str());
+#elif defined(OS_WINCE)
+  std::string absName = name;
+
+  if (absName[0] != '\\' && absName[0] != '/') {
+    absName = Global::RelativePathToAbsPath(absName);
+  }
+  if (!FileExists(absName) || !IsAccessible(absName, 0)) {
+    return false;
+  }
+
+  std::ifstream file(absName.c_str());
+#else
+  if (!FileExists(name) || !IsAccessible(name, R_OK)) {
+    return false;
+  }
+
+  std::ifstream file(name.c_str());
+#endif
   std::ostringstream ss;
   ss << file.rdbuf();
   result = ss.str();

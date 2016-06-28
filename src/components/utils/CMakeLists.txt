@@ -66,6 +66,8 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
     ${CMAKE_SOURCE_DIR}/src/3rd_party/apache-log4cxx-win32-0.10.0/apr/include/arch/win32
     ${CMAKE_SOURCE_DIR}/src/3rd_party/apache-log4cxx-win32-0.10.0/apr/include
     ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
+    ${CMAKE_SOURCE_DIR}/src/3rd_party-static/sdk_ext/include
+endif()
   )
   if(BUILD_TESTS)
     include_directories(
@@ -138,6 +140,9 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
  list(APPEND LIBRARIES dl) 
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  list(APPEND LIBRARIES sdk_ext)
+endif()
 if(ENABLE_LOG)
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
   list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})

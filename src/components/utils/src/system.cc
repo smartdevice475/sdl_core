@@ -125,53 +125,60 @@ bool System::Execute(bool wait) {
 #else  // __QNX__
 #if defined(OS_WIN32)
 bool System::Execute(bool wait) {
-    bool bRet = true;
-    PROCESS_INFORMATION pi;
-    STARTUPINFO si = { sizeof(si) };
+  bool bRet = true;
+  PROCESS_INFORMATION pi;
+  STARTUPINFO si = { sizeof(si) };
 
-    bRet = CreateProcess(
-        NULL,
-        (LPSTR)command_.c_str(),
-        NULL,
-        NULL,
-        FALSE,   
-        0,
-        NULL,
-        NULL,
-        &si,
-        &pi                 
-        ) ? true : false;
+  bRet = CreateProcess(
+      NULL,
+      (LPSTR)command_.c_str(),
+      NULL,
+      NULL,
+      FALSE,   
+      0,
+      NULL,
+      NULL,
+      &si,
+      &pi                 
+      ) ? true : false;
 
-    if (bRet && wait) {
-        WaitForSingleObject(pi.hProcess, INFINITE);
-    }
+  if (bRet && wait) {
+      WaitForSingleObject(pi.hProcess, INFINITE);
+  }
 
-    return bRet;
+  return bRet;
 }
 #elif defined(OS_WINCE)
 bool System::Execute(bool wait) {
-    bool bRet = true;
-    PROCESS_INFORMATION pi;
-    STARTUPINFO si = { sizeof(si) };
+  bool bRet = true;
+  PROCESS_INFORMATION pi;
+  STARTUPINFO si = { sizeof(si) };
+  std::string absCmd = command_;
 
-    bRet = CreateProcess(
-        NULL,
-        (LPWSTR)Global::StringToWString(command_).c_str(),
-        NULL,
-        NULL,
-        FALSE,   
-        0,
-        NULL,
-        NULL,
-        &si,
-        &pi                 
-        ) ? true : false;
+  if (absCmd[0] != '\\' && absCmd[0] != '/') {
+    absCmd = Global::RelativePathToAbsPath(absCmd);
+  }
 
-    if (bRet && wait) {
-        WaitForSingleObject(pi.hProcess, INFINITE);
-    }
+  bRet = CreateProcess(
+      (LPWSTR)Global::StringToWString(absCmd).c_str(),
+      NULL,
+      NULL,
+      NULL,
+      FALSE,
+      0,
+      NULL,
+      NULL,
+      &si,
+      &pi                 
+      ) ? true : false;
 
-    return bRet;
+  if (bRet && wait) {
+      WaitForSingleObject(pi.hProcess, INFINITE);
+      CloseHandle (pi.hThread);
+      CloseHandle (pi.hProcess);
+  }
+
+  return bRet;
 }
 #elif defined(OS_MAC)
 bool System::Execute(bool wait) {
