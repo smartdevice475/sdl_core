@@ -26,7 +26,13 @@ namespace utils {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
+#if defined(OS_WIN32)
+const char* Resources::proc = "C:\\Windows";
+#elif defined(OS_WINCE)
+const char* Resources::proc = "\\Windows";
+#else
 const char* Resources::proc = "/proc/";
+#endif
 
 ResourseUsage* Resources::getCurrentResourseUsage() {
   PidStats pid_stats;
@@ -58,7 +64,7 @@ bool Resources::ReadStatFile(std::string& output) {
 }
 
 bool Resources::GetProcInfo(Resources::PidStats& output) {
-#if defined(OS_LINUX)
+#if defined(OS_LINUX) || defined(OS_WIN32) || defined(OS_WINCE)
   std::string proc_buf;
   if (false == ReadStatFile(proc_buf)) {
     return false;
@@ -142,7 +148,7 @@ bool Resources::GetProcInfo(Resources::PidStats& output) {
 
 bool Resources::GetMemInfo(Resources::MemInfo &output) {
   bool result = false;
-  #if defined(OS_LINUX)
+#if defined(OS_LINUX) || defined(OS_WIN32) || defined(OS_WINCE)
   Resources::PidStats pid_stat;
   if (false == GetProcInfo(pid_stat)) {
     LOG4CXX_ERROR(logger_, "Failed to get proc info");
@@ -186,6 +192,11 @@ std::string Resources::GetStatPath() {
 #elif defined(__QNXNTO__)
   filename = GetProcPath() + "/as";
 #endif
+
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  filename = GetProcPath() + "/memstat";
+#endif
+
   return filename;
 }
 

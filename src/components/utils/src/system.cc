@@ -150,7 +150,6 @@ bool System::Execute(bool wait) {
 }
 #elif defined(OS_WINCE)
 bool System::Execute(bool wait) {
-  bool bRet = true;
   PROCESS_INFORMATION pi;
   STARTUPINFO si = { sizeof(si) };
   std::string absCmd = command_;
@@ -159,26 +158,23 @@ bool System::Execute(bool wait) {
     absCmd = Global::RelativePathToAbsPath(absCmd);
   }
 
-  bRet = CreateProcess(
-      (LPWSTR)Global::StringToWString(absCmd).c_str(),
-      NULL,
-      NULL,
-      NULL,
-      FALSE,
-      0,
-      NULL,
-      NULL,
-      &si,
-      &pi                 
-      ) ? true : false;
+  SHELLEXECUTEINFO ShExecInfo = {0};
+  ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
+  ShExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
+  ShExecInfo.hwnd = NULL;
+  ShExecInfo.lpVerb = NULL;
+  ShExecInfo.lpFile = Global::StringToWString(absCmd).c_str();
+  ShExecInfo.lpParameters = L"";
+  ShExecInfo.lpDirectory = NULL;
+  ShExecInfo.nShow = SW_HIDE;
+  ShExecInfo.hInstApp = NULL;
+
+  BOOL bRet = ShellExecuteEx(&ShExecInfo);
 
   if (bRet && wait) {
-      WaitForSingleObject(pi.hProcess, INFINITE);
-      CloseHandle (pi.hThread);
-      CloseHandle (pi.hProcess);
+    WaitForSingleObject(ShExecInfo.hProcess,INFINITE);
   }
-
-  return bRet;
+  return bRet == TRUE;
 }
 #elif defined(OS_MAC)
 bool System::Execute(bool wait) {
