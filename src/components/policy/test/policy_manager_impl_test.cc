@@ -52,6 +52,10 @@
 #include "utils/date_time.h"
 #include "utils/make_shared.h"
 
+#ifdef OS_WINCE
+#include "utils/global.h"
+#endif
+
 using ::testing::ReturnRef;
 using ::testing::DoAll;
 using ::testing::SetArgReferee;
@@ -180,7 +184,15 @@ class PolicyManagerImplTest2 : public ::testing::Test {
 
   const Json::Value GetPTU(std::string file_name) {
     // Get PTU
+#ifdef OS_WINCE
+    std::string tmp = file_name;
+    if (tmp[0] != '\\' && tmp[0] != '/') {
+      tmp = Global::RelativePathToAbsPath(tmp);
+    }
+    std::ifstream ifile(tmp.c_str());
+#else
     std::ifstream ifile(file_name.c_str());
+#endif
     Json::Reader reader;
     std::string json;
     Json::Value root(Json::objectValue);
@@ -190,14 +202,26 @@ class PolicyManagerImplTest2 : public ::testing::Test {
     ifile.close();
     ::policy::BinaryMessage msg(json.begin(), json.end());
     // Load Json to cache
+#ifdef OS_WINCE
+    EXPECT_TRUE(manager->LoadPT(Global::RelativePathToAbsPath("file_pt_update.json").c_str(), msg));
+#else
     EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+#endif
     return root;
   }
 
   void CreateLocalPT(const std::string& file_name) {
     file_system::remove_directory_content("storage1");
     ON_CALL(policy_settings_, app_storage_folder()).WillByDefault(ReturnRef(kAppStorageFolder));
+#ifdef OS_WINCE
+    std::string tmp = file_name;
+    if (tmp[0] != '\\' && tmp[0] != '/') {
+      tmp = Global::RelativePathToAbsPath(tmp);
+    }
+    ASSERT_TRUE(manager->InitPT(tmp, &policy_settings_));
+#else
     ASSERT_TRUE(manager->InitPT(file_name, &policy_settings_));
+#endif
   }
 
   void AddRTtoPT(const std::string& update_file_name,
@@ -461,7 +485,11 @@ TEST_F(PolicyManagerImplTest2, GetNotificationsNumberAfterPTUpdate) {
 
 TEST_F(PolicyManagerImplTest2, IsAppRevoked_SetRevokedAppID_ExpectAppRevoked) {
   // Arrange
+#ifdef OS_WINCE
+  std::ifstream ifile(Global::RelativePathToAbsPath("sdl_preloaded_pt.json").c_str());
+#else
   std::ifstream ifile("sdl_preloaded_pt.json");
+#endif
   Json::Reader reader;
   std::string json;
   Json::Value root(Json::objectValue);
@@ -472,7 +500,11 @@ TEST_F(PolicyManagerImplTest2, IsAppRevoked_SetRevokedAppID_ExpectAppRevoked) {
   ifile.close();
 
   ::policy::BinaryMessage msg(json.begin(), json.end());
+#ifdef OS_WINCE
+  ASSERT_TRUE(manager->LoadPT(Global::RelativePathToAbsPath("file_pt_update.json").c_str(), msg));
+#else
   ASSERT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+#endif
   EXPECT_TRUE(manager->IsApplicationRevoked(app_id1));
 }
 

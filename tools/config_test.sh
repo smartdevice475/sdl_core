@@ -58,6 +58,21 @@ cp ${BIN_ROOT}/src/components/media_manager/test/${BIN_TYPE}/media_manager_test.
 #policy_test
 cp ${BIN_ROOT}/src/components/policy/test/${BIN_TYPE}/policy_test.exe ${DES_PATH}/policy_test
 cp ${BIN_ROOT}/src/components/policy/src/policy/${BIN_TYPE}/Policy.dll ${DES_PATH}/policy_test
+cp ${BIN_ROOT}/src/components/policy/test/PTU.json ${DES_PATH}/policy_test
+cp ${BIN_ROOT}/src/components/policy/test/ptu_requestType.json ${DES_PATH}/policy_test
+cp ${BIN_ROOT}/src/components/policy/test/PTU2.json ${DES_PATH}/policy_test
+cp ${BIN_ROOT}/src/components/policy/test/ptu2_requestType.json ${DES_PATH}/policy_test
+cp ${BIN_ROOT}/src/components/policy/test/PTU3.json ${DES_PATH}/policy_test
+cp ${BIN_ROOT}/src/components/policy/test/PTU4.json ${DES_PATH}/policy_test
+cp ${BIN_ROOT}/src/components/policy/test/sdl_preloaded_pt.json ${DES_PATH}/policy_test
+cp ${BIN_ROOT}/src/components/policy/test/sdl_pt_first_update.json ${DES_PATH}/policy_test
+cp ${BIN_ROOT}/src/components/policy/test/sdl_pt_second_update.json ${DES_PATH}/policy_test
+cp ${BIN_ROOT}/src/components/policy/test/sdl_pt_update.json ${DES_PATH}/policy_test
+cp ${BIN_ROOT}/src/components/policy/test/valid_sdl_pt_update.json ${DES_PATH}/policy_test
+cp ${BIN_ROOT}/src/components/policy/test/smartDeviceLink.ini ${DES_PATH}/policy_test
+cp ${BIN_ROOT}/src/components/policy/test/smartDeviceLink2.ini ${DES_PATH}/policy_test
+cp ${BIN_ROOT}/src/components/policy/test/smartDeviceLink3.ini ${DES_PATH}/policy_test
+cp ${BIN_ROOT}/src/components/policy/test/log4cxx.properties ${DES_PATH}/policy_test
 #protocol_handler_test
 cp ${BIN_ROOT}/src/components/protocol_handler/test/${BIN_TYPE}/protocol_handler_test.exe ${DES_PATH}/protocol_handler_test
 #resumption_test

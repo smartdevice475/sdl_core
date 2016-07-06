@@ -106,19 +106,19 @@ TEST_F(HeartBeatMonitorTest, TimerElapsed) {
 
 TEST_F(HeartBeatMonitorTest, KeptAlive) {
   EXPECT_CALL(connection_handler_mock, CloseSession(_, _)).Times(0);
-  EXPECT_CALL(connection_handler_mock, CloseConnection(_)).Times(1);
-  EXPECT_CALL(connection_handler_mock, SendHeartBeat(_, _)).Times(1);
+  EXPECT_CALL(connection_handler_mock, CloseConnection(_)).Times(0);
+  EXPECT_CALL(connection_handler_mock, SendHeartBeat(_, _)).Times(0);
 
   const uint32_t session = conn->AddNewSession();
   conn->StartHeartBeat(session);
 #if defined(OS_WIN32) || defined(OS_WINCE)
-  Sleep(kTimeout);
+  Sleep(kTimeout - MILLISECONDS_IN_SECOND);
   conn->KeepAlive(session);
-  Sleep(kTimeout);
+  Sleep(kTimeout - MILLISECONDS_IN_SECOND);
   conn->KeepAlive(session);
-  Sleep(kTimeout);
+  Sleep(kTimeout - MILLISECONDS_IN_SECOND);
   conn->KeepAlive(session);
-  Sleep(kTimeout);
+  Sleep(kTimeout - MILLISECONDS_IN_SECOND);
 #else
   usleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
   conn->KeepAlive(session);
@@ -140,13 +140,13 @@ TEST_F(HeartBeatMonitorTest, NotKeptAlive) {
 
   conn->StartHeartBeat(session);
 #if defined(OS_WIN32) || defined(OS_WINCE)
-  Sleep(kTimeout);
+  Sleep(kTimeout - MILLISECONDS_IN_SECOND);
   conn->KeepAlive(session);
-  Sleep(kTimeout);
+  Sleep(kTimeout - MILLISECONDS_IN_SECOND);
   conn->KeepAlive(session);
-  Sleep(kTimeout);
+  Sleep(kTimeout - MILLISECONDS_IN_SECOND);
   conn->KeepAlive(session);
-  Sleep(2 * kTimeout);
+  Sleep(2 * kTimeout + MILLISECONDS_IN_SECOND);
 #else
   usleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
   conn->KeepAlive(session);
