@@ -142,7 +142,11 @@ int32_t main(int32_t argc, char** argv) {
   if ((argc > 1)&&(0 != argv)) {
     profile::Profile::instance()->config_file_name(argv[1]);
   } else {
+#ifdef OS_WINCE
+    profile::Profile::instance()->config_file_name(Global::RelativePathToAbsPath("smartDeviceLink.ini"));
+#else
     profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
+#endif
   }
 
   // Logger initialization
