@@ -1,4 +1,5 @@
 BIN_ROOT=".."
+SRC_ROOT="../../.."
 DES_PATH="./test_bin"
 BIN_TYPE="Release"
 
@@ -40,14 +41,14 @@ cp ${BIN_ROOT}/src/components/application_manager/test/smartDeviceLink_test.ini 
 cp ${BIN_ROOT}/src/components/application_manager/test/message_helper/${BIN_TYPE}/message_helper_test.exe ${DES_PATH}/message_helper_test
 #state_controller_test
 cp ${BIN_ROOT}/src/components/application_manager/test/state_controller/${BIN_TYPE}/state_controller_test.exe ${DES_PATH}/state_controller_test
-cp ${BIN_ROOT}/../../lib/wince/libeay32.dll ${DES_PATH}/state_controller_test
+cp ${SRC_ROOT}/lib/wince/libeay32.dll ${DES_PATH}/state_controller_test
 #config_profile_test
 cp ${BIN_ROOT}/src/components/config_profile/test/${BIN_TYPE}/config_profile_test.exe ${DES_PATH}/config_profile_test
 cp ${BIN_ROOT}/src/components/config_profile/test/*.ini ${DES_PATH}/config_profile_test
 #connection_handler_test
 cp ${BIN_ROOT}/src/components/connection_handler/test/${BIN_TYPE}/connection_handler_test.exe ${DES_PATH}/connection_handler_test
-cp ${BIN_ROOT}/../../lib/wince/libeay32.dll ${DES_PATH}/connection_handler_test
-cp ${BIN_ROOT}/../../lib/wince/msvcr90.dll ${DES_PATH}/connection_handler_test
+cp ${SRC_ROOT}/lib/wince/libeay32.dll ${DES_PATH}/connection_handler_test
+cp ${SRC_ROOT}/lib/wince/msvcr90.dll ${DES_PATH}/connection_handler_test
 cp ${BIN_ROOT}/src/components/connection_handler/test/*.ini ${DES_PATH}/connection_handler_test
 #formatters_test
 cp ${BIN_ROOT}/src/components/formatters/test/${BIN_TYPE}/formatters_test.exe ${DES_PATH}/formatters_test
@@ -81,8 +82,8 @@ cp ${BIN_ROOT}/src/components/resumption/test/${BIN_TYPE}/resumption_test.exe ${
 cp ${BIN_ROOT}/src/components/rpc_base/test/${BIN_TYPE}/rpc_base_test.exe ${DES_PATH}/rpc_base_test
 #security_manager_test
 cp ${BIN_ROOT}/src/components/security_manager/test/${BIN_TYPE}/security_manager_test.exe ${DES_PATH}/security_manager_test
-cp ${BIN_ROOT}/../../lib/wince/libeay32.dll ${DES_PATH}/security_manager_test
-cp ${BIN_ROOT}/../../lib/wince/ssleay32.dll ${DES_PATH}/security_manager_test
+cp ${SRC_ROOT}/lib/wince/libeay32.dll ${DES_PATH}/security_manager_test
+cp ${SRC_ROOT}/lib/wince/ssleay32.dll ${DES_PATH}/security_manager_test
 cp ${BIN_ROOT}/src/components/security_manager/test/*.pem ${DES_PATH}/security_manager_test
 #smart_object_test
 cp ${BIN_ROOT}/src/components/smart_objects/test/${BIN_TYPE}/smart_object_test.exe ${DES_PATH}/smart_object_test

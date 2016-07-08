@@ -79,9 +79,10 @@ void clock_gettime(int i, timespec * tm)
 		tm->tv_nsec = (cur % 1000) * 1000000;
 	}
 	else if (i == CLOCK_REALTIME) {
-    clock_t t = clock();
-    tm->tv_sec = t / 1000;
-    tm->tv_nsec = (t % 1000) * 1000000;
+		time_t t;
+		::time(&t);
+		tm->tv_sec = t;
+		tm->tv_nsec = 0;
 	}
     else {
         assert(false);
@@ -106,7 +107,7 @@ TimevalStruct DateTime::getCurrentTime() {
   TimevalStruct currentTime;
 #if defined(OS_WIN32) || defined(OS_WINCE)
   timespec tm;
-  clock_gettime(CLOCK_MONOTONIC, &tm);
+  clock_gettime(CLOCK_REALTIME, &tm);
   currentTime.tv_sec = (long)tm.tv_sec;
   currentTime.tv_usec = tm.tv_nsec / 1000;
 #else
