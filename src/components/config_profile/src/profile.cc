@@ -1629,7 +1629,11 @@ bool Profile::ReadValue(std::string* value, const char* const pSection,
   char buf[INI_LINE_LEN + 1];
   *buf = '\0';
 #ifdef OS_WINCE
-  if ((0 != ini_read_value(Global::RelativePathToAbsPath(config_file_name_).c_str(), pSection, pKey, buf))
+  std::string tmp = config_file_name_;
+  if (tmp[0]=='.' ||(tmp[0] != '\\' && tmp[0] != '/')) {
+	  tmp = Global::RelativePathToAbsPath(tmp);
+  }
+  if ((0 != ini_read_value(tmp.c_str(), pSection, pKey, buf))
       && ('\0' != *buf)) {
     *value = buf;
     ret = true;
