@@ -103,24 +103,54 @@ void clock_gettime(int i, timespec * tm)
 
 namespace date_time {
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+TimevalStruct DateTime::getCurrentTime() {
+  FILETIME ft;
+  uint64_t tmpres = 0;
+  TimevalStruct tv;
+  const uint64_t kDeltaEpochInMicrosecs = 11644473600000000u;
+  const uint32_t kMillisecondsInSecond = 1000u;
+  const uint32_t kMicrosecondsInMillisecond = 1000u;
+  const uint32_t kMicrosecondsInSecond =
+    kMillisecondsInSecond * kMicrosecondsInMillisecond;
+
+  GetSystemTimeAsFileTime(&ft);
+
+  // The GetSystemTimeAsFileTime returns the number of 100 nanosecond
+  // intervals since Jan 1, 1601 in a structure. Copy the high bits to
+  // the 64 bit tmpres, shift it left by 32 then or in the low 32 bits.
+  tmpres |= ft.dwHighDateTime;
+  tmpres <<= 32;
+  tmpres |= ft.dwLowDateTime;
+
+  // Convert to microseconds by dividing by 10
+  tmpres /= 10;
+
+  // The Unix epoch starts on Jan 1 1970.  Need to subtract the difference
+  // in seconds from Jan 1 1601.
+  tmpres -= kDeltaEpochInMicrosecs;
+
+  // Finally change microseconds to seconds and place in the seconds value.
+  // The modulus picks up the microseconds.
+  tv.tv_sec = static_cast<long>(tmpres / kMicrosecondsInSecond);
+  tv.tv_usec = static_cast<long>(tmpres % kMicrosecondsInSecond);
+
+  return tv;
+}
+#else
 TimevalStruct DateTime::getCurrentTime() {
   TimevalStruct currentTime;
-#if defined(OS_WIN32) || defined(OS_WINCE)
-  timespec tm;
-  clock_gettime(CLOCK_REALTIME, &tm);
-  currentTime.tv_sec = (long)tm.tv_sec;
-  currentTime.tv_usec = tm.tv_nsec / 1000;
-#else
+
 #ifdef OS_MAC
     struct timezone timeZone;
 #else
   timezone timeZone;
 #endif
   gettimeofday(&currentTime, &timeZone);
-#endif
 
-    return currentTime;
-  }
+  return currentTime;
+}
+#endif
 
 int64_t date_time::DateTime::getSecs(const TimevalStruct &time) {
    const TimevalStruct times = ConvertionUsecs(time);

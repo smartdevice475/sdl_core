@@ -179,7 +179,7 @@ void RegisterAppInterfaceRequest::Run() {
     ApplicationManagerImpl::instance()->updateRequestTimeout(
         connection_key(), correlation_id(), default_timeout());
 #if defined(OS_WIN32) || defined(OS_WINCE)
-    Sleep(1000);
+    Sleep(1);
 #else
     sleep(1);
 #endif

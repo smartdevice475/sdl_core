@@ -112,6 +112,16 @@ char* ini_read_value(const char *fname,
   *line = '\0';
   *val = '\0';
   *tag = '\0';
+
+#ifdef OS_WINCE
+  std::string absPath = fname;
+
+  if (absPath[0] != '\\' && absPath[0] != '/') {
+    absPath = Global::RelativePathToAbsPath(absPath);
+  }
+  fname = absPath.c_str();
+#endif
+
   if ((NULL == fname) || (NULL == chapter) || (NULL == item) || (NULL == value))
     return NULL;
 
@@ -174,6 +184,15 @@ char ini_write_value(const char *fname,
   *val = '\0';
   *tag = '\0';
   *temp_fname = '\0';
+
+#ifdef OS_WINCE
+  std::string absPath = fname;
+
+  if (absPath[0] != '\\' && absPath[0] != '/') {
+    absPath = Global::RelativePathToAbsPath(absPath);
+  }
+  fname = absPath.c_str();
+#endif
 
   if ((NULL == fname) || (NULL == chapter) || (NULL == item) || (NULL == value))
     return FALSE;
