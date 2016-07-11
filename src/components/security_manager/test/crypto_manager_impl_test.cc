@@ -42,7 +42,9 @@
 #include "gtest/gtest.h"
 #include "security_manager/crypto_manager_impl.h"
 #include "security_manager/mock_security_manager_settings.h"
-
+#ifdef OS_WINCE
+#include "utils/global.h"
+#endif
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::NiceMock;
@@ -73,7 +75,11 @@ namespace crypto_manager_test {
 class CryptoManagerTest : public testing::Test {
  protected:
   static void SetUpTestCase() {
+#ifdef OS_WINCE
+    std::ifstream certificate_file(Global::RelativePathToAbsPath("server/spt_credential.p12.enc").c_str());
+#else
     std::ifstream certificate_file("server/spt_credential.p12.enc");
+#endif
     ASSERT_TRUE(certificate_file.is_open())
         << "Could not open certificate data file";
 

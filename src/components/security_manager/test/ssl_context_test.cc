@@ -43,7 +43,9 @@
 #include "security_manager/mock_security_manager_settings.h"
 #include "utils/shared_ptr.h"
 #include "utils/make_shared.h"
-
+#ifdef OS_WINCE
+#include "utils/global.h"
+#endif
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::NiceMock;
@@ -88,7 +90,11 @@ struct ProtocolAndCipher {
 class SSLTest : public testing::Test {
  protected:
   static void SetUpTestCase() {
+#ifdef OS_WINCE
+    std::ifstream certificate_file(Global::RelativePathToAbsPath("server/spt_credential_unsigned.p12").c_str());
+#else
     std::ifstream certificate_file("server/spt_credential_unsigned.p12");
+#endif
     std::stringstream certificate;
     if (certificate_file.is_open()) {
       certificate << certificate_file.rdbuf();
