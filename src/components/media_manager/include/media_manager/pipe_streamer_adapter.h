@@ -61,7 +61,11 @@ class PipeStreamerAdapter : public StreamerAdapter {
    private:
     std::string named_pipe_path_;
     std::string app_storage_folder_;
+#if defined(OS_WIN32)||defined(OS_WINCE)
+    HANDLE      pipe_fd_;
+#else
     int32_t     pipe_fd_;
+#endif
   };
 };
 

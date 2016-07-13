@@ -31,9 +31,13 @@
  */
 
 #include <errno.h>
-#include <fcntl.h>
 #include <sys/stat.h>
+#if !(defined(OS_WIN32)||defined(OS_WINCE))
+#include <fcntl.h>
 #include <unistd.h>
+#else
+#include <Windows.h>
+#endif
 #include "utils/logger.h"
 #include "utils/file_system.h"
 #include "media_manager/pipe_streamer_adapter.h"
@@ -63,9 +67,15 @@ PipeStreamerAdapter::PipeStreamer::PipeStreamer(
                     << app_storage_folder_ );
       return;
     }
+#if defined(OS_WIN32)||defined(OS_WINCE)
+      pipe_fd_=CreateNamedPipe(named_pipe_path_, PIPE_ACCESS_DUPLEX,  
+        PIPE_TYPE_BYTE|PIPE_READMODE_BYTE , 1, 0, 0, 1000, NULL);
+      if (pipe_fd_== INVALID_HANDLE_VALUE) {
+#else
     if ((mkfifo(named_pipe_path_.c_str(),
                 S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH) < 0)
         && (errno != EEXIST)) {
+#endif
       LOG4CXX_ERROR(logger_, "Cannot create pipe " << named_pipe_path_);
     } else {
       LOG4CXX_INFO(logger_, "Pipe " << named_pipe_path_
@@ -73,7 +83,11 @@ PipeStreamerAdapter::PipeStreamer::PipeStreamer(
     }
 }
 PipeStreamerAdapter::PipeStreamer::~PipeStreamer() {
+#if defined(OS_WIN32)||defined(OS_WINCE)
+  if(TRUE == CloseHandle(pipe_fd_)) {
+#else
   if (0 == unlink(named_pipe_path_.c_str()) ) {
+#endif
     LOG4CXX_INFO(logger_, "Pipe " << named_pipe_path_ << " was removed");
   } else {
     LOG4CXX_ERROR(logger_, "Error removing pipe " << named_pipe_path_);
@@ -83,9 +97,12 @@ PipeStreamerAdapter::PipeStreamer::~PipeStreamer() {
 
 bool PipeStreamerAdapter::PipeStreamer::Connect() {
   LOG4CXX_AUTO_TRACE(logger_);
-
+#if defined(OS_WIN32)||defined(OS_WINCE)
+  if(!ConnectNamedPipe(pipe_fd_, NULL)) {
+#else
   pipe_fd_ = open(named_pipe_path_.c_str(), O_RDWR, 0);
   if (-1 == pipe_fd_) {
+#endif
     LOG4CXX_ERROR(logger_, "Cannot open pipe for writing "
                   << named_pipe_path_);
     return false;
@@ -98,7 +115,11 @@ bool PipeStreamerAdapter::PipeStreamer::Connect() {
 
 void PipeStreamerAdapter::PipeStreamer::Disconnect() {
   LOG4CXX_AUTO_TRACE(logger_);
+#if defined(OS_WIN32)||defined(OS_WINCE)
+  if(FALSE == CloseHandle(pipe_fd_)) {
+#else
   if (0 == close(pipe_fd_)) {
+#endif
     LOG4CXX_INFO(logger_, "Pipe " << named_pipe_path_ << " was closed");
   } else {
     LOG4CXX_ERROR(logger_, "Error closing pipe " << named_pipe_path_);
@@ -108,8 +129,13 @@ void PipeStreamerAdapter::PipeStreamer::Disconnect() {
 bool PipeStreamerAdapter::PipeStreamer::Send(
     protocol_handler::RawMessagePtr msg) {
   LOG4CXX_AUTO_TRACE(logger_);
+#if defined(OS_WIN32)||defined(OS_WINCE)
+  DWORD ret;
+  if(WriteFile(pipe_fd_, msg->data(), (DWORD)msg->data_size(), &ret, NULL) == FALSE) {
+#else
   ssize_t ret = write(pipe_fd_, msg->data(), msg->data_size());
   if (-1 == ret) {
+#endif
     LOG4CXX_ERROR(logger_, "Failed writing data to pipe "
                   << named_pipe_path_);
     return false;

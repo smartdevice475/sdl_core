@@ -110,7 +110,9 @@ void UsageStatistics::RecordHmiStateChanged(HMILevel::eType new_hmi_level) {
       next_stopwatch = SECONDS_HMI_NONE;
       break;
     default:
-      NOTREACHED();
+      //NOTREACHED();
+      next_stopwatch = SECONDS_HMI_NONE;
+      break;
   }
   time_in_hmi_state_sptr_->Switch(next_stopwatch);
 }

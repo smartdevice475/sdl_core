@@ -127,8 +127,10 @@ void MediaManagerImpl::Init() {
     streamer_[ServiceType::kMobileNav] = new SocketVideoStreamerAdapter(
         settings().server_address(), settings().video_streaming_port());
   } else if ("pipe" == settings().video_server_type()) {
+#if !(defined(OS_WIN32)||defined(OS_WINCE))
     streamer_[ServiceType::kMobileNav]= new PipeVideoStreamerAdapter(
         settings().named_video_pipe_path(), settings().app_storage_folder());
+#endif
   } else if ("file" == settings().video_server_type()) {
     streamer_[ServiceType::kMobileNav] = new FileVideoStreamerAdapter(
         settings().video_stream_file(), settings().app_storage_folder());
@@ -138,8 +140,10 @@ void MediaManagerImpl::Init() {
     streamer_[ServiceType::kAudio] = new SocketAudioStreamerAdapter(
         settings().server_address(), settings().audio_streaming_port());
   } else if ("pipe" == settings().audio_server_type()) {
+#if !(defined(OS_WIN32)||defined(OS_WINCE))
     streamer_[ServiceType::kAudio] = new PipeAudioStreamerAdapter(
         settings().named_audio_pipe_path(), settings().app_storage_folder());
+#endif
   } else if ("file" == settings().audio_server_type()) {
     streamer_[ServiceType::kAudio] = new FileAudioStreamerAdapter(
         settings().audio_stream_file(), settings().app_storage_folder());

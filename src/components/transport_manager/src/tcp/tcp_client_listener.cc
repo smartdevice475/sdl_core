@@ -38,6 +38,7 @@
 #include <signal.h>
 #include <errno.h>
 #include <unistd.h>
+#include <MSTcpIP.h>
 #else
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -61,9 +62,6 @@
 #include "transport_manager/tcp/tcp_device.h"
 #include "transport_manager/tcp/tcp_socket_connection.h"
 
-#if defined(OS_WIN32) || defined(OS_WINCE)
-#define SIO_KEEPALIVE_VALS _WSAIOW(IOC_VENDOR,4)  
-#endif
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -72,11 +70,6 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 #if defined(OS_WIN32) || defined(OS_WINCE)
 	typedef int socklen_t;
-	struct TCP_KEEPALIVE {
-		unsigned long onoff;
-		unsigned long keepalivetime;
-		unsigned long keepaliveinterval;
-	};
 #endif
 
 TcpClientListener::TcpClientListener(TransportAdapterController* controller,
@@ -116,7 +109,7 @@ TransportAdapter::Error TcpClientListener::Init() {
   server_address.sin_addr.s_addr = INADDR_ANY;
 
 #if defined(OS_WIN32) || defined(OS_WINCE)
-  char optval = 0;
+  char optval = 1;
 #else
   int optval = 1;
 #endif
@@ -181,14 +174,14 @@ void SetKeepaliveOptions(const int fd) {
 #if defined(OS_WIN32) || defined(OS_WINCE)
 	setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, (const char *)&yes, sizeof(yes));
 
-	TCP_KEEPALIVE inKeepAlive = { 0 };	// in parameter
-	unsigned long ulInLen = sizeof(TCP_KEEPALIVE);
-	TCP_KEEPALIVE outKeepAlive = { 0 }; // out parameter
-	unsigned long ulOutLen = sizeof(TCP_KEEPALIVE);
+	tcp_keepalive inKeepAlive = { 0 };	// in parameter
+	unsigned long ulInLen = sizeof(tcp_keepalive);
+	tcp_keepalive outKeepAlive = { 0 }; // out parameter
+	unsigned long ulOutLen = sizeof(tcp_keepalive);
 	unsigned long ulBytesReturn = 0;
 
-	inKeepAlive.onoff = 1;
-	inKeepAlive.keepaliveinterval = 3000;
+	inKeepAlive.onoff = RCVALL_ON;
+	inKeepAlive.keepaliveinterval = 5000;
 	inKeepAlive.keepalivetime = 1000;
 	if (WSAIoctl((unsigned int)fd, SIO_KEEPALIVE_VALS,
 		(LPVOID)&inKeepAlive, ulInLen,
