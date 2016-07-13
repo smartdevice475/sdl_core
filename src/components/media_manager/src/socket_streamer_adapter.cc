@@ -29,7 +29,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
+#if !defined(OS_WIN32)&&!defined(OS_WINCE)
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/select.h>
@@ -37,6 +37,19 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <unistd.h>
+#else
+#include <WinSock2.h>
+#include <ws2tcpip.h>
+#include <stdint.h>
+#ifndef close
+#define close closesocket
+#endif
+#ifndef ssize_t
+#define ssize_t int
+#endif
+#define MSG_NOSIGNAL 0
+#define SHUT_RDWR 2
+#endif
 #include "utils/logger.h"
 #include "media_manager/socket_streamer_adapter.h"
 
@@ -80,8 +93,13 @@ bool SocketStreamerAdapter::SocketStreamer::Connect() {
   }
 
   int32_t optval = 1;
+#if defined(OS_WIN32)||defined(OS_WINCE)
   if (-1 == setsockopt(socket_fd_, SOL_SOCKET, SO_REUSEADDR,
-                       &optval, sizeof optval)) {
+	  (const char*)&optval, sizeof(optval))) {
+#else
+  if (-1 == setsockopt(socket_fd_, SOL_SOCKET, SO_REUSEADDR,
+                       &optval, sizeof(optval))) {
+#endif
     LOG4CXX_ERROR(logger, "Unable to set sockopt");
     return false;
   }
@@ -136,9 +154,13 @@ bool SocketStreamerAdapter::SocketStreamer::Send(
     }
     is_first_frame_ = false;
   }
-
+#if  defined(OS_WIN32)||defined(OS_WINCE)
+  ret = send(send_socket_fd_, (const char*)msg->data(),
+	  msg->data_size(), MSG_NOSIGNAL);
+#else
   ret = send(send_socket_fd_, msg->data(),
              msg->data_size(), MSG_NOSIGNAL);
+#endif
   if (-1 == ret) {
     LOG4CXX_ERROR(logger, "Unable to send data to socket");
     return false;

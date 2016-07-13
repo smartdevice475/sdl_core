@@ -45,6 +45,10 @@
 
 namespace rpc {
 
+#ifndef assert
+#define assert(s)
+#endif
+
 /*
  * Range helper class
  */

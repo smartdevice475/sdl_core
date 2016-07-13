@@ -85,7 +85,11 @@ void FileStreamerAdapter::FileStreamer::Disconnect() {
     delete file_stream_;
     file_stream_ = NULL;
   }
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  file_system::DeleteFileWindows(file_name_);
+#else
   file_system::DeleteFile(file_name_);
+#endif
 }
 
 bool FileStreamerAdapter::FileStreamer::Send(

@@ -123,8 +123,6 @@ void MediaManagerImpl::Init() {
 #endif
 #endif
 
-#if defined(OS_WIN32) || defined(OS_WINCE)
-#else
   if ("socket" == settings().video_server_type()) {
     streamer_[ServiceType::kMobileNav] = new SocketVideoStreamerAdapter(
         settings().server_address(), settings().video_streaming_port());
@@ -146,7 +144,6 @@ void MediaManagerImpl::Init() {
     streamer_[ServiceType::kAudio] = new FileAudioStreamerAdapter(
         settings().audio_stream_file(), settings().app_storage_folder());
   }
-#endif
 
   streamer_listener_[ServiceType::kMobileNav] = new StreamerListener(*this);
   streamer_listener_[ServiceType::kAudio] = new StreamerListener(*this);
@@ -298,7 +295,9 @@ void MediaManagerImpl::OnMessageReceived(
   ApplicationSharedPtr app = application_manager_.application(streaming_app_id);
   if (app) {
     app->WakeUpStreaming(service_type);
-    streamer_[service_type]->SendData(streaming_app_id, message);
+    if (streamer_[service_type]) {
+      streamer_[service_type]->SendData(streaming_app_id, message);
+    }  
   }
 }
 

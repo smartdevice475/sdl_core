@@ -55,6 +55,9 @@ __declspec(dllexport) policy::PolicyManager* CreateManager() {
 #else
 policy::PolicyManager* CreateManager() {
 #endif
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  profile::Profile::instance()->config_file_name(Global::RelativePathToAbsPath("smartDeviceLink.ini"));
+#endif
   ENABLE_LOGGER(profile::Profile::instance()->logs_enabled());
   return new policy::PolicyManagerImpl();
 }
