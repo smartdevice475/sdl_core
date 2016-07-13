@@ -202,7 +202,11 @@ std::string SSLTest::certificate_data_base64_;
 class SSLTestParam : public testing::TestWithParam<ProtocolAndCipher> {
  protected:
   virtual void SetUp() OVERRIDE {
+#ifdef OS_WINCE
+    std::ifstream certificate_file(Global::RelativePathToAbsPath("server/spt_credential.p12").c_str());
+#else
     std::ifstream certificate_file("server/spt_credential.p12");
+#endif
     ASSERT_TRUE(certificate_file.is_open())
         << "Could not open certificate data file";
 
