@@ -1,34 +1,34 @@
-//
-// Copyright (c) 2013, Ford Motor Company
-// All rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met:
-//
-// Redistributions of source code must retain the above copyright notice, this
-// list of conditions and the following disclaimer.
-//
-// Redistributions in binary form must reproduce the above copyright notice,
-// this list of conditions and the following
-// disclaimer in the documentation and/or other materials provided with the
-// distribution.
-//
-// Neither the name of the Ford Motor Company nor the names of its contributors
-// may be used to endorse or promote products derived from this software
-// without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-// POSSIBILITY OF SUCH DAMAGE.
-//
+/*
+ * Copyright (c) 2014, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_AUDIO_STREAM_SENDER_THREAD_H_
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_AUDIO_STREAM_SENDER_THREAD_H_
@@ -44,6 +44,10 @@ namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 class SmartObject;
 }
+}
+
+namespace application_manager {
+  class ApplicationManager;
 }
 
 namespace media_manager {
@@ -79,8 +83,9 @@ class AudioStreamSenderThread : public threads::ThreadDelegate {
      * @param session_key     Session key of connection for Mobile side
      * @param correlation_id  Correlation id for response for Mobile side
      */
-    AudioStreamSenderThread(const std::string fileName,
-                            uint32_t session_key);
+    AudioStreamSenderThread(const std::string& fileName,
+                            uint32_t session_key,
+                            application_manager::ApplicationManager& app_mngr);
 
     /*
      * @brief AudioStreamSenderThread class destructor
@@ -99,7 +104,7 @@ class AudioStreamSenderThread : public threads::ThreadDelegate {
      */
     uint32_t session_key() const;
 
-    bool exitThreadMain();
+    void exitThreadMain();
 
   private:
     /*
@@ -109,14 +114,6 @@ class AudioStreamSenderThread : public threads::ThreadDelegate {
 
     void sendAudioChunkToMobile();
 
-
-    /*
-     * @brief Creates command for corresponding smart object
-     *
-     * @param cmd Smart object representing command
-     */
-    void FactoryCreateCommand(
-      NsSmartDeviceLink::NsSmartObjects::SmartObject* cmd);
 
     bool getShouldBeStopped();
     void setShouldBeStopped(bool should_stop);
@@ -129,6 +126,8 @@ class AudioStreamSenderThread : public threads::ThreadDelegate {
     sync_primitives::ConditionalVariable  shouldBeStoped_cv_;
 
     static const int32_t                  kAudioPassThruTimeout;
+
+    application_manager::ApplicationManager& application_manager_;
 
     DISALLOW_COPY_AND_ASSIGN(AudioStreamSenderThread);
 };

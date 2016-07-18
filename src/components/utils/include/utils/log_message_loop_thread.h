@@ -37,8 +37,8 @@
 #include <queue>
 #include <log4cxx/logger.h>
 
+#include "utils/macro.h"
 #include "utils/threads/message_loop_thread.h"
-#include "utils/singleton.h"
 
 namespace logger {
 
@@ -61,18 +61,13 @@ class LogMessageHandler : public LogMessageLoopThreadTemplate::Handler {
 };
 
 class LogMessageLoopThread :
-  public LogMessageLoopThreadTemplate,
-  public utils::Singleton<LogMessageLoopThread> {
+  public LogMessageLoopThreadTemplate {
 
  public:
-  ~LogMessageLoopThread();
-
- private:
   LogMessageLoopThread();
+  ~LogMessageLoopThread();  
 
 DISALLOW_COPY_AND_ASSIGN(LogMessageLoopThread);
-FRIEND_BASE_SINGLETON_CLASS(LogMessageLoopThread);
-
 };
 
 }  // namespace logger

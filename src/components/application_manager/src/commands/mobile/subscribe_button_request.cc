@@ -48,13 +48,13 @@ SubscribeButtonRequest::~SubscribeButtonRequest() {
 }
 
 void SubscribeButtonRequest::Run() {
-  LOG4CXX_INFO(logger_, "SubscribeButtonRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app =
       ApplicationManagerImpl::instance()->application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
+    LOG4CXX_ERROR(logger_, "APPLICATION_NOT_REGISTERED");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -63,26 +63,38 @@ void SubscribeButtonRequest::Run() {
       static_cast<mobile_apis::ButtonName::eType>(
           (*message_)[str::msg_params][str::button_name].asUInt());
 
-  if (!IsSubscribtionAllowed(app, btn_id)) {
-    LOG4CXX_ERROR_EXT(logger_, "Subscribe on button " << btn_id
+  if (!IsSubscriptionAllowed(app, btn_id)) {
+    LOG4CXX_ERROR(logger_, "Subscribe on button " << btn_id
                       << " isn't allowed");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
 
+  if (!CheckHMICapabilities(btn_id)) {
+    LOG4CXX_ERROR(logger_, "Subscribe on button " << btn_id
+                      << " isn't allowed by HMI capabilities");
+    SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
+    return;
+  }
+
   if (app->IsSubscribedToButton(btn_id)) {
-    LOG4CXX_ERROR_EXT(logger_, "Already subscribed to button " << btn_id);
+    LOG4CXX_ERROR(logger_, "Already subscribed to button " << btn_id);
     SendResponse(false, mobile_apis::Result::IGNORED);
     return;
   }
 
   app->SubscribeToButton(static_cast<mobile_apis::ButtonName::eType>(btn_id));
-  SendResponse(true, mobile_apis::Result::SUCCESS);
+  SendSubscribeButtonNotification();
 
-  app->UpdateHash();
+  const bool is_succedeed = true;
+  SendResponse(is_succedeed, mobile_apis::Result::SUCCESS);
+
+  if (is_succedeed) {
+    app->UpdateHash();
+  }
 }
 
-bool SubscribeButtonRequest::IsSubscribtionAllowed(
+bool SubscribeButtonRequest::IsSubscriptionAllowed(
     ApplicationSharedPtr app, mobile_apis::ButtonName::eType btn_id) {
 
   if (!app->is_media_application() &&
@@ -94,6 +106,50 @@ bool SubscribeButtonRequest::IsSubscribtionAllowed(
   }
 
   return true;
+}
+
+bool SubscribeButtonRequest::CheckHMICapabilities(
+    mobile_apis::ButtonName::eType button) {
+  using namespace smart_objects;
+  using namespace mobile_apis;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
+  DCHECK_OR_RETURN(app_mgr, false);
+
+  const HMICapabilities& hmi_caps = app_mgr->hmi_capabilities();
+  if (!hmi_caps.is_ui_cooperating()) {
+    LOG4CXX_ERROR(logger_, "UI is not supported by HMI.");
+    return false;
+  }
+
+  const SmartObject* button_caps_ptr = hmi_caps.button_capabilities();
+  if (button_caps_ptr) {
+    const SmartObject& button_caps = *button_caps_ptr;
+    const size_t length = button_caps.length();
+    for (size_t i = 0; i < length; ++i) {
+      const SmartObject& caps = button_caps[i];
+      const ButtonName::eType name =
+          static_cast<ButtonName::eType>(caps.getElement(hmi_response::button_name).asInt());
+      if (name == button) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+void SubscribeButtonRequest::SendSubscribeButtonNotification() {
+  using namespace smart_objects;
+  using namespace hmi_apis;
+
+  // send OnButtonSubscription notification
+  SmartObject msg_params = SmartObject(SmartType_Map);
+  msg_params[strings::app_id] = connection_key();
+  msg_params[strings::name] = static_cast<Common_ButtonName::eType>(
+      (*message_)[strings::msg_params][strings::button_name].asUInt());
+  msg_params[strings::is_suscribed] = true;
+  CreateHMINotification(FunctionID::Buttons_OnButtonSubscription, msg_params);
 }
 
 }  // namespace commands

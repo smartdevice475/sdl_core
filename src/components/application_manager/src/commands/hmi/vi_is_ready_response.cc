@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -31,7 +31,6 @@
  */
 #include "application_manager/commands/hmi/vi_is_ready_response.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/policies/policy_handler.h"
 
 namespace application_manager {
 
@@ -45,7 +44,7 @@ VIIsReadyResponse::~VIIsReadyResponse() {
 }
 
 void VIIsReadyResponse::Run() {
-  LOG4CXX_INFO(logger_, "VIIsReadyResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject& object = *message_;
 
   bool is_available = false;
@@ -57,7 +56,7 @@ void VIIsReadyResponse::Run() {
       ApplicationManagerImpl::instance()->hmi_capabilities();
   hmi_capabilities.set_is_ivi_cooperating(is_available);
 
-  policy::PolicyHandler::instance()->OnVIIsReady();
+  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().OnVIIsReady();
 }
 
 }  // namespace commands

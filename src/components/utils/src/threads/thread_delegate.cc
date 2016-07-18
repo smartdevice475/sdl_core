@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,24 +40,26 @@
 namespace threads {
 
 ThreadDelegate::~ThreadDelegate() {
-  if(thread_) {
+  if (thread_) {
     thread_->set_delegate(NULL);
   }
 }
 
 void ThreadDelegate::exitThreadMain() {
   if (thread_) {
-    if (thread_->thread_handle() == pthread_self()) {
+    if (thread_->IsCurrentThread()) {
       pthread_exit(NULL);
     } else {
+#ifndef __ANDROID__
       pthread_cancel(thread_->thread_handle());
+#endif
     }
   }
 }
 
 void ThreadDelegate::set_thread(Thread *thread) {
-  DCHECK(thread && !thread->is_running());
+  DCHECK(thread);
   thread_ = thread;
 }
 
-}
+}  // namespace threads

@@ -208,11 +208,14 @@ typedef unsigned __int64   uintmax_t;
 #endif
 #endif
 
+<<<<<<< HEAD
 #ifndef WCHAR_MIN  /* also in wchar.h */
 #define WCHAR_MIN 0U
 #define WCHAR_MAX 0xffffU
 #endif
 
+=======
+>>>>>>> b6fbba03422aea7fe00f07c2d244e5aae7d55e2c
 /*
  * wint_t is unsigned short for compatibility with MS runtime
  */

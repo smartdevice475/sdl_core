@@ -1,4 +1,4 @@
-/**
+/*
  * \file bluetooth_transport_adapter.cc
  * \brief BluetoothTransportAdapter class source file.
  *
@@ -35,14 +35,14 @@
 
 #include <errno.h>
 #include <sys/types.h>
+#ifndef OS_WINCE
 #include <sys/socket.h>
+#endif
 #include <unistd.h>
 
 #include <iomanip>
 #include <set>
 #include <bluetooth/bluetooth.h>
-
-#include "resumption/last_state.h"
 
 #include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 #include "transport_manager/bluetooth/bluetooth_device_scanner.h"
@@ -62,13 +62,14 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 BluetoothTransportAdapter::~BluetoothTransportAdapter() {
 }
 
-BluetoothTransportAdapter::BluetoothTransportAdapter()
+BluetoothTransportAdapter::BluetoothTransportAdapter(resumption::LastState &last_state)
   : TransportAdapterImpl(new BluetoothDeviceScanner(this, true, 0),
-                         new BluetoothConnectionFactory(this), 0) {
+                         new BluetoothConnectionFactory(this), NULL,
+                         last_state) {
 }
 
 DeviceType BluetoothTransportAdapter::GetDeviceType() const {
-  return "sdl-bluetooth";
+  return BLUETOOTH;
 }
 
 void BluetoothTransportAdapter::Store() const {
@@ -109,7 +110,7 @@ void BluetoothTransportAdapter::Store() const {
     }
   }
   bluetooth_adapter_dictionary["devices"] = devices_dictionary;
-  resumption::LastState::instance()->dictionary["TransportManager"]["BluetoothAdapter"] =
+  last_state().dictionary["TransportManager"]["BluetoothAdapter"] =
     bluetooth_adapter_dictionary;
   LOG4CXX_TRACE(logger_, "exit");
 }
@@ -118,7 +119,7 @@ bool BluetoothTransportAdapter::Restore() {
   LOG4CXX_TRACE(logger_, "enter");
   bool errors_occured = false;
   const Json::Value bluetooth_adapter_dictionary =
-    resumption::LastState::instance()->dictionary["TransportManager"]["BluetoothAdapter"];
+      last_state().dictionary["TransportManager"]["BluetoothAdapter"];
   const Json::Value devices_dictionary = bluetooth_adapter_dictionary["devices"];
   for (Json::Value::const_iterator i = devices_dictionary.begin();
        i != devices_dictionary.end(); ++i) {
@@ -155,7 +156,7 @@ bool BluetoothTransportAdapter::Restore() {
   if (result) {
     LOG4CXX_TRACE(logger_, "exit with TRUE");
   } else {
-      LOG4CXX_TRACE(logger_, "exit with FALSE");
+    LOG4CXX_TRACE(logger_, "exit with FALSE");
   }
   return result;
 }

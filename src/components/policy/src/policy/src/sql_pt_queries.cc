@@ -1,5 +1,5 @@
-﻿/*
- Copyright (c) 2013, " Ford Motor Company
+/*
+ Copyright (c) 2015, " Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, " with or without
@@ -67,17 +67,19 @@ const std::string kCreateSchema =
   "); "
   "CREATE TABLE IF NOT EXISTS `module_config`( "
   "  `preloaded_pt` BOOL NOT NULL, "
+  "  `is_first_run` BOOL NOT NULL, "
   "  `exchange_after_x_ignition_cycles` INTEGER NOT NULL, "
   "  `exchange_after_x_kilometers` INTEGER NOT NULL, "
   "  `exchange_after_x_days` INTEGER NOT NULL, "
   "  `timeout_after_x_seconds` INTEGER NOT NULL, "
+  "  `certificate` TEXT, "
   "  `vehicle_make` VARCHAR(45), "
   "  `vehicle_model` VARCHAR(45), "
   "  `vehicle_year` VARCHAR(4) "
   "); "
   "CREATE TABLE IF NOT EXISTS `functional_group`( "
   "  `id` INTEGER PRIMARY KEY NOT NULL, "
-  "  `user_consent_prompt` TEXT UNIQUE ON CONFLICT REPLACE, "
+  "  `user_consent_prompt` TEXT, "
   "  `name` VARCHAR(100) NOT NULL "
   "); "
   "CREATE TABLE IF NOT EXISTS `priority`( "
@@ -188,7 +190,7 @@ const std::string kCreateSchema =
   "  `functional_group_id` INTEGER NOT NULL, "
   "  `is_consented` BOOL NOT NULL, "
   "  `input` VARCHAR(45), "
-  "  `time_stamp` DATETIME DEFAULT CURRENT_TIMESTAMP, "
+  "  `time_stamp` VARCHAR(45), "
   "  PRIMARY KEY(`device_id`,`functional_group_id`), "
   "  CONSTRAINT `fk_device_has_functional_group_device1` "
   "    FOREIGN KEY(`device_id`) "
@@ -217,6 +219,7 @@ const std::string kCreateSchema =
   "  `count_of_rpcs_sent_in_hmi_none` INTEGER DEFAULT 0, "
   "  `count_of_removals_for_bad_behavior` INTEGER DEFAULT 0, "
   "  `count_of_run_attempts_while_revoked` INTEGER DEFAULT 0, "
+  "  `count_of_tls_errors` INTEGER DEFAULT 0, "
   "  `app_registration_language_gui` VARCHAR(25), "
   "  `app_registration_language_vui` VARCHAR(25), "
   "  CONSTRAINT `fk_app_levels_application1` "
@@ -253,6 +256,14 @@ const std::string kCreateSchema =
   "    FOREIGN KEY(`application_id`) "
   "    REFERENCES `application`(`id`) "
   "); "
+  "CREATE TABLE IF NOT EXISTS `request_type`( "
+  "  `request_type` VARCHAR(50) NOT NULL, "
+  "  `application_id` VARCHAR(45) NOT NULL, "
+  "  PRIMARY KEY(`request_type`,`application_id`), "
+  "  CONSTRAINT `fk_app_type_application1` "
+  "    FOREIGN KEY(`application_id`) "
+  "    REFERENCES `application`(`id`) "
+  "); "
   "CREATE INDEX IF NOT EXISTS `app_type.fk_app_type_application1_idx` "
   "  ON `app_type`(`application_id`); "
   "CREATE TABLE IF NOT EXISTS `consent_group`( "
@@ -261,7 +272,7 @@ const std::string kCreateSchema =
   "  `functional_group_id` INTEGER NOT NULL, "
   "  `is_consented` BOOL NOT NULL, "
   "  `input` VARCHAR(45), "
-  "  `time_stamp` DATETIME DEFAULT CURRENT_TIMESTAMP, "
+  "  `time_stamp` VARCHAR(45), "
   "  PRIMARY KEY(`application_id`,`functional_group_id`,`device_id`), "
   "  CONSTRAINT `fk_consent_group_device1` "
   "    FOREIGN KEY(`device_id`) "
@@ -279,7 +290,7 @@ const std::string kCreateSchema =
   "CREATE INDEX IF NOT EXISTS `consent_group.fk_consent_group_functional_group1_idx` "
   "  ON `consent_group`(`functional_group_id`); "
   "CREATE TABLE IF NOT EXISTS `endpoint`( "
-  "  `service` INTEGER NOT NULL, "
+  "  `service` VARCHAR(100) NOT NULL, "
   "  `url` VARCHAR(100) NOT NULL, "
   "  `application_id` VARCHAR(45) NOT NULL, "
   "  CONSTRAINT `fk_endpoint_application1` "
@@ -308,6 +319,9 @@ const std::string kCreateSchema =
   "  ON `message`(`language_code`);"
   "CREATE INDEX IF NOT EXISTS `message.fk_message_consumer_friendly_messages1_idx` "
   "  ON `message`(`message_type_name`);"
+  "CREATE TABLE IF NOT EXISTS `_internal_data`( "
+  "   `db_version_hash` INTEGER "
+  "  ); "
   "COMMIT;";
 
 const std::string kInsertInitData =
@@ -318,10 +332,10 @@ const std::string kInsertInitData =
   "  `pt_exchanged_x_days_after_epoch`, `ignition_cycles_since_last_exchange`,"
   "  `flag_update_required`) "
   "  VALUES (0, 0, 0, 0); "
-  "INSERT OR IGNORE INTO `module_config` (`preloaded_pt`, "
+  "INSERT OR IGNORE INTO `module_config` (`preloaded_pt`, `is_first_run`,"
   "  `exchange_after_x_ignition_cycles`, `exchange_after_x_kilometers`, "
   "  `exchange_after_x_days`, `timeout_after_x_seconds`) "
-  "  VALUES(1, 0, 0, 0, 0); "
+  "  VALUES(1, 0, 0, 0, 0, 0); "
   "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('EMERGENCY'); "
   "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('NAVIGATION'); "
   "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('VOICECOMMUNICATION'); "
@@ -333,6 +347,7 @@ const std::string kInsertInitData =
   "INSERT OR IGNORE INTO `hmi_level`(`value`) VALUES ('BACKGROUND'); "
   "INSERT OR IGNORE INTO `hmi_level`(`value`) VALUES ('NONE'); "
   "INSERT OR IGNORE INTO `version` (`number`) VALUES('0'); "
+  "INSERT OR IGNORE INTO `_internal_data` (`db_version_hash`) VALUES(0); "
   "";
 
 const std::string kDropSchema =
@@ -382,6 +397,7 @@ const std::string kDropSchema =
   "DROP TABLE IF EXISTS `module_meta`; "
   "DROP TABLE IF EXISTS `usage_and_error_count`; "
   "DROP TABLE IF EXISTS `device`; "
+  "DROP TABLE IF EXISTS `_internal_data`; "
   "COMMIT; "
   "VACUUM;";
 
@@ -439,6 +455,9 @@ const std::string kSetNotFirstRun =
 const std::string kSelectEndpoint =
   "SELECT `url`, `application_id` FROM `endpoint` WHERE `service` = ? ";
 
+const std::string kSelectLockScreenIcon =
+  "SELECT `url` FROM `endpoint` WHERE `service` = ? AND `application_id` = ?";
+
 const std::string kInsertFunctionalGroup =
   "INSERT INTO `functional_group` (`id`, `name`, `user_consent_prompt`) "
   "  VALUES (?, ?, ?)";
@@ -465,6 +484,9 @@ const std::string kInsertNickname =
 const std::string kInsertAppType =
   "INSERT OR IGNORE INTO `app_type` (`application_id`, `name`) VALUES (?, ?)";
 
+const std::string kInsertRequestType =
+  "INSERT OR IGNORE INTO `request_type` (`application_id`, `request_type`) VALUES (?, ?)";
+
 const std::string kUpdateVersion = "UPDATE `version` SET `number`= ?";
 
 const std::string kInsertMessageType =
@@ -481,7 +503,7 @@ const std::string kUpdateModuleConfig =
   "UPDATE `module_config` SET `preloaded_pt` = ?, "
   "  `exchange_after_x_ignition_cycles` = ?,"
   "  `exchange_after_x_kilometers` = ?, `exchange_after_x_days` = ?, "
-  "  `timeout_after_x_seconds` = ?, `vehicle_make` = ?, "
+  "  `timeout_after_x_seconds` = ?, `certificate` = ?, `vehicle_make` = ?, "
   "  `vehicle_model` = ?, `vehicle_year` = ?";
 
 const std::string kInsertEndpoint =
@@ -507,7 +529,7 @@ const std::string kInsertAppLevel =
     "`count_of_rejections_duplicate_name`,`count_of_rejected_rpcs_calls`,"
     "`count_of_rpcs_sent_in_hmi_none`,`count_of_removals_for_bad_behavior`,"
     "`count_of_run_attempts_while_revoked`,`app_registration_language_gui`,"
-    "`app_registration_language_vui`) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    "`app_registration_language_vui`, `count_of_tls_errors`) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 const std::string kDeleteSecondsBetweenRetries =
   "DELETE FROM `seconds_between_retry`";
@@ -527,14 +549,12 @@ const std::string kDeleteAppGroup = "DELETE FROM `app_group`";
 const std::string kSelectModuleConfig =
   "SELECT `preloaded_pt`, `exchange_after_x_ignition_cycles`, "
   " `exchange_after_x_kilometers`, `exchange_after_x_days`, "
-  " `timeout_after_x_seconds`, `vehicle_make`,"
+  " `timeout_after_x_seconds`, `certificate`, `vehicle_make`,"
   " `vehicle_model`, `vehicle_year` "
   " FROM `module_config`";
 
 const std::string kSelectEndpoints =
-  "SELECT `url`, `service`, `application_id` "
-  "FROM `endpoint` "
-  "GROUP BY `application_id`";
+  "SELECT `url`, `service`, `application_id` FROM `endpoint` ";
 
 const std::string kSelectNotificationsPerMin =
   "SELECT `priority_value`, `value` FROM notifications_by_priority";
@@ -570,6 +590,9 @@ const std::string kSelectNicknames = "SELECT DISTINCT `name` FROM `nickname` "
 
 const std::string kSelectAppTypes = "SELECT DISTINCT `name` FROM `app_type` "
                                     "WHERE `application_id` = ?";
+
+const std::string kSelectRequestTypes =
+    "SELECT DISTINCT `request_type` FROM `request_type` WHERE `application_id` = ?";
 
 const std::string kSelectSecondsBetweenRetries =
   "SELECT `value` FROM `seconds_between_retry` ORDER BY `index`";
@@ -613,6 +636,8 @@ const std::string kUpdateCountersSuccessfulUpdate =
 
 const std::string kDeleteApplication = "DELETE FROM `application`";
 
+const std::string kDeleteRequestType = "DELETE FROM `request_type`";
+
 const std::string kSelectApplicationRevoked =
   "SELECT `is_revoked` FROM `application` WHERE `id` = ?";
 
@@ -644,6 +669,12 @@ const std::string kSelectApplicationFull =
   "SELECT `keep_context`, `steal_focus`, `default_hmi`, `priority_value`, "
   "  `is_revoked`, `is_default`, `is_predata`, `memory_kb`,"
   "  `heart_beat_timeout_ms`, `certificate` FROM `application` WHERE `id` = ?";
+
+const std::string kSelectDBVersion =
+    "SELECT `db_version_hash` from `_internal_data`";
+
+const std::string kUpdateDBVersion =
+    "UPDATE `_internal_data` SET `db_version_hash` = ? ";
 
 }  // namespace sql_pt
 }  // namespace policy

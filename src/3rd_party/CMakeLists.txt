@@ -31,9 +31,12 @@
 INCLUDE("./set_3rd_party_paths.cmake")
 
 if(ENABLE_LOG OR HMI_DBUS_API)
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+else()
   # --- libexpat
   add_subdirectory(expat-2.1.0)
   set(EXPAT_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
+endif()
 endif()
 
 if(ENABLE_LOG)
@@ -44,7 +47,8 @@ if(ENABLE_LOG)
   set(LOG4CXX_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
 endif()
 
-if(ENABLE_LOG AND NOT (${is_logger_actual} EQUAL 0))
+if(ENABLE_LOG)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
   # --- libapr-1
   add_subdirectory(apr-cmake)
 
@@ -53,6 +57,25 @@ if(ENABLE_LOG AND NOT (${is_logger_actual} EQUAL 0))
 
   # --- log4cxx
   add_subdirectory(apache-log4cxx-cmake)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  if(MODIFY_FUNCTION_FLAGS)
+    MESSAGE(STATUS  "current binary dir is ${CMAKE_CURRENT_BINARY_DIR}")
+    MESSAGE(STATUS  "current source dir is ${CMAKE_CURRENT_SOURCE_DIR}")
+    set(LOG4CXX_LIBS_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}/apache-log4cxx-win32-0.10.0/apache-log4cxx-0.10.0/Release)
+    set(LOG4CXX_INCLUDE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/apache-log4cxx-win32-0.10.0/apache-log4cxx-0.10.0/src/main/include)
+    #set(LOG4CXX_BUILD_INCLUDE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/apache-log4cxx-win32-0.10.0/src/main/include)
+   
+    set(APR_LIBS_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/apache-log4cxx-win32-0.10.0/apr/Release)
+    set(APR_UTIL_LIBS_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/apache-log4cxx-win32-0.10.0/apr-util/Release)
+   
+    set(APR_LIBS_DIRECTORY ${APR_LIBS_DIRECTORY} PARENT_SCOPE)
+    set(APR_UTIL_LIBS_DIRECTORY ${APR_UTIL_LIBS_DIRECTORY} PARENT_SCOPE)
+    set(LOG4CXX_LIBS_DIRECTORY ${LOG4CXX_LIBS_DIRECTORY} PARENT_SCOPE)
+    set(LOG4CXX_INCLUDE_DIRECTORY ${LOG4CXX_INCLUDE_DIRECTORY} PARENT_SCOPE)
+    set(LOG4CXX_BUILD_INCLUDE_DIRECTORY ${LOG4CXX_BUILD_INCLUDE_DIRECTORY} PARENT_SCOPE)
+  endif()
+  add_subdirectory(apache-log4cxx-win32-0.10.0)
+endif()
 endif()
 
 # --- D-Bus
@@ -64,7 +87,7 @@ if(HMI_DBUS_API)
   set(DBUS_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
 endif()
 
-if(HMI_DBUS_API AND NOT (${is_dbus_actual} EQUAL 0))
+if(HMI_DBUS_API)
   add_subdirectory(dbus-cmake)
 endif()
 

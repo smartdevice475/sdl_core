@@ -31,6 +31,36 @@
 #ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ERRORS_H_
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ERRORS_H_
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#ifdef ERROR
+#undef ERROR
+#endif // ERROR
+//>>>>>>>>>> DECLARE_ENUM >>>>>>>>>>
+#define DECLARE_ENUM(E) \
+struct E \
+{ \
+public: \
+	E(int value = 0) : _value((__Enum)value) { \
+	} \
+	E& operator=(int value) { \
+	this->_value = (__Enum)value; \
+	return *this; \
+	} \
+	operator int() const { 	\
+	return this->_value; \
+	} \
+	\
+enum __Enum {
+
+#define END_ENUM() \
+}; \
+	\
+private: \
+	__Enum _value; \
+};
+//<<<<<<<<<< DECLARE_ENUM <<<<<<<<<<
+#endif // OS_WIN32
+
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 namespace Errors {

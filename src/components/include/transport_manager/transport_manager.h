@@ -37,6 +37,11 @@
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
 #include "protocol/common.h"
+#include "resumption/last_state.h"
+
+namespace resumption {
+class LastState;
+}
 
 namespace transport_manager {
 
@@ -56,7 +61,13 @@ class TransportManager {
    * @brief Initialize transport manager.
    * @return Error code.
    */
-  virtual int Init() = 0;
+  virtual int Init(resumption::LastState &last_state) = 0;
+
+  /**
+   * @brief Reinitializes transport manager
+   * @return Error code
+   */
+  virtual int Reinit() = 0;
 
   /**
     * @brief Start scanning for new devices.
@@ -72,7 +83,7 @@ class TransportManager {
    *
    * @return Code error.
    **/
-  virtual int ConnectDevice(const DeviceHandle& device_id) = 0;
+  virtual int ConnectDevice(const DeviceHandle device_id) = 0;
 
   /**
    * @brief Disconnect from all applications connected on device.
@@ -81,7 +92,7 @@ class TransportManager {
    *
    * @return Code error.
    **/
-  virtual int DisconnectDevice(const DeviceHandle& device_id) = 0;
+  virtual int DisconnectDevice(const DeviceHandle device_id) = 0;
 
   /**
    * @brief Disconnect from applications connected on device by connection
@@ -91,14 +102,14 @@ class TransportManager {
    *
    * @return Code error.
    **/
-  virtual int Disconnect(const ConnectionUID& connection_id) = 0;
+  virtual int Disconnect(const ConnectionUID connection_id) = 0;
 
   /**
    * @brief Disconnect and clear all unprocessed data.
    *
    * @param connection Connection unique identifier.
    */
-  virtual int DisconnectForce(const ConnectionUID& connection_id) = 0;
+  virtual int DisconnectForce(const ConnectionUID connection_id) = 0;
 
   /**
    * @brief Post new message in queue for massages destined to device.
@@ -151,7 +162,7 @@ class TransportManager {
    *
    * @return Code error.
    **/
-  virtual int RemoveDevice(const DeviceHandle& device_handle) = 0;
+  virtual int RemoveDevice(const DeviceHandle device_handle) = 0;
 
   /**
    * @brief Turns on or off visibility of SDL to mobile devices

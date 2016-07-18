@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -33,11 +33,20 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_RESOURCE_USAGE_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_RESOURCE_USAGE_H_
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#include "sched.h"
+#include <stdint.h>
+#ifdef BUILD_TESTS
+#include "gtest/gtest.h"
+#endif
+#else
 #include <sys/resource.h>
+#endif
 #if defined(__QNXNTO__)
 #include <sys/procfs.h>
 #endif
 
+#include "utils/macro.h"
 #include <string>
 #include <iostream>
 
@@ -60,7 +69,7 @@ class Resources {
 #if defined(__QNXNTO__)
   typedef procfs_info PidStats;
 
-#elif defined(OS_LINUX)
+#elif defined(OS_LINUX) || defined(OS_WIN32) || defined(OS_WINCE) || defined(OS_ANDROID)
 
   struct PidStats {
     int pid;
@@ -119,6 +128,16 @@ class Resources {
   static ResourseUsage* getCurrentResourseUsage();
 
 private:
+
+#ifdef BUILD_TESTS
+  friend class ResourceUsagePrivateTest;
+  FRIEND_TEST(ResourceUsagePrivateTest, ReadStatFileTest);
+  FRIEND_TEST(ResourceUsagePrivateTest, GetProcInfoTest);
+  FRIEND_TEST(ResourceUsagePrivateTest, GetMemInfoTest);
+  FRIEND_TEST(ResourceUsagePrivateTest, GetStatPathTest_FileExists);
+  FRIEND_TEST(ResourceUsagePrivateTest, GetStatPathTest_ReadFile);
+  FRIEND_TEST(ResourceUsagePrivateTest, GetProcPathTest);
+#endif
 
   /*
    * @brief reads /proc/PID/stat file on linux

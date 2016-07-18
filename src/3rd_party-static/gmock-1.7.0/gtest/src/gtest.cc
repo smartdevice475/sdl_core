@@ -50,6 +50,11 @@
 #include <sstream>
 #include <vector>
 
+#ifdef OS_WINCE
+#include "time_ext.h"
+#include "utils/file_system.h"
+#endif
+
 #if GTEST_OS_LINUX
 
 // TODO(kenton@google.com): Use autoconf to detect availability of
@@ -2144,6 +2149,7 @@ void Test::Run() {
   internal::UnitTestImpl* const impl = internal::GetUnitTestImpl();
   impl->os_stack_trace_getter()->UponLeavingGTest();
   internal::HandleExceptionsInMethodIfSupported(this, &Test::SetUp, "SetUp()");
+
   // We will run the test only if SetUp() was successful.
   if (!HasFatalFailure()) {
     impl->os_stack_trace_getter()->UponLeavingGTest();
@@ -3542,7 +3548,11 @@ class ScopedPrematureExitFile {
 
   ~ScopedPrematureExitFile() {
     if (premature_exit_filepath_ != NULL && *premature_exit_filepath_ != '\0') {
+#ifdef OS_WINCE
+      file_system::DeleteFileWindows(premature_exit_filepath_);
+#else
       remove(premature_exit_filepath_);
+#endif
     }
   }
 
@@ -3852,6 +3862,7 @@ void UnitTest::RecordProperty(const std::string& key,
 // We don't protect this under mutex_, as we only support calling it
 // from the main thread.
 int UnitTest::Run() {
+printf("---UnitTest::Run--enter\n");
   const bool in_death_test_child_process =
       internal::GTEST_FLAG(internal_run_death_test).length() > 0;
 
@@ -3923,6 +3934,7 @@ int UnitTest::Run() {
   }
 #endif  // GTEST_HAS_SEH
 
+printf("---UnitTest::Run--quit\n");
   return internal::HandleExceptionsInMethodIfSupported(
       impl(),
       &internal::UnitTestImpl::RunAllTests,

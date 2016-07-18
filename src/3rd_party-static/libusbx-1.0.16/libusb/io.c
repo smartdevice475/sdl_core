@@ -2489,7 +2489,7 @@ DEFAULT_VISIBILITY
 const struct libusb_pollfd ** LIBUSB_CALL libusb_get_pollfds(
 	libusb_context *ctx)
 {
-#ifndef OS_WINDOWS
+#ifndef OS_WIN32
 	struct libusb_pollfd **ret = NULL;
 	struct usbi_pollfd *ipollfd;
 	size_t i = 0;

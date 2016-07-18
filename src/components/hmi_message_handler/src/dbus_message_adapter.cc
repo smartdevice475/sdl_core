@@ -33,7 +33,7 @@
 #include "hmi_message_handler/dbus_message_adapter.h"
 #include <sstream>
 #include "utils/logger.h"
-#include "formatters/CSmartFactory.hpp"
+#include "formatters/CSmartFactory.h"
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 namespace sos = NsSmartDeviceLink::NsJSONHandler::strings;
@@ -58,7 +58,7 @@ std::vector<std::string> &split(const std::string &s, char delim,
 }
 
 DBusMessageAdapter::DBusMessageAdapter(HMIMessageHandler* hmi_msg_handler)
-    : HMIMessageAdapter(hmi_msg_handler),
+    : HMIMessageAdapterImpl(hmi_msg_handler),
       DBusMessageController(SDL_SERVICE_NAME, SDL_OBJECT_PATH,
                             HMI_SERVICE_NAME, HMI_OBJECT_PATH) {
   LOG4CXX_INFO(logger_, "Created DBusMessageAdapter");
@@ -86,7 +86,7 @@ void DBusMessageAdapter::SendMessageToHMI(MessageSharedPointer message) {
       break;
     case hmi_apis::messageType::INVALID_ENUM:
     default:
-      LOG4CXX_INFO(logger_, "Message type is invalid");
+      LOG4CXX_WARN(logger_, "Message type is invalid");
   }
 }
 
@@ -119,6 +119,7 @@ void DBusMessageAdapter::SubscribeTo() {
   DBusMessageController::SubscribeTo("BasicCommunication", "OnSystemRequest");
   DBusMessageController::SubscribeTo("BasicCommunication", "OnSystemInfoChanged");
   DBusMessageController::SubscribeTo("BasicCommunication", "OnPhoneCall");
+  DBusMessageController::SubscribeTo("BasicCommunication", "OnEmergencyEvent");
   DBusMessageController::SubscribeTo("TTS", "Started");
   DBusMessageController::SubscribeTo("TTS", "Stopped");
   DBusMessageController::SubscribeTo("TTS", "OnLanguageChange");
@@ -156,7 +157,7 @@ void DBusMessageAdapter::SubscribeTo() {
 }
 
 void DBusMessageAdapter::SendMessageToCore(const smart_objects::SmartObject& obj) {
-  LOG4CXX_INFO(logger_, "DBusMessageAdapter::SendMessageToCore");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   if (!handler()) {
     LOG4CXX_WARN(logger_, "DBusMessageAdapter hasn't handler");
@@ -171,7 +172,7 @@ void DBusMessageAdapter::SendMessageToCore(const smart_objects::SmartObject& obj
 }
 
 void DBusMessageAdapter::Request(const smart_objects::SmartObject& obj) {
-  LOG4CXX_DEBUG(logger_, "Request");
+  LOG4CXX_AUTO_TRACE(logger_);
   dbus::MessageId func_id = static_cast<dbus::MessageId>(
       obj[sos::S_PARAMS][sos::S_FUNCTION_ID].asInt());
   dbus::MessageName name = get_schema().getMessageName(func_id);
@@ -180,7 +181,7 @@ void DBusMessageAdapter::Request(const smart_objects::SmartObject& obj) {
 }
 
 void DBusMessageAdapter::Notification(const smart_objects::SmartObject &obj) {
-  LOG4CXX_DEBUG(logger_, "Notification");
+  LOG4CXX_AUTO_TRACE(logger_);
   dbus::MessageId func_id = static_cast<dbus::MessageId>(
       obj[sos::S_PARAMS][sos::S_FUNCTION_ID].asInt());
   dbus::MessageName name = get_schema().getMessageName(func_id);
@@ -188,7 +189,7 @@ void DBusMessageAdapter::Notification(const smart_objects::SmartObject &obj) {
 }
 
 void DBusMessageAdapter::Response(const smart_objects::SmartObject& obj) {
-  LOG4CXX_DEBUG(logger_, "Response");
+  LOG4CXX_AUTO_TRACE(logger_);
   dbus::MessageId func_id = static_cast<dbus::MessageId>(
         obj[sos::S_PARAMS][sos::S_FUNCTION_ID].asInt());
   dbus::MessageName name = get_schema().getMessageName(func_id);

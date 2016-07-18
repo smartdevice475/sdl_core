@@ -49,7 +49,7 @@ class UsbConnection : public Connection {
   UsbConnection(const DeviceUID& device_uid,
                 const ApplicationHandle& app_handle,
                 TransportAdapterController* controller,
-                const UsbHandlerSptr& usb_handler, PlatformUsbDevice* device);
+                const UsbHandlerSptr usb_handler, PlatformUsbDevice* device);
   bool Init();
   virtual ~UsbConnection();
 
@@ -88,8 +88,17 @@ class UsbConnection : public Connection {
   bool disconnecting_;
   bool waiting_in_transfer_cancel_;
   bool waiting_out_transfer_cancel_;
-  friend void InTransferCallback(struct libusb_transfer*);
-  friend void OutTransferCallback(struct libusb_transfer*);
+  friend void
+#ifdef OS_WIN32
+LIBUSB_CALL
+#endif
+InTransferCallback(struct libusb_transfer*);
+
+  friend void
+#ifdef OS_WIN32
+LIBUSB_CALL
+#endif
+OutTransferCallback(struct libusb_transfer*);
 };
 }  // namespace transport_adapter
 }  // namespace transport_manager

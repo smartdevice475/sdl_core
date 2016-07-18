@@ -1,4 +1,4 @@
-﻿/**
+﻿/*
  Copyright (c) 2014, Ford Motor Company
  All rights reserved.
 
@@ -44,14 +44,15 @@ const int32_t CommandImpl::protocol_version_ = 3;
 
 CommandImpl::CommandImpl(const MessageSharedPtr& message)
     : message_(message),
-      default_timeout_(profile::Profile::instance()->default_timeout()) {
+      default_timeout_(profile::Profile::instance()->default_timeout()),
+      allowed_to_terminate_(true) {
 }
 
 CommandImpl::~CommandImpl() {
   CleanUp();
 }
 
-bool CommandImpl::CheckPermissions(){
+bool CommandImpl::CheckPermissions() {
   return true;
 }
 

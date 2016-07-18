@@ -30,8 +30,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#include "unistd.h"
+#include "apr_arch_dso.h"
+#else
 #include <dlfcn.h>
-
+#endif
 #include "utils/appenders_loader.h"
 
 namespace utils {
@@ -39,17 +43,25 @@ namespace utils {
 AppendersLoader appenders_loader;
 
 AppendersLoader::AppendersLoader() {
-#ifdef OS_ANDROID
-  handle_ = dlopen("libappenders.so", RTLD_LAZY);
+#if defined(OS_WIN32)
+  handle_=LoadLibrary("appenders.dll");
+#elif defined(OS_WINCE)
+  handle_=LoadLibrary(L"appenders.dll");
 #else
-  handle_ = dlopen("libappenders.so", RTLD_LAZY | RTLD_NODELETE);
+  handle_ = dlopen("libappenders.so", RTLD_LAZY);
 #endif
 }
 
 AppendersLoader::~AppendersLoader() {
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  if (handle_!=0) {
+    CloseHandle(handle_);
+  }
+#else
   if (handle_ != 0) {
     dlclose(handle_);
   }
+#endif
 }
 
 bool AppendersLoader::Loaded() const {

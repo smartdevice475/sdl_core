@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -53,7 +53,7 @@ namespace utils {
 template<typename ObjectType>
 class SharedPtr {
   public:
-    //std smart pointer compability
+    //std smart pointer compatibility
     typedef ObjectType element_type;
     /**
      * @brief Constructor.
@@ -120,7 +120,7 @@ class SharedPtr {
 
     bool operator ==(const SharedPtr<ObjectType>& Other) const;
 
-    bool operator< (const SharedPtr<ObjectType>& other) const;
+    bool operator <(const SharedPtr<ObjectType>& other) const;
 
     /**
      * @brief Assignment operator.
@@ -164,8 +164,13 @@ class SharedPtr {
     operator bool() const;
     void reset();
     void reset(ObjectType* other);
-    void release();
     ObjectType* get() const;
+
+#ifdef BUILD_TESTS
+   inline const uint32_t* get_ReferenceCounter() const {
+     return mReferenceCounter;
+   }
+#endif // BUILD_TESTS
 
     /**
      * @return true if mObject not NULL
@@ -197,6 +202,8 @@ class SharedPtr {
      * @brief Pointer to reference counter.
      **/
     uint32_t* mReferenceCounter;
+
+    void release();
 };
 
 template<typename ObjectType>
@@ -248,7 +255,7 @@ inline bool utils::SharedPtr<ObjectType>::operator ==(
 }
 
 template<typename ObjectType>
-inline bool utils::SharedPtr<ObjectType>::operator< (
+inline bool utils::SharedPtr<ObjectType>::operator <(
   const SharedPtr<ObjectType>& other) const {
   return (mObject < other.mObject);
 }

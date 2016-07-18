@@ -1,4 +1,4 @@
-/* Copyright (c) 2013, Ford Motor Company
+/* Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#include <Windows.h>
+#else
 #include <dlfcn.h>
+#endif
 
 #include "gtest/gtest.h"
 
@@ -45,20 +49,71 @@ namespace policy {
   }
 }
 
-TEST(SharedLibraryTest, Full) {
-  const std::string kLib = "../src/policy/libPolicy.so";
+TEST(SharedLibraryTest, FullTest_OpenLibrarySetSymbolCloseLibrary_ExpectActsWithoutErrors) {
+#if defined(OS_WIN32)
+    //Arrange
+    const std::string kLib = "..\\src\\policy\\Policy.dll";
+    HINSTANCE handle = LoadLibrary(kLib.c_str());
+
+    //Assert
+    EXPECT_FALSE(IsError((void*)GetLastError()));
+    ASSERT_TRUE(handle);
+
+    //Act
+    const std::string kSymbol = "CreateManager";
+    void* symbol = GetProcAddress(handle, kSymbol.c_str());
+
+    //Assert
+    EXPECT_FALSE(IsError((void*)GetLastError()));
+    EXPECT_TRUE(symbol);
+#elif defined(OS_WINCE)
+    //Arrange
+    const std::wstring kLib = L"..\\src\\policy\\Policy.dll";
+    HINSTANCE handle = LoadLibrary(kLib.c_str());
+
+    //Assert
+    EXPECT_FALSE(IsError((void*)GetLastError()));
+    ASSERT_TRUE(handle);
+
+    //Act
+    const std::wstring kSymbol = L"CreateManager";
+    void* symbol = GetProcAddress(handle, kSymbol.c_str());
+
+    //Assert
+    EXPECT_FALSE(IsError((void*)GetLastError()));
+    EXPECT_TRUE(symbol);
+#else
+  //Arrange
+    const int iBuffLen = 256;
+    char aPathBuff[iBuffLen];
+    std::string strResult("");
+    getcwd(aPathBuff,iBuffLen);
+    strResult = aPathBuff;
+
+  //const std::string kLib = "../src/policy/libPolicy.so";
+	const std::string kLib = strResult + "/../src/policy/libPolicy.so";
+printf("---%s\n",kLib.c_str());
   void* handle = dlopen(kLib.c_str(), RTLD_LAZY);
-  EXPECT_FALSE(IsError(dlerror()));
+
+  //Assert
+  EXPECT_FALSE(IsError((void*)dlerror()));
   ASSERT_TRUE(handle);
 
+  //Act
   const std::string kSymbol = "CreateManager";
   void* symbol = dlsym(handle, kSymbol.c_str());
-  EXPECT_FALSE(IsError(dlerror()));
+
+  //Assert
+  EXPECT_FALSE(IsError((void*)dlerror()));
   EXPECT_TRUE(symbol);
 
+  //Act
   int ret = dlclose(handle);
+
+  //Assert
   EXPECT_FALSE(ret);
-  EXPECT_FALSE(IsError(dlerror()));
+  EXPECT_FALSE(IsError((void*)dlerror()));
+#endif
 }
 
 }  // namespace policy

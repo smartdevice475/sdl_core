@@ -13,13 +13,13 @@ namespace NsMessageBroker
 {
    CMessageBrokerController::CMessageBrokerController(const std::string& address, uint16_t port, std::string name):
    TcpClient(address, port),
+   stop(false),
    m_receivingBuffer(""),
    mControllersIdStart(-1),
    mControllersIdCurrent(0)
    {
       mControllersName = name;
    }
-
 
    std::string CMessageBrokerController::getControllersName()
    {
@@ -272,7 +272,6 @@ namespace NsMessageBroker
 
    void* CMessageBrokerController::MethodForReceiverThread(void * arg)
    {
-      sync_primitives::AutoLock auto_lock(receiving_thread_lock_);
       stop = false;
       arg = arg; // to avoid compiler warnings
       while(!stop)
@@ -308,6 +307,12 @@ namespace NsMessageBroker
             err["code"] = NsMessageBroker::INVALID_REQUEST;
             err["message"] = "Invalid MessageBroker request.";
             error["error"] = err;
+            return false;
+         }
+
+         if (root.isMember("result") && root.isMember("error"))
+         {
+            /* message can't contain simultaneously result and error*/
             return false;
          }
 

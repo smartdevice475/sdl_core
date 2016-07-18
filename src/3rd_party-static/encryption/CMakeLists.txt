@@ -5,15 +5,27 @@ include_directories (
   ./include
 )
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    include_directories(${CMAKE_SOURCE_DIR}/include/win32/)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+    include_directories(${CMAKE_SOURCE_DIR}/include/wince/)
+    include_directories(${CMAKE_SOURCE_DIR}/lib/wince/)
+endif()
+
 set (SOURCES
     ./src/Base64.cpp
     ./src/hashing.cc
 )
 
-set (LIBRARIES crypto)
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  set (LIBRARIES ssleay32 libeay32)
+else()
+  set (LIBRARIES crypto)
+endif()
 
 add_library("encryption" ${SOURCES})
 if (CMAKE_SYSTEM_NAME STREQUAL "Android")
 else()
 target_link_libraries("encryption" "${LIBRARIES}")
 endif()
+

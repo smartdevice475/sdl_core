@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/on_ignition_cycle_over_notification.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
@@ -46,8 +46,8 @@ OnIgnitionCycleOverNotification::~OnIgnitionCycleOverNotification() {
 }
 
 void OnIgnitionCycleOverNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnIgnitionCycleOverNotification::Run");
-  policy::PolicyHandler::instance()->OnIgnitionCycleOver();
+  LOG4CXX_AUTO_TRACE(logger_);
+  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().OnIgnitionCycleOver();
 }
 
 }  // namespace commands

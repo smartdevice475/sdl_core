@@ -1,12 +1,41 @@
-set (COMPONENTS_DIR ${CMAKE_SOURCE_DIR}/src/components)
+# Copyright (c) 2014, Ford Motor Company
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# Redistributions of source code must retain the above copyright notice, this
+# list of conditions and the following disclaimer.
+#
+# Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following
+# disclaimer in the documentation and/or other materials provided with the
+# distribution.
+#
+# Neither the name of the Ford Motor Company nor the names of its contributors
+# may be used to endorse or promote products derived from this software
+# without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
+
 set (AM_SOURCE_DIR ${COMPONENTS_DIR}/application_manager)
 set (AM_TEST_DIR ${AM_SOURCE_DIR}/test)
 set (AM_MOCK_DIR ${AM_TEST_DIR}/mock)
 
-
-
 include_directories (
   include/
+  ${COMPONENTS_DIR}
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/formatters/include/
   ${COMPONENTS_DIR}/protocol_handler/include/
@@ -18,8 +47,8 @@ include_directories (
   ${COMPONENTS_DIR}/request_watchdog/include/
   ${COMPONENTS_DIR}/resumption/include/
   ${COMPONENTS_DIR}/rpc_base/include/
+  ${COMPONENTS_DIR}/interfaces
   ${CMAKE_BINARY_DIR}/src/components/
-  ${COMPONENTS_DIR}/include/
   ${COMPONENTS_DIR}/policy/src/policy/include/
   ${COMPONENTS_DIR}/policy/src/policy/usage_statistics/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
@@ -28,25 +57,61 @@ include_directories (
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    include_directories(
+        ${COMPONENTS_DIR}/utils/include/utils/sqlite_wrapper/
+        ${CMAKE_SOURCE_DIR}/include/win32
+        ${CMAKE_SOURCE_DIR}/src/3rd_party/apache-log4cxx-win32-0.10.0/apr/include/arch/win32
+        ${CMAKE_SOURCE_DIR}/src/LibVrMsp/
+	    ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
+    )
+endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+    include_directories(
+        ${COMPONENTS_DIR}/utils/include/utils/sqlite_wrapper/
+	    ${CMAKE_SOURCE_DIR}/include/wince
+	    ${CMAKE_SOURCE_DIR}/src/LibVrMsp/
+        ${CMAKE_SOURCE_DIR}/src/3rd_party-static/pthread-win32-2.9.1
+    )
+endif()
+  
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "Android")
+  include_directories(
+    ${COMPONENTS_DIR}/utils/include/utils/sqlite_wrapper/
+  )
+endif ()
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "QNX")
+  include_directories(
+    ${COMPONENTS_DIR}/utils/include/utils/qdb_wrapper/
+  )
+endif()
+
 file (GLOB SOURCES
   ${AM_SOURCE_DIR}/src/*
+)
+
+set (MESSAGE_HELPER_SOURCES
+  ${AM_SOURCE_DIR}/src/message_helper/message_helper.cc
 )
 
 set (POLICIES_MANAGER
 ${AM_SOURCE_DIR}/src/policies/policy_handler.cc
 ${AM_SOURCE_DIR}/src/policies/policy_event_observer.cc
+${AM_SOURCE_DIR}/src/policies/delegates/app_permission_delegate.cc
+${AM_SOURCE_DIR}/src/policies/delegates/statistics_delegate.cc
 )
 
   include_directories(
     ${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct
   )
-  list(APPEND POLICIES_MANAGER
-    ${AM_SOURCE_DIR}/src/policies/pt_exchange_handler_impl.cc
-    ${AM_SOURCE_DIR}/src/policies/policy_retry_sequence.cc
-  )
-
 file (GLOB EVENT_ENGINE
   ${AM_SOURCE_DIR}/src/event_engine/*
+)
+
+file (GLOB RESUMPTION
+  ${AM_SOURCE_DIR}/src/resumption/*
 )
 
 file (GLOB MOBILE_COMMANDS_SOURCES
@@ -87,6 +152,8 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${AM_SOURCE_DIR}/src/commands/hmi/on_update_device_list.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/update_device_list_request.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/update_device_list_response.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_audio_data_streaming_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_video_data_streaming_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_sdl_consent_needed_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_sdl_persistence_complete_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_exit_all_applications_notification.cc
@@ -163,8 +230,8 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${AM_SOURCE_DIR}/src/commands/hmi/ui_end_audio_pass_thru_response.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/ui_perform_interaction_request.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/ui_perform_interaction_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_set_icon_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_set_icon_response.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/ui_set_app_icon_request.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/ui_set_app_icon_response.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/ui_set_media_clock_timer_request.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/ui_set_media_clock_timer_response.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/ui_show_request.cc
@@ -201,7 +268,6 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${AM_SOURCE_DIR}/src/commands/hmi/on_ignition_cycle_over_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_system_info_changed_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_file_removed_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_play_tone_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_tts_started_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_tts_stopped_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_vr_started_notification.cc
@@ -215,6 +281,7 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${AM_SOURCE_DIR}/src/commands/hmi/on_ui_language_change_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_button_event_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_button_press_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_button_subscription_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_find_applications.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_ui_keyboard_input_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_ui_touch_event_notification.cc
@@ -246,7 +313,9 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${AM_SOURCE_DIR}/src/commands/hmi/get_urls_response.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_device_state_changed_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_tts_reset_timeout_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_phone_call_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/dial_number_request.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/dial_number_response.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_event_changed_notification.cc
 )
 
 set (HMI_COMMANDS_SOURCES_JSON
@@ -290,18 +359,42 @@ if (${HMI_DBUS_API})
     set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_DBUS})
 endif (${HMI_DBUS_API})
 
-SET (LIBRARIES
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+set (LIBRARIES
+  HMI_API
+  MOBILE_API
+  v4_protocol_v1_2_no_extra
+  ProtocolLibrary
+  SmartObjects
+  UsageStatistics
+  formatters
+  dbms
+)
+else()
+set (LIBRARIES
+  HMI_API
+  MOBILE_API
+  v4_protocol_v1_2_no_extra
+  ProtocolLibrary
+  SmartObjects
   UsageStatistics
   dl
-  ProtocolLibrary
+  formatters
+  dbms
 )
+endif()
 
-IF(${CMAKE_SYSTEM_NAME} MATCHES "QNX")
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "Android")
+  list(APPEND LIBRARIES sqlite3)
+endif ()
+
+if(${CMAKE_SYSTEM_NAME} MATCHES "QNX" OR CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
   list(REMOVE_ITEM LIBRARIES dl)
 endif()
 
 add_library("AMEventEngine" ${EVENT_ENGINE})
 target_link_libraries("AMEventEngine" ${LIBRARIES})
+
 
 add_library("AMPolicyLibrary" ${POLICIES_MANAGER} )
 target_link_libraries("AMPolicyLibrary" ${LIBRARIES} AMEventEngine)
@@ -309,10 +402,12 @@ target_link_libraries("AMPolicyLibrary" ${LIBRARIES} AMEventEngine)
 add_library("AMHMICommandsLibrary" ${HMI_COMMANDS_SOURCES})
 target_link_libraries("AMHMICommandsLibrary" ${LIBRARIES} AMEventEngine)
 
+add_library("MessageHelper" ${MESSAGE_HELPER_SOURCES})
+
 add_library("AMMobileCommandsLibrary" ${MOBILE_COMMANDS_SOURCES} )
 target_link_libraries("AMMobileCommandsLibrary" ${LIBRARIES} AMEventEngine)
 
-add_library("ApplicationManager" ${SOURCES})
+add_library("ApplicationManager" ${SOURCES} ${RESUMPTION})
 target_link_libraries("ApplicationManager" ${LIBRARIES} AMHMICommandsLibrary
                                                         AMMobileCommandsLibrary
                                                         AMEventEngine
@@ -326,4 +421,5 @@ endif()
 
 if(BUILD_TESTS)
   add_subdirectory(test)
+  add_subdirectory(test/message_helper)
 endif()

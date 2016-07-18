@@ -47,7 +47,7 @@ const struct usbi_os_backend * const usbi_backend = &linux_usbfs_backend;
 const struct usbi_os_backend * const usbi_backend = &darwin_backend;
 #elif defined(OS_OPENBSD)
 const struct usbi_os_backend * const usbi_backend = &openbsd_backend;
-#elif defined(OS_WINDOWS)
+#elif defined(OS_WIN32)
 const struct usbi_os_backend * const usbi_backend = &windows_backend;
 #elif defined(OS_WINCE)
 const struct usbi_os_backend * const usbi_backend = &wince_backend;
@@ -2061,25 +2061,6 @@ void usbi_log_v(struct libusb_context *ctx, enum libusb_log_level level,
 
 #ifdef __ANDROID__
 	int prio;
-/*
-	switch (level) {
-	case LOG_LEVEL_INFO:
-		prio = ANDROID_LOG_INFO;
-		break;
-	case LOG_LEVEL_WARNING:
-		prio = ANDROID_LOG_WARN;
-		break;
-	case LOG_LEVEL_ERROR:
-		prio = ANDROID_LOG_ERROR;
-		break;
-	case LOG_LEVEL_DEBUG:
-		prio = ANDROID_LOG_DEBUG;
-		break;
-	default:
-		prio = ANDROID_LOG_UNKNOWN;
-		break;
-	}
-*/
 
 	switch (level) {
 	case LIBUSB_LOG_LEVEL_INFO:

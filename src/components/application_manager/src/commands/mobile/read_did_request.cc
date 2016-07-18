@@ -1,6 +1,5 @@
 /*
-
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -31,6 +30,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string>
 #include "application_manager/commands/mobile/read_did_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
@@ -49,7 +49,7 @@ ReadDIDRequest::~ReadDIDRequest() {
 }
 
 void ReadDIDRequest::Run() {
-  LOG4CXX_INFO(logger_, "ReadDIDRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   uint32_t app_id = (*message_)[strings::params][strings::connection_key]
       .asUInt();
@@ -59,14 +59,8 @@ void ReadDIDRequest::Run() {
                .asUInt());
 
   if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "An application is not registered.");
+    LOG4CXX_ERROR(logger_, "An application is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    return;
-  }
-
-  if (mobile_api::HMILevel::HMI_NONE == app->hmi_level()) {
-    SendResponse(false, mobile_apis::Result::REJECTED);
-    LOG4CXX_ERROR(logger_, "Rejected");
     return;
   }
 
@@ -79,7 +73,7 @@ void ReadDIDRequest::Run() {
   }
 
   if ((*message_)[strings::msg_params][strings::did_location].empty()) {
-    LOG4CXX_ERROR_EXT(logger_, "INVALID_DATA");
+    LOG4CXX_ERROR(logger_, "INVALID_DATA");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -96,7 +90,7 @@ void ReadDIDRequest::Run() {
 }
 
 void ReadDIDRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "ReadDIDRequest::on_event");
+  LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -107,7 +101,11 @@ void ReadDIDRequest::on_event(const event_engine::Event& event) {
 
       bool result = mobile_apis::Result::SUCCESS == result_code;
 
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      const std::string return_info =
+          message[strings::msg_params][hmi_response::message].asString();
+
+      SendResponse(result, result_code, return_info.c_str(),
+                   &(message[strings::msg_params]));
       break;
     }
     default: {

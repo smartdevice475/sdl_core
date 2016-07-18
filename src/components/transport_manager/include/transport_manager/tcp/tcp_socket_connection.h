@@ -1,4 +1,4 @@
-/**
+/*
  * \file tcp_socket_connection.h
  * \brief TcpSocketConnection class header file.
  *
@@ -36,10 +36,13 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_SOCKET_CONNECTION_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_SOCKET_CONNECTION_H_
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#else
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#endif
 
 #include "transport_manager/transport_adapter/threaded_socket_connection.h"
 
@@ -53,7 +56,6 @@ class TransportAdapterController;
  */
 class TcpSocketConnection : public ThreadedSocketConnection {
  public:
-
   /**
    * @brief Constructor.
    *
@@ -69,8 +71,8 @@ class TcpSocketConnection : public ThreadedSocketConnection {
    * @brief Destructor.
    */
   virtual ~TcpSocketConnection();
- protected:
 
+ protected:
   /**
    * @brief
    */
@@ -82,7 +84,6 @@ class TcpSocketConnection : public ThreadedSocketConnection {
  */
 class TcpServerOiginatedSocketConnection : public ThreadedSocketConnection {
  public:
-
   /**
    * @brief Constructor.
    *
@@ -98,8 +99,8 @@ class TcpServerOiginatedSocketConnection : public ThreadedSocketConnection {
    * @brief Destructor.
    */
   virtual ~TcpServerOiginatedSocketConnection();
- protected:
 
+ protected:
   /**
    * @brief
    */
@@ -109,4 +110,4 @@ class TcpServerOiginatedSocketConnection : public ThreadedSocketConnection {
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_SOCKET_CONNECTION_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_SOCKET_CONNECTION_H_

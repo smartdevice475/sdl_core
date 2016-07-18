@@ -22,38 +22,194 @@ namespace policy_table_interface_base {
       }
   }
 
+  // PolicyBase methods
+  PolicyBase::PolicyBase()
+    : CompositeType(kUninitialized) {
+  }
+
+  PolicyBase::PolicyBase(Priority priority)
+    : CompositeType(kUninitialized),
+      priority(priority) {
+  }
+
+  PolicyBase::~PolicyBase() {
+  }
+
+  PolicyBase::PolicyBase(const Json::Value* value__)
+    : CompositeType(InitHelper(value__, &Json::Value::isObject)),
+      priority(impl::ValueMember(value__, "priority")) {
+  }
+
+  Json::Value PolicyBase::ToJsonValue() const {
+    Json::Value result__(Json::objectValue);
+    impl::WriteJsonField("priority", priority, &result__);
+    return result__;
+  }
+
+  bool PolicyBase::is_valid() const {
+    if (!priority.is_valid()) {
+      return false;
+    }
+    return Validate();
+  }
+
+  bool PolicyBase::is_initialized() const {
+    return (initialization_state__ != kUninitialized) || (!struct_empty());
+  }
+
+  bool PolicyBase::struct_empty() const {
+    if (priority.is_initialized()) {
+      return false;
+    }
+    return true;
+  }
+
+  void PolicyBase::ReportErrors(rpc::ValidationReport* report__) const {
+    if (struct_empty()) {
+      rpc::CompositeType::ReportErrors(report__);
+    }
+    if (!priority.is_valid()) {
+      priority.ReportErrors(&report__->ReportSubobject("priority"));
+    }
+  }
+
+  void PolicyBase::SetPolicyTableType(PolicyTableType pt_type) {
+    CompositeType::SetPolicyTableType(pt_type);
+    priority.SetPolicyTableType(pt_type);
+  }
+
+  // DevicePolicy methods
+  DevicePolicy::DevicePolicy()
+    : PolicyBase() {
+  }
+
+  DevicePolicy::DevicePolicy(Priority priority)
+    : PolicyBase(priority) {
+  }
+
+  DevicePolicy::~DevicePolicy() {
+  }
+
+  DevicePolicy::DevicePolicy(const Json::Value* value__)
+    : PolicyBase(value__) {
+  }
+
+  // AppPoliciesSection methods
+  ApplicationPoliciesSection::ApplicationPoliciesSection()
+    : CompositeType(kUninitialized) {
+  }
+
+  ApplicationPoliciesSection::ApplicationPoliciesSection(const ApplicationPolicies& apps, const DevicePolicy& device)
+    : CompositeType(kUninitialized),
+      apps(apps),
+      device(device) {
+  }
+
+  ApplicationPoliciesSection::~ApplicationPoliciesSection() {
+  }
+
+  ApplicationPoliciesSection::ApplicationPoliciesSection(const Json::Value* value__)
+    : CompositeType(InitHelper(value__, &Json::Value::isObject)),
+      apps(value__),
+      device(impl::ValueMember(value__, "device")) {
+    // Since "device" is moved to separate struct, we have to delete it from
+    // parsed apps to avoid validation issues due to possible wrong params in
+    // device section
+    apps.erase("device");
+  }
+
+  Json::Value ApplicationPoliciesSection::ToJsonValue() const {
+    Json::Value result__(Json::objectValue);
+    result__ = apps.ToJsonValue();
+    impl::WriteJsonField("device", device, &result__);
+    return result__;
+  }
+
+  bool ApplicationPoliciesSection::is_valid() const {
+    if (!device.is_valid()) {
+      return false;
+    }
+    if (!apps.is_valid()) {
+      return false;
+    }
+    return Validate();
+  }
+
+  bool ApplicationPoliciesSection::is_initialized() const {
+    return (initialization_state__ != kUninitialized) || (!struct_empty());
+  }
+
+  bool ApplicationPoliciesSection::struct_empty() const {
+    if (device.is_initialized()) {
+      return false;
+    }
+    if (apps.is_initialized()) {
+      return false;
+    }
+    return true;
+  }
+
+  void ApplicationPoliciesSection::ReportErrors(rpc::ValidationReport* report__) const {
+    if (struct_empty()) {
+      rpc::CompositeType::ReportErrors(report__);
+    }
+    if (!device.is_valid()) {
+      device.ReportErrors(&report__->ReportSubobject("device"));
+    }
+    if (!apps.is_valid()) {
+      apps.ReportErrors(&report__->ReportSubobject("apps"));
+    }
+  }
+
+  void ApplicationPoliciesSection::SetPolicyTableType(PolicyTableType pt_type) {
+    CompositeType::SetPolicyTableType(pt_type);
+    device.SetPolicyTableType(pt_type);
+    apps.SetPolicyTableType(pt_type);
+  }
+
 // ApplicationParams methods
 ApplicationParams::ApplicationParams()
-  : CompositeType(kUninitialized) {
+  : PolicyBase(),
+    groups() {
 }
-ApplicationParams::ApplicationParams(const Strings& groups)
-  : CompositeType(kUninitialized),
+
+ApplicationParams::ApplicationParams(const Strings& groups, Priority priority)
+  : PolicyBase(priority),
     groups(groups) {
 }
+
 ApplicationParams::~ApplicationParams() {
 }
+
 ApplicationParams::ApplicationParams(const Json::Value* value__)
-  : CompositeType(InitHelper(value__, &Json::Value::isObject)),
+  : PolicyBase(value__),
     groups(impl::ValueMember(value__, "groups")),
     nicknames(impl::ValueMember(value__, "nicknames")),
     AppHMIType(impl::ValueMember(value__, "AppHMIType")),
-    priority(impl::ValueMember(value__, "priority")),
-    memory_kb(impl::ValueMember(value__, "memory_kb")),
+    RequestType(impl::ValueMember(value__, "RequestType")),
+    memory_kb(impl::ValueMember(value__, "memory_kb"), 0),
     heart_beat_timeout_ms(impl::ValueMember(value__, "heart_beat_timeout_ms")),
-    certificate(impl::ValueMember(value__, "certificate")) {
+    certificate(impl::ValueMember(value__, "certificate"), "not_specified") {
 }
+
 Json::Value ApplicationParams::ToJsonValue() const {
-  Json::Value result__(Json::objectValue);
+  Json::Value result__(PolicyBase::ToJsonValue());
   impl::WriteJsonField("groups", groups, &result__);
   impl::WriteJsonField("nicknames", nicknames, &result__);
   impl::WriteJsonField("AppHMIType", AppHMIType, &result__);
-  impl::WriteJsonField("priority", priority, &result__);
+  impl::WriteJsonField("RequestType", RequestType, &result__);
   impl::WriteJsonField("memory_kb", memory_kb, &result__);
   impl::WriteJsonField("heart_beat_timeout_ms", heart_beat_timeout_ms, &result__);
   impl::WriteJsonField("certificate", certificate, &result__);
   return result__;
 }
+
 bool ApplicationParams::is_valid() const {
+  // RequestType is not validated since there is high-level validation logic,
+  // which takes into account information not available here.
+  if (!PolicyBase::is_valid()) {
+    return false;
+  }
   if (!groups.is_valid()) {
     return false;
   }
@@ -61,9 +217,6 @@ bool ApplicationParams::is_valid() const {
     return false;
   }
   if (!AppHMIType.is_valid()) {
-    return false;
-  }
-  if (! priority.is_valid()) {
     return false;
   }
   if (!memory_kb.is_valid()) {
@@ -77,36 +230,39 @@ bool ApplicationParams::is_valid() const {
   }
   return Validate();
 }
+
 bool ApplicationParams::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool ApplicationParams::struct_empty() const {
+  if (!PolicyBase::is_initialized()) {
+    return false;
+  }
   if (groups.is_initialized()) {
     return false;
   }
   if (nicknames.is_initialized()) {
     return false;
   }
-
   if (AppHMIType.is_initialized()) {
     return false;
   }
-  if (priority.is_initialized()) {
+  if (RequestType.is_initialized()) {
     return false;
   }
   if (memory_kb.is_initialized()) {
     return false;
   }
-
   if (heart_beat_timeout_ms.is_initialized()) {
     return false;
   }
   if (certificate.is_initialized()) {
     return false;
   }
-
   return true;
 }
+
 void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
@@ -119,6 +275,9 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
   }
   if (!AppHMIType.is_valid()) {
     AppHMIType.ReportErrors(&report__->ReportSubobject("AppHMIType"));
+  }
+  if (!RequestType.is_valid()) {
+    RequestType.ReportErrors(&report__->ReportSubobject("RequestType"));
   }
   if (!priority.is_valid()) {
     priority.ReportErrors(&report__->ReportSubobject("priority"));
@@ -135,10 +294,10 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
 }
 
 void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
-  CompositeType::SetPolicyTableType(pt_type);
-  AppHMIType.SetPolicyTableType(pt_type);
+  PolicyBase::SetPolicyTableType(pt_type);
   groups.SetPolicyTableType(pt_type);
-  priority.SetPolicyTableType(pt_type);
+  AppHMIType.SetPolicyTableType(pt_type);
+  RequestType.SetPolicyTableType(pt_type);
   memory_kb.SetPolicyTableType(pt_type);
   heart_beat_timeout_ms.SetPolicyTableType(pt_type);
   certificate.SetPolicyTableType(pt_type);
@@ -295,8 +454,28 @@ ModuleConfig::ModuleConfig(const Json::Value* value__)
     notifications_per_minute_by_priority(impl::ValueMember(value__, "notifications_per_minute_by_priority")),
     vehicle_make(impl::ValueMember(value__, "vehicle_make")),
     vehicle_model(impl::ValueMember(value__, "vehicle_model")),
-    vehicle_year(impl::ValueMember(value__, "vehicle_year")) {
+    vehicle_year(impl::ValueMember(value__, "vehicle_year")),
+    preloaded_date(impl::ValueMember(value__, "preloaded_date")),
+    certificate(impl::ValueMember(value__, "certificate")) {
 }
+
+void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
+//  device_certificates = from.device_certificates;  // According to the requirements this is optional.
+  exchange_after_x_ignition_cycles = from.exchange_after_x_ignition_cycles;
+  exchange_after_x_kilometers = from.exchange_after_x_kilometers;
+  exchange_after_x_days = from.exchange_after_x_days;
+  timeout_after_x_seconds = from.timeout_after_x_seconds;
+  seconds_between_retries = from.seconds_between_retries;
+  endpoints = from.endpoints;
+  notifications_per_minute_by_priority = from.notifications_per_minute_by_priority;
+
+  vehicle_make.assign_if_valid(from.vehicle_make);
+  vehicle_model.assign_if_valid(from.vehicle_model);
+  vehicle_year.assign_if_valid(from.vehicle_year);
+  certificate .assign_if_valid(from.certificate);
+
+}
+
 Json::Value ModuleConfig::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("device_certificates", device_certificates, &result__);
@@ -311,6 +490,8 @@ Json::Value ModuleConfig::ToJsonValue() const {
   impl::WriteJsonField("vehicle_make", vehicle_make, &result__);
   impl::WriteJsonField("vehicle_model", vehicle_model, &result__);
   impl::WriteJsonField("vehicle_year", vehicle_year, &result__);
+  impl::WriteJsonField("certificate", certificate, &result__);
+  impl::WriteJsonField("preloaded_date", preloaded_date, &result__);
   return result__;
 }
 bool ModuleConfig::is_valid() const {
@@ -348,6 +529,12 @@ bool ModuleConfig::is_valid() const {
     return false;
   }
   if (!vehicle_year.is_valid()) {
+    return false;
+  }
+  if (!certificate.is_valid()) {
+    return false;
+  }
+  if (!preloaded_date.is_valid()) {
     return false;
   }
   return Validate();
@@ -731,18 +918,109 @@ void ModuleMeta::ReportErrors(rpc::ValidationReport* report__) const {
 AppLevel::AppLevel()
   : CompositeType(kUninitialized) {
 }
+
+AppLevel::AppLevel(uint16_t minutes_in_hmi_full, const std::string& app_registration_language_gui, const std::string& app_registration_language_vui, uint16_t minutes_in_hmi_limited, uint16_t minutes_in_hmi_background, uint16_t minutes_in_hmi_none, uint16_t count_of_user_selections, uint16_t count_of_rejections_sync_out_of_memory, uint16_t count_of_rejections_nickname_mismatch, uint16_t count_of_rejections_duplicate_name, uint16_t count_of_rejected_rpc_calls, uint16_t count_of_rpcs_sent_in_hmi_none, uint16_t count_of_removals_for_bad_behavior, uint16_t count_of_tls_errors, uint16_t count_of_run_attempts_while_revoked)
+  : CompositeType(kUninitialized),
+    minutes_in_hmi_full(minutes_in_hmi_full),
+    app_registration_language_gui(app_registration_language_gui),
+    app_registration_language_vui(app_registration_language_vui),
+    minutes_in_hmi_limited(minutes_in_hmi_limited),
+    minutes_in_hmi_background(minutes_in_hmi_background),
+    minutes_in_hmi_none(minutes_in_hmi_none),
+    count_of_user_selections(count_of_user_selections),
+    count_of_rejections_sync_out_of_memory(count_of_rejections_sync_out_of_memory),
+    count_of_rejections_nickname_mismatch(count_of_rejections_nickname_mismatch),
+    count_of_rejections_duplicate_name(count_of_rejections_duplicate_name),
+    count_of_rejected_rpc_calls(count_of_rejected_rpc_calls),
+    count_of_rpcs_sent_in_hmi_none(count_of_rpcs_sent_in_hmi_none),
+    count_of_removals_for_bad_behavior(count_of_removals_for_bad_behavior),
+    count_of_tls_errors(count_of_tls_errors),
+    count_of_run_attempts_while_revoked(count_of_run_attempts_while_revoked) {
+}
 AppLevel::~AppLevel() {
 }
 AppLevel::AppLevel(const Json::Value* value__)
-  : CompositeType(InitHelper(value__, &Json::Value::isObject)) {
+  : CompositeType(InitHelper(value__, &Json::Value::isObject)),
+    minutes_in_hmi_full(impl::ValueMember(value__, "minutes_in_hmi_full")),
+    app_registration_language_gui(impl::ValueMember(value__, "app_registration_language_gui")),
+    app_registration_language_vui(impl::ValueMember(value__, "app_registration_language_vui")),
+    minutes_in_hmi_limited(impl::ValueMember(value__, "minutes_in_hmi_limited")),
+    minutes_in_hmi_background(impl::ValueMember(value__, "minutes_in_hmi_background")),
+    minutes_in_hmi_none(impl::ValueMember(value__, "minutes_in_hmi_none")),
+    count_of_user_selections(impl::ValueMember(value__, "count_of_user_selections")),
+    count_of_rejections_sync_out_of_memory(impl::ValueMember(value__, "count_of_rejections_sync_out_of_memory")),
+    count_of_rejections_nickname_mismatch(impl::ValueMember(value__, "count_of_rejections_nickname_mismatch")),
+    count_of_rejections_duplicate_name(impl::ValueMember(value__, "count_of_rejections_duplicate_name")),
+    count_of_rejected_rpc_calls(impl::ValueMember(value__, "count_of_rejected_rpc_calls")),
+    count_of_rpcs_sent_in_hmi_none(impl::ValueMember(value__, "count_of_rpcs_sent_in_hmi_none")),
+    count_of_removals_for_bad_behavior(impl::ValueMember(value__, "count_of_removals_for_bad_behavior")),
+    count_of_tls_errors(impl::ValueMember(value__, "count_of_tls_errors")),
+    count_of_run_attempts_while_revoked(impl::ValueMember(value__, "count_of_run_attempts_while_revoked")) {
 }
 Json::Value AppLevel::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
+  impl::WriteJsonField("minutes_in_hmi_full", minutes_in_hmi_full, &result__);
+  impl::WriteJsonField("app_registration_language_gui", app_registration_language_gui, &result__);
+  impl::WriteJsonField("app_registration_language_vui", app_registration_language_vui, &result__);
+  impl::WriteJsonField("minutes_in_hmi_limited", minutes_in_hmi_limited, &result__);
+  impl::WriteJsonField("minutes_in_hmi_background", minutes_in_hmi_background, &result__);
+  impl::WriteJsonField("minutes_in_hmi_none", minutes_in_hmi_none, &result__);
+  impl::WriteJsonField("count_of_user_selections", count_of_user_selections, &result__);
+  impl::WriteJsonField("count_of_rejections_sync_out_of_memory", count_of_rejections_sync_out_of_memory, &result__);
+  impl::WriteJsonField("count_of_rejections_nickname_mismatch", count_of_rejections_nickname_mismatch, &result__);
+  impl::WriteJsonField("count_of_rejections_duplicate_name", count_of_rejections_duplicate_name, &result__);
+  impl::WriteJsonField("count_of_rejected_rpc_calls", count_of_rejected_rpc_calls, &result__);
+  impl::WriteJsonField("count_of_rpcs_sent_in_hmi_none", count_of_rpcs_sent_in_hmi_none, &result__);
+  impl::WriteJsonField("count_of_removals_for_bad_behavior", count_of_removals_for_bad_behavior, &result__);
+  impl::WriteJsonField("count_of_tls_errors", count_of_tls_errors, &result__);
+  impl::WriteJsonField("count_of_run_attempts_while_revoked", count_of_run_attempts_while_revoked, &result__);
   return result__;
 }
 bool AppLevel::is_valid() const {
-  if (struct_empty()) {
-    return initialization_state__ == kInitialized && Validate();
+  if (!minutes_in_hmi_full.is_valid()) {
+    return false;
+  }
+  if (!app_registration_language_gui.is_valid()) {
+    return false;
+  }
+  if (!app_registration_language_vui.is_valid()) {
+    return false;
+  }
+  if (!minutes_in_hmi_limited.is_valid()) {
+    return false;
+  }
+  if (!minutes_in_hmi_background.is_valid()) {
+    return false;
+  }
+  if (!minutes_in_hmi_none.is_valid()) {
+    return false;
+  }
+  if (!count_of_user_selections.is_valid()) {
+    return false;
+  }
+  if (!count_of_rejections_sync_out_of_memory.is_valid()) {
+    return false;
+  }
+  if (!count_of_rejections_nickname_mismatch.is_valid()) {
+    return false;
+  }
+  if (!count_of_rejections_duplicate_name.is_valid()) {
+    return false;
+  }
+  if (!count_of_rejected_rpc_calls.is_valid()) {
+    return false;
+  }
+  if (!count_of_rpcs_sent_in_hmi_none.is_valid()) {
+    return false;
+  }
+  if (!count_of_removals_for_bad_behavior.is_valid()) {
+    return false;
+  }
+  if (!count_of_tls_errors.is_valid()) {
+    return false;
+  }
+  if (!count_of_run_attempts_while_revoked.is_valid()) {
+    return false;
   }
   return Validate();
 }
@@ -750,6 +1028,58 @@ bool AppLevel::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
 bool AppLevel::struct_empty() const {
+
+  if (minutes_in_hmi_full.is_initialized()) {
+    return false;
+  }
+  if (app_registration_language_gui.is_initialized()) {
+    return false;
+  }
+
+  if (app_registration_language_vui.is_initialized()) {
+    return false;
+  }
+
+  if (minutes_in_hmi_limited.is_initialized()) {
+    return false;
+  }
+  if (minutes_in_hmi_background.is_initialized()) {
+    return false;
+  }
+
+  if (minutes_in_hmi_none.is_initialized()) {
+    return false;
+  }
+  if (count_of_user_selections.is_initialized()) {
+    return false;
+  }
+
+  if (count_of_rejections_sync_out_of_memory.is_initialized()) {
+    return false;
+  }
+  if (count_of_rejections_nickname_mismatch.is_initialized()) {
+    return false;
+  }
+
+  if (count_of_rejections_duplicate_name.is_initialized()) {
+    return false;
+  }
+  if (count_of_rejected_rpc_calls.is_initialized()) {
+    return false;
+  }
+
+  if (count_of_rpcs_sent_in_hmi_none.is_initialized()) {
+    return false;
+  }
+  if (count_of_removals_for_bad_behavior.is_initialized()) {
+    return false;
+  }
+  if (count_of_tls_errors.is_initialized()) {
+    return false;
+  }
+  if (count_of_run_attempts_while_revoked.is_initialized()) {
+    return false;
+  }
   return true;
 }
 void AppLevel::ReportErrors(rpc::ValidationReport* report__) const {
@@ -853,9 +1183,9 @@ void DeviceParams::ReportErrors(rpc::ValidationReport* report__) const {
 PolicyTable::PolicyTable()
   : CompositeType(kUninitialized) {
 }
-PolicyTable::PolicyTable(const ApplicationPolicies& app_policies, const FunctionalGroupings& functional_groupings, const ConsumerFriendlyMessages& consumer_friendly_messages, const ModuleConfig& module_config)
+PolicyTable::PolicyTable(const ApplicationPoliciesSection& app_policies_section, const FunctionalGroupings& functional_groupings, const ConsumerFriendlyMessages& consumer_friendly_messages, const ModuleConfig& module_config)
   : CompositeType(kUninitialized),
-    app_policies(app_policies),
+    app_policies_section(app_policies_section),
     functional_groupings(functional_groupings),
     consumer_friendly_messages(consumer_friendly_messages),
     module_config(module_config) {
@@ -864,7 +1194,7 @@ PolicyTable::~PolicyTable() {
 }
 PolicyTable::PolicyTable(const Json::Value* value__)
   : CompositeType(InitHelper(value__, &Json::Value::isObject)),
-    app_policies(impl::ValueMember(value__, "app_policies")),
+    app_policies_section(impl::ValueMember(value__, "app_policies")),
     functional_groupings(impl::ValueMember(value__, "functional_groupings")),
     consumer_friendly_messages(impl::ValueMember(value__, "consumer_friendly_messages")),
     module_config(impl::ValueMember(value__, "module_config")),
@@ -874,7 +1204,7 @@ PolicyTable::PolicyTable(const Json::Value* value__)
 }
 Json::Value PolicyTable::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
-  impl::WriteJsonField("app_policies", app_policies, &result__);
+  impl::WriteJsonField("app_policies", app_policies_section, &result__);
   impl::WriteJsonField("functional_groupings", functional_groupings, &result__);
   impl::WriteJsonField("consumer_friendly_messages", consumer_friendly_messages, &result__);
   impl::WriteJsonField("module_config", module_config, &result__);
@@ -884,7 +1214,7 @@ Json::Value PolicyTable::ToJsonValue() const {
   return result__;
 }
 bool PolicyTable::is_valid() const {
-  if (!app_policies.is_valid()) {
+  if (!app_policies_section.is_valid()) {
     return false;
   }
   if (!functional_groupings.is_valid()) {
@@ -911,7 +1241,7 @@ bool PolicyTable::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
 bool PolicyTable::struct_empty() const {
-  if (app_policies.is_initialized()) {
+  if (app_policies_section.is_initialized()) {
     return false;
   }
   if (functional_groupings.is_initialized()) {
@@ -950,8 +1280,8 @@ void PolicyTable::ReportErrors(rpc::ValidationReport* report__) const {
       report__->ReportSubobject("device_data").set_validation_info(validation_info);
     }
   }
-  if (!app_policies.is_valid()) {
-    app_policies.ReportErrors(&report__->ReportSubobject("app_policies"));
+  if (!app_policies_section.is_valid()) {
+    app_policies_section.ReportErrors(&report__->ReportSubobject("app_policies"));
   }
   if (!functional_groupings.is_valid()) {
     functional_groupings.ReportErrors(&report__->ReportSubobject("functional_groupings"));
@@ -975,7 +1305,7 @@ void PolicyTable::ReportErrors(rpc::ValidationReport* report__) const {
 
 void PolicyTable::SetPolicyTableType(PolicyTableType pt_type) {
   CompositeType::SetPolicyTableType(pt_type);
-  app_policies.SetPolicyTableType(pt_type);
+  app_policies_section.SetPolicyTableType(pt_type);
   functional_groupings.SetPolicyTableType(pt_type);
   consumer_friendly_messages.SetPolicyTableType(pt_type);
   module_config.SetPolicyTableType(pt_type);

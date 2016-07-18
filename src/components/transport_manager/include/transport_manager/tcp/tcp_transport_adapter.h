@@ -1,4 +1,4 @@
-/**
+/*
  * \file tcp_transport_adapter.h
  * \brief TcpTransportAdapter class header file.
  *
@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_ADAPTER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_ADAPTER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_TRANSPORT_ADAPTER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_TRANSPORT_ADAPTER_H_
 
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
@@ -49,14 +49,15 @@ class TcpTransportAdapter : public TransportAdapterImpl {
   /**
    * @brief Constructor.
    */
-  explicit TcpTransportAdapter(uint16_t port);
+  explicit TcpTransportAdapter(uint16_t port,
+                               resumption::LastState& last_state);
 
   /**
    * @brief Destructor.
    */
   virtual ~TcpTransportAdapter();
- protected:
 
+ protected:
   /**
    * @brief Return type of device.
    *
@@ -80,4 +81,4 @@ class TcpTransportAdapter : public TransportAdapterImpl {
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_ADAPTER
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_TRANSPORT_ADAPTER_H_

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,9 +29,15 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
+#ifndef OS_WINCE
 #include <sys/stat.h>
+#endif
+
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#include <stdint.h>
+#else
 #include <unistd.h>
+#endif
 #include <signal.h>
 #include <cstdio>
 #include <cstdlib>
@@ -53,6 +59,7 @@
 #include "utils/system.h"
 #include "config_profile/profile.h"
 #include "utils/appenders_loader.h"
+#include "utils/file_system.h"
 
 #if defined(EXTENDED_MEDIA_MODE)
 #include <gst/gst.h>
@@ -68,16 +75,14 @@
 #include <main.h>
 #endif
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "appMain")
+CREATE_LOGGERPTR_GLOBAL(logger_, "SDLMain")
 
-extern const char* gitVersion;
 namespace {
 
 const std::string kBrowser = "/usr/bin/chromium-browser";
 const std::string kBrowserName = "chromium-browser";
 const std::string kBrowserParams = "--auth-schemes=basic,digest,ntlm";
 const std::string kLocalHostAddress = "127.0.0.1";
-const std::string kApplicationVersion = "Develop";
 
 #ifdef WEB_HMI
 /**
@@ -85,33 +90,20 @@ const std::string kApplicationVersion = "Develop";
  * @return true if success otherwise false.
  */
 bool InitHmi() {
-
-struct stat sb;
-if (stat("hmi_link", &sb) == -1) {
-  LOG4CXX_FATAL(logger_, "File with HMI link doesn't exist!");
-  return false;
-}
-
-std::ifstream file_str;
-file_str.open("hmi_link");
-
-if (!file_str.is_open()) {
-  LOG4CXX_FATAL(logger_, "File with HMI link was not opened!");
-  return false;
-}
-
-std::string hmi_link;
-std::getline(file_str, hmi_link);
-
-
-LOG4CXX_INFO(logger_,
-             "Input string:" << hmi_link << " length = " << hmi_link.size());
-file_str.close();
-
-if (stat(hmi_link.c_str(), &sb) == -1) {
-  LOG4CXX_FATAL(logger_, "HMI index.html doesn't exist!");
-  return false;
-}
+  std::string hmi_link = profile::Profile::instance()->link_to_web_hmi();
+#ifdef OS_WINCE
+  LPWIN32_FIND_DATA  sb = {0};
+  if(INVALID_HANDLE_VALUE==FindFirstFile((LPCWSTR)"hmi_link",sb)) {
+    LOG4CXX_FATAL(logger_, "File with HMI link doesn't exist!");
+    return false;
+  }
+#else
+  struct stat sb;
+  if (stat(hmi_link.c_str(), &sb) == -1) {
+    LOG4CXX_FATAL(logger_, "HMI index file " << hmi_link << " doesn't exist!");
+    return false;
+  }
+#endif
   return utils::System(kBrowser, kBrowserName).Add(kBrowserParams).Add(hmi_link)
       .Execute();
 }
@@ -148,14 +140,26 @@ int32_t main(int32_t argc, char** argv) {
 int32_t sdl_start(int32_t argc,char** argv){
 #endif
 
+  // Unsibscribe once for all threads
+  if (!utils::UnsibscribeFromTermination()) {
+    // Can't use internal logger here
+    exit(EXIT_FAILURE);
+  }
+
   // --------------------------------------------------------------------------
+  if ((argc > 1)&&(0 != argv)) {
+    profile::Profile::instance()->config_file_name(argv[1]);
+  } else {
+    profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
+  }
+
   // Logger initialization
-  INIT_LOGGER("log4cxx.properties");
-  LOG4CXX_INFO(logger_, gitVersion);
-#if defined(__QNXNTO__) and defined(GCOV_ENABLED)
-  LOG4CXX_WARN(logger_,
-                "Attention! This application was built with unsupported "
-                "configuration (gcov + QNX). Use it at your own risk.");
+#ifdef OS_WINCE
+  INIT_LOGGER(file_system::CurrentWorkingDirectory() + "/" + "log4cxx.properties",
+              profile::Profile::instance()->logs_enabled());
+#else
+  INIT_LOGGER("log4cxx.properties",
+              profile::Profile::instance()->logs_enabled());
 #endif
 
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
@@ -165,54 +169,26 @@ int32_t sdl_start(int32_t argc,char** argv){
   }
 
   LOG4CXX_INFO(logger_, "Application started!");
-  LOG4CXX_INFO(logger_, "Application version " << kApplicationVersion);
-
-  // Initialize gstreamer. Needed to activate debug from the command line.
-#if defined(EXTENDED_MEDIA_MODE)
-  gst_init(&argc, &argv);
-#endif
+  LOG4CXX_INFO(logger_, "SDL version: "
+                         << profile::Profile::instance()->sdl_version());
 
   // --------------------------------------------------------------------------
   // Components initialization
-  if ((argc > 1)&&(0 != argv)) {
-      profile::Profile::instance()->config_file_name(argv[1]);
-  } else {
-      profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
-  }
-
-#ifdef __QNX__
-  if (profile::Profile::instance()->enable_policy()) {
-    if (!utils::System("./init_policy.sh").Execute(true)) {
-      LOG4CXX_ERROR(logger_, "Failed initialization of policy database");
-#ifdef ENABLE_LOG
-#ifndef CUSTOM_LOG
-      logger::LogMessageLoopThread::destroy();
-#endif
-#endif
-      DEINIT_LOGGER();
-      exit(EXIT_FAILURE);
-    }
-  }
-#endif  // __QNX__
-
   if (!main_namespace::LifeCycle::instance()->StartComponents()) {
+    LOG4CXX_FATAL(logger_, "Failed to start components");
     main_namespace::LifeCycle::instance()->StopComponents();
-#ifdef ENABLE_LOG
-#ifndef CUSTOM_LOG
-      logger::LogMessageLoopThread::destroy();
-#endif
-#endif
+
     DEINIT_LOGGER();
     exit(EXIT_FAILURE);
   }
 
   // --------------------------------------------------------------------------
   // Third-Party components initialization.
-
   if (!main_namespace::LifeCycle::instance()->InitMessageSystem()) {
+    LOG4CXX_FATAL(logger_, "Failed to init message system");
     main_namespace::LifeCycle::instance()->StopComponents();
     DEINIT_LOGGER();
-    exit(EXIT_FAILURE);
+    _exit(EXIT_FAILURE);
   }
   LOG4CXX_INFO(logger_, "InitMessageBroker successful");
 
@@ -222,16 +198,10 @@ int32_t sdl_start(int32_t argc,char** argv){
 
 #ifndef NO_HMI
       if (!InitHmi()) {
-        main_namespace::LifeCycle::instance()->StopComponents();
-#ifdef ENABLE_LOG
-#ifndef CUSTOM_LOG
-      logger::LogMessageLoopThread::destroy();
-#endif
-#endif
-        DEINIT_LOGGER();
-        exit(EXIT_FAILURE);
+        LOG4CXX_INFO(logger_, "InitHmi successful");
+      } else {
+        LOG4CXX_WARN(logger_, "Failed to init HMI");
       }
-      LOG4CXX_INFO(logger_, "InitHmi successful");
 #endif  // #ifndef NO_HMI
     }
   }
@@ -243,11 +213,7 @@ int32_t sdl_start(int32_t argc,char** argv){
   main_namespace::LifeCycle::instance()->StopComponents();
 
   LOG4CXX_INFO(logger_, "Application successfully stopped");
-#ifdef ENABLE_LOG
-#ifndef CUSTOM_LOG
-      logger::LogMessageLoopThread::destroy();
-#endif
-#endif
+
   DEINIT_LOGGER();
 
   return EXIT_SUCCESS;

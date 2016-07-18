@@ -1,5 +1,5 @@
-﻿/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,28 +37,41 @@
 #include <set>
 #include <vector>
 #include <utility>
+#include <list>
 
 #include "utils/date_time.h"
 #include "application_manager/application_data_impl.h"
 #include "application_manager/usage_statistics.h"
+#include "application_manager/hmi_state.h"
+#include "protocol_handler/protocol_handler.h"
+
 #include "connection_handler/device.h"
-#include "utils/timer_thread.h"
 #include "utils/lock.h"
+#include "utils/atomic_object.h"
+#include "utils/custom_string.h"
+#include "utils/timer.h"
 
 namespace usage_statistics {
+
 class StatisticsManager;
 }  // namespace usage_statistics
 
 namespace application_manager {
+using namespace utils;
+using namespace timer;
+
 namespace mobile_api = mobile_apis;
+namespace custom_str = custom_string;
 
 class ApplicationImpl : public virtual InitialApplicationDataImpl,
-    public virtual DynamicApplicationDataImpl {
+                        public virtual DynamicApplicationDataImpl {
  public:
-  ApplicationImpl(uint32_t application_id,
-                  const std::string& mobile_app_id,
-                  const std::string& app_name,
-                  utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager);
+  ApplicationImpl(
+      uint32_t application_id,
+      const std::string& mobile_app_id,
+      const std::string& mac_address,
+      const custom_str::CustomString& app_name,
+      utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager);
 
   ~ApplicationImpl();
 
@@ -70,57 +83,75 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   const smart_objects::SmartObject* active_message() const;
   void CloseActiveMessage();
   bool IsFullscreen() const;
-  bool MakeFullscreen();
-  bool IsAudible() const;
-  void MakeNotAudible();
 
-  // navi
-  bool allowed_support_navigation() const;
-  void set_allowed_support_navigation(bool allow);
-  bool hmi_supports_navi_video_streaming() const;
-  void set_hmi_supports_navi_video_streaming(bool supports);
-  bool hmi_supports_navi_audio_streaming() const;
-  void set_hmi_supports_navi_audio_streaming(bool supports);
+  /**
+   * @brief change supporting COMMUNICATION NAVIGATION
+   */
+  virtual void ChangeSupportingAppHMIType();
+
+  inline bool is_navi() const {
+    return is_navi_;
+  }
+  void set_is_navi(bool allow);
+
+  bool video_streaming_approved() const;
+  void set_video_streaming_approved(bool state);
+  bool audio_streaming_approved() const;
+  void set_audio_streaming_approved(bool state);
+
+  bool video_streaming_allowed() const;
+  void set_video_streaming_allowed(bool state);
+  bool audio_streaming_allowed() const;
+  void set_audio_streaming_allowed(bool state);
+
+  void StartStreaming(
+      protocol_handler::ServiceType service_type);
+  void StopStreamingForce(
+      protocol_handler::ServiceType service_type);
+  void StopStreaming(
+      protocol_handler::ServiceType service_type);
+  void SuspendStreaming(
+      protocol_handler::ServiceType service_type);
+  void WakeUpStreaming(
+      protocol_handler::ServiceType service_type);
 
   virtual bool is_voice_communication_supported() const;
   virtual void set_voice_communication_supported(
       bool is_voice_communication_supported);
   inline bool app_allowed() const;
   bool has_been_activated() const;
+  bool set_activated(bool is_active);
 
   const Version& version() const;
   void set_hmi_application_id(uint32_t hmi_app_id);
   inline uint32_t hmi_app_id() const;
   inline uint32_t app_id() const;
-  const std::string& name() const;
+  const custom_str::CustomString& name() const;
+  void set_folder_name(const std::string& folder_name) OVERRIDE;
   const std::string folder_name() const;
   bool is_media_application() const;
-  const mobile_api::HMILevel::eType& hmi_level() const;
+  virtual bool is_foreground() const;
+  virtual void set_foreground(bool is_foreground);
+  virtual const mobile_api::HMILevel::eType hmi_level() const;
   const uint32_t put_file_in_none_count() const;
   const uint32_t delete_file_in_none_count() const;
   const uint32_t list_files_in_none_count() const;
-  const mobile_api::SystemContext::eType& system_context() const;
-  inline const mobile_api::AudioStreamingState::eType&
-  audio_streaming_state() const;
+  const mobile_api::SystemContext::eType system_context() const;
+  inline const mobile_apis::AudioStreamingState::eType audio_streaming_state()
+      const;
   const std::string& app_icon_path() const;
   connection_handler::DeviceHandle device() const;
-  void set_tts_speak_state(bool state_tts_speak);
-  bool tts_speak_state();
+  const std::string& mac_address() const OVERRIDE;
   void set_tts_properties_in_none(bool active);
   bool tts_properties_in_none();
   void set_tts_properties_in_full(bool active);
   bool tts_properties_in_full();
   void set_version(const Version& ver);
-  void set_name(const std::string& name);
+  void set_name(const custom_str::CustomString& name);
   void set_is_media_application(bool is_media);
-  void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level);
   void increment_put_file_in_none_count();
   void increment_delete_file_in_none_count();
   void increment_list_files_in_none_count();
-  void set_system_context(
-      const mobile_api::SystemContext::eType& system_context);
-  void set_audio_streaming_state(
-      const mobile_api::AudioStreamingState::eType& state);
   bool set_app_icon_path(const std::string& path);
   void set_app_allowed(const bool& allowed);
   void set_device(connection_handler::DeviceHandle device);
@@ -130,9 +161,11 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   virtual void set_protocol_version(const ProtocolVersion& protocol_version);
   virtual ProtocolVersion protocol_version() const;
 
-  bool AddFile(AppFile& file);
-  bool UpdateFile(AppFile& file);
+  virtual void set_is_resuming(bool is_resuming);
+  virtual bool is_resuming() const;
 
+  bool AddFile(const AppFile& file);
+  bool UpdateFile(const AppFile& file);
   bool DeleteFile(const std::string& file_name);
   virtual const AppFilesMap& getAppFiles() const;
 
@@ -142,22 +175,25 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool IsSubscribedToButton(mobile_apis::ButtonName::eType btn_name);
   bool UnsubscribeFromButton(mobile_apis::ButtonName::eType btn_name);
 
-  bool SubscribeToIVI(uint32_t vehicle_info_type_);
-  bool IsSubscribedToIVI(uint32_t vehicle_info_type_);
-  bool UnsubscribeFromIVI(uint32_t vehicle_info_type_);
+  bool SubscribeToIVI(uint32_t vehicle_info_type) OVERRIDE;
+  bool IsSubscribedToIVI(uint32_t vehicle_info_type) const OVERRIDE;
+  bool UnsubscribeFromIVI(uint32_t vehicle_info_type) OVERRIDE;
+  DataAccessor<VehicleInfoSubscriptions> SubscribedIVI() const OVERRIDE;
 
-  virtual const std::set<mobile_apis::ButtonName::eType>& SubscribedButtons() const;
-  virtual const  std::set<uint32_t>& SubscribesIVI() const;
+  /**
+   * @brief ResetDataInNone reset data counters in NONE
+   */
+  virtual void ResetDataInNone();
 
-  virtual uint32_t nextHash();
-  virtual uint32_t curHash() const;
+  virtual DataAccessor<ButtonSubscriptions> SubscribedButtons() const OVERRIDE;
 
+  virtual const std::string& curHash() const;
   /**
    * @brief Change Hash for current application
    * and send notification to mobile
    * @return updated_hash
    */
-  virtual uint32_t UpdateHash();
+  virtual void UpdateHash();
 
   UsageStatistics& usage_report();
 
@@ -169,77 +205,165 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
 
   virtual void UnsubscribeFromSoftButtons(int32_t cmd_id);
 
+  virtual bool is_application_data_changed() const;
+
+  virtual void set_is_application_data_changed(bool state_application_data);
+
   /**
-   * @brief Check's if it is media, voice communication or navigation application
+   * @brief Check's if it is media, voice communication or navigation
+   * application
    *
    * @return true if application is media, voice communication or navigation
    */
   virtual bool IsAudioApplication() const;
 
- protected:
+  /**
+   * @brief Load persistent files from application folder.
+   */
+  virtual void LoadPersistentFiles();
 
+  /**
+  * @brief SetRegularState set permanent state of application
+  *
+  * @param state state to setup
+  */
+  virtual void SetRegularState(HmiStatePtr state);
+
+  /**
+  * @brief SetPostponedState sets postponed state to application.
+  * This state could be set as regular later
+  *
+  * @param state state to setup
+  */
+  virtual void SetPostponedState(HmiStatePtr state);
+
+  virtual void RemovePostponedState();
+
+  /**
+   * @brief AddHMIState the function that will change application's
+   * hmi state.
+   *
+   * @param app_id id of the application whose hmi level should be changed.
+   *
+   * @param state new hmi state for certain application.
+   */
+  virtual void AddHMIState(HmiStatePtr state);
+
+  /**
+   * @brief RemoveHMIState the function that will turn back hmi_level after end
+   * of some event
+   *
+   * @param app_id id of the application whose hmi level should be changed.
+   *
+   * @param state_id that should be removed
+   */
+  virtual void RemoveHMIState(HmiState::StateID state_id);
+
+  /**
+   * @brief HmiState of application within active events PhoneCall, TTS< etc ...
+   * @return Active HmiState of application
+   */
+  virtual const HmiStatePtr CurrentHmiState() const;
+
+  /**
+   * @brief RegularHmiState of application without active events VR, TTS etc ...
+   * @return HmiState of application
+   */
+  virtual const HmiStatePtr RegularHmiState() const;
+
+  /**
+   * @brief PostponedHmiState returns postponed hmi state of application
+   * if it's present
+   *
+   * @return Postponed hmi state of application
+   */
+  virtual const HmiStatePtr PostponedHmiState() const;
+
+  uint32_t audio_stream_retry_number() const;
+
+  void set_audio_stream_retry_number(const uint32_t& audio_stream_retry_number);
+
+  uint32_t video_stream_retry_number() const;
+
+  void set_video_stream_retry_number(const uint32_t& video_stream_retry_number);
+
+ protected:
   /**
    * @brief Clean up application folder. Persistent files will stay
    */
   void CleanupFiles();
 
-  /**
-   * @brief Load persistent files from application folder.
-   */
-  void LoadPersistentFiles();
-
  private:
 
-  // interfaces for NAVI retry sequence
-  bool video_stream_retry_active() const;
-  void set_video_stream_retry_active(bool active);
-  bool audio_stream_retry_active() const;
-  void set_audio_stream_retry_active(bool active);
-  void OnVideoStreamRetry();
-  void OnAudioStreamRetry();
+  /**
+   * @brief Callback for video streaming suspend timer.
+   * Suspends video streaming process for application
+   */
+  void OnVideoStreamSuspend();
 
-  uint32_t                                 hash_val_;
-  uint32_t                                 grammar_id_;
+  /**
+   * @brief Stops video streaming for application
+   */
+  inline void StopNaviStreaming();
 
+  /**
+   * @brief Stops audio streaming for application
+   */
+  inline void StopAudioStreaming();
+
+  /**
+   * @brief Callback for audio streaming suspend timer.
+   * Suspends audio streaming process for application
+   */
+  void OnAudioStreamSuspend();
+
+  std::string hash_val_;
+  uint32_t grammar_id_;
 
   Version version_;
-  std::string                              app_name_;
-  uint32_t                                 hmi_app_id_;
-  uint32_t                                 app_id_;
-  smart_objects::SmartObject*              active_message_;
-  bool                                     is_media_;
-  bool                                     allowed_support_navigation_;
-  bool                                     hmi_supports_navi_video_streaming_;
-  bool                                     hmi_supports_navi_audio_streaming_;
-  bool                                     is_app_allowed_;
-  bool                                     has_been_activated_;
-  bool                                     tts_speak_state_;
-  bool                                     tts_properties_in_none_;
-  bool                                     tts_properties_in_full_;
-  mobile_api::HMILevel::eType              hmi_level_;
-  uint32_t                                 put_file_in_none_count_;
-  uint32_t                                 delete_file_in_none_count_;
-  uint32_t                                 list_files_in_none_count_;
-  mobile_api::SystemContext::eType         system_context_;
-  mobile_api::AudioStreamingState::eType   audio_streaming_state_;
-  std::string                              app_icon_path_;
-  connection_handler::DeviceHandle         device_;
+  custom_str::CustomString app_name_;
+  uint32_t hmi_app_id_;
+  uint32_t app_id_;
+  smart_objects::SmartObject* active_message_;
+  bool is_media_;
+  bool is_navi_;
 
-  AppFilesMap                              app_files_;
+  bool video_streaming_approved_;
+  bool audio_streaming_approved_;
+  bool video_streaming_allowed_;
+  bool audio_streaming_allowed_;
+  bool video_streaming_suspended_;
+  bool audio_streaming_suspended_;
+  sync_primitives::Lock video_streaming_suspended_lock_;
+  sync_primitives::Lock audio_streaming_suspended_lock_;
+
+  bool is_app_allowed_;
+  bool has_been_activated_;
+  bool tts_properties_in_none_;
+  bool tts_properties_in_full_;
+  bool is_foreground_;
+  bool is_application_data_changed_;
+  uint32_t put_file_in_none_count_;
+  uint32_t delete_file_in_none_count_;
+  uint32_t list_files_in_none_count_;
+  std::string app_icon_path_;
+  connection_handler::DeviceHandle device_;
+  const std::string mac_address_;
+
+  AppFilesMap app_files_;
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
-  std::set<uint32_t>                       subscribed_vehicle_info_;
-  UsageStatistics                          usage_report_;
-  ProtocolVersion                          protocol_version_;
-  bool                                     is_voice_communication_application_;
+  VehicleInfoSubscriptions subscribed_vehicle_info_;
+  UsageStatistics usage_report_;
+  ProtocolVersion protocol_version_;
+  bool is_voice_communication_application_;
+  sync_primitives::atomic_bool is_resuming_;
 
-  // NAVI retry stream
-  volatile bool                            is_video_stream_retry_active_;
-  volatile bool                            is_audio_stream_retry_active_;
-  uint32_t                                 video_stream_retry_number_;
-  uint32_t                                 audio_stream_retry_number_;
-  utils::SharedPtr<timer::TimerThread<ApplicationImpl>> video_stream_retry_timer_;
-  utils::SharedPtr<timer::TimerThread<ApplicationImpl>> audio_stream_retry_timer_;
-
+  uint32_t video_stream_retry_number_;
+  uint32_t audio_stream_retry_number_;
+  uint32_t video_stream_suspend_timeout_;
+  uint32_t audio_stream_suspend_timeout_;
+  Timer video_stream_suspend_timer_;
+  Timer audio_stream_suspend_timer_;
 
   /**
    * @brief Defines number per time in seconds limits
@@ -250,17 +374,19 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    * @brief Defines specific command number per time in seconds limits
    */
   typedef std::map<mobile_apis::FunctionID::eType, TimeToNumberLimit>
-  CommandNumberTimeLimit;
+      CommandNumberTimeLimit;
 
   /**
    * @brief Defines id of SoftButton which is related from name of command
    */
-  typedef std::map<int32_t, SoftButtonID>
-  CommandSoftButtonID;
+  typedef std::map<int32_t, SoftButtonID> CommandSoftButtonID;
   CommandNumberTimeLimit cmd_number_to_time_limits_;
   CommandSoftButtonID cmd_softbuttonid_;
   // Lock for command soft button id
   sync_primitives::Lock cmd_softbuttonid_lock_;
+  mutable sync_primitives::Lock vi_lock_;
+  sync_primitives::Lock button_lock_;
+  std::string folder_name_;
   DISALLOW_COPY_AND_ASSIGN(ApplicationImpl);
 };
 
@@ -272,9 +398,12 @@ uint32_t ApplicationImpl::app_id() const {
   return app_id_;
 }
 
-const mobile_api::AudioStreamingState::eType&
+const mobile_api::AudioStreamingState::eType
 ApplicationImpl::audio_streaming_state() const {
-  return audio_streaming_state_;
+  using namespace mobile_apis;
+  const HmiStatePtr hmi_state = CurrentHmiState();
+  return hmi_state ? hmi_state->audio_streaming_state()
+                   : AudioStreamingState::INVALID_ENUM;
 }
 
 bool ApplicationImpl::app_allowed() const {

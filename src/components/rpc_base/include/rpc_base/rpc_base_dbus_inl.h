@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -374,12 +374,12 @@ inline Map<T, minsize, maxsize>::Map(dbus::MessageReader* reader)
 template<typename T>
 inline Nullable<T>::Nullable(dbus::MessageReader* reader)
   : T(reader),
-    marked_null_(impl::TakeNullable<T>(reader)){
+    marked_null_(impl::TakeNullable<T>(reader)) {
 }
 
 template<typename T>
 inline Optional<T>::Optional(dbus::MessageReader* reader)
-  : value_(impl::TakeOptional<T>(reader)){
+  : value_(impl::TakeOptional<T>(reader)) {
 }
 
 // MessageWriter serializers

@@ -40,10 +40,11 @@
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/session_observer.h"
 
-#include "security_manager/crypto_manager.h"
 #include "security_manager/security_manager_listener.h"
 
 namespace security_manager {
+
+class CryptoManager;
 /**
  * \brief SecurityManager interface implements protocol_handler::ProtocolObserver
  * and provide interface for handling Security queries from mobile side
@@ -55,6 +56,13 @@ class SecurityManager
    * \brief InternalErrors is 1 byte identifier of internal error
    * Handle as binary data in Ford Protocol
    */
+
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#undef ERROR_SUCCESS
+#undef ERROR_NOT_SUPPORTED
+#undef ERROR_DECRYPTION_FAILED
+#undef ERROR_ENCRYPTION_FAILED
+#endif
   enum InternalErrors {
     ERROR_SUCCESS                    = 0x00,
     ERROR_INVALID_QUERY_SIZE         = 0x01,  // wrong size of query data
@@ -67,7 +75,7 @@ class SecurityManager
     ERROR_ENCRYPTION_FAILED          = 0x07,
     ERROR_SSL_INVALID_DATA           = 0x08,
     ERROR_INTERNAL                   = 0xFF,
-    ERROR_UNKWOWN_INTERNAL_ERROR     = 0xFE  // error valeu for testing
+    ERROR_UNKNOWN_INTERNAL_ERROR     = 0xFE  // error value for testing
   };
   /**
    * \brief Sets pointer for Connection Handler layer for managing sessions

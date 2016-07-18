@@ -1,4 +1,4 @@
-/**
+/*
  * \file bluetooth_transport_adapter.h
  * \brief BluetoothAdapter class header file.
  *
@@ -49,7 +49,7 @@ class BluetoothTransportAdapter : public TransportAdapterImpl {
   /**
    * @brief Constructor.
    */
-  BluetoothTransportAdapter();
+  BluetoothTransportAdapter(resumption::LastState& last_state);
 
   /**
    * @brief Destructor.

@@ -8,6 +8,9 @@
 #define MB_CLIENT_H
 
 #if _MSC_VER >= 1400 // VC++ 8.0
+#ifdef ssize_t
+#undef ssize_t
+#endif
 typedef int ssize_t;
 #endif 
 

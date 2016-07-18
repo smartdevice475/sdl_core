@@ -10,12 +10,16 @@
 #include <sys/types.h>
 #include <unistd.h>
 #endif
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#include <process.h>
+#else
 #include <sys/resource.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <sstream>
+#endif
 #include "utils/file_system.h"
 
 namespace utils {
@@ -124,10 +128,14 @@ bool Resources::GetProcInfo(Resources::PidStats& output) {
   if (0 >= fd) {
     LOG4CXX_ERROR(logger_, "Failed open process proc file : " << GetProcPath() <<
                   "; error no : " << strerror( errno ) );
+
+    close(fd);
     return false;
   }
   devctl(fd, DCMD_PROC_INFO, &output, sizeof(output), 0);
   close(fd);
+  return true;
+#else
   return true;
 #endif
 }
@@ -148,14 +156,14 @@ bool Resources::GetMemInfo(Resources::MemInfo &output) {
   std::string as_path = GetStatPath();
   struct stat st;
   struct _dir* proc_dir = 0;
-  struct dirent* proc_entry = 0;
   if (0 == (proc_dir = opendir(proc))) {
     LOG4CXX_ERROR(logger_, "Unable to access to " << proc);
     result = false;
     return result;
   }  
-  if (0 == (proc_entry = readdir(proc_dir))) {
+  if (0 == readdir(proc_dir)) {
     LOG4CXX_ERROR(logger_, "Unable to read : " << proc_dir);
+    closedir(proc_dir);
     result = false;
     return result;
   }

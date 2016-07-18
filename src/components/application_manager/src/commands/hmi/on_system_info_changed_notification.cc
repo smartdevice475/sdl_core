@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/on_system_info_changed_notification.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/application_manager_impl.h"
 #include "application_manager/message_helper.h"
 
 namespace application_manager {
@@ -47,14 +47,14 @@ OnSystemInfoChangedNotification::~OnSystemInfoChangedNotification() {
 }
 
 void OnSystemInfoChangedNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnSystemInfoChangedNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
   uint32_t lang_code =
       (*message_)[strings::msg_params][strings::language].asUInt();
   const std::string language =
       application_manager::MessageHelper::CommonLanguageToString(
         static_cast<hmi_apis::Common_Language::eType>(lang_code));
 
-  policy::PolicyHandler::instance()->OnSystemInfoChanged(language);
+  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().OnSystemInfoChanged(language);
 }
 
 }  // namespace commands

@@ -2,8 +2,11 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* Default visibility */
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#define DEFAULT_VISIBILITY
+#else
 #define DEFAULT_VISIBILITY __attribute__((visibility("default")))
-
+#endif
 /* Start with debug message logging enabled */
 /* #undef ENABLE_DEBUG_LOGGING */
 
@@ -35,10 +38,14 @@
 #define HAVE_MEMORY_H 1
 
 /* Define to 1 if you have the <poll.h> header file. */
+#if !defined(OS_WIN32) && !defined(OS_WINCE)
 #define HAVE_POLL_H 1
+#endif
 
 /* Define to 1 if you have the <signal.h> header file. */
+#if !defined(OS_WIN32) && !defined(OS_WINCE)
 #define HAVE_SIGNAL_H 1
+#endif
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #define HAVE_STDINT_H 1
@@ -53,19 +60,33 @@
 #define HAVE_STRING_H 1
 
 /* Define to 1 if the system has the type `struct timespec'. */
+#if !defined(OS_WIN32) && !defined(OS_WINCE)
 #define HAVE_STRUCT_TIMESPEC 1
+#endif
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
+#if !defined(OS_WIN32) && !defined(OS_WINCE)
 #define HAVE_SYS_STAT_H 1
+#endif
 
 /* Define to 1 if you have the <sys/time.h> header file. */
+#if !defined(OS_WIN32) && !defined(OS_WINCE)
 #define HAVE_SYS_TIME_H 1
+#endif
 
 /* Define to 1 if you have the <sys/types.h> header file. */
+#if !defined(OS_WIN32) && !defined(OS_WINCE)
 #define HAVE_SYS_TYPES_H 1
+#endif
 
 /* Define to 1 if you have the <unistd.h> header file. */
+#if !defined(OS_WIN32) && !defined(OS_WINCE)
 #define HAVE_UNISTD_H 1
+#endif
+
+#if defined(OS_WINCE)
+#define HAVE_MISSING_H
+#endif
 
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */
@@ -78,13 +99,15 @@
 /* #undef OS_DARWIN */
 
 /* Linux backend */
+#if !defined(OS_WIN32) && !defined(OS_WINCE)
 #define OS_LINUX 1
+#endif
 
 /* OpenBSD/NetBSD backend */
 /* #undef OS_OPENBSD */
 
 /* Windows backend */
-/* #undef OS_WINDOWS */
+/* #undef OS_WIN32 */
 
 /* Name of package */
 #define PACKAGE "libusbx"
@@ -108,13 +131,19 @@
 #define PACKAGE_VERSION "1.0.16"
 
 /* type of second poll() argument */
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#define POLL_NFDS_TYPE unsigned int
+#else
 #define POLL_NFDS_TYPE nfds_t
+#endif
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
 /* Use POSIX Threads */
+#if !defined(OS_WIN32) && !defined(OS_WINCE)
 #define THREADS_POSIX 1
+#endif
 
 /* timerfd headers available */
 #if defined(OS_LINUX) && !defined(OS_ANDROID)

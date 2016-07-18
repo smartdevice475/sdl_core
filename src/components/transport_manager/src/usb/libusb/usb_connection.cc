@@ -30,6 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <pthread.h>
 #include <unistd.h>
 #include <iomanip>
 
@@ -51,7 +52,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 UsbConnection::UsbConnection(const DeviceUID& device_uid,
                              const ApplicationHandle& app_handle,
                              TransportAdapterController* controller,
-                             const UsbHandlerSptr& usb_handler,
+                             const UsbHandlerSptr usb_handler,
                              PlatformUsbDevice* device)
   : device_uid_(device_uid),
     app_handle_(app_handle),
@@ -83,11 +84,19 @@ UsbConnection::~UsbConnection() {
 }
 
 // Callback for handling income and outcome data from lib_usb
-void InTransferCallback(libusb_transfer* transfer) {
+void 
+#ifdef OS_WIN32
+LIBUSB_CALL
+#endif
+InTransferCallback(libusb_transfer* transfer) {
   static_cast<UsbConnection*>(transfer->user_data)->OnInTransfer(transfer);
 }
 
-void OutTransferCallback(libusb_transfer* transfer) {
+void 
+#ifdef OS_WIN32
+LIBUSB_CALL
+#endif
+OutTransferCallback(libusb_transfer* transfer) {
   static_cast<UsbConnection*>(transfer->user_data)->OnOutTransfer(transfer);
 }
 
@@ -256,9 +265,9 @@ void UsbConnection::Finalise() {
   }
   while (waiting_in_transfer_cancel_ || waiting_out_transfer_cancel_) {
 #ifdef OS_ANDROID
-    usleep(150000);
-#elif defined(OS_WIN32)
-	  ::Sleep(150);
+	usleep(150000);
+#elif defined(OS_WIN32) || defined(OS_WINCE)
+	::Sleep(150);
 #else
     pthread_yield();
 #endif

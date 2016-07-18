@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/on_allow_sdl_functionality_notification.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
@@ -39,19 +39,17 @@ namespace commands {
 
 OnAllowSDLFunctionalityNotification::OnAllowSDLFunctionalityNotification(
     const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    : NotificationFromHMI(message) {}
 
-OnAllowSDLFunctionalityNotification::~OnAllowSDLFunctionalityNotification() {
-}
+OnAllowSDLFunctionalityNotification::~OnAllowSDLFunctionalityNotification() {}
 
 void OnAllowSDLFunctionalityNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnAllowSDLFunctionalityNotification::Run");
-  uint32_t device_id = 0;
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::string device_id;
   if ((*message_)[strings::msg_params].keyExists("device")) {
-    device_id = (*message_)[strings::msg_params]["device"]["id"].asUInt();
+    device_id = (*message_)[strings::msg_params]["device"]["id"].asString();
   }
-  policy::PolicyHandler::instance()->OnAllowSDLFunctionalityNotification(
+  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().OnAllowSDLFunctionalityNotification(
       (*message_)[strings::msg_params][hmi_response::allowed].asBool(),
       device_id);
 }
@@ -59,4 +57,3 @@ void OnAllowSDLFunctionalityNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -32,19 +32,33 @@
 #ifdef __QNX__
 #  include <process.h>
 #else  // __QNX__
+#ifndef OS_WINCE
 #  include <sys/types.h>
+#endif
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#include "windows.h"
+#include "process.h"
+#else
 #  include <sys/wait.h>
+#endif
+#ifndef OS_WINCE
 #  include <sys/stat.h>
 #  include <fcntl.h>
 #  include <unistd.h>
+#endif
 #endif  // __QNX__
 
 #include <algorithm>
 #include <functional>
 #include <cstring>
+#include <iostream>
 
 #include "utils/logger.h"
 #include "utils/system.h"
+
+#ifdef OS_WINCE
+#include "utils/global.h"
+#endif
 
 namespace utils {
 
@@ -66,13 +80,21 @@ System::System(const std::string& file, const std::string& command)
   argv_.push_back(command);
 }
 
-bool System::Execute() {
-  return Execute(false);
-}
-
 System& System::Add(const std::string& arg) {
   argv_.push_back(arg);
   return *this;
+}
+
+std::string System::command() const {
+  return command_;
+}
+
+std::vector<std::string> System::argv() const {
+  return argv_;
+}
+
+bool System::Execute() {
+  return Execute(false);
 }
 
 #ifdef __QNX__
@@ -89,7 +111,7 @@ bool System::Execute(bool wait) {
 
   if (ret == -1) {
     LOG4CXX_ERROR(logger_, "Can't execute command: " << command_
-                  << " Errno is: " << std::strerror(errno));
+        << " Errno is: " << std::strerror(errno));
     return false;
   }
 
@@ -101,7 +123,65 @@ bool System::Execute(bool wait) {
 }
 
 #else  // __QNX__
+#if defined(OS_WIN32)
+bool System::Execute(bool wait) {
+    bool bRet = true;
+    PROCESS_INFORMATION pi;
+    STARTUPINFO si = { sizeof(si) };
 
+    bRet = CreateProcess(
+        NULL,
+        (LPSTR)command_.c_str(),
+        NULL,
+        NULL,
+        FALSE,   
+        0,
+        NULL,
+        NULL,
+        &si,
+        &pi                 
+        ) ? true : false;
+
+    if (bRet && wait) {
+        WaitForSingleObject(pi.hProcess, INFINITE);
+    }
+
+    return bRet;
+}
+#elif defined(OS_WINCE)
+bool System::Execute(bool wait) {
+    bool bRet = true;
+    PROCESS_INFORMATION pi;
+    STARTUPINFO si = { sizeof(si) };
+
+    std::wstring tmpStr;
+    Global::toUnicode(command_, CP_ACP, tmpStr);
+
+    bRet = CreateProcess(
+        NULL,
+        (LPWSTR)tmpStr.c_str(),
+        NULL,
+        NULL,
+        FALSE,   
+        0,
+        NULL,
+        NULL,
+        &si,
+        &pi                 
+        ) ? true : false;
+
+    if (bRet && wait) {
+        WaitForSingleObject(pi.hProcess, INFINITE);
+    }
+
+    return bRet;
+}
+#elif defined(OS_MAC)
+bool System::Execute(bool wait) {
+	wait;
+	return true;
+}
+#else
 bool System::Execute(bool wait) {
   // Create a child process.
   pid_t pid_command = fork();
@@ -165,7 +245,7 @@ bool System::Execute(bool wait) {
     }
   }
 }
-
+#endif
 #endif  // __QNX__
 
 }  // utils

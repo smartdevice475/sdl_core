@@ -30,8 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#if !defined(OS_WIN32) && !defined(OS_WINCE)
 #include <apr_time.h>
 #include <log4cxx/spi/loggingevent.h>
+#endif
 
 #include "utils/auto_trace.h"
 #include "utils/push_log.h"
@@ -42,7 +44,9 @@ AutoTrace::AutoTrace(
   log4cxx::LoggerPtr logger,
   const log4cxx::spi::LocationInfo& location) :
   logger_(logger), location_(location) {
-  if (logger_->isTraceEnabled()) {
+#if !defined(OS_WIN32) && !defined(OS_WINCE)
+  if (logger::logs_enabled() &&
+      logger_->isTraceEnabled()) {
     push_log(logger_,
              ::log4cxx::Level::getTrace(),
              "Enter",
@@ -51,10 +55,13 @@ AutoTrace::AutoTrace(
              ::log4cxx::spi::LoggingEvent::getCurrentThreadName()
     );
   }
+#endif
 }
 
 AutoTrace::~AutoTrace() {
-  if (logger_->isTraceEnabled()) {
+#if !defined(OS_WIN32) && !defined(OS_WINCE)
+  if (logger::logs_enabled() &&
+      logger_->isTraceEnabled()) {
     push_log(logger_,
              ::log4cxx::Level::getTrace(),
              "Exit",
@@ -63,6 +70,7 @@ AutoTrace::~AutoTrace() {
              ::log4cxx::spi::LoggingEvent::getCurrentThreadName()
     );
   }
+#endif
 }
 
 }  // namespace logger

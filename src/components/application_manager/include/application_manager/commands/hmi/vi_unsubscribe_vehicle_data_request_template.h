@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -61,7 +61,7 @@ class VIUnsubscribeVehicleDataRequestTemplate : public RequestToHMI {
    * @brief Execute command with sending DBus thin request to HMI
    **/
   virtual void Run() {
-    LOG4CXX_INFO(logger_, "VIUnsubscriveVehicleDataRequestTemplate::Run");
+    LOG4CXX_AUTO_TRACE(logger_);
     SendRequest();
   }
 

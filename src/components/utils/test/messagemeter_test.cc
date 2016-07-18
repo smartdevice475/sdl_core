@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2014, Ford Motor Company
+* Copyright (c) 2015, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,7 @@ const TimePair testing_time_pairs[] = { TimePair(0,  50),
 class MessageMeterTest: public ::testing::TestWithParam<TimePair> {
  protected:
   void SetUp() OVERRIDE {
-    usecs = date_time::DateTime::MICROSECONDS_IN_MILLISECONDS;
+    usecs = date_time::DateTime::MICROSECONDS_IN_MILLISECOND;
     id1 = 0x0;
     id2 = 0xABCDEF;
     id3 = 0xFEBCDA;
@@ -73,13 +73,12 @@ class MessageMeterTest: public ::testing::TestWithParam<TimePair> {
         << "Wrong test case with null range value";
 
     meter.set_time_range(time_range);
-    // Get range in msec less than original for correct waitng in tests
-    time_range_msecs = date_time::DateTime::getmSecs(time_range) * 0.95;
+    time_range_msecs = date_time::DateTime::getmSecs(time_range);
   }
   void TearDown() OVERRIDE {
   }
   ::utils::MessageMeter<int> meter;
-  TimevalStruct time_range {0, 0};
+  TimevalStruct time_range;
   int64_t time_range_msecs;
   int usecs;
   int id1, id2, id3;
@@ -87,20 +86,28 @@ class MessageMeterTest: public ::testing::TestWithParam<TimePair> {
 
 TEST(MessageMeterTest, DefaultTimeRange) {
   const ::utils::MessageMeter<int> default_meter;
+#ifdef OS_WINCE
+  const TimevalStruct time_second = {1, 0};
+#else
   const TimevalStruct time_second {1, 0};
+#endif
   EXPECT_EQ(time_second, default_meter.time_range());
 }
 
 TEST(MessageMeterTest, TimeRangeSetter) {
   ::utils::MessageMeter<int> meter;
+#ifdef OS_WINCE
+  TimevalStruct time_range = {0, 0};
+#else
   TimevalStruct time_range {0, 0};
+#endif
   const int test_count_secs = 1000;
   // Skip 1000th msec value as wrong for TimevalStruct
   const int test_count_msecs = 999;
   for (int sec = test_count_secs; sec >= 0; --sec) {
     for (int msec = test_count_msecs; msec >= 0; --msec) {
       time_range.tv_sec = sec;
-      time_range.tv_usec = msec * date_time::DateTime::MICROSECONDS_IN_MILLISECONDS;
+      time_range.tv_usec = msec * date_time::DateTime::MICROSECONDS_IN_MILLISECOND;
       // Setter TimevalStruct
       meter.set_time_range(time_range);
       EXPECT_EQ(time_range,
@@ -118,7 +125,11 @@ TEST(MessageMeterTest, AddingWithNullTimeRange) {
   ::utils::MessageMeter<int> meter;
   const int id1 = 1;
   const int id2 = 2;
+#ifdef OS_WINCE
+  const TimevalStruct null_time_range = {0, 0};
+#else
   const TimevalStruct null_time_range {0, 0};
+#endif
   meter.set_time_range(null_time_range);
   for (int i = 0; i < 10000; ++i) {
     // 1st Connection
@@ -135,48 +146,66 @@ TEST(MessageMeterTest, AddingWithNullTimeRange) {
   }
 }
 
-TEST_P(MessageMeterTest, AddingOverPeriod) {
+TEST_P(MessageMeterTest, TrackMessage_AddingOverPeriod_CorrectCountOfMessages) {
   size_t messages = 0;
   const TimevalStruct start_time = date_time::DateTime::getCurrentTime();
   // Add messages for less range period
-  while (date_time::DateTime::calculateTimeSpan(start_time)
+  int64_t time_span;
+  while ((time_span = date_time::DateTime::calculateTimeSpan(start_time))
          < time_range_msecs) {
     ++messages;
-    EXPECT_EQ(messages,
-              meter.TrackMessage(id1));
-    EXPECT_EQ(messages,
-              meter.Frequency(id1));
+
+    size_t tracked_frequency = meter.TrackMessage(id1);
+    size_t frequency = meter.Frequency(id1);
+
+    EXPECT_GE(messages, tracked_frequency)
+        << "Tracked messages can`t be over cycles.";
+
+    if (messages > frequency) {
+      EXPECT_GE(time_range_msecs, time_span);
+      break;
+    }
+    EXPECT_EQ(tracked_frequency, frequency);
   }
 }
 
-TEST_P(MessageMeterTest, AddingOverPeriod_MultiIds) {
+TEST_P(MessageMeterTest,
+    TrackMessage_AddingOverPeriodMultiIds_CorrectCountOfMessages) {
   size_t messages = 0;
   const TimevalStruct start_time = date_time::DateTime::getCurrentTime();
   // Add messages for less range period
-  while (date_time::DateTime::calculateTimeSpan(start_time)
+  int64_t time_span;
+  while ((time_span = date_time::DateTime::calculateTimeSpan(start_time))
          < time_range_msecs) {
     ++messages;
-    // 1st  Connection
-    EXPECT_EQ(messages,
-              meter.TrackMessage(id1));
-    EXPECT_EQ(messages,
-              meter.Frequency(id1));
 
-    // 2d Connection
-    EXPECT_EQ(messages,
-              meter.TrackMessage(id2));
-    EXPECT_EQ(messages,
-              meter.Frequency(id2));
+    size_t tracked_frequency_id1 = meter.TrackMessage(id1);
+    size_t tracked_frequency_id2 = meter.TrackMessage(id2);
+    size_t tracked_frequency_id3 = meter.TrackMessage(id3);
+    size_t frequency_id1 = meter.Frequency(id1);
+    size_t frequency_id2 = meter.Frequency(id2);
+    size_t frequency_id3 = meter.Frequency(id3);
 
-    // 3d Connection
-    EXPECT_EQ(messages,
-              meter.TrackMessage(id3));
-    EXPECT_EQ(messages,
-              meter.Frequency(id3));
+    EXPECT_GE(messages, tracked_frequency_id1)
+        << "Tracked messages can`t be over cycles.";
+    EXPECT_GE(messages, tracked_frequency_id2)
+        << "Tracked messages can`t be over cycles.";
+    EXPECT_GE(messages, tracked_frequency_id3)
+        << "Tracked messages can`t be over cycles.";
+
+    if (messages > frequency_id1 ||
+       messages > frequency_id2 ||
+       messages > frequency_id3) {
+      EXPECT_GE(time_range_msecs, time_span);
+      break;
+    }
+    EXPECT_EQ(tracked_frequency_id1, frequency_id1);
+    EXPECT_EQ(tracked_frequency_id2, frequency_id2);
+    EXPECT_EQ(tracked_frequency_id3, frequency_id3);
   }
 }
 
-TEST_P(MessageMeterTest, CountingOverPeriod) {
+TEST_P(MessageMeterTest, Frequency_CountingOverPeriod_CorrectCountOfMessages) {
   const size_t one_message = 1;
   const TimevalStruct start_time = date_time::DateTime::getCurrentTime();
   EXPECT_EQ(one_message,
@@ -185,17 +214,23 @@ TEST_P(MessageMeterTest, CountingOverPeriod) {
             meter.TrackMessage(id2));
   EXPECT_EQ(one_message,
             meter.TrackMessage(id3));
-  const int sleep_usecs = 500;
+
   // Check messages count over period
-  while (date_time::DateTime::calculateTimeSpan(start_time)
+  int64_t time_span;
+  while ((time_span = date_time::DateTime::calculateTimeSpan(start_time))
          < time_range_msecs) {
-    usleep(sleep_usecs);
-    EXPECT_EQ(one_message,
-              meter.Frequency(id1));
-    EXPECT_EQ(one_message,
-              meter.Frequency(id2));
-    EXPECT_EQ(one_message,
-              meter.Frequency(id3));
+#if defined(OS_WIN32) || defined(OS_WINCE)
+    Sleep(time_range_msecs);
+#else
+    usleep(time_range_msecs);
+#endif
+
+    if (one_message != meter.Frequency(id1) ||
+       one_message != meter.Frequency(id2) ||
+       one_message != meter.Frequency(id3)) {
+      EXPECT_GE(time_range_msecs, time_span);
+      break;
+    }
   }
 }
 
@@ -209,7 +244,11 @@ TEST_P(MessageMeterTest, CountingOutOfPeriod) {
             meter.TrackMessage(id3));
 
   // sleep more than time range
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  Sleep(time_range_msecs * usecs * 1.1);
+#else
   usleep(time_range_msecs * usecs * 1.1);
+#endif
   EXPECT_EQ(0u,
             meter.Frequency(id1));
   EXPECT_EQ(0u,

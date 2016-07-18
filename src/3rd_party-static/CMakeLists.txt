@@ -46,10 +46,27 @@ add_subdirectory(./bluez-libs-3.36)
 endif()
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+add_subdirectory(./sdk_ext)
+endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  # --- sqlite3
+  add_subdirectory(./sqlite3-3.11.1)
+  set(SQLITE3_INCLUDE_DIRECTORY ${SQLITE3_INCLUDE_DIRECTORY} PARENT_SCOPE)
+  
+  # --- pthread-win32
+  add_subdirectory(./pthread-win32-2.9.1)
+endif()
+
 if (BUILD_USB_SUPPORT)
-  if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
+  if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
     add_subdirectory(./libusbx-1.0.16)
     set(LIBUSB_INCLUDE_DIRECTORY ${LIBUSB_INCLUDE_DIRECTORY} PARENT_SCOPE)
     set(LIBUSB_LIBS_DIRECTORY ${LIBUSB_LIBS_DIRECTORY} PARENT_SCOPE)
   endif()
+endif()
+
+if(BUILD_TESTS)
+  add_subdirectory(test)
 endif()

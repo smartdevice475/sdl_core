@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/on_system_error_notification.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/application_manager_impl.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -47,12 +47,13 @@ OnSystemErrorNotification::~OnSystemErrorNotification() {
 }
 
 void OnSystemErrorNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnSystemErrorNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
-  int code = (*message_)[strings::msg_params][hmi_notification::error]
+  const int code = (*message_)[strings::msg_params][hmi_notification::error]
       .asInt();
 
-  policy::PolicyHandler::instance()->OnSystemError(code);
+  application_manager::ApplicationManagerImpl::instance()
+      ->GetPolicyHandler().OnSystemError(code);
 }
 
 }  // namespace commands

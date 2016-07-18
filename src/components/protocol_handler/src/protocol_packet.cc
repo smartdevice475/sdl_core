@@ -37,55 +37,254 @@
 #include <string.h>
 #endif
 #include <new>
+#include <memory>
+#include <cstring>
+#include <limits>
+
+#include "protocol/common.h"
 #include "protocol_handler/protocol_packet.h"
 #include "utils/macro.h"
+#include "utils/byte_order.h"
 
 namespace protocol_handler {
 
-ProtocolPacket::ProtocolPacket()
-    : payload_size_(0),
-      packet_id_(0),
-      connection_id_(0)  {
+CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
+
+ProtocolPacket::ProtocolData::ProtocolData()
+  : data(NULL), totalDataBytes(0u) { }
+
+ProtocolPacket::ProtocolData::~ProtocolData() {
+  delete[] data;
 }
 
-ProtocolPacket::ProtocolPacket(uint8_t connection_id,
+ProtocolPacket::ProtocolHeader::ProtocolHeader()
+  : version(0x00),
+    protection_flag(PROTECTION_OFF),
+    frameType(0x00),
+    serviceType(0x00),
+    frameData(0x00),
+    sessionId(0x00),
+    dataSize(0x00),
+    messageId(0x00) {
+}
+
+ProtocolPacket::ProtocolHeader::ProtocolHeader(
+    uint8_t version, bool protection, uint8_t frameType, uint8_t serviceType,
+    uint8_t frameData, uint8_t sessionID, uint32_t dataSize, uint32_t messageID)
+  : version(version),
+    protection_flag(protection),
+    frameType(frameType),
+    serviceType(serviceType),
+    frameData(frameData),
+    sessionId(sessionID),
+    dataSize(dataSize),
+    messageId(messageID) {
+}
+
+inline uint32_t read_be_uint32(const uint8_t* const data) {
+  // Int value read byte per byte
+  // reintercast for non-4 byte address alignment lead to UB on arm platform
+  uint32_t value = data[3];
+  value += (data[2] <<  8);
+  value += (data[1] << 16);
+  value += (data[0] << 24);
+  return value;
+}
+
+void ProtocolPacket::ProtocolHeader::deserialize(
+    const uint8_t* message, const size_t messageSize) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK_OR_RETURN_VOID(message);
+  if (messageSize < PROTOCOL_HEADER_V1_SIZE) {
+    LOG4CXX_DEBUG(logger_, "Message size less " << PROTOCOL_HEADER_V1_SIZE << " bytes");
+    return;
+  }
+  // first 4 bits
+  version = message[0] >> 4u;
+  // 5th bit
+  protection_flag = message[0] & 0x08u;
+  // 6-8 bits
+  frameType = message[0] & 0x07u;
+
+  serviceType = message[1];
+  frameData   = message[2];
+  sessionId   = message[3];
+
+  // FIXME(EZamakhov): usage for FirstFrame message
+  dataSize = read_be_uint32(message + 4);
+  switch (version) {
+    case PROTOCOL_VERSION_2:
+    case PROTOCOL_VERSION_3:
+    case PROTOCOL_VERSION_4: {
+        if (messageSize < PROTOCOL_HEADER_V2_SIZE) {
+          LOG4CXX_DEBUG(logger_, "Message size less " << PROTOCOL_HEADER_V2_SIZE << " bytes");
+          return;
+        }
+        messageId = read_be_uint32(message + 8);
+      }
+      break;
+    default:
+      LOG4CXX_WARN(logger_, "Unknown version:" <<
+                   static_cast<int>(version));
+      messageId = 0;
+      break;
+  }
+}
+
+ProtocolPacket::ProtocolHeaderValidator::ProtocolHeaderValidator()
+#if defined(OS_WIN32) || defined(OS_WINCE)
+	: max_payload_size_(UINT_MAX) {}
+#else
+    : max_payload_size_(std::numeric_limits<size_t>::max()) {}
+#endif
+
+void ProtocolPacket::ProtocolHeaderValidator::set_max_payload_size(
+    const size_t max_payload_size) {
+  LOG4CXX_DEBUG(logger_, "New maximum payload size is " << max_payload_size);
+  max_payload_size_ = max_payload_size;
+}
+
+size_t ProtocolPacket::ProtocolHeaderValidator::max_payload_size() const {
+  return max_payload_size_;
+}
+
+RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
+    const ProtocolHeader& header) const {
+  LOG4CXX_DEBUG(logger_, "Validating header - " << header.sessionId);
+  // expected payload size will be calculated depending
+  // on used protocol version
+  size_t payload_size = MAXIMUM_FRAME_DATA_V2_SIZE;
+  // Protocol version shall be from 1 to 4
+  switch (header.version) {
+    case PROTOCOL_VERSION_1:
+    case PROTOCOL_VERSION_2:
+      break;
+    case PROTOCOL_VERSION_3:
+    case PROTOCOL_VERSION_4:
+      payload_size = max_payload_size_ > MAXIMUM_FRAME_DATA_V2_SIZE ?
+                     max_payload_size_ : MAXIMUM_FRAME_DATA_V2_SIZE;
+      break;
+    default:
+      LOG4CXX_WARN(logger_, "Unknown version:" <<
+                   static_cast<int>(header.version));
+      return RESULT_FAIL;
+  }
+  // ServiceType shall be equal 0x0 (Control), 0x07 (RPC), 0x0A (PCM), 0x0B (Video), 0x0F (Bulk)
+  if (ServiceTypeFromByte(header.serviceType) == kInvalidServiceType) {
+    LOG4CXX_WARN(logger_, "Invalide service type" <<
+                 static_cast<int>(header.serviceType));
+    return RESULT_FAIL;
+  }
+  // Check frame info for each frame type
+  // Frame type shall be 0x00 (Control), 0x01 (Single), 0x02 (First), 0x03 (Consecutive)
+  // For Control frames Frame info value shall be from 0x00 to 0x06 or 0xFE(Data Ack), 0xFF(HB Ack)
+  // For Single and First frames Frame info value shall be equal 0x00
+  switch (header.frameType) {
+    case FRAME_TYPE_CONTROL : {
+        switch (header.frameData) {
+          case FRAME_DATA_HEART_BEAT:
+          case FRAME_DATA_START_SERVICE:
+          case FRAME_DATA_START_SERVICE_ACK:
+          case FRAME_DATA_START_SERVICE_NACK:
+          case FRAME_DATA_END_SERVICE:
+          case FRAME_DATA_END_SERVICE_ACK:
+          case FRAME_DATA_END_SERVICE_NACK:
+          case FRAME_DATA_SERVICE_DATA_ACK:
+          case FRAME_DATA_HEART_BEAT_ACK:
+            break;
+          default:
+            LOG4CXX_WARN(logger_, "FRAME_TYPE_CONTROL - Invalide frame data " <<
+                         static_cast<int>(header.frameData));
+            return RESULT_FAIL;
+        }
+        break;
+      }
+    case FRAME_TYPE_SINGLE:
+      if (header.frameData != FRAME_DATA_SINGLE) {
+        LOG4CXX_WARN(logger_, "FRAME_TYPE_SINGLE - Invalide frame data " <<
+                     static_cast<int>(header.frameData));
+        return RESULT_FAIL;
+      }
+      break;
+    case FRAME_TYPE_FIRST:
+      if (header.frameData != FRAME_DATA_FIRST) {
+        LOG4CXX_WARN(logger_, "FRAME_TYPE_FIRST - Invalide frame data " <<
+                     static_cast<int>(header.frameData));
+        return RESULT_FAIL;
+      }
+      break;
+    case FRAME_TYPE_CONSECUTIVE:
+      // Could have any FrameInfo value
+      break;
+    default:
+      LOG4CXX_WARN(logger_, "Unknown frame type " <<
+                   static_cast<int>(header.frameType));
+      // All other Frame type is invalid
+      return RESULT_FAIL;
+  }
+  // For Control frames Data Size value shall be less than MTU header
+  // For Single and Consecutive Data Size value shall be greater than 0x00
+  // and shall be less than payload size
+  if (header.dataSize > payload_size) {
+    LOG4CXX_WARN(logger_, "Packet data size is " << header.dataSize <<
+                 " and bigger than allowed payload size " << payload_size << " bytes");
+    return RESULT_FAIL;
+  }
+  switch (header.frameType) {
+    case FRAME_TYPE_SINGLE:
+    case FRAME_TYPE_CONSECUTIVE:
+      if (header.dataSize <= 0u) {
+        LOG4CXX_WARN(logger_,
+                     "Data size of Single and Consecutive frame shall be not equal 0 byte ");
+        return RESULT_FAIL;
+      }
+      break;
+    default:
+      break;
+  }
+  // Message ID be equal or greater than 0x01 (not actual for 1 protocol version and Control frames)
+  if (header.messageId <= 0) {
+    if (FRAME_TYPE_CONTROL != header.frameType &&
+        PROTOCOL_VERSION_1 != header.version) {
+      LOG4CXX_WARN(logger_, "Message ID shall be greater than 0x00");
+      // Message ID shall be greater than 0x00, but not implemented in SPT
+      return RESULT_FAIL;
+    }
+  }
+  LOG4CXX_DEBUG(logger_, "Message header is completely correct.");
+  return RESULT_OK;
+}
+
+ProtocolPacket::ProtocolPacket()
+  : payload_size_(0u), connection_id_(0u)  {
+}
+
+ProtocolPacket::ProtocolPacket(ConnectionID connection_id,
                                uint8_t version, bool protection,
                                uint8_t frameType,
                                uint8_t serviceType,
                                uint8_t frameData, uint8_t sessionID,
                                uint32_t dataSize, uint32_t messageID,
-                               const uint8_t *data,
-                               uint32_t packet_id)
+                               const uint8_t *data)
   : packet_header_(version, protection, frameType, serviceType,
                    frameData, sessionID, dataSize, messageID),
+    packet_data_(),
     payload_size_(0),
-    packet_id_(packet_id),
     connection_id_(connection_id) {
   set_data(data, dataSize);
-  DCHECK(MAXIMUM_FRAME_DATA_SIZE >= dataSize);
 }
 
-ProtocolPacket::ProtocolPacket(uint8_t connection_id, uint8_t *data_param,
-                               uint32_t data_size)
-  : payload_size_(0),
-    packet_id_(0),
+ProtocolPacket::ProtocolPacket(ConnectionID connection_id)
+  : packet_header_(),
+    packet_data_(),
+    payload_size_(0),
     connection_id_(connection_id) {
-  RESULT_CODE result = deserializePacket(data_param, data_size);
-  if (result != RESULT_OK) {
-    //NOTREACHED();
-  }
-}
-
-ProtocolPacket::~ProtocolPacket() {
-  delete[] packet_data_.data;
 }
 
 // Serialization
 RawMessagePtr ProtocolPacket::serializePacket() const {
-  uint8_t *packet = new (std::nothrow) uint8_t[MAXIMUM_FRAME_DATA_SIZE];
-  if (!packet) {
-    return RawMessagePtr();
-  }
+  LOG4CXX_AUTO_TRACE(logger_);
+  // TODO(EZamakhov): Move header serialization to ProtocolHeader
   // version is low byte
   const uint8_t version_byte = packet_header_.version << 4;
   // protection is first bit of second byte
@@ -93,30 +292,35 @@ RawMessagePtr ProtocolPacket::serializePacket() const {
   // frame type is last 3 bits of second byte
   const uint8_t frame_type_byte = packet_header_.frameType & 0x07;
 
+  uint8_t header[PROTOCOL_HEADER_V2_SIZE];
   uint8_t offset = 0;
-  packet[offset++] = version_byte | protection_byte | frame_type_byte;
-  packet[offset++] = packet_header_.serviceType;
-  packet[offset++] = packet_header_.frameData;
-  packet[offset++] = packet_header_.sessionId;
+  header[offset++] = version_byte | protection_byte | frame_type_byte;
+  header[offset++] = packet_header_.serviceType;
+  header[offset++] = packet_header_.frameData;
+  header[offset++] = packet_header_.sessionId;
 
-  packet[offset++] = packet_header_.dataSize >> 24;
-  packet[offset++] = packet_header_.dataSize >> 16;
-  packet[offset++] = packet_header_.dataSize >> 8;
-  packet[offset++] = packet_header_.dataSize;
+  header[offset++] = packet_header_.dataSize >> 24;
+  header[offset++] = packet_header_.dataSize >> 16;
+  header[offset++] = packet_header_.dataSize >> 8;
+  header[offset++] = packet_header_.dataSize;
 
   if (packet_header_.version != PROTOCOL_VERSION_1) {
-    packet[offset++] = packet_header_.messageId >> 24;
-    packet[offset++] = packet_header_.messageId >> 16;
-    packet[offset++] = packet_header_.messageId >> 8;
-    packet[offset++] = packet_header_.messageId;
+    header[offset++] = packet_header_.messageId >> 24;
+    header[offset++] = packet_header_.messageId >> 16;
+    header[offset++] = packet_header_.messageId >> 8;
+    header[offset++] = packet_header_.messageId;
   }
 
-  DCHECK((offset + packet_data_.totalDataBytes) <= MAXIMUM_FRAME_DATA_SIZE);
+  size_t total_packet_size = offset + (packet_data_.data ? packet_data_.totalDataBytes : 0);
 
-  size_t total_packet_size = offset;
-  if (packet_data_.data) {
+  uint8_t *packet = new (std::nothrow) uint8_t[total_packet_size];
+  if (!packet) {
+    return RawMessagePtr();
+  }
+
+  memcpy(packet, header, offset);
+  if (packet_data_.data && packet_data_.totalDataBytes) {
     memcpy(packet + offset, packet_data_.data, packet_data_.totalDataBytes);
-    total_packet_size += packet_data_.totalDataBytes;
   }
 
   const RawMessagePtr out_message(
@@ -128,14 +332,10 @@ RawMessagePtr ProtocolPacket::serializePacket() const {
   return out_message;
 }
 
-uint32_t ProtocolPacket::packet_id() const {
-  return packet_id_;
-}
-
 RESULT_CODE ProtocolPacket::appendData(uint8_t *chunkData,
                                        uint32_t chunkDataSize) {
   if (payload_size_ + chunkDataSize <= packet_data_.totalDataBytes) {
-    if (chunkData) {
+    if (chunkData && chunkDataSize > 0) {
       if (packet_data_.data) {
         memcpy(packet_data_.data + payload_size_, chunkData, chunkDataSize);
         payload_size_ += chunkDataSize;
@@ -151,39 +351,38 @@ size_t ProtocolPacket::packet_size() const {
   return packet_header_.dataSize;
 }
 
-RESULT_CODE ProtocolPacket::deserializePacket(const uint8_t *message,
-                                              uint32_t messageSize) {
-  uint8_t offset = 0;
-  uint8_t firstByte = message[offset];
-  offset++;
-
-  packet_header_.version = firstByte >> 4u;
-
-  if (firstByte & 0x08u) {
-    packet_header_.protection_flag = true;
-  } else {
-    packet_header_.protection_flag = false;
+bool ProtocolPacket::operator==(const ProtocolPacket& other) const {
+  if (connection_id_ == other.connection_id_ &&
+      packet_header_.version == other.packet_header_.version &&
+      packet_header_.protection_flag == other.packet_header_.protection_flag &&
+      packet_header_.frameType == other.packet_header_.frameType &&
+      packet_header_.serviceType == other.packet_header_.serviceType &&
+      packet_header_.frameData == other.packet_header_.frameData &&
+      packet_header_.sessionId == other.packet_header_.sessionId &&
+      packet_header_.dataSize == other.packet_header_.dataSize &&
+      packet_header_.messageId ==  other.packet_header_.messageId &&
+      packet_data_.totalDataBytes == other.packet_data_.totalDataBytes) {
+    if (other.packet_data_.totalDataBytes == 0) {
+      return true;
+    }
+    // Compare payload data
+    if (packet_data_.data && other.packet_data_.data &&
+        0 == memcmp(packet_data_.data, other.packet_data_.data,
+                    packet_data_.totalDataBytes)) {
+      return true;
+    }
   }
+  return false;
+}
 
-  packet_header_.frameType = firstByte & 0x07u;
-
-  packet_header_.serviceType = message[offset++];
-  packet_header_.frameData = message[offset++];
-  packet_header_.sessionId = message[offset++];
-
-  packet_header_.dataSize = message[offset++] << 24u;
-  packet_header_.dataSize |= message[offset++] << 16u;
-  packet_header_.dataSize |= message[offset++] << 8u;
-  packet_header_.dataSize |= message[offset++];
-
-  if (packet_header_.version != PROTOCOL_VERSION_1) {
-    packet_header_.messageId = message[offset++] << 24u;
-    packet_header_.messageId |= message[offset++] << 16u;
-    packet_header_.messageId |= message[offset++] << 8u;
-    packet_header_.messageId |= message[offset++];
-  } else {
-    packet_header_.messageId = 0u;
-  }
+RESULT_CODE ProtocolPacket::deserializePacket(
+    const uint8_t *message, const size_t messageSize) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK_OR_RETURN(message, RESULT_FAIL);
+  packet_header_.deserialize(message, messageSize);
+  const uint8_t offset =
+      packet_header_.version == PROTOCOL_VERSION_1 ? PROTOCOL_HEADER_V1_SIZE
+                                                   : PROTOCOL_HEADER_V2_SIZE;
 
   packet_data_.totalDataBytes = packet_header_.dataSize;
 
@@ -191,17 +390,6 @@ RESULT_CODE ProtocolPacket::deserializePacket(const uint8_t *message,
   if ((offset < messageSize) &&
       packet_header_.frameType != FRAME_TYPE_FIRST) {
     dataPayloadSize = messageSize - offset;
-  }
-
-  uint8_t *data = 0;
-  if (dataPayloadSize) {
-    data = new (std::nothrow) uint8_t[dataPayloadSize];
-    if (data) {
-      memcpy(data, message + offset, dataPayloadSize);
-      payload_size_ = dataPayloadSize;
-    } else {
-      return RESULT_FAIL;
-    }
   }
 
   if (packet_header_.frameType == FRAME_TYPE_FIRST) {
@@ -215,11 +403,12 @@ RESULT_CODE ProtocolPacket::deserializePacket(const uint8_t *message,
     if (0 == packet_data_.data) {
       return RESULT_FAIL;
     }
-  } else {
-    if (packet_data_.data) {
-      delete[] packet_data_.data;
-    }
-    packet_data_.data = data;
+  } else if (dataPayloadSize) {
+
+    delete[] packet_data_.data;
+    packet_data_.data = new (std::nothrow) uint8_t[dataPayloadSize];
+    memcpy(packet_data_.data, message + offset, dataPayloadSize);
+    payload_size_ = dataPayloadSize;
   }
 
   return RESULT_OK;
@@ -249,6 +438,10 @@ uint8_t ProtocolPacket::frame_data() const {
   return packet_header_.frameData;
 }
 
+void ProtocolPacket::set_frame_data(const uint8_t frame_data) {
+  packet_header_.frameData = frame_data;
+}
+
 uint8_t ProtocolPacket::session_id() const {
   return packet_header_.sessionId;
 }
@@ -269,8 +462,7 @@ void ProtocolPacket::set_total_data_bytes(size_t dataBytes) {
   if (dataBytes) {
     delete[] packet_data_.data;
     packet_data_.data = new (std::nothrow) uint8_t[dataBytes];
-    packet_data_.totalDataBytes =
-        packet_data_.data ? dataBytes : 0;
+    packet_data_.totalDataBytes = packet_data_.data ? dataBytes : 0u;
   }
 }
 
@@ -284,7 +476,7 @@ void ProtocolPacket::set_data(
       memcpy(packet_data_.data, new_data, packet_data_.totalDataBytes);
     } else {
       // TODO(EZamakhov): add log info about memory problem
-      packet_header_.dataSize = packet_data_.totalDataBytes = 0;
+      packet_header_.dataSize = packet_data_.totalDataBytes = 0u;
     }
   }
 }
@@ -293,7 +485,7 @@ uint32_t ProtocolPacket::total_data_bytes() const {
   return packet_data_.totalDataBytes;
 }
 
-uint8_t ProtocolPacket::connection_id() const {
+ConnectionID ProtocolPacket::connection_id() const {
   return connection_id_;
 }
 
@@ -301,5 +493,8 @@ uint32_t ProtocolPacket::payload_size() const {
   return payload_size_;
 }
 
-// End of Deserialization
+const ProtocolPacket::ProtocolHeader& ProtocolPacket::packet_header() const {
+  return packet_header_;
+}
+
 }  // namespace protocol_handler

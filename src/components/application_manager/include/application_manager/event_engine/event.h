@@ -77,7 +77,7 @@ class Event {
    *
    * @param so The smart_object received in HMI response
    */
-  void set_smart_object(smart_objects::SmartObject& so);
+  void set_smart_object(const smart_objects::SmartObject& so);
 
   /*
    * @brief Retrieves event smart object
@@ -141,7 +141,7 @@ int32_t Event::smart_object_type() const {
         strings::params).getElement(strings::message_type).asInt();
 }
 
-}
-}
+}  // namespace event_engine
+}  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_H_

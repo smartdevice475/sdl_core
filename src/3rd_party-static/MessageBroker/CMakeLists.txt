@@ -8,6 +8,18 @@ include_directories (
 
 )
 
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+    include_directories(
+      ../pthread-win32-2.9.1
+    )
+endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    include_directories(
+      ../pthread-win32-2.9.1
+    )
+endif()
+
 set (MESSAGE_BROKER_SOURCES
   ./src/lib_messagebroker/CMessageBroker.cpp
   ./src/lib_messagebroker/CMessageBrokerRegistry.cpp
@@ -29,6 +41,8 @@ set (MESSAGE_BROKER_SERVER_SOURCES
 )
 
 add_library("MessageBroker" ${MESSAGE_BROKER_SOURCES})
+target_link_libraries(MessageBroker Utils)
+
 
 add_library("MessageBrokerClient" ${MESSAGE_BROKER_CLIENT_SOURCES})
 target_link_libraries("MessageBrokerClient" "MessageBroker")

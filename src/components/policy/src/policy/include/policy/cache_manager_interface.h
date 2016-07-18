@@ -38,6 +38,8 @@
 
 #include "utils/shared_ptr.h"
 #include "usage_statistics/counter.h"
+#include "policy/policy_types.h"
+#include "policy/policy_settings.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -82,11 +84,10 @@ class CacheManagerInterface {
   virtual int KilometersBeforeExchange(int current) = 0;
 
   /**
-   * @brief Sets kilometers and days after epoch, that passed for recieved
-   * successful PT UPdate
+   * @brief Sets counter value that passed for recieved successful PT UPdate
    */
-  virtual bool SetCountersPassedForSuccessfulUpdate(int kilometers,
-                                                    int days_after_epoch) = 0;
+  virtual bool SetCountersPassedForSuccessfulUpdate(Counters counter,
+                                                    int value) = 0;
 
   /**
    * Gets value in days before next update policy table
@@ -121,7 +122,7 @@ class CacheManagerInterface {
   /**
    * @brief Get information about vehicle
    */
-  virtual VehicleData GetVehicleData() = 0;
+  virtual const VehicleInfo GetVehicleInfo() const = 0;
 
   /**
    * @brief Allows to update 'vin' field in module_meta table.
@@ -145,18 +146,26 @@ class CacheManagerInterface {
       const std::string& language) = 0;
 
   /**
-   * @brief Get list of URL to send PTS to
+   * @brief Get list of URLs related to particular service
    * @param service_type If URLs for specific service are preset,
    * return them otherwise default URLs.
    */
-  virtual EndpointUrls GetUpdateUrls(int service_type) = 0;
+  virtual void GetServiceUrls(const std::string& service_type,
+                              EndpointUrls& end_points) = 0;
+
+  /**
+   * @brief GetLockScreenIcon allows to obtain lock screen icon url;
+   *
+   * @return url which point to the resourse where lock screen icon could be obtained.
+   */
+  virtual std::string GetLockScreenIconUrl() const = 0;
 
   /**
    * @brief Get allowed number of notifications
    * depending on application priority.
    * @param priority Priority of application
    */
-  virtual int GetNotificationsNumber(const std::string& priority) = 0;
+  virtual policy_table::NumberOfNotificationsType GetNotificationsNumber(const std::string& priority) = 0;
 
   /**
    * @brief Get priority for given application
@@ -165,13 +174,14 @@ class CacheManagerInterface {
    * @return true, if succedeed, otherwise - false
    */
   virtual bool GetPriority(const std::string& policy_app_id,
-                           std::string& priority) = 0;
+                           std::string& priority) const = 0;
 
   /**
    * @brief Initialized Policy Table (load)
    * @return bool Success of operation
    */
-  virtual bool Init(const std::string& file_name) = 0;
+  virtual bool Init(const std::string& file_name,
+                    const PolicySettings* settings) = 0;
 
   /**
    * @brief Get snapshot of Policy Table
@@ -187,6 +197,12 @@ class CacheManagerInterface {
    * @return true if successfully
    */
   virtual bool ApplyUpdate(const policy_table::Table& update_pt) = 0;
+
+  /**
+   * @brief Gets list of appHMIType associated with mobile appID
+   * @param container of appHMIType
+   */
+  virtual void GetHMIAppTypeAfterUpdate(std::map<std::string, StringArray>& app_hmi_types) = 0;
 
   /**
    * Gets flag updateRequired
@@ -219,7 +235,7 @@ class CacheManagerInterface {
    * @param app_id application id
    * @return true if application is revoked
    */
-  virtual bool IsApplicationRevoked(const std::string& app_id) = 0;
+  virtual bool IsApplicationRevoked(const std::string& app_id) const = 0;
 
   /**
    * @brief Get functional groupings from DB
@@ -246,10 +262,9 @@ class CacheManagerInterface {
   /**
    * @brief SetIsDefault Sets is_default flag for application
    * @param app_id app specific application
-   * @param is_default true if default false otherwise.
    * @return  true in case opperation was done successfully.
    */
-  virtual bool SetIsDefault(const std::string& app_id, bool is_default) = 0;
+  virtual bool SetIsDefault(const std::string& app_id) = 0;
 
   /**
    * Checks if the application has pre_data policy
@@ -271,14 +286,14 @@ class CacheManagerInterface {
    * @param app_id Application id
    * @return bool Allowed/disallowed.
    */
-  virtual bool CanAppKeepContext(const std::string& app_id) = 0;
+  virtual bool CanAppKeepContext(const std::string& app_id) const = 0;
 
   /**
    * @brief Is application allowed to move foreground at will?
    * @param app_id Application id
    * @return bool Allowed/disallowed.
    */
-  virtual bool CanAppStealFocus(const std::string& app_id) = 0;
+  virtual bool CanAppStealFocus(const std::string& app_id) const = 0;
 
   /**
    * @brief Get default_hmi for given application
@@ -288,7 +303,7 @@ class CacheManagerInterface {
    * @return true, if succedeed, otherwise - false
    */
   virtual bool GetDefaultHMI(const std::string& app_id,
-                             std::string &default_hmi) = 0;
+                             std::string &default_hmi) const = 0;
 
   /**
    * @brief Reset user consent for device data and applications permissions
@@ -305,7 +320,7 @@ class CacheManagerInterface {
    */
   virtual bool GetUserPermissionsForDevice(const std::string& device_id,
                                            StringArray &consented_groups,
-                                           StringArray &disallowed_groups) = 0;
+                                           StringArray &disallowed_groups) const = 0;
 
   /**
    * @brief Gets list of groups permissions from policy table
@@ -326,7 +341,16 @@ class CacheManagerInterface {
    */
   virtual bool GetDeviceGroupsFromPolicies(
       rpc::policy_table_interface_base::Strings &groups,
-      rpc::policy_table_interface_base::Strings &preconsented_groups) = 0;
+      rpc::policy_table_interface_base::Strings &preconsented_groups) const = 0;
+
+  /**
+   * @brief Add's information about mobile device in Policy Table.
+   * @param device_id Generated or obtained id of device
+   * @param connection_type device connection type
+   * @return bool Success of operation
+   */
+  virtual bool AddDevice(const std::string& device_id,
+                         const std::string& connection_type) = 0;
 
   /**
    * @brief Record information about mobile device in Policy Table.
@@ -423,12 +447,10 @@ class CacheManagerInterface {
    * groups for specific application.
    * @param policy_app_id application id.
    * @param device_id device id.
-   * @param result the count of unconsented groups
-   * @return true in case opperation has been done successfully.
+   * @param the count of unconsented groups
    */
-  virtual bool CountUnconsentedGroups(const std::string& policy_app_id,
-                                      const std::string& device_id,
-                                      int& result) = 0;
+  virtual int CountUnconsentedGroups(const std::string& policy_app_id,
+                                      const std::string& device_id) = 0;
 
   /**
    * @brief Gets functional group names and user_consent_prompts, if any
@@ -487,32 +509,18 @@ class CacheManagerInterface {
   virtual bool SetPredataPolicy(const std::string& app_id) = 0;
 
   /**
-   * @brief Updates application policy to either pre_DataConsented or not
-   * @param app_id Policy Id of application to be checked
-   * @param is_pre_data True of False to setting app policy to be pre_DataConsented
-   * @return true, if succeeded, otherwise - false
-   */
-  virtual bool SetIsPredata(const std::string& app_id, bool is_pre_data) = 0;
-
-  /**
    * @brief Removes unpaired devices
    * @return true if success
    */
-  virtual bool CleanupUnpairedDevices(const DeviceIds& device_ids) = 0;
+  virtual bool CleanupUnpairedDevices() = 0;
 
   /**
    * Sets flag of unpaired device
-   * @param device_id
+   * @param device_id Unique device id
+   * @param unpaired True, if should be marked as unpaired, otherwise - false
    * @return true if success
    */
-  virtual bool SetUnpairedDevice(const std::string& device_id) = 0;
-
-  /**
-   * Gets list of unpaired devices
-   * @param device_ids output list
-   * @return true if success
-   */
-  virtual bool UnpairedDevicesList(DeviceIds& device_ids) = 0;
+  virtual bool SetUnpairedDevice(const std::string& device_id, bool unpaired = true) = 0;
 
   /**
    * Resets Policy Table
@@ -530,9 +538,10 @@ class CacheManagerInterface {
   /**
    * @brief LoadFromFile allows to load policy cache from preloaded table.
    * @param file_name preloaded
-   * @return
+   * @param table object which will be filled during file parsing.
+   * @return true in case file was successfuly loaded, false otherwise.
    */
-  virtual bool LoadFromFile(const std::string& file_name) = 0;
+  virtual bool LoadFromFile(const std::string& file_name, policy_table::Table& table) = 0;
 
   /**
    * @brief Backup allows to save cache onto hard drive.
@@ -542,10 +551,67 @@ class CacheManagerInterface {
   /**
    * Returns heart beat timeout
    * @param app_id application id
-   * @return if timeout was set then value in seconds greater zero
+   * @return if timeout was set then value in milliseconds greater zero
    * otherwise heart beat for specific application isn't set
    */
-  virtual uint16_t HeartBeatTimeout(const std::string& app_id) const = 0;
+  virtual uint32_t HeartBeatTimeout(const std::string& app_id) const = 0;
+
+  /**
+   * @brief Resets all calculated permissions in cache
+   */
+  virtual void ResetCalculatedPermissions() = 0;
+
+  /**
+   * @brief Adds calculated permissions for specific app on particular device
+   * into cache
+   * @param device_id Device id
+   * @param policy_app_id Application id
+   * @param permissions Calculated permissions
+   */
+  virtual void AddCalculatedPermissions(
+      const std::string& device_id,
+      const std::string& policy_app_id,
+      const policy::Permissions& permissions) = 0;
+
+  /**
+   * @brief Checks if permissions calculated for specific app on particular
+   * device
+   * @param device_id Device id
+   * @param policy_app_id Application id
+   * @param permission Permissions to be filled, in case of presence in cache
+   * @return true if present, otherwise false
+   */
+  virtual bool IsPermissionsCalculated(
+      const std::string& device_id,
+      const std::string& policy_app_id,
+      policy::Permissions& permission) = 0;
+
+  /**
+   * @brief Gets request types for application
+   * @param policy_app_id Unique application id
+   * @param request_types Request types of application
+   */
+  virtual void GetAppRequestTypes(
+      const std::string& policy_app_id,
+      std::vector<std::string>& request_types) const = 0;
+
+    /**
+     * @brief GetCertificate allows to obtain certificate in order to
+     * make secure connection
+     *
+     * @return The certificate in PKCS#7.
+     */
+    virtual std::string GetCertificate() const = 0;
+
+#ifdef BUILD_TESTS
+  /**
+   * @brief GetPT allows to obtain SharedPtr to PT.
+   * Used ONLY in Unit tests
+   * @return SharedPTR to PT
+   *
+   */
+  virtual utils::SharedPtr<policy_table::Table> GetPT() const  = 0;
+#endif
 };
 
 typedef utils::SharedPtr<CacheManagerInterface> CacheManagerInterfaceSPtr;

@@ -1,5 +1,4 @@
-/**
- *
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -31,62 +30,65 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <memory.h>
-#include <signal.h>
-#include <errno.h>
-#include <sstream>
-#include <cstdlib>
+#include "transport_manager/tcp/tcp_transport_adapter.h"
 
-#include "resumption/last_state.h"
+#if defined(OS_WIN32) || defined(OS_WINCE)
+#ifndef _WINSOCKAPI_
+#include <winsock2.h>
+#endif
+#elif defined(OS_MAC)
+#include <arpa/inet.h>
+#endif
+#include <memory.h>
+#ifndef OS_WINCE
+#include <signal.h>
+#endif
+#include <errno.h>
+#include <stdio.h>
+
+#include <cstdlib>
+#include <sstream>
 
 #include "utils/logger.h"
 #include "utils/threads/thread_delegate.h"
-
-#include "transport_manager/tcp/tcp_transport_adapter.h"
+#include "resumption/last_state.h"
 #include "transport_manager/tcp/tcp_client_listener.h"
 #include "transport_manager/tcp/tcp_connection_factory.h"
 #include "transport_manager/tcp/tcp_device.h"
 
-#ifdef AVAHI_SUPPORT
-#include "transport_manager/tcp/dnssd_service_browser.h"
-#endif
-
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapterImpl")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
-TcpTransportAdapter::TcpTransportAdapter(const uint16_t port)
-  : TransportAdapterImpl(
-#ifdef AVAHI_SUPPORT
-    new DnssdServiceBrowser(this),
-#else
-    NULL,
-#endif
-    new TcpConnectionFactory(this),
-    new TcpClientListener(this, port, false)) {
-}
+TcpTransportAdapter::TcpTransportAdapter(const uint16_t port,
+                                         resumption::LastState& last_state)
+    : TransportAdapterImpl(NULL,
+                           new TcpConnectionFactory(this),
+                           new TcpClientListener(this, port, true),
+                           last_state) {}
 
 TcpTransportAdapter::~TcpTransportAdapter() {
 }
 
 DeviceType TcpTransportAdapter::GetDeviceType() const {
-  return "sdl-tcp";
+  return TCP;
 }
 
 void TcpTransportAdapter::Store() const {
-  LOG4CXX_TRACE(logger_, "enter");
+  LOG4CXX_AUTO_TRACE(logger_);
   Json::Value tcp_adapter_dictionary;
   Json::Value devices_dictionary;
   DeviceList device_ids = GetDeviceList();
-  for (DeviceList::const_iterator i = device_ids.begin(); i != device_ids.end(); ++i) {
+  for (DeviceList::const_iterator i = device_ids.begin(); i != device_ids.end();
+      ++i) {
     DeviceUID device_id = *i;
     DeviceSptr device = FindDevice(device_id);
-    if (!device) { // device could have been disconnected
+    if (!device) {  // device could have been disconnected
       continue;
     }
-    utils::SharedPtr<TcpDevice> tcp_device =
-      DeviceSptr::static_pointer_cast<TcpDevice>(device);
+    utils::SharedPtr<TcpDevice> tcp_device = DeviceSptr::static_pointer_cast<
+        TcpDevice>(device);
     Json::Value device_dictionary;
     device_dictionary["name"] = tcp_device->name();
     struct in_addr address;
@@ -94,14 +96,16 @@ void TcpTransportAdapter::Store() const {
     device_dictionary["address"] = std::string(inet_ntoa(address));
     Json::Value applications_dictionary;
     ApplicationList app_ids = tcp_device->GetApplicationList();
-    for (ApplicationList::const_iterator j = app_ids.begin(); j != app_ids.end(); ++j) {
+    for (ApplicationList::const_iterator j = app_ids.begin();
+        j != app_ids.end(); ++j) {
       ApplicationHandle app_handle = *j;
-      if (FindEstablishedConnection(tcp_device->unique_device_id(), app_handle)) {
+      if (FindEstablishedConnection(tcp_device->unique_device_id(),
+                                    app_handle)) {
         int port = tcp_device->GetApplicationPort(app_handle);
-        if (port != -1) { // don't want to store incoming applications
+        if (port != -1) {  // don't want to store incoming applications
           Json::Value application_dictionary;
           char port_record[12];
-          sprintf(port_record, "%d", port);
+          snprintf(port_record, sizeof(port_record), "%d", port);
           application_dictionary["port"] = std::string(port_record);
           applications_dictionary.append(application_dictionary);
         }
@@ -113,19 +117,18 @@ void TcpTransportAdapter::Store() const {
     }
   }
   tcp_adapter_dictionary["devices"] = devices_dictionary;
-  resumption::LastState::instance()->dictionary["TransportManager"]["TcpAdapter"] =
-    tcp_adapter_dictionary;
-  LOG4CXX_TRACE(logger_, "exit");
+  Json::Value& dictionary = last_state().dictionary;
+  dictionary["TransportManager"]["TcpAdapter"] = tcp_adapter_dictionary;
 }
 
 bool TcpTransportAdapter::Restore() {
-  LOG4CXX_TRACE(logger_, "enter");
+  LOG4CXX_AUTO_TRACE(logger_);
   bool errors_occurred = false;
   const Json::Value tcp_adapter_dictionary =
-    resumption::LastState::instance()->dictionary["TransportManager"]["TcpAdapter"];
+      last_state().dictionary["TransportManager"]["TcpAdapter"];
   const Json::Value devices_dictionary = tcp_adapter_dictionary["devices"];
   for (Json::Value::const_iterator i = devices_dictionary.begin();
-       i != devices_dictionary.end(); ++i) {
+      i != devices_dictionary.end(); ++i) {
     const Json::Value device_dictionary = *i;
     std::string name = device_dictionary["name"].asString();
     std::string address_record = device_dictionary["address"].asString();
@@ -133,9 +136,10 @@ bool TcpTransportAdapter::Restore() {
     TcpDevice* tcp_device = new TcpDevice(address, name);
     DeviceSptr device(tcp_device);
     AddDevice(device);
-    const Json::Value applications_dictionary = device_dictionary["applications"];
+    const Json::Value applications_dictionary =
+        device_dictionary["applications"];
     for (Json::Value::const_iterator j = applications_dictionary.begin();
-         j != applications_dictionary.end(); ++j) {
+        j != applications_dictionary.end(); ++j) {
       const Json::Value application_dictionary = *j;
       std::string port_record = application_dictionary["port"].asString();
       int port = atoi(port_record.c_str());
@@ -146,11 +150,7 @@ bool TcpTransportAdapter::Restore() {
     }
   }
   bool result = !errors_occurred;
-  if (result) {
-    LOG4CXX_TRACE(logger_, "exit with TRUE");
-  } else {
-    LOG4CXX_TRACE(logger_, "exit with FALSE");
-  }
+  LOG4CXX_DEBUG(logger_, "result " << std::boolalpha << result);
   return result;
 }
 

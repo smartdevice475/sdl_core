@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,7 +32,7 @@
 #ifndef SRC_COMPONENTS_INCLUDE_UTILS_CONDITIONAL_VARIABLE_H_
 #define SRC_COMPONENTS_INCLUDE_UTILS_CONDITIONAL_VARIABLE_H_
 
-#if defined(OS_POSIX)
+#if defined(OS_POSIX) || defined(OS_WIN32) || defined(OS_WINCE)
 #include <pthread.h>
 #else
 #error Please implement conditional variable for your OS
@@ -43,9 +43,10 @@
 
 namespace sync_primitives {
 class AutoLock;
+class Lock;
 
 namespace impl {
-#if defined(OS_POSIX)
+#if defined(OS_POSIX) || defined(OS_WIN32) || defined(OS_WINCE)
 typedef pthread_cond_t PlatformConditionalVariable;
 #endif
 }  // namespace impl
@@ -80,8 +81,9 @@ class ConditionalVariable {
   void Broadcast();
 
   // Wait forever or up to milliseconds time limit
-  void Wait(AutoLock& auto_lock);
-  WaitStatus WaitFor(AutoLock& auto_lock, int32_t milliseconds);
+  bool Wait(AutoLock& auto_lock);
+  bool Wait(Lock& lock);
+  WaitStatus WaitFor(AutoLock& auto_lock, uint32_t milliseconds);
  private:
   impl::PlatformConditionalVariable cond_var_;
 

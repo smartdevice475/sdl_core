@@ -23,7 +23,9 @@
  */
 
 #include <time.h>
-
+#ifndef OS_WINCE
+#include <signal.h>
+#endif
 #include "system.h"
 
 namespace System {
@@ -93,6 +95,15 @@ bool Thread::Join(void** ret) {
 }
 
 void* Thread::Call(void* arg) {
+#if !defined(OS_WIN32) && !defined(OS_WINCE)
+  // Disable system signals receiving in thread
+  // by setting empty signal mask
+  // (system signals processes only in the main thread)
+  sigset_t set;
+  sigfillset(&set);
+  pthread_sigmask(SIG_SETMASK, &set, NULL);
+#endif
+
   Thread* thread = static_cast<Thread*>(arg);
 
   /* call our specific object method */
@@ -211,7 +222,9 @@ bool Thread::Join(void** ret) {
   GetExitCodeThread(m_id, &val);
   CloseHandle(m_id);
   m_id = NULL;
-  *ret = (void*)val;
+  if (ret) {
+    *ret = (void*)val;
+  }
   return true;
 }
 

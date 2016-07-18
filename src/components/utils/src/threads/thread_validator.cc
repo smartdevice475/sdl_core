@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,25 @@ SingleThreadSimpleValidator::~SingleThreadSimpleValidator() {
 }
 
 void SingleThreadSimpleValidator::AssertRunningOnCreationThread() const {
-  Thread::Id current_id = Thread::CurrentId();
+  PlatformThreadHandle current_id = Thread::CurrentId();
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  if (creation_thread_id_.p != current_id.p) {
+#ifdef BACKTRACE_SUPPORT
+    LOG4CXX_ERROR(logger_, "Single-threaded object created at thread "
+                          << creation_thread_id_.p
+                          <<" is accessed from thread "
+                          << current_id.p
+                          << std::endl
+                          << utils::Backtrace()
+                             );
+#else
+    LOG4CXX_ERROR(logger_, "Single-threaded object created at thread "
+                          << creation_thread_id_.p
+                          <<" is accessed from thread "
+                          << current_id.p);
+#endif
+  }
+#else
   if (creation_thread_id_ != current_id) {
     LOG4CXX_ERROR(logger_, "Single-threaded object created at thread "
                           << creation_thread_id_
@@ -58,22 +76,46 @@ void SingleThreadSimpleValidator::AssertRunningOnCreationThread() const {
 #endif
     );
   }
+#endif
+}
+
+PlatformThreadHandle SingleThreadSimpleValidator::creation_thread_id() const
+{
+  return creation_thread_id_;
 }
 
 
 SingleThreadValidator::SingleThreadValidator()
-    : owning_thread_id_(Thread::CurrentId()){
+    : owning_thread_id_(Thread::CurrentId()) {
 }
 
 SingleThreadValidator::~SingleThreadValidator() {
 }
 
-void SingleThreadValidator::PassToThread(Thread::Id thread_id) const {
+void SingleThreadValidator::PassToThread(PlatformThreadHandle thread_id) const {
   owning_thread_id_ = thread_id;
 }
 
 void SingleThreadValidator::AssertRunningOnValidThread() const {
-  Thread::Id current_id = Thread::CurrentId();
+  PlatformThreadHandle current_id = Thread::CurrentId();
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  if (owning_thread_id_.p != current_id.p) {
+#ifdef BACKTRACE_SUPPORT
+    LOG4CXX_ERROR(logger_, "Single-threaded object owned by thread "
+                         << owning_thread_id_.p
+                         << " is accessed from thread "
+                         << current_id.p << std::endl
+                         << utils::Backtrace()
+                            );
+#else
+    LOG4CXX_ERROR(logger_, "Single-threaded object owned by thread "
+                         << owning_thread_id_.p
+                         << " is accessed from thread "
+                         << current_id.p);
+#endif
+
+  }
+#else
   if (owning_thread_id_ != current_id) {
     LOG4CXX_ERROR(logger_, "Single-threaded object owned by thread "
                          << owning_thread_id_
@@ -84,6 +126,7 @@ void SingleThreadValidator::AssertRunningOnValidThread() const {
 #endif
                          );
   }
+#endif
 }
 
 

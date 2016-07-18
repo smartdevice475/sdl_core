@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -39,6 +39,11 @@
 #include <vector>
 #include <iostream>
 
+#ifdef OS_WINCE
+#pragma warning(disable: 4482)
+#include "utils/global.h"
+#endif
+
 namespace file_system {
 
 
@@ -55,7 +60,7 @@ uint64_t GetAvailableDiskSpace(const std::string& path);
  *
  * @param path to directory
  */
-size_t DirectorySize(const std::string& path);
+uint32_t DirectorySize(const std::string& path);
 
 /*
  * @brief Get size of current file
@@ -63,14 +68,18 @@ size_t DirectorySize(const std::string& path);
  * @param path to file
  * @return size of file, return 0 if file not exist
  */
-int64_t FileSize(const std::string& path);
+uint32_t FileSize(const std::string& path);
 
 /**
  * @brief Creates directory
  * @param name path to directory
  * @return path to created directory.
  */
+#if defined(OS_WIN32) || defined(OS_WINCE)
+std::string CreateDirectoryWindows(const std::string& name);
+#else
 std::string CreateDirectory(const std::string& name);
+#endif
 
 /**
  * @brief Creates directory recursively
@@ -147,13 +156,23 @@ void Close(std::ofstream* file_stream);
 std::string CurrentWorkingDirectory();
 
 /**
+ * @brief Allows to obtaine absolute path for certain path.
+ * @param path the file name for which absolute path have to be calculated.
+ * @return absolute path for certain path.
+ */
+std::string GetAbsolutePath(const std::string& path);
+
+/**
   * @brief Removes file
   *
   * @param name path to file
   * @return returns true if the file is successfully deleted.
   */
+#if defined(OS_WIN32) || defined(OS_WINCE)
+bool DeleteFileWindows(const std::string& name);
+#else
 bool DeleteFile(const std::string& name);
-
+#endif
 /**
  * @brief Removes directory.
  *
@@ -161,8 +180,13 @@ bool DeleteFile(const std::string& name);
  * @param is_recursively true if you need delete directory recursively, otherwise false.
  * @return returns true if the directory is successfully deleted.
  */
+#if defined(OS_WIN32) || defined(OS_WINCE)
+bool RemoveDirectoryWindows(const std::string& directory_name,
+                     bool is_recursively = true);
+#else
 bool RemoveDirectory(const std::string& directory_name,
                      bool is_recursively = true);
+#endif
 
 /**
   * @brief Check access rights
@@ -232,7 +256,38 @@ const std::string ConvertPathForURL(const std::string& path);
   * @param name path to file
   * @return if result success return true
 */
+#if defined(OS_WIN32) || defined(OS_WINCE)
+bool CreateFileWindows(const std::string& path);
+#else
 bool CreateFile(const std::string& path);
+#endif
+
+/**
+ * @brief Get modification time of file
+ * @param path Path to file
+ * @return Modification time in nanoseconds
+ */
+uint64_t GetFileModificationTime(const std::string& path);
+
+/**
+  * @brief Copy file from source to destination
+  *
+  * @param src Source file path
+  * @param dst Destination file path
+  * @return if result success return true
+*/
+bool CopyFile(const std::string& src,
+              const std::string& dst);
+
+/**
+  * @brief Move file from source to destination
+  *
+  * @param src Source file path
+  * @param dst Destination file path
+  * @return if result success return true
+*/
+bool MoveFile(const std::string& src,
+              const std::string& dst);
 
 void remove_directory_content(const std::string& directory_name);
 

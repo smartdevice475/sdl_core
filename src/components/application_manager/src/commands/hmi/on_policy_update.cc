@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/on_policy_update.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 namespace commands {
@@ -44,8 +44,8 @@ OnPolicyUpdate::~OnPolicyUpdate() {
 }
 
 void OnPolicyUpdate::Run() {
-  LOG4CXX_INFO(logger_, "OnPolicyUpdate::Run");
-  policy::PolicyHandler::instance()->OnPTExchangeNeeded();
+  LOG4CXX_AUTO_TRACE(logger_);
+  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().OnPTExchangeNeeded();
 }
 
 }  // namespace commands

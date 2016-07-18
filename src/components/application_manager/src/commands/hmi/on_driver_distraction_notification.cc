@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -45,26 +45,23 @@ namespace hmi {
 
 OnDriverDistractionNotification::OnDriverDistractionNotification(
     const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    : NotificationFromHMI(message) {}
 
-OnDriverDistractionNotification::~OnDriverDistractionNotification() {
-}
+OnDriverDistractionNotification::~OnDriverDistractionNotification() {}
 
 void OnDriverDistractionNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnDriverDistractionNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   const hmi_apis::Common_DriverDistractionState::eType state =
       static_cast<hmi_apis::Common_DriverDistractionState::eType>(
-          (*message_)[strings::msg_params][hmi_notification::state]
-          .asInt());
+          (*message_)[strings::msg_params][hmi_notification::state].asInt());
   ApplicationManagerImpl::instance()->set_driver_distraction(state);
 
-  MessageSharedPtr on_driver_distraction =
+  smart_objects::SmartObjectSPtr on_driver_distraction =
       new smart_objects::SmartObject();
 
-  if (false == on_driver_distraction.valid()) {
-    LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
+  if (!on_driver_distraction) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
   }
 
@@ -75,17 +72,15 @@ void OnDriverDistractionNotification::Run() {
       state;
 
   ApplicationManagerImpl::ApplicationListAccessor accessor;
-  const std::set<ApplicationSharedPtr> applications = accessor.applications();
+  const ApplicationSet applications = accessor.applications();
 
-  std::set<ApplicationSharedPtr>::const_iterator it = applications.begin();
+  ApplicationSetConstIt it = applications.begin();
   for (; applications.end() != it; ++it) {
-    ApplicationSharedPtr app = *it;
-    if (app.valid()) {
-      if (mobile_apis::HMILevel::eType::HMI_NONE != app->hmi_level()) {
-          (*on_driver_distraction)[strings::params]
-                                  [strings::connection_key] = app->app_id();
-          SendNotificationToMobile(on_driver_distraction);
-      }
+    const ApplicationSharedPtr app = *it;
+    if (app) {
+      (*on_driver_distraction)[strings::params][strings::connection_key] =
+          app->app_id();
+      SendNotificationToMobile(on_driver_distraction);
     }
   }
 }
@@ -95,4 +90,3 @@ void OnDriverDistractionNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

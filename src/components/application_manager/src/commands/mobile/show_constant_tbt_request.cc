@@ -31,11 +31,12 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string.h>
+#include <cstring>
 #include "application_manager/commands/mobile/show_constant_tbt_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler_interface.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
@@ -51,7 +52,7 @@ ShowConstantTBTRequest::~ShowConstantTBTRequest() {
 }
 
 void ShowConstantTBTRequest::Run() {
-  LOG4CXX_INFO(logger_, "ShowConstantTBTRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       (*message_)[strings::params][strings::connection_key].asUInt());
@@ -82,7 +83,11 @@ void ShowConstantTBTRequest::Run() {
   //ProcessSoftButtons checks strings on the contents incorrect character
 
   mobile_apis::Result::eType processing_result =
-      MessageHelper::ProcessSoftButtons(msg_params, app);
+      MessageHelper::ProcessSoftButtons(
+          msg_params,
+          app,
+          application_manager::ApplicationManagerImpl::instance()
+              ->GetPolicyHandler());
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
     LOG4CXX_ERROR(logger_, "INVALID_DATA!");
@@ -175,12 +180,13 @@ void ShowConstantTBTRequest::Run() {
 
 
 void ShowConstantTBTRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "ShowConstantTBTRequest::on_event");
+  LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
     case hmi_apis::FunctionID::Navigation_ShowConstantTBT: {
       LOG4CXX_INFO(logger_, "Received Navigation_ShowConstantTBT event");
+      std::string return_info;
 
       mobile_apis::Result::eType result_code =
           GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
@@ -190,12 +196,16 @@ void ShowConstantTBTRequest::on_event(const event_engine::Event& event) {
       bool result = false;
       if (mobile_apis::Result::SUCCESS == result_code) {
         result = true;
+        return_info =
+            message[strings::msg_params][hmi_response::message].asString();
       } else if ((mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code) &&
           hmi_capabilities.is_ui_cooperating()) {
         result = true;
       }
 
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      SendResponse(result, result_code,
+                   return_info.empty() ? 0 : return_info.c_str(),
+                   &(message[strings::msg_params]));
       break;
     }
     default: {
@@ -206,7 +216,7 @@ void ShowConstantTBTRequest::on_event(const event_engine::Event& event) {
 }
 
 bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
-  LOG4CXX_INFO(logger_, "ShowConstantTBTRequest::IsWhiteSpaceExist");
+  LOG4CXX_AUTO_TRACE(logger_);
   const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::turn_icon)) {

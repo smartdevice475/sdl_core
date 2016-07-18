@@ -39,7 +39,7 @@
 
 #include "policy/pt_representation.h"
 #include "rpc_base/rpc_base.h"
-#include "./types.h"
+#include "table_struct/types.h"
 
 namespace policy_table = ::rpc::policy_table_interface_base;
 
@@ -72,15 +72,15 @@ class MockPTRepresentation : virtual public PTRepresentation {
       bool(std::vector<int>* seconds));
   MOCK_METHOD2(GetPriority,
       bool(const std::string& app_id, std::string* priority));
-  MOCK_METHOD0(GetVehicleData,
-      VehicleData());
+  MOCK_CONST_METHOD0(GetVehicleInfo,
+      const VehicleInfo());
   MOCK_METHOD1(SetVINValue,
       bool(const std::string& value));
   MOCK_METHOD2(GetUserFriendlyMsg,
       std::vector<UserFriendlyMessage>(const std::vector<std::string>& msg_code,
           const std::string& language));
-  MOCK_METHOD1(GetUpdateUrls,
-      EndpointUrls(int service_type));
+  MOCK_METHOD2(GetUpdateUrls,
+      void(int service_type, EndpointUrls&));
   MOCK_METHOD1(GetNotificationsNumber,
       int(const std::string& priority));
   MOCK_METHOD0(Init,

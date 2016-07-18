@@ -1,6 +1,5 @@
 /*
-
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -54,14 +53,34 @@ class DialNumberRequest : public CommandRequestImpl {
   /**
    * \brief DialNumberRequest class destructor
    **/
-  virtual ~DialNumberRequest();
+  ~DialNumberRequest() OVERRIDE;
+
+  /**
+    * @brief Initialize request params
+   **/
+   bool Init() OVERRIDE;
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
+
+  /**
+   * @brief Interface method that is called whenever new event received
+   *
+   * @param event The received event
+   */
+  void on_event(const event_engine::Event& event);
 
  private:
+
+  /**
+   * @brief Removes from number param all characters
+   * except the + character and digits.
+   *
+   */
+  void StripNumberParam(std::string &number);
+
   DISALLOW_COPY_AND_ASSIGN(DialNumberRequest);
 };
 

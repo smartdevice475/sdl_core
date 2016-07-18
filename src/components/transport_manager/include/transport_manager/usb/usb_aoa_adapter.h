@@ -1,4 +1,4 @@
-/**
+/*
  * \file usb_aoa_adapter.h
  * \brief UsbAoaAdapter class header file.
  *
@@ -44,7 +44,7 @@ namespace transport_adapter {
 
 class UsbAoaAdapter : public TransportAdapterImpl {
  public:
-  UsbAoaAdapter();
+  UsbAoaAdapter(resumption::LastState& last_state);
   virtual ~UsbAoaAdapter();
 
  protected:

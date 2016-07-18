@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -38,23 +38,21 @@ namespace application_manager {
 namespace commands {
 
 OnDeviceChosenNotification::OnDeviceChosenNotification(
-    const MessageSharedPtr& message) : NotificationFromHMI(message) {
-}
+    const MessageSharedPtr& message)
+    : NotificationFromHMI(message) {}
 
-OnDeviceChosenNotification::~OnDeviceChosenNotification() {
-}
+OnDeviceChosenNotification::~OnDeviceChosenNotification() {}
 
 void OnDeviceChosenNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnDeviceChosenNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   if ((*message_)[strings::msg_params].keyExists(strings::device_info)) {
     ApplicationManagerImpl::instance()->ConnectToDevice(
         (*message_)[strings::msg_params][strings::device_info][strings::id]
-            .asInt());
+            .asString());
   }
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-

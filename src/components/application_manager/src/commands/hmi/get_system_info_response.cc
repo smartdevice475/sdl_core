@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -30,42 +30,57 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/get_system_info_response.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/application_manager_impl.h"
 #include "application_manager/message_helper.h"
 
 namespace application_manager {
-
 namespace commands {
 
-GetSystemInfoResponse::GetSystemInfoResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
-}
+GetSystemInfoResponse::GetSystemInfoResponse(const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {}
 
-GetSystemInfoResponse::~GetSystemInfoResponse() {
-}
+GetSystemInfoResponse::~GetSystemInfoResponse() {}
 
 void GetSystemInfoResponse::Run() {
-  LOG4CXX_INFO(logger_, "GetSystemInfoResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
+  application_manager::ApplicationManagerImpl* app_manager_inst =
+      application_manager::ApplicationManagerImpl::instance();
+
   const hmi_apis::Common_Result::eType code =
       static_cast<hmi_apis::Common_Result::eType>(
           (*message_)[strings::params][hmi_response::code].asInt());
 
+  const SystemInfo& info = GetSystemInfo(code);
+
+  // We have to set preloaded flag as false in policy table on any response
+  // of GetSystemInfo (SDLAQ-CRS-2365)
+  app_manager_inst->GetPolicyHandler().OnGetSystemInfo(
+      info.ccpu_version, info.wers_country_code, info.language);
+}
+
+const SystemInfo GetSystemInfoResponse::GetSystemInfo(
+    const hmi_apis::Common_Result::eType code) const {
+  SystemInfo info;
+
   if (hmi_apis::Common_Result::SUCCESS != code) {
     LOG4CXX_WARN(logger_, "GetSystemError returns an error code " << code);
-    return;
+    return info;
   }
-  const std::string ccpu_version =
+  info.ccpu_version =
       (*message_)[strings::msg_params]["ccpu_version"].asString();
-  const std::string wers_country_code =
-      (*message_)[strings::msg_params]["wersCountryCode"].asString();
-  uint32_t lang_code = (*message_)[strings::msg_params]["language"].asUInt();
-  const std::string language =
-      application_manager::MessageHelper::CommonLanguageToString(
-        static_cast<hmi_apis::Common_Language::eType>(lang_code));
 
-  policy::PolicyHandler::instance()->OnGetSystemInfo(ccpu_version,
-                                                     wers_country_code,
-                                                     language);
+  info.wers_country_code =
+      (*message_)[strings::msg_params]["wersCountryCode"].asString();
+
+  const uint32_t lang_code = (*message_)[strings::msg_params]["language"].asUInt();
+  info.language = application_manager::MessageHelper::CommonLanguageToString(
+      static_cast<hmi_apis::Common_Language::eType>(lang_code));
+
+  application_manager::ApplicationManagerImpl::instance()
+      ->hmi_capabilities()
+      .set_ccpu_version(info.ccpu_version);
+
+  return info;
 }
 
 }  // namespace commands

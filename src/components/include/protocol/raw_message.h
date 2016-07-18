@@ -37,6 +37,10 @@
 #include "protocol/service_type.h"
 #include "protocol/message_priority.h"
 
+#ifdef OS_WINCE
+#pragma warning(disable : 4482)
+#endif
+
 namespace protocol_handler {
 /**
  * \class SmartDeviceLinkRawMessage
@@ -78,7 +82,7 @@ class RawMessage {
   /**
    * \brief Getter for message size
    */
-  size_t data_size() const;
+ size_t data_size() const;
   /**
    * \brief Getter for actual data size
    */

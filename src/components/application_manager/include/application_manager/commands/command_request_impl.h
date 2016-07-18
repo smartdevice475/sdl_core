@@ -1,4 +1,4 @@
-﻿/**
+﻿/*
  Copyright (c) 2014, Ford Motor Company
  All rights reserved.
 
@@ -50,19 +50,14 @@ namespace commands {
 namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
 
 class CommandRequestImpl : public CommandImpl,
-    public event_engine::EventObserver   {
+                           public event_engine::EventObserver {
  public:
-
-  enum RequestState {
-    kAwaitingHMIResponse = 0,
-    kTimedOut,
-    kCompleted
-  };
+  enum RequestState { kAwaitingHMIResponse = 0, kTimedOut, kCompleted };
 
   explicit CommandRequestImpl(const MessageSharedPtr& message);
   virtual ~CommandRequestImpl();
   virtual bool CheckPermissions();
-  virtual bool Init();  
+  virtual bool Init();
   virtual bool CleanUp();
   virtual void Run();
 
@@ -91,7 +86,7 @@ class CommandRequestImpl : public CommandImpl,
   void SendResponse(const bool success,
                     const mobile_apis::Result::eType& result_code,
                     const char* info = NULL,
-                    const NsSmart::SmartObject* response_params = NULL);
+                    const smart_objects::SmartObject* response_params = NULL);
 
   /**
    * @brief Check syntax of string from mobile
@@ -99,7 +94,7 @@ class CommandRequestImpl : public CommandImpl,
    * @param allow_empty_string if true methods allow empty sting
    * @return true if success otherwise return false
    */
-  bool CheckSyntax(std::string str, bool allow_empty_line = false);
+  bool CheckSyntax(const std::string& str, bool allow_empty_line = false);
 
   /*
    * @brief Sends HMI request
@@ -107,11 +102,11 @@ class CommandRequestImpl : public CommandImpl,
    * @param function_id HMI request ID
    * @param msg_params HMI request msg params
    * @param use_events true if we need subscribe on event(HMI request)
-   *
+   * @return hmi correlation id
    */
-  void SendHMIRequest(const hmi_apis::FunctionID::eType& function_id,
-                      const NsSmart::SmartObject* msg_params = NULL,
-                      bool use_events = false);
+  uint32_t SendHMIRequest(const hmi_apis::FunctionID::eType& function_id,
+                          const smart_objects::SmartObject* msg_params = NULL,
+                          bool use_events = false);
 
   /*
    * @brief Creates HMI request
@@ -131,8 +126,7 @@ class CommandRequestImpl : public CommandImpl,
   mobile_apis::Result::eType GetMobileResultCode(
       const hmi_apis::Common_Result::eType& hmi_code) const;
 
-protected:
-
+ protected:
   /**
    * @brief Checks message permissions and parameters according to policy table
    * permissions
@@ -161,13 +155,12 @@ protected:
   bool HasDisallowedParams() const;
 
  protected:
-  RequestState                  current_state_;
-  sync_primitives::Lock         state_lock_;
-  CommandParametersPermissions  parameters_permissions_;
+  RequestState current_state_;
+  sync_primitives::Lock state_lock_;
+  CommandParametersPermissions parameters_permissions_;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandRequestImpl);
-
 
   /**
    * @brief Adds param to disallowed parameters enumeration
@@ -181,7 +174,8 @@ protected:
    * @brief Adds disallowed parameters to response info
    * @param response Response message, which info should be extended
    */
-  void AddDisallowedParametersToInfo(smart_objects::SmartObject& response) const;
+  void AddDisallowedParametersToInfo(
+      smart_objects::SmartObject& response) const;
 };
 
 }  // namespace commands
