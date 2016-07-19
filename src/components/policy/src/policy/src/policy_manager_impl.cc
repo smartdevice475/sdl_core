@@ -986,7 +986,15 @@ bool PolicyManagerImpl::InitPT(const std::string& file_name,
     LOG4CXX_ERROR(logger_, "Can not read/write into AppStorageFolder");
     return false;
   }
+#ifdef OS_WINCE
+  std::string tmp = file_name;
+  if (tmp[0] != '\\' && tmp[0] != '/') {
+    tmp = Global::RelativePathToAbsPath(tmp);
+  }
+  const bool ret = cache_->Init(tmp, settings);
+#else
   const bool ret = cache_->Init(file_name, settings);
+#endif
   if (ret) {
     RefreshRetrySequence();
     update_status_manager_.OnPolicyInit(cache_->UpdateRequired());

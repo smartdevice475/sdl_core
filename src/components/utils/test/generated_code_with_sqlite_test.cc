@@ -43,7 +43,15 @@ class GeneratedCodeTest : public ::testing::Test {
  public:
   static void SetUpTestCase() {
     sqlite3* conn;
+#ifdef OS_WINCE
+    std::string tmp = kDatabaseName + ".sqlite";
+    if (tmp[0] != '\\' && tmp[0] != '/') {
+      tmp = Global::RelativePathToAbsPath(tmp);
+    }
+    sqlite3_open(tmp.c_str(), &conn);
+#else
     sqlite3_open((kDatabaseName + ".sqlite").c_str(), &conn);
+#endif
     sqlite3_exec(conn, kEndpointsCreation.c_str(), NULL, NULL, NULL);
     sqlite3_exec(conn, kEndpointsContent.c_str(), NULL, NULL, NULL);
     sqlite3_exec(conn, kAppPoliciesCreation.c_str(), NULL, NULL, NULL);
