@@ -1183,7 +1183,11 @@ void DeviceParams::ReportErrors(rpc::ValidationReport* report__) const {
 PolicyTable::PolicyTable()
   : CompositeType(kUninitialized) {
 }
-PolicyTable::PolicyTable(const ApplicationPoliciesSection& app_policies_section, const FunctionalGroupings& functional_groupings, const ConsumerFriendlyMessages& consumer_friendly_messages, const ModuleConfig& module_config)
+PolicyTable::PolicyTable(
+   const ApplicationPoliciesSection& app_policies_section,
+   const FunctionalGroupings& functional_groupings,
+   const ConsumerFriendlyMessages& consumer_friendly_messages,
+   const ModuleConfig& module_config)
   : CompositeType(kUninitialized),
     app_policies_section(app_policies_section),
     functional_groupings(functional_groupings),

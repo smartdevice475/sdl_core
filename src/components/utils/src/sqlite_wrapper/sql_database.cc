@@ -32,7 +32,9 @@
 
 #include "sqlite_wrapper/sql_database.h"
 #include <sqlite3.h>
-
+#ifdef OS_WINCE
+#include "utils/global.h"
+#endif
 namespace utils {
 namespace dbms {
 
@@ -104,11 +106,27 @@ sqlite3* SQLDatabase::conn() const {
 }
 
 void SQLDatabase::set_path(const std::string& path) {
+#ifdef OS_WINCE
+  std::string tmp = path;
+  if (tmp[0] != '\\' && tmp[0] != '/') {
+    tmp = Global::RelativePathToAbsPath(tmp);
+  }
   databasename_ = path +  databasename_;
+#else
+  databasename_ = path +  databasename_;
+#endif
 }
 
 std::string SQLDatabase::get_path() const {
+#ifdef OS_WINCE
+  std::string tmp = databasename_;
+  if (tmp[0] != '\\' && tmp[0] != '/') {
+    tmp = Global::RelativePathToAbsPath(tmp);
+  }
+  return tmp;
+#else
   return databasename_;
+#endif
 }
 
 bool SQLDatabase::Backup() {

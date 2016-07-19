@@ -85,6 +85,12 @@ cp ${BIN_ROOT}/src/components/security_manager/test/${BIN_TYPE}/security_manager
 cp ${SRC_ROOT}/lib/wince/libeay32.dll ${DES_PATH}/security_manager_test
 cp ${SRC_ROOT}/lib/wince/ssleay32.dll ${DES_PATH}/security_manager_test
 cp ${BIN_ROOT}/src/components/security_manager/test/*.pem ${DES_PATH}/security_manager_test
+if [ ! -d "client" ]; then
+  python ${SRC_ROOT}/tools/Utils/generate_test_certificates.py
+fi
+cp -rf client ${DES_PATH}/security_manager_test
+cp -rf server ${DES_PATH}/security_manager_test
+
 #smart_object_test
 cp ${BIN_ROOT}/src/components/smart_objects/test/${BIN_TYPE}/smart_object_test.exe ${DES_PATH}/smart_object_test
 #transport_manager_test

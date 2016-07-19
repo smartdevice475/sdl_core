@@ -81,8 +81,13 @@ namespace policy {
 
 namespace custom_str = utils::custom_string;
 
+#ifdef OS_WINCE
+typedef std::multimap<std::string, policy_table::Rpcs>
+    UserConsentPromptToRpcsConnections;
+#else
 typedef std::multimap<std::string, policy_table::Rpcs&>
     UserConsentPromptToRpcsConnections;
+#endif
 
 template <typename T>
 std::string NumberToString(T Number) {
@@ -158,7 +163,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
   void SetUp() OVERRIDE {
 #if defined(OS_WIN32) || defined(OS_WINCE)
     file_system::CreateDirectoryWindows("storage1");
-	file_system::DeleteFileWindows("policy.sqlite");
+	  file_system::DeleteFileWindows("policy.sqlite");
 #else
     file_system::CreateDirectory("storage1");
     file_system::DeleteFile("policy.sqlite");
@@ -204,11 +209,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
     ifile.close();
     ::policy::BinaryMessage msg(json.begin(), json.end());
     // Load Json to cache
-#ifdef OS_WINCE
-    EXPECT_TRUE(manager->LoadPT(Global::RelativePathToAbsPath("file_pt_update.json").c_str(), msg));
-#else
     EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
-#endif
     return root;
   }
 
@@ -216,15 +217,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
     file_system::remove_directory_content("storage1");
     ON_CALL(policy_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kAppStorageFolder));
-#ifdef OS_WINCE
-    std::string tmp = file_name;
-    if (tmp[0] != '\\' && tmp[0] != '/') {
-      tmp = Global::RelativePathToAbsPath(tmp);
-    }
-    ASSERT_TRUE(manager->InitPT(tmp, &policy_settings_));
-#else
     ASSERT_TRUE(manager->InitPT(file_name, &policy_settings_));
-#endif
   }
 
   void AddRTtoPT(const std::string& update_file_name,
@@ -329,8 +322,8 @@ class PolicyManagerImplTest2 : public ::testing::Test {
           static_cast<const std::string&>(ucp_string);
       // Multimap inserting
 #ifdef OS_WINCE
-      //input_multimap.insert(std::pair<std::string, policy_table::Rpcs&>(
-      //    ucp_std_string, rpcs_ref));
+      input_multimap.insert(std::pair<std::string, policy_table::Rpcs>(
+          ucp_std_string, rpcs_ref));
 #else
       input_multimap.insert(std::pair<std::string, policy_table::Rpcs&>(
           ucp_std_string, rpcs_ref));
@@ -506,11 +499,7 @@ TEST_F(PolicyManagerImplTest2, IsAppRevoked_SetRevokedAppID_ExpectAppRevoked) {
   ifile.close();
 
   ::policy::BinaryMessage msg(json.begin(), json.end());
-#ifdef OS_WINCE
-  ASSERT_TRUE(manager->LoadPT(Global::RelativePathToAbsPath("file_pt_update.json").c_str(), msg));
-#else
   ASSERT_TRUE(manager->LoadPT("file_pt_update.json", msg));
-#endif
   EXPECT_TRUE(manager->IsApplicationRevoked(app_id1));
 }
 
@@ -570,6 +559,7 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
 
   utils::SharedPtr<policy_table::Table> snapshot =
       utils::MakeShared<policy_table::Table>(update.policy_table);
+
   // Assert
   EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
@@ -840,12 +830,21 @@ TEST_F(PolicyManagerImplTest2,
   policy_table::ModuleConfig& module_config = pt->policy_table.module_config;
   ::policy::VehicleInfo vehicle_info = manager->GetVehicleInfo();
 
+#ifdef OS_WINCE
+  EXPECT_EQ(std::string(module_config.vehicle_make.ToJsonValue().asString()),
+            vehicle_info.vehicle_make);
+  EXPECT_EQ(std::string(module_config.vehicle_model.ToJsonValue().asString()),
+            vehicle_info.vehicle_model);
+  EXPECT_EQ(std::string(module_config.vehicle_year.ToJsonValue().asString()),
+            vehicle_info.vehicle_year);
+#else
   EXPECT_EQ(static_cast<std::string>(*module_config.vehicle_make),
             vehicle_info.vehicle_make);
   EXPECT_EQ(static_cast<std::string>(*module_config.vehicle_model),
             vehicle_info.vehicle_model);
   EXPECT_EQ(static_cast<std::string>(*module_config.vehicle_year),
             vehicle_info.vehicle_year);
+#endif
 }
 
 }  // namespace policy

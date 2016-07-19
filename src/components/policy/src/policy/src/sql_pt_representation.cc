@@ -331,18 +331,15 @@ InitResult SQLPTRepresentation::Init(const PolicySettings *settings) {
   if (!db_->Open()) {
     LOG4CXX_ERROR(logger_, "Failed opening database.");
     LOG4CXX_INFO(logger_, "Starting opening retries.");
-    const uint16_t attempts =
-        get_settings().attempts_to_open_policy_db();
+    const uint16_t attempts = get_settings().attempts_to_open_policy_db();
     LOG4CXX_DEBUG(logger_, "Total attempts number is: " << attempts);
     bool is_opened = false;
-    const uint16_t open_attempt_timeout_ms =
-        get_settings().open_attempt_timeout_ms();
+    const uint16_t open_attempt_timeout_ms = get_settings().open_attempt_timeout_ms();
 #if defined(OS_WIN32) || defined(OS_WINCE)
 #else
     const useconds_t sleep_interval_mcsec = open_attempt_timeout_ms * 1000;
 #endif
-    LOG4CXX_DEBUG(logger_, "Open attempt timeout(ms) is: "
-                  << open_attempt_timeout_ms);
+    LOG4CXX_DEBUG(logger_, "Open attempt timeout(ms) is: " << open_attempt_timeout_ms);
     for (int i = 0; i < attempts; ++i) {
 #if defined(OS_WIN32) || defined(OS_WINCE)
       Sleep(open_attempt_timeout_ms);
@@ -359,6 +356,7 @@ InitResult SQLPTRepresentation::Init(const PolicySettings *settings) {
         break;
       }
     }
+    
     if (!is_opened) {
       LOG4CXX_ERROR(logger_, "Open retry sequence failed. Tried "
                     << attempts << " attempts with "

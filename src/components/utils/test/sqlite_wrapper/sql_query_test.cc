@@ -57,7 +57,15 @@ class SQLQueryTest : public ::testing::Test {
   static const std::string kDatabaseName;
 
   static void SetUpTestCase() {
+#ifdef OS_WINCE
+    std::string tmp = kDatabaseName + ".sqlite";
+    if (tmp[0] != '\\' && tmp[0] != '/') {
+      tmp = Global::RelativePathToAbsPath(tmp);
+    }
+    sqlite3_open(tmp.c_str(), &conn);
+#else
     sqlite3_open((kDatabaseName + ".sqlite").c_str(), &conn);
+#endif
     sqlite3_exec(conn, "CREATE TABLE testTable (integerValue INTEGER,"
                  " doubleValue REAL, stringValue TEXT)",
                  NULL, NULL, NULL);

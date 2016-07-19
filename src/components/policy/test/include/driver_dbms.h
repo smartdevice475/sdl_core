@@ -120,7 +120,7 @@ class DBMS {
   void Close() {
     sqlite3_close(conn_);
 #ifdef OS_WINCE
-    file_system::DeleteFileWindows(file_name_.c_str());
+    file_system::DeleteFileWindows(file_name_);
 #else
     remove(file_name_.c_str());
 #endif

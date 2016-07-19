@@ -146,7 +146,7 @@ TEST_F(HeartBeatMonitorTest, NotKeptAlive) {
   conn->KeepAlive(session);
   Sleep(kTimeout - MILLISECONDS_IN_SECOND);
   conn->KeepAlive(session);
-  Sleep(2 * kTimeout + MILLISECONDS_IN_SECOND);
+  Sleep(5 * kTimeout + MILLISECONDS_IN_SECOND);
 #else
   usleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
   conn->KeepAlive(session);
