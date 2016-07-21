@@ -52,7 +52,15 @@ SQLDatabase::~SQLDatabase() {
 bool SQLDatabase::Open() {
   sync_primitives::AutoLock auto_lock(conn_lock_);
   if (conn_) return true;
+#ifdef OS_WINCE
+  std::string tmp = db_name_;
+  if (tmp[0] != '\\' && tmp[0] != '/') {
+    tmp = Global::RelativePathToAbsPath(tmp);
+  }
+  conn_ = qdb_connect(tmp.c_str(), 0);
+#else
   conn_ = qdb_connect(db_name_.c_str(), 0);
+#endif
   if (conn_ == NULL) {
     error_ = Error::ERROR;
     return false;

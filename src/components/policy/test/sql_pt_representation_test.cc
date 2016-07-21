@@ -91,7 +91,15 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     file_system::DeleteFile("policy.sqlite");
 #endif
     reps = new SQLPTRepresentation;
+#ifdef OS_WINCE
+    std::string tmp = kDatabaseName;
+    if (tmp[0] != '\\' && tmp[0] != '/') {
+      tmp = Global::RelativePathToAbsPath(tmp);
+    }
+    dbms = new DBMS(tmp);
+#else
     dbms = new DBMS(kDatabaseName);
+#endif
     policy_settings_ = std::auto_ptr<policy_handler_test::MockPolicySettings>(
         new policy_handler_test::MockPolicySettings());
     ON_CALL(*policy_settings_, app_storage_folder())

@@ -115,7 +115,15 @@ class DBMS {
     Close();
   }
   bool Open() {
+#ifdef OS_WINCE
+    std::string tmp = file_name_;
+    if (tmp[0] != '\\' && tmp[0] != '/') {
+      tmp = Global::RelativePathToAbsPath(tmp);
+    }
+    return SQLITE_OK == sqlite3_open(tmp.c_str(), &conn_);
+#else
     return SQLITE_OK == sqlite3_open(file_name_.c_str(), &conn_);
+#endif
   }
   void Close() {
     sqlite3_close(conn_);

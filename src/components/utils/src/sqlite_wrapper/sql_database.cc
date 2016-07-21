@@ -58,7 +58,15 @@ SQLDatabase::~SQLDatabase() {
 bool SQLDatabase::Open() {
   sync_primitives::AutoLock auto_lock(conn_lock_);
   if (conn_) return true;
+#ifdef OS_WINCE
+  std::string tmp = databasename_;
+  if (tmp[0] != '\\' && tmp[0] != '/') {
+    tmp = Global::RelativePathToAbsPath(tmp);
+  }
+  error_ = sqlite3_open(tmp.c_str(), &conn_);
+#else
   error_ = sqlite3_open(databasename_.c_str(), &conn_);
+#endif
   return error_ == SQLITE_OK;
 }
 
@@ -106,15 +114,7 @@ sqlite3* SQLDatabase::conn() const {
 }
 
 void SQLDatabase::set_path(const std::string& path) {
-#ifdef OS_WINCE
-  std::string tmp = path;
-  if (tmp[0] != '\\' && tmp[0] != '/') {
-    tmp = Global::RelativePathToAbsPath(tmp);
-  }
   databasename_ = path +  databasename_;
-#else
-  databasename_ = path +  databasename_;
-#endif
 }
 
 std::string SQLDatabase::get_path() const {
