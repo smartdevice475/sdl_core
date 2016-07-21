@@ -1169,7 +1169,7 @@ bool ApplicationManagerImpl::StartNaviService(
     service_type == ServiceType::kMobileNav ? it->second.first = true
                                             : it->second.second = true;
 
-    application(app_id)->WakeUpStreaming(service_type);
+  //  application(app_id)->WakeUpStreaming(service_type);
     application(app_id)->StartStreaming(service_type);
     return true;
   } else {
@@ -3185,7 +3185,10 @@ mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
     // if offset == 0: rewrite file
     file_stream = file_system::Open(full_file_path, std::ios_base::out);
   }
-
+  if (NULL == file_stream) {
+    LOG4CXX_ERROR(logger_, "file open failed");
+    return mobile_apis::Result::GENERIC_ERROR;
+  }
 #ifdef OS_WINCE
   std::string binary_str;
   binary_str.assign(binary_data.begin(), binary_data.end());

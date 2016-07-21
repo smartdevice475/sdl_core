@@ -67,7 +67,6 @@ set(default_includes
 )
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
 set(default_sources
-    ${COMPONENTS_DIR}/media_manager/src/video/video_stream_to_file_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/audio/socket_audio_streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/audio/file_audio_streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/video/socket_video_streamer_adapter.cc
