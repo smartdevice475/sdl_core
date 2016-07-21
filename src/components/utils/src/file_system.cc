@@ -441,26 +441,23 @@ bool file_system::Write(const std::string& file_name,
 std::ofstream* file_system::Open(const std::string& file_name,
                                  std::ios_base::openmode mode) {
   std::ofstream* file = new std::ofstream();
+  if (NULL == file) {
+    return NULL;
+  }
 #ifdef OS_WINCE
   std::string absName = file_name;
 
   if (absName[0] != '\\' && absName[0] != '/') {
     absName = Global::RelativePathToAbsPath(absName);
   }
-
-  file->open(absName.c_str(), std::ios_base::binary | mode);
-  if (file->is_open()) {
-    return file;
-  }
-
-#else
+#endif
   file->open(file_name.c_str(), std::ios_base::binary | mode);
   if (file->is_open()) {
     return file;
   }
-#endif
 
-  return file;
+  delete file;
+  return NULL;
 }
 
 bool file_system::Write(std::ofstream* const file_stream,

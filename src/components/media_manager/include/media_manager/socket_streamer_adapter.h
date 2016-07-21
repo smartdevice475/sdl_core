@@ -42,7 +42,7 @@ namespace media_manager {
 class SocketStreamerAdapter : public StreamerAdapter {
  public:
   SocketStreamerAdapter(const std::string& ip,
-                        uint16_t port,
+                        int32_t port,
                         const std::string& header);
   virtual ~SocketStreamerAdapter();
 
@@ -51,7 +51,7 @@ class SocketStreamerAdapter : public StreamerAdapter {
    public:
     SocketStreamer(SocketStreamerAdapter* const adapter,
                    const std::string& ip,
-                   uint16_t port,
+                   int32_t port,
                    const std::string& header);
     virtual ~SocketStreamer();
 
