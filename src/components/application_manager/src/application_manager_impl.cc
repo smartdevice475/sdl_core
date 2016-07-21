@@ -1169,7 +1169,7 @@ bool ApplicationManagerImpl::StartNaviService(
     service_type == ServiceType::kMobileNav ? it->second.first = true
                                             : it->second.second = true;
 
-  //  application(app_id)->WakeUpStreaming(service_type);
+    application(app_id)->WakeUpStreaming(service_type);
     application(app_id)->StartStreaming(service_type);
     return true;
   } else {
