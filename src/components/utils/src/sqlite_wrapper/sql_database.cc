@@ -38,7 +38,11 @@
 namespace utils {
 namespace dbms {
 
+#ifdef OS_WINCE
+const std::string SQLDatabase::kInMemory = "memory";
+#else
 const std::string SQLDatabase::kInMemory = ":memory:";
+#endif
 const std::string SQLDatabase::kExtension = ".sqlite";
 
 SQLDatabase::SQLDatabase()
