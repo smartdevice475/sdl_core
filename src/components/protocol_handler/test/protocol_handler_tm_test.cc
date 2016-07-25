@@ -36,7 +36,7 @@
 #include "protocol/common.h"
 #include "protocol_handler/control_message_matcher.h"
 #include "protocol_handler/mock_protocol_handler.h"
-#include "protocol_handler/protocol_observer_mock.h"
+#include "protocol_handler/mock_protocol_observer.h"
 #include "protocol_handler/mock_protocol_handler_settings.h"
 #include "protocol_handler/mock_session_observer.h"
 #include "connection_handler/mock_connection_handler.h"
@@ -145,14 +145,12 @@ class ProtocolHandlerImplTest : public ::testing::Test {
 
     // Expect ConnectionHandler support methods call (conversion, check
     // heartbeat)
-    EXPECT_CALL(session_observer_mock, KeyFromPair(connection_id, _))
-        .
-        // Return some connection_key
-        WillRepeatedly(Return(connection_key));
-    EXPECT_CALL(session_observer_mock, IsHeartBeatSupported(connection_id, _))
-        .
-        // Return false to avoid call KeepConnectionAlive
-        WillRepeatedly(Return(false));
+    ON_CALL(session_observer_mock, KeyFromPair(connection_id, _))
+        // return some connection_key
+        .WillByDefault(Return(connection_key));
+    ON_CALL(session_observer_mock, IsHeartBeatSupported(connection_id, _))
+        // return false to avoid call KeepConnectionAlive
+        .WillByDefault(Return(false));
   }
 
   void TearDown() OVERRIDE {
@@ -256,7 +254,6 @@ class ProtocolHandlerImplTest : public ::testing::Test {
   }
 
   testing::NiceMock<MockProtocolHandlerSettings> protocol_handler_settings_mock;
-  ::utils::SharedPtr<ProtocolHandlerImpl> protocol_handler_impl;
   TransportManagerListener* tm_listener;
   // Uniq connection
   ::transport_manager::ConnectionUID connection_id;
@@ -269,14 +266,16 @@ class ProtocolHandlerImplTest : public ::testing::Test {
   // Strict mocks (same as all methods EXPECT_CALL().Times(0))
   testing::NiceMock<connection_handler_test::MockConnectionHandler>
       connection_handler_mock;
-  testing::StrictMock<transport_manager_test::MockTransportManager>
+  testing::NiceMock<transport_manager_test::MockTransportManager>
       transport_manager_mock;
-  testing::StrictMock<protocol_handler_test::MockSessionObserver>
+  testing::NiceMock<protocol_handler_test::MockSessionObserver>
       session_observer_mock;
 #ifdef ENABLE_SECURITY
-  testing::NiceMock<security_manager_test::MockSecurityManager> security_manager_mock;
+  testing::NiceMock<security_manager_test::MockSecurityManager>
+      security_manager_mock;
   testing::NiceMock<security_manager_test::MockSSLContext> ssl_context_mock;
 #endif  // ENABLE_SECURITY
+  ::utils::SharedPtr<ProtocolHandlerImpl> protocol_handler_impl;
 };
 
 #ifdef ENABLE_SECURITY
@@ -920,11 +919,6 @@ TEST_F(ProtocolHandlerImplTest, FloodVerification) {
   EXPECT_CALL(session_observer_mock, OnApplicationFloodCallBack(connection_key))
       .Times(1);
 
-  ON_CALL(protocol_handler_settings_mock, message_frequency_time())
-      .WillByDefault(Return(period_msec));
-  ON_CALL(protocol_handler_settings_mock, message_frequency_count())
-      .WillByDefault(Return(max_messages));
-
   for (size_t i = 0; i < max_messages + 1; ++i) {
     SendTMMessage(connection_id,
                   PROTOCOL_VERSION_3,
@@ -944,11 +938,6 @@ TEST_F(ProtocolHandlerImplTest, FloodVerification_ThresholdValue) {
   InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
   AddSession();
-
-  ON_CALL(protocol_handler_settings_mock, message_frequency_time())
-      .WillByDefault(Return(period_msec));
-  ON_CALL(protocol_handler_settings_mock, message_frequency_count())
-      .WillByDefault(Return(max_messages));
 
   // Expect NO flood notification to CH
   EXPECT_CALL(session_observer_mock, OnApplicationFloodCallBack(connection_key))
