@@ -497,6 +497,7 @@ void RequestController::Worker::exitThreadMain() {
 
 void RequestController::UpdateTimer() {
   LOG4CXX_TRACE(logger_,"UpdateTimer");
+  sync_primitives::AutoLock auto_lock(timer_lock);
   timer_condition_.NotifyOne();
 }
 
