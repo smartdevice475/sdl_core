@@ -117,6 +117,9 @@ TEST_F(ConditionalVariableTest, CheckBroadcast_AllThreadsNotified_ExpectSuccessf
       this);
   ASSERT_FALSE(thread_created) << "thread2 is not created!";
   check_counter();
+#if defined(OS_WIN32) || defined(OS_WINCE)
+  Sleep(3000);
+#endif
   EXPECT_EQ(2u, counter_);
 }
 

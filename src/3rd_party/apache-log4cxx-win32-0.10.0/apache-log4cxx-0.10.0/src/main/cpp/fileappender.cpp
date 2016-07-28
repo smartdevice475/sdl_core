@@ -16,6 +16,7 @@
  */
 #ifdef OS_WINCE
 #include <stdlib.h>
+#include <Windows.h>
 #endif
 #include <log4cxx/logstring.h>
 #include <log4cxx/fileappender.h>
@@ -113,6 +114,43 @@ void FileAppender::setBufferedIO(bool bufferedIO1)
         }
 }
 
+#ifdef OS_WINCE
+LogString relativeToFullPath(LogString relativePath)
+{
+	wchar_t fullPath[MAX_PATH]={0};
+	wchar_t curPath[MAX_PATH]={0};
+        wchar_t rltPath[MAX_PATH] = {0};
+	wchar_t *curDir1,*curDir2,*curDir;
+	//just relative path 
+	if (relativePath.size()==0||(relativePath[0]=='\\'||relativePath[0]=='/'))	{
+		return relativePath;
+	}
+#if  LOG4CXX_LOGCHAR_IS_UTF8
+        mbstowcs(rltPath, relativePath.c_str(), relativePath.size());
+#else
+        wcscpy(rltPath,relativePath.c_str(),relativePath.size());
+#endif
+	GetModuleFileNameW(NULL,curPath,MAX_PATH);
+	curDir1=wcsrchr(curPath,L'\\');
+	curDir2=wcsrchr(curPath,L'/');
+	curDir=curDir1>curDir2?curDir1:curDir2;
+	if (NULL == curDir)	{
+		return relativePath;
+	}
+	curDir[0]=L'\0';
+	swprintf(fullPath,L"%s\\%s",curPath,rltPath);
+#if  LOG4CXX_LOGCHAR_IS_UTF8
+	int len=wcslen(fullPath)+1;
+	char utffull[MAX_PATH]={0};
+	wcstombs(utffull,fullPath,len);
+	return LogString(utffull);
+#else
+	return LogString(fullPath);
+#endif	
+}
+#endif
+
+
 void FileAppender::setOption(const LogString& option,
         const LogString& value)
 {
@@ -121,6 +159,9 @@ void FileAppender::setOption(const LogString& option,
         {
                 synchronized sync(mutex);
                 fileName = stripDuplicateBackslashes(value);
+#ifdef OS_WINCE
+		fileName=relativeToFullPath(fileName);
+#endif
         }
         else if (StringHelper::equalsIgnoreCase(option, LOG4CXX_STR("APPEND"), LOG4CXX_STR("append")))
         {

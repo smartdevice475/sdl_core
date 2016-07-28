@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,41 +30,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <apr_time.h>
-#include <log4cxx/spi/loggingevent.h>
+#ifndef SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_PROTOCOL_OBSERVER_H_
+#define SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_PROTOCOL_OBSERVER_H_
 
-#include "utils/auto_trace.h"
-#include "utils/push_log.h"
+#include "gmock/gmock.h"
+#include <string>
+#include "protocol_handler/protocol_observer.h"
 
-namespace logger {
+namespace test {
+namespace components {
+namespace protocol_handler_test {
 
-AutoTrace::AutoTrace(
-  log4cxx::LoggerPtr logger,
-  const log4cxx::spi::LocationInfo& location) :
-  logger_(logger), location_(location) {
-  if (logger::logs_enabled() &&
-      logger_->isTraceEnabled()) {
-    push_log(logger_,
-             ::log4cxx::Level::getTrace(),
-             "Enter",
-             apr_time_now(),
-             location_,
-             ::log4cxx::spi::LoggingEvent::getCurrentThreadName()
-    );
-  }
-}
-
-AutoTrace::~AutoTrace() {
-  if (logger::logs_enabled() &&
-      logger_->isTraceEnabled()) {
-    push_log(logger_,
-             ::log4cxx::Level::getTrace(),
-             "Exit",
-             apr_time_now(),
-             location_, // the location corresponds rather to creation of autotrace object than to deletion
-             ::log4cxx::spi::LoggingEvent::getCurrentThreadName()
-    );
-  }
-}
-
-}  // namespace logger
+/*
+ * MOCK implementation of ::protocol_handler::ProtocolObserver interface
+ */
+class MockProtocolObserver : public ::protocol_handler::ProtocolObserver {
+ public:
+  MOCK_METHOD1(OnMessageReceived,
+               void(const ::protocol_handler::RawMessagePtr));
+  MOCK_METHOD1(OnMobileMessageSent,
+               void(const ::protocol_handler::RawMessagePtr));
+};
+}  // namespace protocol_handler_test
+}  // namespace components
+}  // namespace test
+#endif  // SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_PROTOCOL_OBSERVER_H_

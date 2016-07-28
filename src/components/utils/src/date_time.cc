@@ -46,6 +46,10 @@
 #include "time_ext.h"
 #endif
 
+#if defined(OS_WIN32)||defined(OS_WINCE)
+static uint64_t win32_system_time_ = time(NULL);  //wince start time ,unit :s
+#endif
+
 #if defined(OS_WINCE)
 static time_t time(time_t* TimeOutPtr)  
 {
@@ -103,38 +107,16 @@ void clock_gettime(int i, timespec * tm)
 
 namespace date_time {
 
-#if defined(OS_WIN32) || defined(OS_WINCE)
+#if defined(OS_WIN32)|| defined(OS_WINCE)
+
 TimevalStruct DateTime::getCurrentTime() {
-  FILETIME ft;
-  uint64_t tmpres = 0;
   TimevalStruct tv;
-  const uint64_t kDeltaEpochInMicrosecs = 11644473600000000u;
   const uint32_t kMillisecondsInSecond = 1000u;
-  const uint32_t kMicrosecondsInMillisecond = 1000u;
-  const uint32_t kMicrosecondsInSecond =
-    kMillisecondsInSecond * kMicrosecondsInMillisecond;
-
-  GetSystemTimeAsFileTime(&ft);
-
-  // The GetSystemTimeAsFileTime returns the number of 100 nanosecond
-  // intervals since Jan 1, 1601 in a structure. Copy the high bits to
-  // the 64 bit tmpres, shift it left by 32 then or in the low 32 bits.
-  tmpres |= ft.dwHighDateTime;
-  tmpres <<= 32;
-  tmpres |= ft.dwLowDateTime;
-
-  // Convert to microseconds by dividing by 10
-  tmpres /= 10;
-
-  // The Unix epoch starts on Jan 1 1970.  Need to subtract the difference
-  // in seconds from Jan 1 1601.
-  tmpres -= kDeltaEpochInMicrosecs;
-
+  uint64_t curr=clock();
   // Finally change microseconds to seconds and place in the seconds value.
   // The modulus picks up the microseconds.
-  tv.tv_sec = static_cast<long>(tmpres / kMicrosecondsInSecond);
-  tv.tv_usec = static_cast<long>(tmpres % kMicrosecondsInSecond);
-
+  tv.tv_sec = static_cast<long>(win32_system_time_+curr/kMillisecondsInSecond);
+  tv.tv_usec = static_cast<long>((curr % kMillisecondsInSecond)*1000);
   return tv;
 }
 #else

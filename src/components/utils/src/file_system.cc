@@ -37,6 +37,8 @@
 #include <sstream>
 #include <Shlobj.h>
 #include <Shlwapi.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #else
 #include <sys/statvfs.h>
 #include <sys/stat.h>
@@ -383,21 +385,19 @@ bool file_system::FileExists(const std::string& name) {
 		::CloseHandle((HANDLE)file);
 	return b;
 #elif defined(OS_WINCE)
+
   std::string absPath = name;
 
   if (absPath[0] != '\\' && absPath[0] != '/') {
     absPath = Global::RelativePathToAbsPath(absPath);
   }
 
-  HANDLE file = ::CreateFile(Global::StringToWString(absPath).c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-
-	bool b = !(file == (HANDLE)-1);
-	if (b) ::CloseHandle((HANDLE)file);
-
-	return b;
+  struct stat status;
+  memset(&status, 0, sizeof(status));
+  return (0 == stat(absPath.c_str(), &status));
 #else
-	struct stat status;
-	memset(&status, 0, sizeof(status));
+  struct stat status;
+  memset(&status, 0, sizeof(status));
 
   if (-1 == stat(name.c_str(), &status)) {
     return false;
@@ -440,18 +440,20 @@ bool file_system::Write(const std::string& file_name,
 
 std::ofstream* file_system::Open(const std::string& file_name,
                                  std::ios_base::openmode mode) {
+  if (file_name.empty())  {
+	  return NULL;
+  }
   std::ofstream* file = new std::ofstream();
+  std::string file_name_=file_name;
   if (NULL == file) {
     return NULL;
   }
 #ifdef OS_WINCE
-  std::string absName = file_name;
-
-  if (absName[0] != '\\' && absName[0] != '/') {
-    absName = Global::RelativePathToAbsPath(absName);
+  if (file_name_[0] != '\\' && file_name_[0] != '/') {
+    file_name_ = Global::RelativePathToAbsPath(file_name_);
   }
 #endif
-  file->open(file_name.c_str(), std::ios_base::binary | mode);
+  file->open(file_name_.c_str(), std::ios_base::binary | mode);
   if (file->is_open()) {
     return file;
   }

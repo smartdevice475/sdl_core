@@ -45,6 +45,43 @@ namespace components {
 namespace utils {
 namespace dbms {
 
+#ifdef OS_WINCE
+bool chmod(const std::string& fileName, int iFlag)
+{
+	//gy_int32 iTemp;
+	std::string absFileName;
+	std::wstring abswFileName;
+
+	int fileAttri = 0;
+	if (iFlag < 1)
+	{
+		printf("FUNCTION: %s, LINE: %d, iFlag = %d\n", __FUNCTION__, __LINE__, iFlag);
+		return false;
+	}
+	absFileName = Global::RelativePathToAbsPath(fileName);
+	abswFileName = Global::StringToWString(absFileName);
+	fileAttri = GetFileAttributesW(abswFileName.c_str());
+	if(fileAttri == -1)
+	{
+		int iError = GetLastError();
+		printf("FUNCTION: %s, LINE: %d, iError = %d\n", __FUNCTION__, __LINE__, iError);
+		return false;
+	}
+
+	if (iFlag == 0x0400)
+	{
+		fileAttri |= 0x0001;
+	}
+	if (SetFileAttributesW(abswFileName.c_str(), fileAttri) != 0)
+	{
+		return true;
+	}
+	int iError = GetLastError();
+	printf("FUNCTION: %s, LINE: %d, iError = %d\n", __FUNCTION__, __LINE__, iError);
+	return false;
+}
+#endif
+
 ::testing::AssertionResult IsError(SQLError error) {
   if (error.number() != ::utils::dbms::OK) {
     return ::testing::AssertionSuccess() << error.text();
@@ -226,6 +263,7 @@ TEST(SQLDatabaseTest, IsReadWrite_FirstOpenDBIsRWSecondIsNot) {
 #elif defined(OS_WINCE)
   // TODO:
   // chmod("test-database.sqlite", 0x00400);
+  chmod("test-database.sqlite", 0x00400);
 #else
   chmod("test-database.sqlite", S_IRUSR);
 #endif

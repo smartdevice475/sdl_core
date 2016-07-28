@@ -41,6 +41,11 @@
 #include "utils/logger.h"
 #include "utils/macro.h"
 
+#ifdef OS_WINCE
+#include "utils/global.h"
+#include <windows.h>
+#endif
+
 namespace {
 namespace custom_str = utils::custom_string;
 
@@ -60,9 +65,14 @@ size_t CalculateLengthOfString(const char* str) {
 std::wstring ConvertUTFToWString(const char* str) {
   size_t size = CalculateLengthOfString(str);
   std::vector<wchar_t> wchar_array(size + 1, L'\0');
-
 #ifdef OS_WINCE
-  mbstowcs(&(wchar_array.front()), str, size);
+  wchar_string wstr;
+  if(Global::isUtf8(str, size)){
+    Global::toUnicode(str, CP_UTF8, wstr);
+  }else{
+    Global::toUnicode(str, CP_ACP, wstr);
+  }
+  return wstr;
 #else
   std::string current_locale = setlocale(LC_ALL, NULL);
   setlocale(LC_ALL, "");  // system locale

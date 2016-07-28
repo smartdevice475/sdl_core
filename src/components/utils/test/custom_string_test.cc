@@ -35,6 +35,10 @@
 #include <stdint.h>
 #include "gtest/gtest.h"
 #include "custom_string.h"
+#ifdef OS_WINCE
+#include "utils/global.h"
+#include <windows.h>
+#endif
 
 namespace custom_str = utils::custom_string;
 
@@ -260,8 +264,29 @@ TEST_F(CustomStringTest,
        AddUTF8StringToCustomString_ExpectCorrectConvertingToWString) {
   custom_str::CustomString obj(CustomStringTest::mbstring1_);
   custom_str::CustomString obj1(CustomStringTest::mbstring2_);
+#ifdef OS_WINCE
+  std::wstring wstr1;
+  std::wstring wstr2;
+  std::string astr1;
+  std::string astr2;
+  const size_t kSizeStr = 8;
+  uint8_t array[] = {0xD0,
+					   0xA2,
+					   0xD0,
+					   0xB5,
+					   0xD1,
+					   0x81,
+					   0xD1,
+					   0x82};  // Array contains russian word "Тест"
+  astr1 = CreateMultibyteString(array, kSizeStr);
+  astr2 = astr1 + "abc";
+  Global::toUnicode(astr1, CP_UTF8, wstr1);
+  Global::toUnicode(astr2, CP_UTF8, wstr2);
+#else
   std::wstring wstr1(L"Тест");
   std::wstring wstr2(L"Тестabc");
+#endif
+
   EXPECT_TRUE(wstr1 == obj.ToWString());
   EXPECT_TRUE(wstr2 == obj1.ToWString());
 }

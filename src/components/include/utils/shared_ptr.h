@@ -216,15 +216,15 @@ inline utils::SharedPtr<ObjectType>::SharedPtr(ObjectType* Object)
 
 template<typename ObjectType>
 inline utils::SharedPtr<ObjectType>::SharedPtr()
-  : mObject(0),
-    mReferenceCounter(0) {
+  : mObject(NULL),
+    mReferenceCounter(NULL) {
 }
 
 template<typename ObjectType>
 inline utils::SharedPtr<ObjectType>::SharedPtr(
   const SharedPtr<ObjectType>& Other)
-  : mObject(0),
-    mReferenceCounter(0) {
+  : mObject(NULL),
+    mReferenceCounter(NULL) {
   *this = Other;
 }
 
@@ -232,8 +232,8 @@ template<typename ObjectType>
 template<typename OtherObjectType>
 inline utils::SharedPtr<ObjectType>::SharedPtr(
   const SharedPtr<OtherObjectType>& Other)
-  : mObject(0),
-    mReferenceCounter(0) {
+  : mObject(NULL),
+    mReferenceCounter(NULL) {
   *this = Other;
 }
 
@@ -303,7 +303,6 @@ utils::SharedPtr<OtherObjectType> utils::SharedPtr<ObjectType>::dynamic_pointer_
       atomic_post_inc(casted_pointer.mReferenceCounter);
     }
   }
-
   return casted_pointer;
 }
 
