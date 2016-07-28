@@ -68,9 +68,17 @@ void Preconditions() {
 
 void InitLogger() {
   // Set enabled logs
+#ifdef OS_WINCE
+  profile::Profile::instance()->config_file_name(Global::RelativePathToAbsPath("smartDeviceLink.ini"));
+#else
   profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
+#endif
   profile::Profile::instance()->UpdateValues();
+#ifdef OS_WINCE
+  INIT_LOGGER(Global::RelativePathToAbsPath("log4cxx.properties"), true); //DEINIT_LOGGER will be called in test_main.cc
+#else
   INIT_LOGGER("log4cxx.properties", true); //DEINIT_LOGGER will be called in test_main.cc
+#endif
 }
 
 void CreateDeleteAutoTrace(const std::string & testlog) {
@@ -81,8 +89,11 @@ void CreateDeleteAutoTrace(const std::string & testlog) {
 bool CheckAutoTraceDebugInFile(const std::string & testlog) {
   bool isLogFound = false;
   std::string line;
-
+#ifdef OS_WINCE
+  std::ifstream file_log(Global::RelativePathToAbsPath("AutoTraceTestLogFile.log").c_str());
+#else
   std::ifstream file_log("AutoTraceTestLogFile.log");
+#endif
 
   if (file_log.is_open()) {
     while (getline(file_log, line)) {
@@ -106,7 +117,6 @@ TEST(AutoTraceTest, AutoTrace_WriteToFile_ReadCorrectString) {
   Preconditions();
   InitLogger();
   CreateDeleteAutoTrace(testlog);
-
   const TimevalStruct startTime = date_time::DateTime::getCurrentTime();
   const int64_t timeout_msec = 10000;
   // Waiting for empty Logger MessageQueue 10 seconds
