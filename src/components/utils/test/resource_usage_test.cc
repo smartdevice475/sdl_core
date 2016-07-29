@@ -44,11 +44,12 @@ class ResourceUsagePrivateTest : public ::testing::Test {
   Resources res;
 };
 
+#if !(defined(OS_WIN32)||defined(OS_WINCE))
 TEST_F(ResourceUsagePrivateTest, ReadStatFileTest) {
   std::string proc_buf;
   EXPECT_TRUE(res.ReadStatFile(proc_buf));
 }
-
+#endif
 TEST_F(ResourceUsagePrivateTest, GetProcInfoTest) {
   Resources::PidStats pid_stat;
   EXPECT_TRUE(res.GetProcInfo(pid_stat));
@@ -59,6 +60,7 @@ TEST_F(ResourceUsagePrivateTest, GetMemInfoTest) {
   EXPECT_TRUE(res.GetMemInfo(mem_info));
 }
 
+#if !(defined(OS_WIN32)||defined(OS_WINCE))
 TEST_F(ResourceUsagePrivateTest, GetStatPathTest_FileExists) {
   //arrange
   std::string filename = res.GetStatPath();
@@ -81,6 +83,7 @@ TEST_F(ResourceUsagePrivateTest, GetProcPathTest) {
   //assert
   EXPECT_EQ(filename, fd + "/stat");
 }
+#endif
 }
 
 namespace test {

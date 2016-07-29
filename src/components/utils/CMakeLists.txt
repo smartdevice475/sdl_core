@@ -158,7 +158,7 @@ endif()
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   target_link_libraries("Utils" pthread ${RTLIB})
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-  target_link_libraries("Utils" pthreadVC2 ${RTLIB})
+  target_link_libraries("Utils" pthreadVC2 toolhelp ${RTLIB})
 endif()
 
 target_link_libraries("Utils" ${LIBRARIES})

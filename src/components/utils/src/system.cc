@@ -153,7 +153,9 @@ bool System::Execute(bool wait) {
   PROCESS_INFORMATION pi;
   STARTUPINFO si = { sizeof(si) };
   std::string absCmd = command_;
-
+  if (wait&&absCmd.empty()) {
+	  return false;
+  }
   if (absCmd[0] != '\\' && absCmd[0] != '/') {
     absCmd = Global::RelativePathToAbsPath(absCmd);
   }
@@ -169,8 +171,7 @@ bool System::Execute(bool wait) {
   ShExecInfo.nShow = SW_HIDE;
   ShExecInfo.hInstApp = NULL;
 
-  BOOL bRet = ShellExecuteEx(&ShExecInfo);
-
+  BOOL bRet = ShellExecuteEx(&ShExecInfo); 
   if (bRet && wait) {
     WaitForSingleObject(ShExecInfo.hProcess,INFINITE);
   }
