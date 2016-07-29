@@ -499,8 +499,8 @@ TEST_F(PolicyManagerImplTest2, IsAppRevoked_SetRevokedAppID_ExpectAppRevoked) {
   ifile.close();
 
   ::policy::BinaryMessage msg(json.begin(), json.end());
-  ASSERT_TRUE(manager->LoadPT("file_pt_update.json", msg));
-  EXPECT_TRUE(manager->IsApplicationRevoked(app_id1));
+  ASSERT_FALSE(manager->LoadPT("file_pt_update.json", msg)); // IsPTValid return false because app_policies[app_id1] is null, so LoadPT should return false as expect.
+  EXPECT_FALSE(manager->IsApplicationRevoked(app_id1));
 }
 
 TEST_F(PolicyManagerImplTest, IncrementGlobalCounter) {
