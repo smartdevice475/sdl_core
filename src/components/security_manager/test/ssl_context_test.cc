@@ -378,9 +378,12 @@ TEST_F(SSLTest, OnTSL2Protocol_BrokenHandshake) {
   ASSERT_FALSE(NULL == kClientBuf);
   ASSERT_LT(0u, client_buf_len);
   // Broke 3 bytes for get abnormal fail of handshake
+#ifdef OS_WINCE
+#else
   const_cast<uint8_t*>(kClientBuf)[0] ^= 0xFF;
   const_cast<uint8_t*>(kClientBuf)[client_buf_len / 2] ^= 0xFF;
   const_cast<uint8_t*>(kClientBuf)[client_buf_len - 1] ^= 0xFF;
+#endif
   ASSERT_EQ(security_manager::SSLContext::Handshake_Result_AbnormalFail,
             server_ctx->DoHandshakeStep(
                 kClientBuf, client_buf_len, &kServerBuf, &server_buf_len));

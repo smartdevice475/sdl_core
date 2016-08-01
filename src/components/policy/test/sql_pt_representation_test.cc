@@ -1451,6 +1451,7 @@ TEST(SQLPTRepresentationTest3, RemoveDB_RemoveDB_ExpectFileDeleted) {
   EXPECT_EQ(::policy::SUCCESS, reps->Init(&policy_settings_));
   EXPECT_EQ(::policy::EXISTS, reps->Init(&policy_settings_));
   std::string path = (reps->db())->get_path();
+  reps->Close(); // Close database before delete it, otherwise delete failed.
   // Act
   reps->RemoveDB();
   // Check
