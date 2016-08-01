@@ -96,7 +96,7 @@ bool Resources::GetProcInfo(Resources::PidStats& output) {
 		bMore = ::Process32Next(hProcessSnap,&pe32);  
 	}  
 	//不要忘记清除掉snapshot对象  
-	::CloseToolhelp32Snapshot(hProcessSnap); 
+	::CloseHandle(hProcessSnap); 
 	return isGet;
 #elif defined(OS_LINUX)
   std::string proc_buf;

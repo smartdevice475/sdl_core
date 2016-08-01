@@ -121,6 +121,7 @@ class PolicyManagerImplTest : public ::testing::Test {
   }
 
   void TearDown() OVERRIDE {
+    delete cache_manager;
     delete manager;
   }
 
@@ -557,8 +558,12 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   const std::string json = table.toStyledString();
   ::policy::BinaryMessage msg(json.begin(), json.end());
 
+#ifdef OS_WINCE
+  utils::SharedPtr<policy_table::Table> snapshot(&update);
+#else
   utils::SharedPtr<policy_table::Table> snapshot =
       utils::MakeShared<policy_table::Table>(update.policy_table);
+#endif
 
   // Assert
   EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
