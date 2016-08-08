@@ -129,12 +129,12 @@ bool SocketStreamerAdapter::SocketStreamer::Connect() {
     LOG4CXX_ERROR(logger, "Unable to accept");
     return false;
   }
-  LOG4CXX_INFO(logger,"client socket:%u.%u.%u.%u:%u",
+/*  LOG4CXX_INFO(logger,"client socket:%u.%u.%u.%u:%u",
     client_addr.sin_addr.s_net, 
     client_addr.sin_addr.s_host, 
     client_addr.sin_addr.s_lh, 
     client_addr.sin_addr.s_impno,
-    client_addr.sin_port);
+    client_addr.sin_port);*/
   is_first_frame_ = true;
   LOG4CXX_INFO(logger, "Client connected: " << send_socket_fd_);
   return true;
