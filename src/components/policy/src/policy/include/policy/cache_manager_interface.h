@@ -611,6 +611,7 @@ class CacheManagerInterface {
    *
    */
   virtual utils::SharedPtr<policy_table::Table> GetPT() const  = 0;
+  virtual policy::VehicleInfo GetModuleVehicleInfo() const = 0;
 #endif
 };
 

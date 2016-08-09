@@ -198,6 +198,7 @@ class MockCacheManagerInterface : public CacheManagerInterface {
                     const std::string& policy_app_id,
                     policy::Permissions& permission));
   MOCK_CONST_METHOD0(GetPT, utils::SharedPtr<policy_table::Table>());
+  MOCK_CONST_METHOD0(GetModuleVehicleInfo, policy::VehicleInfo());
   MOCK_CONST_METHOD0(GetCertificate, std::string());
   MOCK_METHOD1(SetDecryptedCertificate, void(const std::string&));
 };

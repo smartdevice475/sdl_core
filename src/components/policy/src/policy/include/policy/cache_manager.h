@@ -601,9 +601,9 @@ class CacheManager : public CacheManagerInterface {
    * The rules are:
    * 1. Add new fields (known to PoliciesManager) & sub-sections if such are
    * present in the updated Preloaded PT
-   * 2. "vehicle_make", “model”, “year” – leave the fields & values as they were
+   * 2. "vehicle_make", “model? “year??leave the fields & values as they were
    * in the database
-   * 3. For all other fields – overwrite the values with the new ones from preloaded PT.
+   * 3. For all other fields ?overwrite the values with the new ones from preloaded PT.
    *
    * @param new_pt the policy table loaded from updated preload JSON file.
    *
@@ -635,7 +635,7 @@ class CacheManager : public CacheManagerInterface {
   /**
    * @brief MergeAP Allows to merge ApplicationPolicies section by definite relues.
    * The rules are:
-   * 1. Leave “<appID>” sub-sections as they were in the database (fields & their values).
+   * 1. Leave ?appID>?sub-sections as they were in the database (fields & their values).
    * 2. Over-write "default", "device", "pre_DataConsent" subsections.
    *
    * @param new_pt the policy table loaded from updated preload JSON file.
@@ -670,6 +670,13 @@ class CacheManager : public CacheManagerInterface {
 #ifdef BUILD_TESTS
  utils::SharedPtr<policy_table::Table> GetPT() const {
      return pt_;
+ }
+ policy::VehicleInfo GetModuleVehicleInfo() const {
+   policy::VehicleInfo vehicle_info;
+   vehicle_info.vehicle_make = *pt_->policy_table.module_config.vehicle_make;
+   vehicle_info.vehicle_model = *pt_->policy_table.module_config.vehicle_model;
+   vehicle_info.vehicle_year = *pt_->policy_table.module_config.vehicle_year;
+   return vehicle_info;
  }
 #endif
 

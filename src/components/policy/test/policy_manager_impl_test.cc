@@ -438,6 +438,7 @@ Json::Value CreatePTforLoad() {
   return table;
 }
 
+
 TEST_F(PolicyManagerImplTest, GetNotificationsNumber) {
   const std::string priority = "EMERGENCY";
   const uint32_t notif_number = 100u;
@@ -631,12 +632,18 @@ TEST_F(
     PolicyManagerImplTest2,
     AddApplication_AddExistingApplicationFromDeviceWithoutConsent_ExpectNoUpdateRequired) {
   // Arrange
+		printf("CreateLocalPT\n");
   CreateLocalPT("sdl_preloaded_pt.json");
+  printf("1\n");
   EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
+   printf("2\n");
   GetPTU("valid_sdl_pt_update.json");
+   printf("3\n");
   EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
   // Try to add existing app
+   printf("4\n");
   manager->AddApplication(app_id2);
+   printf("5\n");
   // Check no update required
   EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
 }
@@ -831,25 +838,15 @@ TEST_F(PolicyManagerImplTest2,
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
   GetPTU("valid_sdl_pt_update.json");
-  utils::SharedPtr<policy_table::Table> pt = (manager->GetCache())->GetPT();
-  policy_table::ModuleConfig& module_config = pt->policy_table.module_config;
+  ::policy::VehicleInfo module_info = (manager->GetCache())->GetModuleVehicleInfo();
   ::policy::VehicleInfo vehicle_info = manager->GetVehicleInfo();
 
-#ifdef OS_WINCE
-  EXPECT_EQ(std::string(module_config.vehicle_make.ToJsonValue().asString()),
+  EXPECT_EQ(module_info.vehicle_make,
             vehicle_info.vehicle_make);
-  EXPECT_EQ(std::string(module_config.vehicle_model.ToJsonValue().asString()),
+  EXPECT_EQ(module_info.vehicle_model,
             vehicle_info.vehicle_model);
-  EXPECT_EQ(std::string(module_config.vehicle_year.ToJsonValue().asString()),
+  EXPECT_EQ(module_info.vehicle_year,
             vehicle_info.vehicle_year);
-#else
-  EXPECT_EQ(static_cast<std::string>(*module_config.vehicle_make),
-            vehicle_info.vehicle_make);
-  EXPECT_EQ(static_cast<std::string>(*module_config.vehicle_model),
-            vehicle_info.vehicle_model);
-  EXPECT_EQ(static_cast<std::string>(*module_config.vehicle_year),
-            vehicle_info.vehicle_year);
-#endif
 }
 
 }  // namespace policy
