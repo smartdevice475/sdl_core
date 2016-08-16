@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ FLAGS = Em.Object.create( {
      */
     SET_LOCALIZATION: 'eng',
 
-    WEBSOCKET_URL: "ws://127.0.0.1:8087",
+    WEBSOCKET_URL: "ws://10.27.0.188:8087",
 
     TOUCH_EVENT_STARTED: false,
 
