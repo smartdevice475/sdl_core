@@ -222,7 +222,8 @@ void TcpServer::WaitMessage(uint32_t ms) {
   int max_sock = m_sock;
 
   tv.tv_sec = ms / 1000;
-  tv.tv_usec = (ms % 1000) / 1000;
+  // tv.tv_usec = (ms % 1000) / 1000;
+  tv.tv_usec = (ms % 1000) * 1000; // QA: usec = msec * 1000, not usec = msec / 1000
 
   FD_ZERO(&fdsr);
 
@@ -302,12 +303,11 @@ bool TcpServer::Accept() {
     return false;
   }
 #ifdef OS_WINCE
-	  sockaddr_in client_address;
-	  socklen_t client_address_size = sizeof(client_address);
-      client = accept(m_sock, (struct sockaddr*)&client_address,
-                                     &client_address_size);
+  sockaddr_in client_address;
+  socklen_t client_address_size = sizeof(client_address);
+  client = accept(m_sock, (struct sockaddr*)&client_address, &client_address_size);
 #else
-      client = accept(m_sock, 0, &addrlen);
+  client = accept(m_sock, 0, &addrlen);
 #endif
 
   if (client == -1) {
