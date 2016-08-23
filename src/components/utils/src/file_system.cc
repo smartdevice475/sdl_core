@@ -269,11 +269,13 @@ bool file_system::CreateDirectoryRecursively(const std::string& path) {
   size_t pos = 0;
   bool ret_val = true;
   std::string fp = path;
- 
+
+#if defined(OS_WIN32) || defined(OS_WINCE)
   // Replace all symbol '/' with '\'
   for (std::string::iterator it = fp.begin(); it != fp.end(); it++) {
       if (*it == '/') *it = '\\';
   }
+#endif
 
 #if defined(OS_WIN32)
   std::string desPath;
