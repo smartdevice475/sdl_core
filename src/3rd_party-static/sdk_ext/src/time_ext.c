@@ -22,14 +22,13 @@
 #include <time_ext.h>
 #include "sys/timeb.h"
 #include <stdio.h>
+#ifndef _WINSOCKAPI_
 #include <winsock2.h>
+#endif
 #include <errno.h>
 #ifdef OS_WINCE
 #include "errno_ext.h"
 #include "internal.h"
-#ifndef NDEBUG
-int errno=0;
-#endif
 #endif
 
 // Contains the time zone string

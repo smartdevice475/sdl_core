@@ -127,6 +127,8 @@
     #define CREATE_LOGGERPTR_GLOBAL(logger_var, logger_name)
 
     #define CREATE_LOGGERPTR_LOCAL(logger_var, logger_name)
+    
+    #define ENABLE_LOGGER(logs_enabled)   
 
     #define INIT_LOGGER(file_name)
 
