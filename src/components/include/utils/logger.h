@@ -132,8 +132,10 @@
 
     #define INIT_LOGGER(file_name)
 
-    #define DEINIT_LOGGER(file_name)
-
+    #define DEINIT_LOGGER()
+    
+    #undef FLUSH_LOGGER
+    #define FLUSH_LOGGER()
     #define LOG4CXX_IS_TRACE_ENABLED(logger) false
 
     #undef LOG4CXX_TRACE
