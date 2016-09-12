@@ -1161,6 +1161,8 @@ bool CacheManager::IsPredataPolicy(const std::string &app_id) {
   std::sort(pre_data_app.groups.begin(), pre_data_app.groups.end(), Compare);
   std::sort(specific_app.groups.begin(), specific_app.groups.end(), Compare);
   policy_table::Strings res;
+  std::sort(pre_data_app.groups.begin(), pre_data_app.groups.end());
+  std::sort(specific_app.groups.begin(), specific_app.groups.end());
   std::set_intersection(pre_data_app.groups.begin(),
                         pre_data_app.groups.end(),
                         specific_app.groups.begin(),

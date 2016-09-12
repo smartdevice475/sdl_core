@@ -45,7 +45,7 @@ namespace {
 
 sync_primitives::Lock test_lock;
 sync_primitives::ConditionalVariable lock_monitor;
-const uint32_t kDefaultTimeout = 30u;
+const uint32_t kDefaultTimeout = 3u;
 const std::string kTimerName = "test_timer";
 
 class TestTask : public timer::TimerTask {
