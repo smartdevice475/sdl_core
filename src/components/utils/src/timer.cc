@@ -192,7 +192,7 @@ void timer::Timer::TimerDelegate::threadMain() {
     if (sync_primitives::ConditionalVariable::kTimeout ==
         state_condition_.WaitFor(auto_lock, timeout_)) {
       LOG4CXX_DEBUG(logger_,
-                    "Timer has finished counting. Timeout (ms): " << timeout_);
+        "Timer " << timer_->name_<<" has finished counting.Timeout(ms) : "<< timeout_);
       if (timer_) {
         sync_primitives::AutoUnlock auto_unlock(auto_lock);
         timer_->OnTimeout();
