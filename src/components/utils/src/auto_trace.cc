@@ -42,7 +42,7 @@ AutoTrace::AutoTrace(
   log4cxx::LoggerPtr logger,
   const log4cxx::spi::LocationInfo& location) :
   logger_(logger), location_(location) {
-#ifdef OS_WINCE
+#if defined(OS_WIN32) || defined(OS_WINCE)
   if (logger::logs_enabled() &&
       logger_->isTraceEnabled()) {
     push_log(logger_,
@@ -59,7 +59,7 @@ AutoTrace::AutoTrace(
 AutoTrace::~AutoTrace() {
   if (logger::logs_enabled() &&
       logger_->isTraceEnabled()) {
-#ifdef OS_WINCE
+#if defined(OS_WIN32) || defined(OS_WINCE)
     push_log(logger_,
              ::log4cxx::Level::getTrace(),
              "Exit",

@@ -325,14 +325,14 @@ TEST_F(
     CustomStringTest,
     AddSameMultiByteStringsToCustomString_ExpectCorrectCaseInsensitiveComparing) {
   const size_t kSizeStr = 8;
-  uint8_t array[] = {0xD1,
-                     0x82,
+  uint8_t array[] = {0xD0,
+                     0xA2,
                      0xD0,
                      0xB5,
                      0xD1,
                      0x81,
-                     0xD0,
-                     0xA2};  // String contains russian word "тесТ"
+                     0xD1,
+                     0x82 };  // Array contains russian word "Тест"
   std::string mbstring = CreateMultibyteString(array, kSizeStr);
   custom_str::CustomString obj(CustomStringTest::mbstring1_);
   custom_str::CustomString obj1(mbstring);
