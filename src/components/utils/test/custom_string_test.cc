@@ -333,8 +333,8 @@ TEST_F(
                      0x81,
                      0xD0,
                      0xA2 };  // Array contains russian word "тесТ"
-#if defined(OS_WIN32)
   std::string mbstring = CreateMultibyteString(array, kSizeStr);
+#if defined(OS_WIN32)
   if (Global::isUnicode(mbstring.c_str(), mbstring.size())) {
     std::string tmp;
     Global::fromUnicode((wchar_t*)mbstring.c_str(), CP_ACP, tmp);
