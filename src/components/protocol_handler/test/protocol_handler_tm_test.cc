@@ -931,7 +931,9 @@ TEST_F(ProtocolHandlerImplTest, FloodVerification) {
                   message_id,
                   &some_data[0]);
   }
+#ifdef OS_WIN32
   Sleep(1000);
+#endif
 }
 TEST_F(ProtocolHandlerImplTest, FloodVerification_ThresholdValue) {
   const size_t period_msec = 10000;
@@ -955,7 +957,9 @@ TEST_F(ProtocolHandlerImplTest, FloodVerification_ThresholdValue) {
                   message_id,
                   &some_data[0]);
   }
+#ifdef OS_WIN32
   Sleep(1000);
+#endif
 }
 TEST_F(ProtocolHandlerImplTest, FloodVerification_VideoFrameSkip) {
   const size_t period_msec = 10000;
@@ -977,7 +981,9 @@ TEST_F(ProtocolHandlerImplTest, FloodVerification_VideoFrameSkip) {
                   message_id,
                   &some_data[0]);
   }
+#ifdef OS_WIN32
   Sleep(1000);
+#endif
 }
 TEST_F(ProtocolHandlerImplTest, FloodVerification_AudioFrameSkip) {
   const size_t period_msec = 10000;
@@ -999,7 +1005,9 @@ TEST_F(ProtocolHandlerImplTest, FloodVerification_AudioFrameSkip) {
                   message_id,
                   &some_data[0]);
   }
+#ifdef OS_WIN32
   Sleep(1000);
+#endif
 }
 TEST_F(ProtocolHandlerImplTest, FloodVerificationDisable) {
   const size_t period_msec = 0;
@@ -1021,7 +1029,9 @@ TEST_F(ProtocolHandlerImplTest, FloodVerificationDisable) {
                   message_id,
                   &some_data[0]);
   }
+#ifdef OS_WIN32
   Sleep(1000);
+#endif
 }
 
 TEST_F(ProtocolHandlerImplTest, MalformedVerificationDisable) {
@@ -1048,7 +1058,9 @@ TEST_F(ProtocolHandlerImplTest, MalformedVerificationDisable) {
                   message_id,
                   &some_data[0]);
   }
+#ifdef OS_WIN32
   Sleep(1000);
+#endif
 }
 
 TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification) {
@@ -1088,7 +1100,9 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification) {
                   message_id,
                   &some_data[0]);
   }
+#ifdef OS_WIN32
   Sleep(1000);
+#endif
 }
 
 TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_MalformedStock) {
@@ -1153,7 +1167,9 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_MalformedStock) {
                   message_id,
                   &some_data[0]);
   }
+#ifdef OS_WIN32
   Sleep(1000);
+#endif
 }
 
 TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_MalformedOnly) {
@@ -1208,7 +1224,9 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_MalformedOnly) {
 
     // No common message
   }
+#ifdef OS_WIN32
   Sleep(1000);
+#endif
 }
 
 TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_NullTimePeriod) {
@@ -1236,7 +1254,9 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_NullTimePeriod) {
                   message_id,
                   &some_data[0]);
   }
+#ifdef OS_WIN32
   Sleep(1000);
+#endif
 }
 TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_NullCount) {
   const size_t period_msec = 10000;
@@ -1263,7 +1283,9 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_NullCount) {
                   message_id,
                   &some_data[0]);
   }
+#ifdef OS_WIN32
   Sleep(1000);
+#endif
 }
 
 TEST_F(ProtocolHandlerImplTest,
