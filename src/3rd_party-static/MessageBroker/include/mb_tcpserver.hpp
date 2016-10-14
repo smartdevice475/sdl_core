@@ -17,7 +17,7 @@
 
 #define RECV_BUFFER_LENGTH 4097
 #define MAX_RECV_BUFFER_LENGTH 100000
-#define MAX_RECV_DATA 4096
+#define MAX_RECV_DATA 8192
 
 /**
  * \namespace NsMessageBroker
