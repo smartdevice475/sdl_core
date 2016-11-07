@@ -786,7 +786,16 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(const ProtocolFramePtr pac
     case FRAME_DATA_HEART_BEAT_ACK: {
       LOG4CXX_TRACE(logger_, "FrameData Heartbeat ACK");
       LOG4CXX_DEBUG(logger_, "Received Heartbeat ACK from mobile,"
-                            " connection: " << packet->connection_id());
+        " connection: " << packet->connection_id());
+      {
+        const uint8_t c_id = packet->connection_id();
+        const uint32_t m_id = packet->session_id();
+        static uint32_t iCount = 0;
+        if (session_observer_.IsHeartBeatSupported(c_id, m_id)) {
+          iCount++;
+          connection_handler_.KeepConnectionAlive(c_id, m_id);
+        }
+      }
       return RESULT_OK;
     }
     default:
@@ -1134,12 +1143,6 @@ void ProtocolHandlerImpl::Handle(const impl::RawFordMessageFromMobile message) {
       break;
   }
   LOG4CXX_DEBUG(logger_, "Message : " << message.get());
-  const uint8_t c_id = message->connection_id();
-  const uint32_t m_id = message->session_id();  
-
-  if (session_observer_.IsHeartBeatSupported(c_id, m_id)) {
-    connection_handler_.KeepConnectionAlive(c_id, m_id);
-  }
 
   // TODO(EZamakhov): remove dublication of IncomingDataHandler logic
   if (((0 != message->data()) && (0 != message->data_size())) ||
