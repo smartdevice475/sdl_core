@@ -1,1 +1,4 @@
-build*
+build
+build_win32
+build_wince
+build_vs2005

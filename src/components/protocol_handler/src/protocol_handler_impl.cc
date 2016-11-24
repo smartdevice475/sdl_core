@@ -589,7 +589,6 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
   LOG4CXX_DEBUG(logger_, "Packet to be sent: " <<
                    ConvertPacketDataToString(packet->data(), packet->data_size()) <<
                    " of size: " << packet->data_size());
-
   const RawMessagePtr message_to_send = packet->serializePacket();
   if (!message_to_send) {
     LOG4CXX_ERROR(logger_, "Serialization error");
