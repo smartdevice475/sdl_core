@@ -37,7 +37,7 @@
         "functional_groupings": {
             "Base-4": {
                 "rpcs": {
-					"OnTouchEvent": {
+                    "OnTouchEvent": {
                         "hmi_levels": ["FULL"]
                     },
                     "AddCommand": {
