@@ -194,7 +194,11 @@ class BluetoothDeviceScanner : public DeviceScanner {
   /**
    * @brief UUID of SmartDeviceLink service.
    **/
+#ifdef OS_WIN32
+  GUID smart_device_link_service_uuid_;
+#else
   uuid_t smart_device_link_service_uuid_;
+#endif
 
   const bool auto_repeat_search_;
   const int auto_repeat_pause_sec_;

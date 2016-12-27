@@ -35,6 +35,14 @@
 
 #include "transport_manager/bluetooth/bluetooth_device_scanner.h"
 
+#ifdef OS_WIN32
+#include "utils/global.h"
+#else
+//
+#endif
+#ifdef OS_WIN32
+#include <BluetoothAPIs.h>
+#else
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>
@@ -48,11 +56,18 @@
 #include <unistd.h>
 #include <vector>
 #include <sstream>
+#endif
 #include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
+#ifdef OS_WIN32
+#else
 #include "transport_manager/bluetooth/bluetooth_device.h"
+#endif
 
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
+#ifdef OS_WIN32
+#pragma comment(lib,"ws2_32.lib")
+#endif
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -70,6 +85,8 @@ char* SplitToAddr(char* dev_list_entry) {
   }
 }
 
+#ifdef OS_WIN32
+#else
 int FindPairedDevs(std::vector<bdaddr_t>* result) {
   LOG4CXX_TRACE(logger_, "enter. result adress: " << result);
   DCHECK(result != NULL);
@@ -95,11 +112,18 @@ int FindPairedDevs(std::vector<bdaddr_t>* result) {
     delete [] buffer;
     buffer = new char[1028];
   }
+#ifdef MODIFY_FUNCTION_SIGN
+  if(buffer != NULL){
+    delete[] buffer;
+    buffer = NULL;
+  }
+#endif
   pclose(pipe);
   LOG4CXX_TRACE(logger_, "exit with 0");
   delete [] buffer;
   return 0;
 }
+#endif
 }  //  namespace
 
 BluetoothDeviceScanner::BluetoothDeviceScanner(
@@ -114,11 +138,33 @@ BluetoothDeviceScanner::BluetoothDeviceScanner(
     device_scan_requested_cv_(),
     auto_repeat_search_(auto_repeat_search),
     auto_repeat_pause_sec_(auto_repeat_pause_sec) {
+#ifdef OS_WIN32
+	// Initial winsock  
+	WSADATA wsaData;
+	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+	{
+		LOG4CXX_INFO(logger_, "WSAStartup failed with error code: " << WSAGetLastError());
+	}
+#endif
+#ifdef OS_WIN32
+	smart_device_link_service_uuid_.Data1 = 0x936da01f;
+	smart_device_link_service_uuid_.Data2 = 0x9abd;
+	smart_device_link_service_uuid_.Data3 = 0x4d9d;
+	smart_device_link_service_uuid_.Data4[0] = 0x80;
+	smart_device_link_service_uuid_.Data4[1] = 0xc7;
+	smart_device_link_service_uuid_.Data4[2] = 0x02;
+	smart_device_link_service_uuid_.Data4[3] = 0xaf;
+	smart_device_link_service_uuid_.Data4[4] = 0x85;
+	smart_device_link_service_uuid_.Data4[5] = 0xc8;
+	smart_device_link_service_uuid_.Data4[6] = 0x22;
+	smart_device_link_service_uuid_.Data4[7] = 0xa8;
+#else
   uint8_t smart_device_link_service_uuid_data[] = { 0x93, 0x6D, 0xA0, 0x1F,
                                                     0x9A, 0xBD, 0x4D, 0x9D, 0x80, 0xC7, 0x02, 0xAF, 0x85, 0xC8, 0x22, 0xA8
                                                   };
   sdp_uuid128_create(&smart_device_link_service_uuid_,
                      smart_device_link_service_uuid_data);
+#endif
   thread_ = threads::CreateThread("BT Device Scaner",
                                   new  BluetoothDeviceScannerDelegate(this));
 }
@@ -127,6 +173,9 @@ BluetoothDeviceScanner::~BluetoothDeviceScanner() {
   thread_->join();
   delete thread_->delegate();
   threads::DeleteThread(thread_);
+  #ifdef OS_WIN32
+	WSACleanup();
+#endif
 }
 
 
@@ -147,6 +196,10 @@ void BluetoothDeviceScanner::UpdateTotalDeviceList() {
 void BluetoothDeviceScanner::DoInquiry() {
   LOG4CXX_AUTO_TRACE(logger_);
 
+#ifdef OS_WIN32
+  const int device_id = 0;
+  int device_handle = 0;
+#else
   const int device_id = hci_get_route(0);
   if (device_id < 0) {
     LOG4CXX_INFO(logger_, "HCI device is not available");
@@ -178,6 +231,106 @@ void BluetoothDeviceScanner::DoInquiry() {
   UpdateTotalDeviceList();
 
   LOG4CXX_INFO(logger_, "Starting hci_inquiry on device " << device_id);
+#endif
+
+#ifdef OS_WIN32
+  int number_of_devices = 0;
+  std::vector < bdaddr_t > found_devices;
+  // Initialize bluetooth struct of enumeration
+  DWORD dwWsaqsLen = sizeof(WSAQUERYSET);
+  LPWSAQUERYSET lpWsaqs = (LPWSAQUERYSET)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, dwWsaqsLen);
+  lpWsaqs->dwSize = sizeof(WSAQUERYSET);
+  lpWsaqs->dwNameSpace = NS_BTH;
+
+  // Begin enumerate bluetooth device  
+  DWORD dwWsaqsFlags = LUP_CONTAINERS | LUP_FLUSHCACHE | LUP_RETURN_NAME | LUP_RETURN_ADDR;
+  HANDLE hService;
+
+  if (WSALookupServiceBegin(lpWsaqs, dwWsaqsFlags, &hService) != SOCKET_ERROR)
+  {
+	  bool bFinished = false;
+	  while (!bFinished)
+	  {
+		  if (WSALookupServiceNext(hService, dwWsaqsFlags, &dwWsaqsLen, lpWsaqs) == NO_ERROR)
+		  {
+			  bdaddr_t *saBth = (bdaddr_t*)lpWsaqs->lpcsaBuffer->RemoteAddr.lpSockaddr;
+			  BTH_ADDR bthAddr = saBth->btAddr;
+			  //SOCKET_ADDRESS addr;
+			  //memcpy(&addr, saBth, sizeof(SOCKADDR));
+			  printf("\nFind BT Device: \n");
+			  printf("------------------------\n");
+			  printf("NAP: 0x%04X  SAP: 0x%08X DeviceName: %s ServerClassId.Data1: %d\n", GET_NAP(bthAddr), GET_SAP(bthAddr), lpWsaqs->lpszServiceInstanceName, saBth->serviceClassId.Data1);
+#ifdef OS_WINCE
+			  if (wcscmp(lpWsaqs->lpszServiceInstanceName, L"") != 0){
+				  std::string strServiceInstanceName;
+				  Global::fromUnicode(lpWsaqs->lpszServiceInstanceName, CP_ACP, strServiceInstanceName);
+				  map_found_devices_.insert(std::pair<BTH_ADDR, std::string>(bthAddr, strServiceInstanceName));
+#else
+			  if (strcmp(lpWsaqs->lpszServiceInstanceName, "") != 0){
+				  map_found_devices_.insert(std::pair<BTH_ADDR, std::string>(bthAddr, lpWsaqs->lpszServiceInstanceName));
+#endif
+				  found_devices.push_back(*saBth);
+				  number_of_devices++;
+			  }
+		  }
+		  else
+		  {
+			  // Error processing  
+			  switch (WSAGetLastError())
+			  {
+				  // The buffer is too small, reapply for
+			  case WSAEFAULT:
+				  printf("\nFind BT Device: WSAEFAULT\n");
+				  HeapFree(GetProcessHeap(), 0, lpWsaqs);
+				  lpWsaqs = (LPWSAQUERYSET)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, dwWsaqsLen);
+				  lpWsaqs->dwSize = sizeof(WSAQUERYSET);
+				  lpWsaqs->dwNameSpace = NS_BTH;
+				  break;
+
+				  // No more bluetooth devices
+			  case WSA_E_NO_MORE:
+				  printf("\nFind BT Device: WSA_E_NO_MORE\n");
+				  bFinished = true;
+				  break;
+
+			  default:
+				  printf("\nFind BT Device: default\n");
+				  //bFinished = true;  
+				  break;
+			  }
+		  }
+	  }
+	  WSALookupServiceEnd(hService);
+  }
+  else
+  {
+	  Sleep(1000);
+	  printf("\nFind BT Device Begn: \n");
+	  DWORD dwerror = WSAGetLastError();
+	  switch (dwerror)
+	  {
+	  case WSA_NOT_ENOUGH_MEMORY:
+		  printf("WSA_NOT_ENOUGH_MEMORY\n");
+		  break;
+	  case WSAEINVAL:
+		  printf("WSAEINVAL");
+		  break;
+	  case WSANO_DATA:
+		  printf("WSANO_DATA");
+		  break;
+	  case WSANOTINITIALISED:
+		  printf("WSANOTINITIALISED");
+		  break;
+	  case WSASERVICE_NOT_FOUND:
+		  printf("WSASERVICE_NOT_FOUND");
+		  break;
+	  default:
+		  break;
+	  }
+  }
+  // Release resources of bluetooth
+  HeapFree(GetProcessHeap(), 0, lpWsaqs);
+#else
   const uint8_t inquiry_time = 8u;  // Time unit is 1.28 seconds
   const size_t max_devices = 256u;
   inquiry_info* inquiry_info_list = new inquiry_info[max_devices];
@@ -185,14 +338,17 @@ void BluetoothDeviceScanner::DoInquiry() {
   const int number_of_devices = hci_inquiry(device_id, inquiry_time,
                                 max_devices, 0, &inquiry_info_list,
                                 IREQ_CACHE_FLUSH);
-
+#endif
   if (number_of_devices >= 0) {
     LOG4CXX_INFO(logger_,
                  "hci_inquiry: found " << number_of_devices << " devices");
-    std::vector < bdaddr_t > found_devices(number_of_devices);
-    for (int i = 0; i < number_of_devices; ++i) {
-      found_devices[i] = inquiry_info_list[i].bdaddr;
-    }
+#ifdef OS_WIN32
+#else
+	std::vector < bdaddr_t > found_devices(number_of_devices);
+	for (int i = 0; i < number_of_devices; ++i) {
+		found_devices[i] = inquiry_info_list[i].bdaddr;
+	}
+#endif
     found_devices_with_sdl_.clear();
     CheckSDLServiceOnDevices(found_devices, device_handle,
                              &found_devices_with_sdl_);
@@ -200,8 +356,11 @@ void BluetoothDeviceScanner::DoInquiry() {
   UpdateTotalDeviceList();
   controller_->FindNewApplicationsRequest();
 
+#ifdef OS_WIN32
+#else
   close(device_handle);
   delete[] inquiry_info_list;
+#endif
 
   if (number_of_devices < 0) {
     LOG4CXX_DEBUG(logger_, "number_of_devices < 0");
@@ -224,6 +383,10 @@ void BluetoothDeviceScanner::CheckSDLServiceOnDevices(
 
     const bdaddr_t& bd_address = bd_addresses[i];
     char deviceName[256];
+#ifdef OS_WIN32
+	memset(deviceName, 0, sizeof(deviceName));
+	strcpy(deviceName, map_found_devices_[bd_address.btAddr].c_str());
+#else
     int hci_read_remote_name_ret = hci_read_remote_name(
                                      device_handle, &bd_address, sizeof(deviceName) / sizeof(deviceName[0]),
                                      deviceName, 0);
@@ -234,9 +397,19 @@ void BluetoothDeviceScanner::CheckSDLServiceOnDevices(
               BluetoothDevice::GetUniqueDeviceId(bd_address).c_str(),
               sizeof(deviceName) / sizeof(deviceName[0]));
     }
+#endif
 
+#ifdef OS_WIN32
+		std::string strSrc(deviceName);
+		std::string strOut;
+		Global::anyMultiToUtf8Multi(strSrc, strOut);
+		printf("new bluetoothDevice(bd_address, %s)\n", strOut.c_str());
+		Device* bluetooth_device = new BluetoothDevice(bd_address, strOut.c_str(),
+			sdl_rfcomm_channels[i]);
+#else
     Device* bluetooth_device = new BluetoothDevice(bd_address, deviceName,
         sdl_rfcomm_channels[i]);
+#endif
     if (bluetooth_device) {
       LOG4CXX_INFO(logger_, "Bluetooth device created successfully");
       discovered_devices->push_back(bluetooth_device);
@@ -245,6 +418,9 @@ void BluetoothDeviceScanner::CheckSDLServiceOnDevices(
     }
   }
   LOG4CXX_TRACE(logger_, "exit");
+#ifdef OS_WIN32
+  map_found_devices_.clear();
+#endif
 }
 
 std::vector<BluetoothDeviceScanner::RfcommChannelVector>
@@ -254,8 +430,13 @@ BluetoothDeviceScanner::DiscoverSmartDeviceLinkRFCOMMChannels(
   const size_t size = device_addresses.size();
   std::vector<RfcommChannelVector> result(size);
 
+#ifdef OS_WIN32
+  static const int attempts = 1;
+  static const int attempt_timeout = 1;
+#else
   static const int attempts = 4;
   static const int attempt_timeout = 5;
+#endif
   std::vector<bool> processed(size, false);
   unsigned processed_count = 0;
   for (int nattempt = 0; nattempt < attempts; ++nattempt) {
@@ -273,7 +454,11 @@ BluetoothDeviceScanner::DiscoverSmartDeviceLinkRFCOMMChannels(
     if (++processed_count >= size) {
       break;
     }
-    sleep(attempt_timeout);
+#ifdef OS_WIN32
+	Sleep(attempt_timeout * 1000);
+#else
+	sleep(attempt_timeout);
+#endif
   }
   LOG4CXX_TRACE(logger_, "exit with vector<RfcommChannelVector>: size = " << result.size());
   return result;
@@ -281,8 +466,212 @@ BluetoothDeviceScanner::DiscoverSmartDeviceLinkRFCOMMChannels(
 
 bool BluetoothDeviceScanner::DiscoverSmartDeviceLinkRFCOMMChannels(
   const bdaddr_t& device_address, RfcommChannelVector* channels) {
-  LOG4CXX_TRACE(logger_, "enter. device_address: " << &device_address << ", channels: " <<
-                channels);
+#ifdef OS_WIN32
+	// Get rfcomm channels...
+#ifdef OS_WINCE
+	  wchar_t				addressAsString[64];
+#else
+	char                    addressAsString[64];
+#endif
+	int                     retvalue = 0;
+	HANDLE                  hLookup2;
+	WSAQUERYSET             *pretvalueStruct;
+	WSAPROTOCOL_INFO        protocolInfo;
+	int						protocolInfoSize;
+	DWORD					dwWsaqsFlags;
+	CSADDR_INFO*			pCSAddr;
+
+	SOCKET serach_socket = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM);
+
+	/* Set socket options */
+	protocolInfoSize = sizeof(protocolInfo);
+	if (0 != getsockopt(serach_socket, SOL_SOCKET, SO_PROTOCOL_INFO, (char*)&protocolInfo, &protocolInfoSize))
+	{
+		return false;
+	}
+
+	DWORD dwBegFlags = /*LUP_CONTAINERS;//*/  LUP_FLUSHCACHE;
+	/* set flags and pointers */
+	dwWsaqsFlags = LUP_FLUSHCACHE | LUP_RETURN_NAME | LUP_RETURN_TYPE | LUP_RETURN_ADDR | LUP_RETURN_BLOB | LUP_RETURN_COMMENT;
+	WSAQUERYSET querySet2;
+	/* Initialize queryset2 */
+	memset(&querySet2, 0, sizeof(querySet2));
+	querySet2.dwSize = sizeof(querySet2);
+	querySet2.lpServiceClassId = &smart_device_link_service_uuid_;
+	querySet2.dwNameSpace = NS_BTH;
+	memset(addressAsString, 0, sizeof(addressAsString));
+	DWORD addressSize = sizeof(addressAsString);
+
+
+	//if (0 == WSAAddressToString(pCSAddr->RemoteAddr.lpSockaddr, pCSAddr->RemoteAddr.iSockaddrLength, &protocolInfo, addressAsString, &addressSize)){
+	//	printf("Query condition addressAsString = %s\n", addressAsString);
+	//}
+	//	USHORT iNapAddress = GET_NAP(device_address);
+	//	ULONG iSapAddress = GET_SAP(device_address);
+	//	sprintf(addressAsString, "(%2X:%2X:%2X:%2X:%2X:%2X)", iNapAddress >> 8 & 0x00FF, iNapAddress & 0x00FF,
+	//		iSapAddress >> 24 & 0x00FF, iSapAddress >> 16 & 0x00FF, iSapAddress >> 8 & 0x00FF, iSapAddress & 0x00FF);
+	//	printf("Query condition addressAsString = %s\n", addressAsString);
+
+	/* Set query starting from current device */
+	DWORD dwLen;
+	printf("DiscoverSmartDeviceLinkRFCOMMChannels()'WSAAddressToString()'s ");
+	DWORD ret = WSAAddressToString((LPSOCKADDR)&device_address, sizeof(bdaddr_t), NULL, addressAsString, &addressSize);
+	if (SOCKET_ERROR == ret)
+	{
+		DWORD dwError = GetLastError();
+		switch (dwError)
+		{
+		case WSAEFAULT:
+			printf("WSAEFAULT\n");
+			break;
+		case WSAEINVAL:
+			printf("WSAEINVAL\n");
+			break;
+		case WSAENOBUFS:
+			printf("WSAENOBUFS\n");
+			break;
+		case WSANOTINITIALISED:
+			printf("WSANOTINITIALISED\n");
+			break;
+		default:
+			break;
+		}
+	}
+	printf("addressAsString:%s\n", addressAsString);
+	querySet2.lpszContext = addressAsString;
+	/* Start to search services */
+	retvalue = WSALookupServiceBegin(&querySet2, dwBegFlags, &hLookup2);
+
+	/* Is there services  */
+	if (0 != retvalue){
+		DWORD dwError = GetLastError();
+		switch (dwError)
+		{
+		case WSA_NOT_ENOUGH_MEMORY:
+			printf("WSA_NOT_ENOUGH_MEMORY\n");
+			break;
+		case WSAEINVAL:
+			printf("WSAEINVAL\n");
+			break;
+		case WSANO_DATA:
+			printf("WSANO_DATA\n");
+			break;
+		case WSANOTINITIALISED:
+			printf("WSANOTINITIALISED\n");
+			break;
+		case WSASERVICE_NOT_FOUND:
+			printf("WSASERVICE_NOT_FOUND\n");
+			break;
+		default:
+			break;
+		}
+		printf("WSALookupServiceBegin querySet2 fail, return value is %d\n", retvalue);
+		return false;
+	}
+	else{
+		while (0 == retvalue)
+		{
+			/* Initialize buffer for searching */
+			BYTE buffer[2048];
+			DWORD bufferLength = sizeof(buffer);
+			pretvalueStruct = (WSAQUERYSET*)&buffer;
+			memset(&buffer, 0, sizeof(buffer));
+			pretvalueStruct->dwSize = sizeof(WSAQUERYSET);
+
+			retvalue = WSALookupServiceNext(hLookup2, dwWsaqsFlags, &bufferLength, pretvalueStruct);
+
+			if (retvalue == 0)
+			{
+				pCSAddr = (CSADDR_INFO *)pretvalueStruct->lpcsaBuffer;
+				addressSize = sizeof(addressAsString);
+				memset(&addressAsString, 0, sizeof(addressAsString));
+
+				if (pCSAddr == 0)
+					printf("\n====================================================================\nthe pCSaddr is null\n");
+
+				/* Check that pCSAddr is not empty, so print channel*/
+				if (pCSAddr != 0)
+				{
+					if (0 == WSAAddressToString(pCSAddr->RemoteAddr.lpSockaddr, pCSAddr->RemoteAddr.iSockaddrLength, &protocolInfo, addressAsString, &addressSize))
+					{
+						printf("\n==================================\nRemote Protocol = %d\n", pretvalueStruct->lpcsaBuffer->iProtocol);
+						printf("Query result addressAsString = %s\n", addressAsString);
+						int protocol = pretvalueStruct->lpcsaBuffer->iProtocol;
+						/* If channel number is too large don't print it */
+						//if (addressAsString[44] == 0)
+						//{
+						/* RFCOMM: 0x0003 */
+						/* L2CAP : 0x0100 */
+
+						if (protocol == 0x0003)
+							printf("\nRFCOMM:channel:");
+						else
+						if (protocol == 0x0100)
+							printf("\nL2CAP:PSM:");
+						else
+							printf("\n[UNKNOWN]:");
+
+						/* channel number */
+#ifdef OS_WINCE
+						std::string strAddressString;
+						Global::fromUnicode(addressAsString, CP_ACP, strAddressString);
+#else
+						std::string strAddressString = addressAsString;
+#endif
+						int nPortPos = (int)strAddressString.rfind(':');
+						if (nPortPos >= 0){
+							strAddressString = strAddressString.substr(nPortPos + 1);
+							int nChannel = atoi(strAddressString.c_str());
+							channels->push_back(nChannel);
+							printf("%d\n", nChannel);
+						}
+						//}
+					}
+					else
+						printf("\n====================================================================\naddress to string is wrong\n");
+
+				}
+			}
+			else
+			{
+				printf("WSALookupServiceNext faled\n");
+				DWORD dwError = GetLastError();
+				switch (dwError)
+				{
+				case WSA_E_CANCELLED:
+					printf("WSA_E_CANCELLED\n");
+					break;
+				case WSA_E_NO_MORE:
+					printf("WSA_E_NO_MORE\n");
+					break;
+				case WSAEFAULT:
+					printf("WSAEFAULT\n");
+					break;
+				case WSAEINVAL:
+					printf("WSAEINVAL\n");
+					break;
+				case WSA_INVALID_HANDLE:
+					printf("WSA_INVALID_HANDLE\n");
+					break;
+				case WSANOTINITIALISED:
+					printf("WSANOTINITIALISED\n");
+					break;
+				case WSANO_DATA:
+					printf("WSANO_DATA\n");
+					break;
+				case WSA_NOT_ENOUGH_MEMORY:
+					printf("WSA_NOT_ENOUGH_MEMORY\n");
+					break;
+				default:
+					break;
+				}
+			}
+		} /* while service searching loop */
+
+		retvalue = WSALookupServiceEnd(hLookup2);
+		return true;
+	}
+#else
   static bdaddr_t any_address = { { 0, 0, 0, 0, 0, 0 } };
 
   sdp_session_t* sdp_session = sdp_connect(
@@ -370,6 +759,7 @@ bool BluetoothDeviceScanner::DiscoverSmartDeviceLinkRFCOMMChannels(
   }
   LOG4CXX_TRACE(logger_, "exit with TRUE");
   return true;
+#endif
 }
 
 void BluetoothDeviceScanner::Thread() {

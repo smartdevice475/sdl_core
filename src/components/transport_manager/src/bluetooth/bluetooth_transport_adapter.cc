@@ -35,14 +35,17 @@
 
 #include <errno.h>
 #include <sys/types.h>
-#ifndef OS_WINCE
+#ifndef OS_WIN32
 #include <sys/socket.h>
 #endif
 #include <unistd.h>
 
 #include <iomanip>
 #include <set>
+#ifdef OS_WIN32
+#else
 #include <bluetooth/bluetooth.h>
+#endif
 
 #include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 #include "transport_manager/bluetooth/bluetooth_device_scanner.h"
@@ -84,8 +87,14 @@ void BluetoothTransportAdapter::Store() const {
       DeviceSptr::static_pointer_cast<BluetoothDevice>(device);
     Json::Value device_dictionary;
     device_dictionary["name"] = bluetooth_device->name();
+#ifdef OS_WIN32
+		char address[32];
+		memset(address, 0, sizeof(address));
+	BluetoothDevice::GetAddressString(bluetooth_device->address(), address, sizeof(address));
+#else
     char address[18];
     ba2str(&bluetooth_device->address(), address);
+#endif
     device_dictionary["address"] = std::string(address);
     Json::Value applications_dictionary;
     ApplicationList app_ids = bluetooth_device->GetApplicationList();
@@ -124,7 +133,11 @@ bool BluetoothTransportAdapter::Restore() {
     std::string name = device_dictionary["name"].asString();
     std::string address_record = device_dictionary["address"].asString();
     bdaddr_t address;
+#ifdef OS_WIN32
+	BluetoothDevice::GetAddressInfo(address_record.c_str(), address);
+#else
     str2ba(address_record.c_str(), &address);
+#endif
     RfcommChannelVector rfcomm_channels;
     const Json::Value applications_dictionary = device_dictionary["applications"];
     for (Json::Value::const_iterator j = applications_dictionary.begin();

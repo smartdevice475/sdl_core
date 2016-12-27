@@ -128,7 +128,9 @@ if(ENABLE_LOG)
 endif()
 
 if (BUILD_BT_SUPPORT)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
   target_link_libraries(${target} bluetooth)
+endif()
 endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")

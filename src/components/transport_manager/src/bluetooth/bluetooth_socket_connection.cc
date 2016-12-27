@@ -34,12 +34,17 @@
 #include "transport_manager/bluetooth/bluetooth_socket_connection.h"
 
 #include <unistd.h>
+#ifdef OS_WIN32
+#include <winsock2.h>  
+#include <ws2bth.h>
+#else
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>
 #include <bluetooth/sdp.h>
 #include <bluetooth/sdp_lib.h>
 #include <bluetooth/rfcomm.h>
+#endif
 
 #include "transport_manager/bluetooth/bluetooth_device.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
@@ -77,6 +82,16 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
     return false;
   }
 
+#ifdef OS_WIN32
+  GUID guidServiceClass = { 0x936da01f, 0x9abd, 0x4d9d, { 0x80, 0xc7, 0x02, 0xaf, 0x85, 0xc8, 0x22, 0xa8 } };
+  bdaddr_t remoteSocketAddress;
+  remoteSocketAddress.addressFamily = AF_BTH;
+  remoteSocketAddress.port = rfcomm_channel;
+  remoteSocketAddress.serviceClassId = guidServiceClass;
+  remoteSocketAddress.btAddr = bluetooth_device->address().btAddr;
+
+  SOCKET rfcomm_socket;
+#else
   struct sockaddr_rc remoteSocketAddress = { 0 };
   remoteSocketAddress.rc_family = AF_BLUETOOTH;
   memcpy(&remoteSocketAddress.rc_bdaddr, &bluetooth_device->address(),
@@ -84,12 +99,21 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
   remoteSocketAddress.rc_channel = rfcomm_channel;
 
   int rfcomm_socket;
+#endif
 
+#ifdef OS_WIN32
+  int attempts = 1;
+#else
   int attempts = 4;
+#endif
   int connect_status = 0;
   LOG4CXX_DEBUG(logger_, "start rfcomm Connect attempts");
   do {
-    rfcomm_socket = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
+#ifdef OS_WIN32
+	  rfcomm_socket = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM);
+#else
+	  rfcomm_socket = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
+#endif
     if (-1 == rfcomm_socket) {
       LOG4CXX_ERROR_WITH_ERRNO(logger_,
                                "Failed to create RFCOMM socket for device " << device_handle());
@@ -97,13 +121,20 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
       LOG4CXX_TRACE(logger_, "exit with FALSE");
       return false;
     }
-    connect_status = ::connect(rfcomm_socket,
-                               (struct sockaddr*) &remoteSocketAddress,
-                               sizeof(remoteSocketAddress));
+#ifdef OS_WIN32
+	connect_status = connect(rfcomm_socket, (struct sockaddr *)&remoteSocketAddress, sizeof(bdaddr_t));
+#else
+	connect_status = ::connect(rfcomm_socket,
+		(struct sockaddr*) &remoteSocketAddress,
+		sizeof(remoteSocketAddress));
+#endif
     if (0 == connect_status) {
       LOG4CXX_DEBUG(logger_, "rfcomm Connect ok");
       break;
     }
+#ifdef OS_WIN32
+	closesocket(rfcomm_socket);
+#else
     if (errno != 111 && errno != 104) {
       LOG4CXX_DEBUG(logger_, "rfcomm Connect errno " << errno);
       break;
@@ -112,7 +143,13 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
       LOG4CXX_DEBUG(logger_, "rfcomm Connect errno " << errno);
       close(rfcomm_socket);
     }
-    sleep(2);
+
+#endif
+#ifdef OS_WIN32
+	Sleep(2 * 1000);
+#else
+	sleep(2);
+#endif
   } while (--attempts > 0);
   LOG4CXX_INFO(logger_, "rfcomm Connect attempts finished");
   if (0 != connect_status) {

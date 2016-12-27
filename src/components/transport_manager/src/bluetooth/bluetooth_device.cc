@@ -33,17 +33,24 @@
 
 #include "transport_manager/bluetooth/bluetooth_device.h"
 
+#ifdef OS_WIN32
+#include <stdint.h>
+#else
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>
 #include <bluetooth/sdp.h>
 #include <bluetooth/sdp_lib.h>
 #include <bluetooth/rfcomm.h>
+#endif
 
 #include <errno.h>
 #include <sys/types.h>
-#include <sys/socket.h>
 
+#ifndef OS_WIN32
+#include <sys/socket.h>
+#else
+#endif
 #include <algorithm>
 #include <limits>
 #include "utils/logger.h"
@@ -56,7 +63,12 @@ bool BluetoothDevice::GetRfcommChannel(const ApplicationHandle app_handle,
                                        uint8_t* channel_out) {
   LOG4CXX_TRACE(logger_, "enter. app_handle: " << app_handle << ", channel_out: " <<
                 channel_out);
-  if (app_handle < 0 || app_handle > std::numeric_limits<uint8_t>::max()) {
+  if (app_handle < 0 || 
+  #ifdef OS_WIN32
+  app_handle > UINT8_MAX) {
+  #else
+  app_handle > std::numeric_limits<uint8_t>::max()) {
+  #endif
     LOG4CXX_TRACE(logger_,
                   "exit with FALSE. Condition: app_handle < 0 || app_handle > numeric_limits::max()");
     return false;
@@ -74,10 +86,84 @@ bool BluetoothDevice::GetRfcommChannel(const ApplicationHandle app_handle,
   return true;
 }
 
+#ifdef OS_WIN32
+void BluetoothDevice::GetAddressString(const bdaddr_t& device_address, char *device_address_string, int address_size)
+{
+	DWORD addressSize = (DWORD)address_size;
+	printf("GetAddressString(), addressSize=%d\n", addressSize);
+	USHORT iNapAddress = GET_NAP(device_address.btAddr);
+	ULONG iSapAddress = GET_SAP(device_address.btAddr);
+	sprintf(device_address_string, "%02X:%02X:%02X:%02X:%02X:%02X", iNapAddress >> 8 & 0x00FF, iNapAddress & 0x00FF,
+		iSapAddress >> 24 & 0x00FF, iSapAddress >> 16 & 0x00FF, iSapAddress >> 8 & 0x00FF, iSapAddress & 0x00FF);
+	//DWORD ret = WSAAddressToString((LPSOCKADDR)&device_address, sizeof(bdaddr_t), NULL, device_address_string, &addressSize);
+	//if (SOCKET_ERROR == ret)
+	//{
+	//	 DWORD dwError = GetLastError();
+	//	 switch (dwError)
+	//	 {
+	//		 case WSAEFAULT:
+	//		  printf("WSAEFAULT\n");
+	//		  break;
+	//		 case WSAEINVAL:
+	//		  printf("WSAEINVAL\n");
+	//		  break;
+	//		 case WSAENOBUFS:
+	//		  printf("WSAENOBUFS\n");
+	//		  break;
+	//		 case WSANOTINITIALISED:
+	//		  printf("WSANOTINITIALISED\n");
+	//		  break;
+	//		 default:
+	//		  break;
+	//	 }
+	//}
+	printf("GetAddressString(), addressString=%s\n", device_address_string);
+}
+
+void BluetoothDevice::GetAddressInfo(const char *device_address_string, bdaddr_t& device_address)
+{
+	int sa_len;
+#ifdef OS_WINCE
+	wchar_string strOut;
+	Global::toUnicode(device_address_string, CP_ACP, strOut);
+	DWORD ret = WSAStringToAddress((wchar_t*)strOut.c_str(), AF_BTH, NULL, (LPSOCKADDR)(&device_address), &sa_len);
+#else
+	DWORD ret = WSAStringToAddress((char *)device_address_string, AF_BTH, NULL, (LPSOCKADDR)(&device_address), &sa_len);
+#endif
+	if (SOCKET_ERROR == ret)
+	{
+		DWORD dwError = GetLastError();
+		switch (dwError)
+		{
+		case WSAEFAULT:
+			printf("WSAEFAULT\n");
+			break;
+		case WSAEINVAL:
+			printf("WSAEINVAL\n");
+			break;
+		case WSAENOBUFS:
+			printf("WSAENOBUFS\n");
+			break;
+		case WSANOTINITIALISED:
+			printf("WSANOTINITIALISED\n");
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+#endif
+
 std::string BluetoothDevice::GetUniqueDeviceId(const bdaddr_t& device_address) {
   LOG4CXX_TRACE(logger_, "enter. device_adress: " << &device_address);
   char device_address_string[32];
-  ba2str(&device_address, device_address_string);
+#ifdef OS_WIN32
+	memset(device_address_string, 0, sizeof(device_address_string));
+	GetAddressString(device_address, device_address_string, sizeof(device_address_string));
+#else
+	ba2str(&device_address, device_address_string);
+#endif
   LOG4CXX_TRACE(logger_, "exit with BT-" << device_address_string);
   return std::string("BT-") + device_address_string;
 }
