@@ -43,8 +43,6 @@ class CallbackStreamerAdapter : public StreamerAdapter {
  public:
   CallbackStreamerAdapter();
 	virtual ~CallbackStreamerAdapter();
-	virtual void SendData(int32_t application_key,
-		const ::protocol_handler::RawMessagePtr msg);
 
  protected:
   class CallbackStreamer : public StreamerAdapter::Streamer {

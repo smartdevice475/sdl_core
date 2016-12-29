@@ -10,5 +10,6 @@
 #endif
 
 typedef void (CALLBACK* fun_SetMediaVideoStreamSendCallback)(const BYTE* chBuff, int iBufLen);
+typedef void (CALLBACK* fun_SetMediaAudioStreamSendCallback)(const BYTE* chBuff, int iBufLen);
 
 #endif // SRC_BUILD_TARGET_LIB_H

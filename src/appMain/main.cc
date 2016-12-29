@@ -234,4 +234,10 @@ void sdl_set_videostream_callback(fun_SetMediaVideoStreamSendCallback func)
 {
 	SetMediaVideoStreamSendCallback(func);
 }
+
+
+void sdl_set_audiostream_callback(fun_SetMediaAudioStreamSendCallback func)
+{
+	SetMediaAudioStreamSendCallback(func);
+}
 #endif

@@ -69,6 +69,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE
 set(default_sources
     ${COMPONENTS_DIR}/media_manager/src/audio/socket_audio_streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/audio/file_audio_streamer_adapter.cc
+	${COMPONENTS_DIR}/media_manager/src/audio/callback_audio_streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/video/socket_video_streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/video/file_video_streamer_adapter.cc
 	${COMPONENTS_DIR}/media_manager/src/video/callback_video_streamer_adapter.cc
@@ -82,6 +83,7 @@ set(default_sources
     ${COMPONENTS_DIR}/media_manager/src/audio/socket_audio_streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/audio/pipe_audio_streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/audio/file_audio_streamer_adapter.cc
+	${COMPONENTS_DIR}/media_manager/src/audio/callback_audio_streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/video/socket_video_streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/video/pipe_video_streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/video/file_video_streamer_adapter.cc

@@ -39,6 +39,11 @@ void SetMediaVideoStreamSendCallback(fun_SetMediaVideoStreamSendCallback mediaVi
 {
 	s_mediaVideoStreamSendCallback = mediaVideoStreamSendCallback;
 }
+fun_SetMediaAudioStreamSendCallback s_mediaAudioStreamSendCallback = NULL;
+void SetMediaAudioStreamSendCallback(fun_SetMediaAudioStreamSendCallback mediaAudioStreamSendCallback)
+{
+	s_mediaAudioStreamSendCallback = mediaAudioStreamSendCallback;
+}
 #endif
 
 namespace media_manager {

@@ -409,7 +409,9 @@ void ApplicationImpl::StartStreaming(
     LOG4CXX_TRACE(logger_, "ServiceType = Video");
     if (!video_streaming_approved()) {
       LOG4CXX_TRACE(logger_, "Video streaming not approved");
-      MessageHelper::SendNaviStartStream(app_id());
+      //MessageHelper::SendNaviStartStream(app_id());
+			set_video_streaming_allowed(true);
+			set_video_streaming_approved(true);
       set_video_stream_retry_number(0);
     }
   } else if (ServiceType::kAudio == service_type) {

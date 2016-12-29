@@ -38,6 +38,18 @@ CallbackVideoStreamerAdapter::CallbackVideoStreamerAdapter() {
 
 }
 
+void CallbackVideoStreamerAdapter::SendData(int32_t application_key,
+    const ::protocol_handler::RawMessagePtr msg)
+{
+	if (!is_app_performing_activity(application_key)) {
+		return;
+	}
+#ifdef BUILD_TARGET_LIB
+	s_mediaVideoStreamSendCallback((const char *)msg->data(), msg.get()->data_size());
+#endif
+	printf("%s, Line:%d, Streamer::sent %d\n", __FUNCTION__, __LINE__, msg->data_size());
+}
+
 CallbackVideoStreamerAdapter::~CallbackVideoStreamerAdapter() {
 
 }

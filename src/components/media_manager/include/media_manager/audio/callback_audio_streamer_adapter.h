@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2014-2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,44 +30,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_IMPL_H_
-#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_IMPL_H_
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_CALLBACK_AUDIO_STREAMER_ADAPTER_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_CALLBACK_AUDIO_STREAMER_ADAPTER_H_
 
-#include <set>
-#include "media_manager/media_adapter.h"
-#include "media_manager/media_adapter_listener.h"
-#include "utils/macro.h"
-
-#ifdef BUILD_TARGET_LIB
-#include "build_target_lib.h"
-
-extern void SetMediaVideoStreamSendCallback(fun_SetMediaVideoStreamSendCallback mediaVideoStreamSendCallback);
-extern fun_SetMediaVideoStreamSendCallback s_mediaVideoStreamSendCallback;
-extern void SetMediaAudioStreamSendCallback(fun_SetMediaAudioStreamSendCallback mediaAudioStreamSendCallback);
-extern fun_SetMediaAudioStreamSendCallback s_mediaAudioStreamSendCallback;
-#endif
+#include "media_manager/callback_streamer_adapter.h"
 
 namespace media_manager {
 
-typedef utils::SharedPtr<MediaAdapterListener> MediaListenerPtr;
-
-class MediaAdapterImpl : public MediaAdapter {
-  public:
-    virtual ~MediaAdapterImpl();
-    virtual void AddListener(const MediaListenerPtr& listener);
-    virtual void RemoveListener(const MediaListenerPtr& listener);
-
-  protected:
-    MediaAdapterImpl();
-    std::set<MediaListenerPtr> media_listeners_;
-    int32_t current_application_;
-
-  private:
-    DISALLOW_COPY_AND_ASSIGN(MediaAdapterImpl);
+class CallbackAudioStreamerAdapter : public CallbackStreamerAdapter {
+ public:
+  CallbackAudioStreamerAdapter();
+  virtual void SendData(int32_t application_key,
+      const ::protocol_handler::RawMessagePtr msg);
+  virtual ~CallbackAudioStreamerAdapter();
 };
-
-typedef utils::SharedPtr<MediaAdapterImpl> MediaAdapterImplPtr;
 
 }  //  namespace media_manager
 
-#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_IMPL_H_
+#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_CALLBACK_AUDIO_STREAMER_ADAPTER_H_

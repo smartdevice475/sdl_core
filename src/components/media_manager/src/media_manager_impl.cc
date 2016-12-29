@@ -53,6 +53,7 @@
 #include "media_manager/video/file_video_streamer_adapter.h"
 #include "media_manager/audio/file_audio_streamer_adapter.h"
 #include "media_manager/video/callback_video_streamer_adapter.h"
+#include "media_manager/audio/callback_audio_streamer_adapter.h"
 #include "media_manager/media_manager_settings.h"
 
 namespace media_manager {
@@ -150,7 +151,9 @@ void MediaManagerImpl::Init() {
   } else if ("file" == settings().audio_server_type()) {
     streamer_[ServiceType::kAudio] = new FileAudioStreamerAdapter(
         settings().audio_stream_file(), settings().app_storage_folder());
-  }
+	}	else if ("callback" == settings().audio_server_type()) {
+		streamer_[ServiceType::kAudio] = new CallbackAudioStreamerAdapter();
+	}
 
   streamer_listener_[ServiceType::kMobileNav] = new StreamerListener(*this);
   streamer_listener_[ServiceType::kAudio] = new StreamerListener(*this);

@@ -39,6 +39,8 @@ namespace media_manager {
 class CallbackVideoStreamerAdapter : public CallbackStreamerAdapter {
   public:
     CallbackVideoStreamerAdapter();
+    virtual void SendData(int32_t application_key,
+        const ::protocol_handler::RawMessagePtr msg);
     ~CallbackVideoStreamerAdapter();
 };
 
