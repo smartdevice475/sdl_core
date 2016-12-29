@@ -128,6 +128,32 @@ int TransportManagerImpl::ConnectDevice(const DeviceHandle device_handle) {
   return err;
 }
 
+int TransportManagerImpl::FindApplications(const DeviceHandle device_handle) {
+	if (!this->is_initialized_) {
+		LOG4CXX_ERROR(logger_, "TransportManager is not initialized.");
+		LOG4CXX_TRACE(logger_,
+			"exit with E_TM_IS_NOT_INITIALIZED. Condition: !this->is_initialized_");
+		return E_TM_IS_NOT_INITIALIZED;
+	}
+
+	DeviceUID device_id = converter_.HandleToUid(device_handle);
+	LOG4CXX_DEBUG(logger_, "Convert handle to id:" << device_id);
+
+	sync_primitives::AutoReadLock lock(device_to_adapter_map_lock_);
+	DeviceToAdapterMap::iterator it = device_to_adapter_map_.find(device_id);
+	if (it == device_to_adapter_map_.end()) {
+		LOG4CXX_ERROR(logger_, "No device adapter found by id " << device_id);
+		LOG4CXX_TRACE(logger_, "exit with E_INVALID_HANDLE. Condition: NULL == ta");
+		return E_INVALID_HANDLE;
+	}
+	transport_adapter::TransportAdapter* ta = it->second;
+
+	TransportAdapter::Error ta_error = ta->FindApplications(device_id);
+	int err = (TransportAdapter::OK == ta_error) ? E_SUCCESS : E_INTERNAL_ERROR;
+	LOG4CXX_TRACE(logger_, "exit with error: " << err);
+	return err;
+}
+
 int TransportManagerImpl::DisconnectDevice(const DeviceHandle device_handle) {
   LOG4CXX_TRACE(logger_, "enter. DeviceHandle: " << &device_handle);
   if (!this->is_initialized_) {

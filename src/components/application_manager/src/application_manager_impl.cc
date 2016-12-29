@@ -680,6 +680,23 @@ void ApplicationManagerImpl::ConnectToDevice(const std::string& device_mac) {
   connection_handler().ConnectToDevice(handle);
 }
 
+void ApplicationManagerImpl::FindApplications(const std::string& device_mac) {
+	// TODO(VS): Call function from ConnectionHandler
+	if (!connection_handler_) {
+		LOG4CXX_WARN(logger_, "Connection handler is not set.");
+		return;
+	}
+
+	connection_handler::DeviceHandle handle;
+	if (!connection_handler().GetDeviceID(device_mac, &handle)) {
+		LOG4CXX_ERROR(
+			logger_,
+			"Attempt to connect to invalid device with mac:" << device_mac);
+		return;
+	}
+	connection_handler().FindApplications(handle);
+}
+
 void ApplicationManagerImpl::OnHMIStartedCooperation() {
   LOG4CXX_AUTO_TRACE(logger_);
   hmi_cooperating_ = true;

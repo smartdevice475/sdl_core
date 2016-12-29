@@ -374,7 +374,8 @@ class ApplicationManagerImpl
    */
   mobile_api::HMILevel::eType IsHmiLevelFullAllowed(ApplicationSharedPtr app);
 
-  void ConnectToDevice(const std::string& device_mac);
+	void ConnectToDevice(const std::string& device_mac);
+	void FindApplications(const std::string& device_mac);
   void OnHMIStartedCooperation();
 
   /*

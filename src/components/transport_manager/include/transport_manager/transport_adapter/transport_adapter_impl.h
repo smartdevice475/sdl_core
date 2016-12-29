@@ -145,6 +145,8 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   virtual TransportAdapter::Error ConnectDevice(const DeviceUID& device_handle);
 
+	virtual TransportAdapter::Error FindApplications(const DeviceUID& device_handle);
+
   /**
    * @brief Disconnect from specified session.
    *
@@ -461,6 +463,8 @@ class TransportAdapterImpl : public TransportAdapter,
    * @return Error information about connecting applications on device
    */
   TransportAdapter::Error ConnectDevice(DeviceSptr device);
+
+	TransportAdapter::Error FindApplications(DeviceSptr device);
 
   /**
    * @brief Remove specified device

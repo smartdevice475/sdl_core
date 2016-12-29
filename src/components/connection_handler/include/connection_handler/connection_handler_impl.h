@@ -102,6 +102,8 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    */
   void ConnectToDevice(connection_handler::DeviceHandle device_handle) OVERRIDE;
 
+	void FindApplications(connection_handler::DeviceHandle device_handle) OVERRIDE;
+
   void ConnectToAllDevices() OVERRIDE;
 
   void StartTransportManager() OVERRIDE;

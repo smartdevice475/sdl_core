@@ -31,6 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/on_find_applications.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
@@ -45,7 +46,11 @@ OnFindApplications::~OnFindApplications() {
 
 void OnFindApplications::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-
+	if ((*message_)[strings::msg_params].keyExists(strings::device_info)) {
+		ApplicationManagerImpl::instance()->FindApplications(
+			(*message_)[strings::msg_params][strings::device_info][strings::id]
+			.asString());
+	}
   // TODO(PV): add UpdateAppsOnDevice to ApplicationManager
 }
 

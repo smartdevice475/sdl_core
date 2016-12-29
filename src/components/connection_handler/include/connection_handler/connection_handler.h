@@ -68,6 +68,9 @@ class ConnectionHandler {
   virtual void ConnectToDevice(
       connection_handler::DeviceHandle device_handle) = 0;
 
+	virtual void FindApplications(
+		connection_handler::DeviceHandle device_handle) = 0;
+
   virtual void ConnectToAllDevices() = 0;
 
   /**

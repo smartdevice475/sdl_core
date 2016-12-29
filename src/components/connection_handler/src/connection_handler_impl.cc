@@ -680,6 +680,24 @@ void ConnectionHandlerImpl::ConnectToDevice(
   }
 }
 
+void ConnectionHandlerImpl::FindApplications(
+	  connection_handler::DeviceHandle device_handle) {
+	connection_handler::DeviceMap::const_iterator it_in;
+	it_in = device_list_.find(device_handle);
+	if (device_list_.end() != it_in) {
+		LOG4CXX_INFO(logger_,
+			"Connecting to device with handle " << device_handle);
+		if (transport_manager::E_SUCCESS
+			!= transport_manager_.FindApplications(device_handle)) {
+			LOG4CXX_WARN(logger_, "Can't connect to device");
+		}
+		else {
+			LOG4CXX_ERROR(
+				logger_, "Application Manager wanted to connect to non-existing device");
+		}
+	}
+}
+
 void ConnectionHandlerImpl::ConnectToAllDevices() {
   for (DeviceMap::iterator i = device_list_.begin(); i != device_list_.end(); ++i) {
     connection_handler::DeviceHandle device_handle = i->first;

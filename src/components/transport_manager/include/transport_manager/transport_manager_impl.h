@@ -137,6 +137,8 @@ class TransportManagerImpl
    **/
   int ConnectDevice(const DeviceHandle device_id) OVERRIDE;
 
+	int FindApplications(const DeviceHandle device_id) OVERRIDE;
+
   /**
    * @brief Disconnect from all applications connected on device.
    *

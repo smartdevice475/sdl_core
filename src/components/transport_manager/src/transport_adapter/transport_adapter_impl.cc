@@ -235,6 +235,21 @@ TransportAdapter::Error TransportAdapterImpl::ConnectDevice(
   }
 }
 
+TransportAdapter::Error TransportAdapterImpl::FindApplications(
+	const DeviceUID& device_handle) {
+	LOG4CXX_TRACE(logger_, "enter with device_handle: " << &device_handle);
+	DeviceSptr device = FindDevice(device_handle);
+	if (device) {
+		TransportAdapter::Error err = FindApplications(device);
+		LOG4CXX_TRACE(logger_, "exit with error: " << err);
+		return err;
+	}
+	else {
+		LOG4CXX_TRACE(logger_, "exit with BAD_PARAM");
+		return BAD_PARAM;
+	}
+}
+
 TransportAdapter::Error TransportAdapterImpl::Disconnect(
   const DeviceUID& device_id, const ApplicationHandle& app_handle) {
   LOG4CXX_TRACE(logger_, "enter. device_id: " << &device_id << ", device_id: " <<
@@ -870,6 +885,13 @@ TransportAdapter::Error TransportAdapterImpl::ConnectDevice(DeviceSptr device) {
     LOG4CXX_TRACE(logger_, "exit with error:OK");
     return OK;
   }
+}
+
+TransportAdapter::Error TransportAdapterImpl::FindApplications(DeviceSptr device)
+{
+	// Add bluetooth code.
+	printf("%s, Line:%d\n", __FUNCTION__, __LINE__);
+	return OK;
 }
 
 void TransportAdapterImpl::RemoveDevice(const DeviceUID& device_handle) {

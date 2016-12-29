@@ -189,6 +189,8 @@ class TransportAdapter {
    */
   virtual Error ConnectDevice(const DeviceUID& device_handle) = 0;
 
+	virtual Error FindApplications(const DeviceUID& device_handle) = 0;
+
   /**
    * @brief Notify that listener of client connection is available.
    *
