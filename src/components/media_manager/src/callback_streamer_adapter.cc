@@ -67,6 +67,8 @@ bool CallbackStreamerAdapter::CallbackStreamer::Send(
   s_mediaVideoStreamSendCallback((const char *)msg->data(), msg.get()->data_size());
 #endif
   LOG4CXX_INFO(logger_, "Streamer::sent " << msg->data_size());
+
+
   return true;
 }
 

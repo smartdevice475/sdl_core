@@ -77,6 +77,7 @@ set(default_sources
     ${COMPONENTS_DIR}/media_manager/src/socket_streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/file_streamer_adapter.cc
 	${COMPONENTS_DIR}/media_manager/src/callback_streamer_adapter.cc
+	${COMPONENTS_DIR}/media_manager/src/audio/play_wave.cc
 )
 else()
 set(default_sources
@@ -143,6 +144,13 @@ set (SOURCES
 
 add_library("MediaManager" ${SOURCES} ${default_sources})
 target_link_libraries("MediaManager" ${LIBRARIES})
+
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  target_link_libraries("MediaManager" Winmm)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  #target_link_libraries("MediaManager" coredll)
+endif()
 
 if(BUILD_TESTS)
   add_subdirectory(test)

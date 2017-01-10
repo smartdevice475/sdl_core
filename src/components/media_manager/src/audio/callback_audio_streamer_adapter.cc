@@ -32,10 +32,11 @@
 
 #include "media_manager/audio/callback_audio_streamer_adapter.h"
 
+
 namespace media_manager {
 
 CallbackAudioStreamerAdapter::CallbackAudioStreamerAdapter() {
-
+	wave_player_ = new WavePlayer;
 }
 
 void CallbackAudioStreamerAdapter::SendData(int32_t application_key,
@@ -45,12 +46,25 @@ void CallbackAudioStreamerAdapter::SendData(int32_t application_key,
 		return;
 	}
 #ifdef BUILD_TARGET_LIB
-	s_mediaAudioStreamSendCallback((const char *)msg->data(), msg.get()->data_size());
+	//s_mediaAudioStreamSendCallback((const char *)msg->data(), msg.get()->data_size());
 #endif
-	printf("%s, Line:%d, Streamer::sent %d\n", __FUNCTION__, __LINE__, msg->data_size());
+	//printf("%s, Line:%d, Streamer::sent %d\n", __FUNCTION__, __LINE__, msg->data_size());
+
+	wave_player_->SendData((char *)msg->data(), msg->data_size());
 }
 
 CallbackAudioStreamerAdapter::~CallbackAudioStreamerAdapter() {
+	delete wave_player_;
+}
+
+void CallbackAudioStreamerAdapter::StartActivity(int32_t application_key) {
+	StreamerAdapter::StartActivity(application_key);
+	wave_player_->StartActivity();
+}
+
+void CallbackAudioStreamerAdapter::StopActivity(int32_t application_key) {
+	wave_player_->StopActivity();
+	StreamerAdapter::StopActivity(application_key);
 }
 
 }  // namespace media_manager

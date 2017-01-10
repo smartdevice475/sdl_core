@@ -94,6 +94,7 @@ void StreamerAdapter::StopActivity(int32_t application_key) {
 
 void StreamerAdapter::SendData(int32_t application_key,
                                const ::protocol_handler::RawMessagePtr msg) {
+	//printf("---StreamerAdapter::SendData\n");
   LOG4CXX_AUTO_TRACE(logger);
   if (!is_app_performing_activity(application_key)) {
     LOG4CXX_ERROR(logger, "Activity for application: "
