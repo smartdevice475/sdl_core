@@ -297,8 +297,7 @@ bool UsbHandler::IsUsbEqual(libusb_device *devd,libusb_device *devs)
 }
 
 void UsbHandler::UsbThread() {
-	
-	libusb_set_debug(libusb_context_, LIBUSB_LOG_LEVEL_INFO); 
+	libusb_set_debug(libusb_context_, LIBUSB_LOG_LEVEL_INFO);
 	LOG4CXX_INFO(logger_, "UsbThread");
 	fflush(stdout);
 	while (!shutdown_requested_) {

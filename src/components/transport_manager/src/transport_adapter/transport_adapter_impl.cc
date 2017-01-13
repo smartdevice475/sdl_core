@@ -418,7 +418,7 @@ void TransportAdapterImpl::SearchDeviceDone(const DeviceVector& devices) {
     device->set_keep_on_disconnect(true);
     new_devices[device->unique_device_id()] = device;
   }
-
+  
   connections_lock_.AcquireForReading();
   std::set<DeviceUID> connected_devices;
   for (ConnectionMap::const_iterator it = connections_.begin();
