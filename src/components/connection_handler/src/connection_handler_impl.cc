@@ -380,11 +380,11 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
     const uint32_t &hashCode,
     const protocol_handler::ServiceType &service_type) {
   LOG4CXX_AUTO_TRACE(logger_);
-
   connection_list_lock_.AcquireForReading();
   ConnectionList::iterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_WARN(logger_, "Unknown connection!");
+    connection_list_lock_.Release();
     return 0;
   }
   std::pair<int32_t, Connection*> connection_item = *it;
@@ -602,7 +602,6 @@ int ConnectionHandlerImpl::SetSSLContext(
   transport_manager::ConnectionUID connection_handle = 0;
   uint8_t session_id = 0;
   PairFromKey(key, &connection_handle, &session_id);
-
   sync_primitives::AutoReadLock lock(connection_list_lock_);
   ConnectionList::iterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
@@ -619,7 +618,6 @@ security_manager::SSLContext *ConnectionHandlerImpl::GetSSLContext(
   transport_manager::ConnectionUID connection_handle = 0;
   uint8_t session_id = 0;
   PairFromKey(key, &connection_handle, &session_id);
-
   sync_primitives::AutoReadLock lock(connection_list_lock_);
   ConnectionList::iterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
@@ -636,7 +634,6 @@ void ConnectionHandlerImpl::SetProtectionFlag(
   transport_manager::ConnectionUID connection_handle = 0;
   uint8_t session_id = 0;
   PairFromKey(key, &connection_handle, &session_id);
-
   sync_primitives::AutoReadLock lock(connection_list_lock_);
   ConnectionList::iterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
@@ -708,9 +705,7 @@ void ConnectionHandlerImpl::CloseConnection(
   transport_manager::ConnectionUID connection_uid =
       ConnectionUIDFromHandle(connection_handle);
   transport_manager_.DisconnectForce(connection_uid);
-
   sync_primitives::AutoWriteLock connection_list_lock(connection_list_lock_);
-
   ConnectionList::iterator connection_list_itr =
       connection_list_.find(connection_uid);
   if (connection_list_.end() != connection_list_itr) {
@@ -724,14 +719,12 @@ uint32_t ConnectionHandlerImpl::GetConnectionSessionsCount(
   uint32_t connection_handle = 0;
   uint8_t session_id = 0;
   PairFromKey(connection_key, &connection_handle, &session_id);
-
   sync_primitives::AutoReadLock lock(connection_list_lock_);
   ConnectionList::iterator itr = connection_list_.find(connection_handle);
 
   if (connection_list_.end() != itr) {
     return itr->second->session_map().size();
   }
-
   return 0;
 }
 
@@ -762,7 +755,6 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
   SessionMap session_map;
   {
     sync_primitives::AutoReadLock connection_list_lock(connection_list_lock_);
-
     ConnectionList::iterator connection_list_itr =
         connection_list_.find(connection_id);
     if (connection_list_.end() != connection_list_itr) {
@@ -819,7 +811,6 @@ void ConnectionHandlerImpl::CloseConnectionSessions(
   SessionIdVector session_id_vector;
   {
     sync_primitives::AutoReadLock connection_list_lock(connection_list_lock_);
-
     ConnectionList::iterator connection_list_itr =
         connection_list_.find(connection_id);
     if (connection_list_.end() != connection_list_itr) {
@@ -906,8 +897,9 @@ void ConnectionHandlerImpl::OnConnectionEnded(
                << " from the list.");
   connection_list_lock_.AcquireForWriting();
   ConnectionList::iterator itr = connection_list_.find(connection_id);
-  if (connection_list_.end() == itr) {
+  if(connection_list_.end() == itr) {
     LOG4CXX_ERROR(logger_, "Connection not found!");
+    connection_list_lock_.Release();
     return;
   }
   std::auto_ptr<Connection> connection(itr->second);

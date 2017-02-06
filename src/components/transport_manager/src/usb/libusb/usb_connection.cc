@@ -128,6 +128,7 @@ std::string hex_data(const unsigned char* const buffer, const int actual_length)
 
 void UsbConnection::OnInTransfer(libusb_transfer* transfer) {
   LOG4CXX_TRACE(logger_, "enter with Libusb_transfer*: " << transfer);
+
   if (transfer->status == LIBUSB_TRANSFER_COMPLETED) {
     LOG4CXX_DEBUG(logger_,
                   "USB incoming transfer, size:" << transfer->actual_length
@@ -135,12 +136,17 @@ void UsbConnection::OnInTransfer(libusb_transfer* transfer) {
     ::protocol_handler::RawMessagePtr data(new protocol_handler::RawMessage(
                          0, 0, in_buffer_, transfer->actual_length));
     controller_->DataReceiveDone(device_uid_, app_handle_, data);
+  } else if(LIBUSB_TRANSFER_STALL == transfer->status) {
+    usb_handler_->RestartSearchDevice();
+    AbortConnection();
+    return;
   } else {
     LOG4CXX_ERROR(logger_, "USB incoming transfer failed: "
                   << libusb_error_name(transfer->status));
     controller_->DataReceiveFailed(device_uid_, app_handle_,
                                    DataReceiveError());
   }
+
   if (disconnecting_) {
     waiting_in_transfer_cancel_ = false;
   } else {
@@ -168,6 +174,10 @@ void UsbConnection::PopOutMessage() {
 
 bool UsbConnection::PostOutTransfer() {
   LOG4CXX_TRACE(logger_, "enter");
+  if(disconnecting_) {
+    return false;
+  }
+
   out_transfer_ = libusb_alloc_transfer(0);
   if (0 == out_transfer_) {
     LOG4CXX_ERROR(logger_, "libusb_alloc_transfer failed");
@@ -194,6 +204,7 @@ bool UsbConnection::PostOutTransfer() {
 void UsbConnection::OnOutTransfer(libusb_transfer* transfer) {
   LOG4CXX_TRACE(logger_, "enter with  Libusb_transfer*: " << transfer);
   sync_primitives::AutoLock locker(out_messages_mutex_);
+
   if (transfer->status == LIBUSB_TRANSFER_COMPLETED) {
     bytes_sent_ += transfer->actual_length;
     if (bytes_sent_ == current_out_message_->data_size()) {
@@ -224,7 +235,9 @@ TransportAdapter::Error UsbConnection::SendData(::protocol_handler::RawMessagePt
                   << "disconnecting_");
     return TransportAdapter::BAD_STATE;
   }
+
   sync_primitives::AutoLock locker(out_messages_mutex_);
+
   if (current_out_message_.valid()) {
     out_messages_.push_back(message);
   } else {
@@ -246,15 +259,16 @@ void UsbConnection::Finalise() {
   {
     sync_primitives::AutoLock locker(out_messages_mutex_);
     disconnecting_ = true;
-    if (out_transfer_) {
+    int ret = 0;
+    if(out_transfer_) {
       waiting_out_transfer_cancel_ = true;
-      if ( LIBUSB_SUCCESS != libusb_cancel_transfer(out_transfer_)) {
+      if(LIBUSB_SUCCESS != libusb_cancel_transfer(out_transfer_)) {
         waiting_out_transfer_cancel_ = false;
       }
     }
-    if (in_transfer_) {
+    if(in_transfer_) {
       waiting_in_transfer_cancel_ = true;
-      if ( LIBUSB_SUCCESS != libusb_cancel_transfer(in_transfer_)) {
+      if(LIBUSB_SUCCESS != libusb_cancel_transfer(in_transfer_)) {
         waiting_in_transfer_cancel_ = false;
       }
     }
