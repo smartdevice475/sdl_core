@@ -59,7 +59,7 @@ class UsbHandler {
 
  public:
   void CloseDeviceHandle(libusb_device_handle* device_handle);
-
+  void RestartSearchDevice();
  private:
   class ControlTransferSequenceState;
 
@@ -118,6 +118,9 @@ class UsbHandler {
   void UsbThread();
   bool IsUsbEqual(libusb_device *devd,libusb_device *devs);
 #endif
+
+  mutable sync_primitives::Lock search_lock_;
+  sync_primitives::ConditionalVariable restart_cond_;
 };
 
 }  // namespace transport_adapter

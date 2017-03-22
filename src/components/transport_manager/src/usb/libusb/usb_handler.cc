@@ -88,7 +88,9 @@ UsbHandler::UsbHandler()
     device_handles_to_close_(),
     libusb_context_(NULL),
     arrived_callback_handle_(),
-    left_callback_handle_() {
+    left_callback_handle_(),
+    search_lock_(),
+    restart_cond_(){
   thread_ = threads::CreateThread("UsbHandler", new UsbHandlerDelegate(this));
 }
 
@@ -297,16 +299,13 @@ bool UsbHandler::IsUsbEqual(libusb_device *devd,libusb_device *devs)
 }
 
 void UsbHandler::UsbThread() {
-	
-	libusb_set_debug(libusb_context_, LIBUSB_LOG_LEVEL_INFO); 
+  libusb_set_debug(libusb_context_, LIBUSB_LOG_LEVEL_DEBUG);
 	LOG4CXX_INFO(logger_, "UsbThread");
 	fflush(stdout);
 	while (!shutdown_requested_) {
 		libusb_device **devs=NULL;
-		int num=libusb_get_device_list(libusb_context_,&devs);
+		int num = libusb_get_device_list(libusb_context_,&devs);
 
-		//check  exist
-		//LOG4CXX_INFO(logger_,"check exist usb");
 		if(num<0) {
 			LOG4CXX_INFO(logger_, "lisusb_get_device_list:errno = " << num);
 			fflush(stdout);
@@ -334,7 +333,7 @@ void UsbHandler::UsbThread() {
 			DeviceLeft(device);
 		}
 		//device arrive
-		//LOG4CXX_INFO(logger_,"arrive usb check");
+
 		std::vector<libusb_device*> arriveDevs;
 		for(int i=0;i<num;i++) {
 			libusb_device *device=devs[i];
@@ -347,7 +346,7 @@ void UsbHandler::UsbThread() {
 			if(!exist)
 				arriveDevs.push_back(device);
 		}
-		//
+
 		for(int i=0;i<arriveDevs.size();i++) {
 			libusb_device *device=arriveDevs[i];
 			LOG4CXX_INFO(logger_, "libusb device arrived (bus number "
@@ -355,14 +354,20 @@ void UsbHandler::UsbThread() {
                             << ", device address "
                             << static_cast<int>(
                                    libusb_get_device_address(device)) << ")");
+
 			DeviceArrived(device);
 		}
 
 		libusb_free_device_list(devs,1);
-		Sleep(2000);//500ms
+    sync_primitives::AutoLock auto_lock(search_lock_);
+    restart_cond_.WaitFor(auto_lock, 2000);
 	}
 }
 #endif
+
+void UsbHandler::RestartSearchDevice() {
+  restart_cond_.NotifyOne();
+}
 
 TransportAdapter::Error UsbHandler::Init() {
   LOG4CXX_TRACE(logger_, "enter");
