@@ -49,7 +49,7 @@
 #if defined(OS_WIN32)
 static uint64_t win32_system_time_ = time(NULL);  //wince start time ,unit :s
 #elif defined(OS_WINCE)
-static uint64_t win32_system_time_test_ = time(NULL) - clock() / 1000;  //wince start time ,unit :s
+static uint64_t win32_system_time_ = time(NULL) - clock() / 1000;  //wince start time ,unit :s
 #endif
 
 #if defined(OS_WINCE)
