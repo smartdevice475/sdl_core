@@ -174,6 +174,7 @@ void UsbConnection::PopOutMessage() {
 
 bool UsbConnection::PostOutTransfer() {
   LOG4CXX_TRACE(logger_, "enter");
+
   if(disconnecting_) {
     return false;
   }
@@ -207,18 +208,20 @@ void UsbConnection::OnOutTransfer(libusb_transfer* transfer) {
 
   if (transfer->status == LIBUSB_TRANSFER_COMPLETED) {
     bytes_sent_ += transfer->actual_length;
-    if (bytes_sent_ == current_out_message_->data_size()) {
+    if (current_out_message_.valid() && bytes_sent_ == current_out_message_->data_size()) {
       LOG4CXX_DEBUG(logger_, "USB out transfer, data sent: "
                     << current_out_message_.get());
       controller_->DataSendDone(device_uid_, app_handle_, current_out_message_);
       PopOutMessage();
     }
   } else {
-    LOG4CXX_ERROR(logger_, "USB out transfer failed: "
-                  << libusb_error_name(transfer->status));
-    controller_->DataSendFailed(device_uid_, app_handle_, current_out_message_,
-                                DataSendError());
-    PopOutMessage();
+    if (current_out_message_.valid() && bytes_sent_ == current_out_message_->data_size()) {
+      LOG4CXX_ERROR(logger_, "USB out transfer failed: "
+			        << libusb_error_name(transfer->status));
+      controller_->DataSendFailed(device_uid_, app_handle_, current_out_message_,
+							      DataSendError());
+      PopOutMessage();
+    }
   }
   if (!current_out_message_.valid()) {
     libusb_free_transfer(transfer);
@@ -281,6 +284,7 @@ void UsbConnection::Finalise() {
     usleep(150000);
 #elif defined(OS_WIN32) || defined(OS_WINCE)
     ::Sleep(150);
+    if (disconnecting_) break;
 #else
     pthread_yield();
 #endif
