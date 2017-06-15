@@ -10,6 +10,7 @@
 #ifdef OS_WIN32
 #include <mmeapi.h>
 #endif
+#include "play_wave_interface.h"
 
 namespace media_manager {
 
