@@ -194,8 +194,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
     add_definitions(-DGCOV_ENABLED)
   endif()
+
+  set (CMAKE_C_FLAGS "-fPIC")
   
-  set (CMAKE_CXX_FLAGS_RELEASE "-fPIC -s -O2") #It will be appended to CMAKE_CXX_FLAGS in release
+  set (CMAKE_CXX_FLAGS_RELEASE "-fPIC -DNDEBUG -s -O2") #It will be appended to CMAKE_CXX_FLAGS in release
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   set (CMAKE_CXX_FLAGS "-g3 -ggdb3 -std=gnu++0x -Werror=return-type -Wuninitialized --coverage -std=c++0x") # -stdlib=libc++ -m32
   set (CMAKE_CXX_FLAGS_RELEASE "-s -O2") #It will be appended to CMAKE_CXX_FLAGS in release
@@ -212,7 +214,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
 endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  set(CMAKE_CXX_FLAGS_RELEASE " -DNDEBUG -s -O2")
+  #set(CMAKE_CXX_FLAGS_RELEASE " -DNDEBUG -s -O2")
   set(CMAKE_CXX_FLAGS_DEBUG   " -DDEBUG -g3 -ggdb3")
 endif()
 
