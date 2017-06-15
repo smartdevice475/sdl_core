@@ -32,11 +32,18 @@
 
 #include "media_manager/audio/callback_audio_streamer_adapter.h"
 
+#if defined(WIN32) || defined(WINCE)
+#include "media_manager/audio/play_wave.h"
+#endif
 
 namespace media_manager {
 
 CallbackAudioStreamerAdapter::CallbackAudioStreamerAdapter() {
-	wave_player_ = new WavePlayer;
+#if defined(WIN32) || defined(WINCE)
+  wave_player_ = new WavePlayer;
+#else
+  wave_player_ = new WavePlayerInterface;
+#endif	
 }
 
 void CallbackAudioStreamerAdapter::SendData(int32_t application_key,

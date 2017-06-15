@@ -13,7 +13,7 @@
 
 namespace media_manager {
 
-  class WavePlayer
+  class WavePlayer : public WavePlayerInterface
   {
   public:
     WavePlayer();

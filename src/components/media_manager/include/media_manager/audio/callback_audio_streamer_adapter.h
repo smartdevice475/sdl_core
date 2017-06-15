@@ -34,7 +34,8 @@
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_CALLBACK_AUDIO_STREAMER_ADAPTER_H_
 
 #include "media_manager/callback_streamer_adapter.h"
-#include "media_manager/audio/play_wave.h"
+
+#include "media_manager/audio/play_wave_interface.h"
 
 namespace media_manager {
 
@@ -48,7 +49,7 @@ class CallbackAudioStreamerAdapter : public CallbackStreamerAdapter {
   virtual void StartActivity(int32_t application_key);
   virtual void StopActivity(int32_t application_key);
 private:
-	WavePlayer *wave_player_;
+  WavePlayerInterface *wave_player_;
 };
 
 }  //  namespace media_manager
