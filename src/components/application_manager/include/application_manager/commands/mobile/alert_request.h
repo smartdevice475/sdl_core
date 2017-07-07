@@ -83,7 +83,7 @@ class AlertRequest : public CommandRequestImpl {
   void on_event(const event_engine::Event& event);
 
  protected:
-
+	 uint32_t alert_timeout_;
  private:
   /*
    * @brief Checks if request parameters are valid

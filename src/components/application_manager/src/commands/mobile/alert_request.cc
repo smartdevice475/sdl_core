@@ -57,6 +57,7 @@ AlertRequest::AlertRequest(const MessageSharedPtr& message)
       tts_speak_result_(mobile_apis::Result::INVALID_ENUM) {
   subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
   subscribe_on_event(hmi_apis::FunctionID::TTS_OnResetTimeout);
+	alert_timeout_ = 5000;
 }
 
 AlertRequest::~AlertRequest() {
@@ -66,12 +67,13 @@ bool AlertRequest::Init() {
   /* Timeout in milliseconds.
      If omitted a standard value of 10000 milliseconds is used.*/
   if ((*message_)[strings::msg_params].keyExists(strings::duration)) {
-    default_timeout_ =
+		alert_timeout_ =
         (*message_)[strings::msg_params][strings::duration].asUInt();
   } else {
     const int32_t def_value = 5000;
-    default_timeout_ = def_value;
-  }
+		alert_timeout_ = def_value;
+	}
+	default_timeout_ = alert_timeout_ + 1000;
 
   // If soft buttons are present, SDL will not use initiate timeout tracking for response.
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
@@ -341,7 +343,7 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
   }
   // app_id
   msg_params[strings::app_id] = app_id;
-  msg_params[strings::duration] = default_timeout_;
+	msg_params[strings::duration] = alert_timeout_;
 
   // NAVI platform progressIndicator
   if ((*message_)[strings::msg_params].keyExists(strings::progress_indicator)) {
