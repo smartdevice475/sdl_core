@@ -73,7 +73,8 @@ class ScrollableMessageRequest : public CommandRequestImpl {
    * @param event The received event
    */
   virtual void on_event(const event_engine::Event& event);
-
+protected:
+	uint32_t scrollable_message_timeout_;
  private:
   DISALLOW_COPY_AND_ASSIGN(ScrollableMessageRequest);
 };

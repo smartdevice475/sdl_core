@@ -48,6 +48,7 @@ ScrollableMessageRequest::ScrollableMessageRequest(
     const MessageSharedPtr& message)
  : CommandRequestImpl(message) {
   subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
+	scrollable_message_timeout_ = 30000;
 }
 
 ScrollableMessageRequest::~ScrollableMessageRequest() {
@@ -58,13 +59,13 @@ bool ScrollableMessageRequest::Init() {
   /* Timeout in milliseconds.
      If omitted a standard value of 10000 milliseconds is used.*/
   if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
-    default_timeout_ =
+		scrollable_message_timeout_ =
         (*message_)[strings::msg_params][strings::timeout].asUInt();
   } else {
     const int32_t def_value = 30000;
-    default_timeout_ = def_value;
+		scrollable_message_timeout_ = def_value;
   }
-
+	default_timeout_ = scrollable_message_timeout_ + 1000;
   return true;
 }
 
@@ -101,7 +102,7 @@ void ScrollableMessageRequest::Run() {
   msg_params[hmi_request::message_text][hmi_request::field_text] =
       (*message_)[strings::msg_params][strings::scroll_message_body];
   msg_params[strings::app_id] = app->app_id();
-  msg_params[strings::timeout] = default_timeout_;
+	msg_params[strings::timeout] = scrollable_message_timeout_;
 
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
     msg_params[strings::soft_buttons] =
