@@ -115,6 +115,7 @@ UsbHandler::~UsbHandler() {
 }
 
 void UsbHandler::DeviceArrived(libusb_device* device_libusb) {
+LOG_TAG(logger_);
   LOG4CXX_TRACE(logger_, "enter. libusb_device* " << device_libusb);
   const uint8_t bus_number = libusb_get_bus_number(device_libusb);
   const uint8_t device_address = libusb_get_device_address(device_libusb);
@@ -192,6 +193,7 @@ void UsbHandler::DeviceArrived(libusb_device* device_libusb) {
 }
 
 void UsbHandler::DeviceLeft(libusb_device* device_libusb) {
+LOG_TAG(logger_);
   LOG4CXX_TRACE(logger_, "enter. libusb_device* " << device_libusb);
   PlatformUsbDevice* device = NULL;
   for (Devices::iterator it = devices_.begin(); it != devices_.end(); ++it) {

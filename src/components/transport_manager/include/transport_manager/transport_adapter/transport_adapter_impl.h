@@ -324,6 +324,16 @@ class TransportAdapterImpl : public TransportAdapter,
                              const ConnectError& error);
 
   /**
+   * @brief Remove marked as FINALISING connection from accounting.
+   *
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   */
+  void RemoveFinalizedConnection(const DeviceUID& device_handle,
+                                 const ApplicationHandle& app_handle) OVERRIDE;
+
+
+  /**
    * @brief Remove specified device and all its connections
    * @param device_handle Device unique identifier.
    * @param error Error class that contains details of this error situation.

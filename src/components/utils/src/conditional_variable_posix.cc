@@ -127,7 +127,7 @@ ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
 #elif defined(OS_MAC)
   clock_gettime(CLOCK_MONOTONIC, &now);
 #else
-  clock_gettime(CLOCK_MONOTONIC, &now); 
+  clock_gettime(CLOCK_MONOTONIC, &now);
 #endif
   timespec wait_interval;
   wait_interval.tv_sec = now.tv_sec +
@@ -138,9 +138,18 @@ ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
   wait_interval.tv_nsec %= kNanosecondsPerSecond;
   Lock& lock = auto_lock.GetLock();
   lock.AssertTakenAndMarkFree();
+
+#if defined(OS_ANDROID)
+pthread_mutex_unlock(&lock.mutex_);
+#endif
   int timedwait_status = pthread_cond_timedwait(&cond_var_,
                                                 &lock.mutex_,
                                                 &wait_interval);
+#if defined(OS_ANDROID)
+pthread_mutex_lock(&lock.mutex_);
+#endif
+
+
   lock.AssertFreeAndMarkTaken();
   WaitStatus wait_status = kNoTimeout;
   switch(timedwait_status) {

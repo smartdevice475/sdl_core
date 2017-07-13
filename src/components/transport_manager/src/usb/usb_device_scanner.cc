@@ -62,6 +62,7 @@ void UsbDeviceScanner::OnDeviceArrived(PlatformUsbDevice* device) {
     SupportedDeviceFound(device);
   } else {
     if (IsGoogleAccessory(device)) {
+LOG_TAG(logger_);
       SupportedDeviceFound(device);
     } else {
       TurnIntoAccessoryMode(device);
@@ -70,6 +71,7 @@ void UsbDeviceScanner::OnDeviceArrived(PlatformUsbDevice* device) {
 }
 
 void UsbDeviceScanner::OnDeviceLeft(PlatformUsbDevice* device) {
+LOG_TAG(logger_);
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "PlatformUsbDevice " << device);
   bool list_changed = false;
@@ -219,6 +221,8 @@ void UsbDeviceScanner::SupportedDeviceFound(PlatformUsbDevice* device) {
       << ") identified as: " << device->GetManufacturer()
       << ", " << device->GetProductName()
       << ", serial: " << device->GetSerialNumber());
+
+LOG_TAG(logger_);
   UpdateList();
 }
 
@@ -248,6 +252,7 @@ void UsbDeviceScanner::UpdateList() {
   devices_mutex_.Release();
 
   LOG4CXX_DEBUG(logger_, "USB search done " << device_vector.size());
+LOG_TAG(logger_);
   controller_->SearchDeviceDone(device_vector);
 }
 

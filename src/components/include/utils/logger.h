@@ -36,6 +36,7 @@
 #ifdef ENABLE_LOG
   #include <errno.h>
   #include <string.h>
+	#include <fstream>
   #include <sstream>
   #include <log4cxx/propertyconfigurator.h>
   #include <log4cxx/spi/loggingevent.h>
@@ -68,19 +69,22 @@
     #define LOG4CXX_IS_TRACE_ENABLED(logger) false
 	#define LOG4CXX_AUTO_TRACE(loggerPtr)
     
-   #define  LOGE(MSG)    {std::ofstream ff("/sdcard/sdllog.txt",std::iostream::out|std::iostream::app); time_t tick = time(NULL);struct tm tm;char s[100];tm = *localtime(&tick);strftime(s, sizeof(s), "%H:%M:%S", &tm);ff<<"["<<s<<"]["<<__FILE__<<"]["<<__FUNCTION__<<"][Line:"<<__LINE__<<"]"<<MSG;ff.flush();ff.close();}
+   #define  LOGE(MSG)    {std::ofstream ff("/sdcard/sdllog.txt",std::iostream::out|std::iostream::app); time_t tick = time(NULL);struct tm tm;char s[100];tm = *localtime(&tick);strftime(s, sizeof(s), "%H:%M:%S", &tm);ff<<"["<<s<<"]["<<__FILE__<<"]["<<__FUNCTION__<<"][Line:"<<__LINE__<<"][pid:"<<pthread_self()<<"]"<<MSG;ff.flush();ff.close();}
 
 
 
 	#define LOG_CUSTOM(logger,message) LOGE(message<<"\n")
+#undef LOG_TAG
+#define LOG_TAG(loggerPtr) //LOG_CUSTOM(loggerPtr,"")
+
 	#define FLUSH_LOGGER()
 	#define ENABLE_LOGGER(logs_enabled)
 		
 	#define LOG4CXX_INFO(logger,message) //LOGE(message<<"\n")
-	#define LOG4CXX_ERROR(logger,message)
+	#define LOG4CXX_ERROR(logger,message) LOGE(message<<"\n")
 	#define LOG4CXX_TRACE(logger,message) //LOGE(message<<"\n")
 	#define LOG4CXX_WARN(logger,message) 
-	#define LOG4CXX_DEBUG(logger,message)
+	#define LOG4CXX_DEBUG(logger,message) //LOGE(message<<"\n")
 	#define LOG4CXX_FATAL(logger,message)
 		
 		
@@ -104,6 +108,8 @@
     #define LOG4CXX_ERROR_WITH_ERRNO(logger, message)    //LOGE(message << ", error code " << errno << " (" << strerror(errno) << ")"<<"\n")
 	
 #else // OS_Android
+
+#define  LOGE(MSG)
 
     #define CREATE_LOGGERPTR_GLOBAL(logger_var, logger_name) \
       namespace { \
@@ -149,12 +155,20 @@
     #undef LOG4CXX_TRACE
     #define LOG4CXX_TRACE(loggerPtr, logEvent) LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getTrace(), logEvent)
 
+//#define LOG4CXX_AUTO_TRACE_WITH_NAME_SPECIFIED(loggerPtr, auto_trace)
+//#define LOG4CXX_AUTO_TRACE(loggerPtr)
+
     #define LOG4CXX_AUTO_TRACE_WITH_NAME_SPECIFIED(loggerPtr, auto_trace) \
       logger::AutoTrace auto_trace(loggerPtr, LOG4CXX_LOCATION)
     #define LOG4CXX_AUTO_TRACE(loggerPtr) LOG4CXX_AUTO_TRACE_WITH_NAME_SPECIFIED(loggerPtr, SDL_local_auto_trace_object)
 
     #undef LOG4CXX_DEBUG
     #define LOG4CXX_DEBUG(loggerPtr, logEvent) LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getDebug(), logEvent)
+
+#undef LOG_CUSTOM
+#define LOG_CUSTOM(loggerPtr,logEvent) LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getDebug(), logEvent)
+#undef LOG_TAG
+#define LOG_TAG(loggerPtr) LOG_CUSTOM(loggerPtr,"["<<__func__ <<"]["<< __FILE__ << "][LINE:" << __LINE__<<"][pid:"<<pthread_self()<<"]")
 
     #undef LOG4CXX_INFO
     #define LOG4CXX_INFO(loggerPtr, logEvent) LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getInfo(), logEvent)
@@ -176,6 +190,8 @@
 #endif
 
 #else  // ENABLE_LOG is OFF
+
+#define LOG_CUSTOM(logger,message)
 	#define FLUSH_LOGGER()
 	#define ENABLE_LOGGER(logs_enabled)
     #define CREATE_LOGGERPTR_GLOBAL(logger_var, logger_name)

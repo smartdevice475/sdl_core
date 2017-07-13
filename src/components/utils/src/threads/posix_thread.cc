@@ -298,11 +298,9 @@ void Thread::stop() {
   LOG4CXX_DEBUG(logger_, "Stopping thread #" << handle_
                 << " \"" << name_ << "\"");
 #endif
-
   if (delegate_ && isThreadRunning_) {
     delegate_->exitThreadMain();
   }
-
 #if defined(OS_WIN32) || defined(OS_WINCE)
   LOG4CXX_DEBUG(logger_,
                 "Stopped thread #" << handle_.p << " \"" << name_ << " \"");
@@ -317,8 +315,8 @@ void Thread::join() {
   DCHECK(!pthread_equal(pthread_self(), handle_));
 
   stop();
-
   sync_primitives::AutoLock auto_lock(state_lock_);
+
   run_cond_.NotifyOne();
   if (isThreadRunning_) {
     if (!pthread_equal(pthread_self(), handle_)) {

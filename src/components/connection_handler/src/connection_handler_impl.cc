@@ -111,9 +111,12 @@ void ConnectionHandlerImpl::set_protocol_handler(
 
 void ConnectionHandlerImpl::OnDeviceListUpdated(
     const std::vector<transport_manager::DeviceInfo>&) {
+LOG_TAG(logger_);
   LOG4CXX_AUTO_TRACE(logger_);
+
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
   if (connection_handler_observer_) {
+
     connection_handler_observer_->OnDeviceListUpdated(device_list_);
   }
 }
@@ -230,7 +233,10 @@ void ConnectionHandlerImpl::OnUnexpectedDisconnect(
     const transport_manager::CommunicationError &error) {
   LOG4CXX_AUTO_TRACE(logger_);
 
+LOG_TAG(logger_);
   OnConnectionEnded(connection_id);
+
+LOG_TAG(logger_);
 }
 
 void ConnectionHandlerImpl::OnDeviceConnectionLost(
@@ -914,21 +920,27 @@ void ConnectionHandlerImpl::OnConnectionEnded(
   connection_list_.erase(itr);
   connection_list_lock_.Release();
 
-  sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
+  //sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
   if (connection_handler_observer_ && connection.get() != NULL) {
     const SessionMap session_map = connection->session_map();
 
     for (SessionMap::const_iterator session_it = session_map.begin();
          session_map.end() != session_it; ++session_it) {
+LOG_TAG(logger_);
       const uint32_t session_key = KeyFromPair(connection_id, session_it->first);
       const ServiceList &service_list = session_it->second.service_list;
       for (ServiceList::const_iterator service_it = service_list.begin(), end =
            service_list.end(); service_it != end; ++service_it) {
+LOG_TAG(logger_);
         connection_handler_observer_->OnServiceEndedCallback(
             session_key, service_it->service_type, CloseSessionReason::kCommon);
+LOG_TAG(logger_);
       }
+LOG_TAG(logger_);
     }
+LOG_TAG(logger_);
    }
+LOG_TAG(logger_);
  }
 
 void ConnectionHandlerImpl::BindProtocolVersionWithSession(

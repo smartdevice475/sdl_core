@@ -48,6 +48,7 @@ TransportAdapterListenerImpl::TransportAdapterListenerImpl(
 
 void TransportAdapterListenerImpl::OnSearchDeviceDone(
   const TransportAdapter* adapter) {
+LOG_TAG(logger_);
   LOG4CXX_TRACE(logger_, "enter. adapter* " << adapter);
   const TransportAdapterEvent event(
     TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE,
@@ -75,6 +76,7 @@ void TransportAdapterListenerImpl::OnSearchDeviceFailed(
 
 void TransportAdapterListenerImpl::OnDeviceListUpdated(
   const TransportAdapter* adapter) {
+LOG_TAG(logger_);
   LOG4CXX_TRACE(logger_, "enter. adapter* " << adapter);
   const TransportAdapterEvent event(
     TransportAdapterListenerImpl::EventTypeEnum::ON_DEVICE_LIST_UPDATED,
@@ -246,6 +248,7 @@ void TransportAdapterListenerImpl::OnConnectRequested(
 void TransportAdapterListenerImpl::OnUnexpectedDisconnect(
   const TransportAdapter* adapter, const DeviceUID& device,
   const ApplicationHandle& application, const CommunicationError& error) {
+LOG_TAG(logger_);
   LOG4CXX_TRACE(logger_, "enter. adapter: " << adapter << ", device: " << &device <<
                 ", application: " << &application << ", error: " << &error);
   CommunicationError* err = new CommunicationError(error);

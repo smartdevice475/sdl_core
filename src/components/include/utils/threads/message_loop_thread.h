@@ -142,8 +142,8 @@ MessageLoopThread<Q>::MessageLoopThread(const std::string&   name,
                                     thread_delegate_)) {
   const bool started = thread_->start(thread_opts);
   if (!started) {
-    CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
-    LOG4CXX_ERROR(logger_, "Failed to start thread " << name);
+    //CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
+    //LOG4CXX_ERROR(logger_, "Failed to start thread " << name);
   }
 }
 
@@ -156,6 +156,7 @@ MessageLoopThread<Q>::~MessageLoopThread() {
 
 template <class Q>
 void MessageLoopThread<Q>::PostMessage(const Message& message) {
+//LOG_TAG(logger_);
   message_queue_.push(message);
 }
 
@@ -181,14 +182,19 @@ MessageLoopThread<Q>::LoopThreadDelegate::LoopThreadDelegate(
 
 template<class Q>
 void MessageLoopThread<Q>::LoopThreadDelegate::threadMain() {
+//LOG_TAG(logger_);
   CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
   LOG4CXX_AUTO_TRACE(logger_);
   while (!message_queue_.IsShuttingDown()) {
+//LOG_TAG(logger_);
     DrainQue();
+//LOG_TAG(logger_);
     message_queue_.wait();
+//LOG_TAG(logger_);
   }
   // Process leftover messages
   DrainQue();
+//LOG_TAG(logger_);
 }
 
 template<class Q>
@@ -198,12 +204,16 @@ void MessageLoopThread<Q>::LoopThreadDelegate::exitThreadMain() {
 
 template<class Q>
 void MessageLoopThread<Q>::LoopThreadDelegate::DrainQue() {
+//LOG_TAG(logger_);
   while (!message_queue_.empty()) {
+//LOG_TAG(logger_);
     Message msg;
     if (message_queue_.pop(msg)) {
+//LOG_TAG(logger_);
       handler_.Handle(msg);
     }
   }
+//LOG_TAG(logger_);
 }
 
 }  // namespace threads

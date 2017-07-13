@@ -725,7 +725,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(const ProtocolFramePtr
 
   const uint32_t connection_key =
       session_observer_.KeyFromPair(packet->connection_id(), packet->session_id());
-
+LOG_CUSTOM(logger_, "connection_key: " << connection_key << " id:" << pthread_self());
   const RawMessagePtr rawMessage(
         new RawMessage(connection_key,
                        packet->protocol_version(),

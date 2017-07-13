@@ -86,6 +86,7 @@ include_directories(./policy_table/table_struct)
 add_subdirectory(./policy_table/table_struct)
 
 set(LIBRARIES ConfigProfile policy_struct dbms jsoncpp Utils)
+
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   # --- QDB Wrapper 
   include_directories (${COMPONENTS_DIR}/utils/include/utils)
@@ -116,12 +117,11 @@ endif()
 endif()
 endif()
 
-#add_library(${target} STATIC ${SOURCES})
 add_library(${target} SHARED ${SOURCES})
-#target_link_libraries(${target} ${LIBRARIES} )
 
 if(ENABLE_LOG)
-if(!CUSTOM_LOG)
+if(CUSTOM_LOG)
+else()
   target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 endif()

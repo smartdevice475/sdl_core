@@ -920,13 +920,11 @@ bool policy::CacheManager::IsNumberService(const std::string& input,
 
 utils::SharedPtr<policy_table::Table>
 CacheManager::GenerateSnapshot() {
-printf("---GenerateSnapshot---enter");
   CACHE_MANAGER_CHECK(snapshot_);
   sync_primitives::AutoLock lock(cache_lock_);
   snapshot_ = new policy_table::Table();
   snapshot_->policy_table = pt_->policy_table;
   CheckSnapshotInitialization();
-printf("---GenerateSnapshot---quit");
   return snapshot_;
 }
 

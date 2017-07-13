@@ -91,12 +91,15 @@ Connection::Connection(ConnectionHandle connection_handle,
 }
 
 Connection::~Connection() {
+LOG_TAG(logger_);
   LOG4CXX_AUTO_TRACE(logger_);
   heart_beat_monitor_thread_->join();
+LOG_TAG(logger_);
   delete heartbeat_monitor_;
   threads::DeleteThread(heart_beat_monitor_thread_);
   sync_primitives::AutoLock lock(session_map_lock_);
   session_map_.clear();
+LOG_TAG(logger_);
 }
 
 // Finds a key not presented in std::map<unsigned char, T>

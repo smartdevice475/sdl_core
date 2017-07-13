@@ -898,6 +898,7 @@ void Profile::UpdateValues() {
                   kMainSection, kAppStorageFolderKey);
 
   if (IsRelativePath(app_storage_folder_)) {
+LOG4CXX_INFO(logger_, "---app_storage_folder = " << app_storage_folder_);
     MakeAbsolutePath(app_storage_folder_);
   }
 

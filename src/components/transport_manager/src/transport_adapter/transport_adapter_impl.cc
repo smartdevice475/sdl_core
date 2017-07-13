@@ -389,7 +389,7 @@ DeviceSptr TransportAdapterImpl::AddDevice(DeviceSptr device) {
 }
 
 void TransportAdapterImpl::SearchDeviceDone(const DeviceVector& devices) {
-  LOG4CXX_TRACE(logger_, "enter. devices: " << &devices);
+LOG_TAG(logger_);
   DeviceMap new_devices;
   for (DeviceVector::const_iterator it = devices.begin(); it != devices.end();
        ++it) {
@@ -457,7 +457,6 @@ void TransportAdapterImpl::SearchDeviceDone(const DeviceVector& devices) {
       ConnectDevice(device);
     }
   }
-  LOG4CXX_TRACE(logger_, "exit");
 }
 
 void TransportAdapterImpl::ApplicationListUpdated(const DeviceUID& device_handle) {
@@ -526,6 +525,7 @@ void TransportAdapterImpl::DeviceDisconnected(
     for (TransportAdapterListenerList::iterator it = listeners_.begin();
          it != listeners_.end(); ++it) {
       TransportAdapterListener* listener = *it;
+LOG_TAG(logger_);
       listener->OnUnexpectedDisconnect(this, device_uid, app_handle, CommunicationError());
     }
   }
@@ -745,8 +745,33 @@ void TransportAdapterImpl::ConnectionAborted(
   ConnectionFinished(device_id, app_handle);
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
        it != listeners_.end(); ++it) {
+LOG_TAG(logger_);
     (*it)->OnUnexpectedDisconnect(this, device_id, app_handle, error);
   }
+}
+
+void TransportAdapterImpl::RemoveFinalizedConnection(
+    const DeviceUID& device_handle, const ApplicationHandle& app_handle) {
+  const DeviceUID device_uid = device_handle;
+  const ApplicationHandle app_uid = app_handle;
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoWriteLock lock(connections_lock_);
+  ConnectionMap::iterator it_conn =
+      connections_.find(std::make_pair(device_uid, app_handle));
+  if (it_conn == connections_.end()) {
+    LOG4CXX_WARN(logger_,
+                 "Device_id: " << &device_uid << ", app_handle: " << &app_uid
+                               << " connection not found");
+    return;
+  }
+  const ConnectionInfo& info = it_conn->second;
+  if (info.state != ConnectionInfo::FINALISING) {
+    LOG4CXX_WARN(logger_,
+                 "Device_id: " << &device_uid << ", app_handle: " << &app_uid
+                               << " connection not finalized");
+    return;
+  }
+  connections_.erase(it_conn);
 }
 
 bool TransportAdapterImpl::IsInitialised() const {

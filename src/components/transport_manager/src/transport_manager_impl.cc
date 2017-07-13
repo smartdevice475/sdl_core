@@ -320,8 +320,12 @@ int TransportManagerImpl::ReceiveEventFromDevice(const TransportAdapterEvent& ev
     LOG4CXX_ERROR(logger_, "TM is not initialized.");
     LOG4CXX_TRACE(logger_,
                   "exit with E_TM_IS_NOT_INITIALIZED. Condition: false == this->is_initialized_");
+//LOG_TAG(logger_);
     return E_TM_IS_NOT_INITIALIZED;
   }
+
+
+
   this->PostEvent(event);
   LOG4CXX_TRACE(logger_, "exit with E_SUCCESS");
   return E_SUCCESS;
@@ -530,6 +534,12 @@ void TransportManagerImpl::PostMessage(const ::protocol_handler::RawMessagePtr m
 void TransportManagerImpl::PostEvent(const TransportAdapterEvent& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "TransportAdapterEvent: " << &event);
+
+if(event.event_type == TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE)
+{
+LOG_TAG(logger_);
+}
+
   event_queue_.PostMessage(event);
 }
 
@@ -583,6 +593,7 @@ TransportManagerImpl::ConnectionInternal* TransportManagerImpl::GetConnection(
 }
 
 void TransportManagerImpl::OnDeviceListUpdated(TransportAdapter* ta) {
+LOG_TAG(logger_);
   LOG4CXX_TRACE(logger_, "enter. TransportAdapter: " << ta);
   const DeviceList device_list = ta->GetDeviceList();
   LOG4CXX_DEBUG(logger_, "DEVICE_LIST_UPDATED " << device_list.size());
@@ -611,11 +622,13 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
   LOG4CXX_TRACE(logger_, "enter");
   switch (event.event_type) {
     case TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE: {
+LOG_TAG(logger_);
       RaiseEvent(&TransportManagerListener::OnScanDevicesFinished);
       LOG4CXX_DEBUG(logger_, "event_type = ON_SEARCH_DONE");
       break;
     }
     case TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL: {
+LOG_TAG(logger_);
       // error happened in real search process (external error)
       RaiseEvent(&TransportManagerListener::OnScanDevicesFailed,
                  *static_cast<SearchDeviceError*>(event.event_error.get()));
@@ -623,16 +636,19 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
       break;
     }
     case TransportAdapterListenerImpl::EventTypeEnum::ON_DEVICE_LIST_UPDATED: {
+LOG_TAG(logger_);
       OnDeviceListUpdated(event.transport_adapter);
       LOG4CXX_DEBUG(logger_, "event_type = ON_DEVICE_LIST_UPDATED");
       break;
     }
     case TransportAdapterListenerImpl::ON_FIND_NEW_APPLICATIONS_REQUEST: {
+LOG_TAG(logger_);
       RaiseEvent(&TransportManagerListener::OnFindNewApplicationsRequest);
       LOG4CXX_DEBUG(logger_, "event_type = ON_FIND_NEW_APPLICATIONS_REQUEST");
       break;
     }
     case TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE: {
+LOG_TAG(logger_);
       const DeviceHandle device_handle = converter_.UidToHandle(event.device_uid);
       AddConnection(ConnectionInternal(this, event.transport_adapter, ++connection_id_counter_,
                                        event.device_uid, event.application_id,
@@ -646,6 +662,7 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
       break;
     }
     case TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL: {
+LOG_TAG(logger_);
       RaiseEvent(&TransportManagerListener::OnConnectionFailed,
                  DeviceInfo(converter_.UidToHandle(event.device_uid), event.device_uid,
                                 event.transport_adapter->DeviceName(event.device_uid),
@@ -655,6 +672,7 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
       break;
     }
     case TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_DONE: {
+LOG_TAG(logger_);
       connections_lock_.AcquireForReading();
       ConnectionInternal* connection =
           GetConnection(event.device_uid, event.application_id);
@@ -674,6 +692,7 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
       break;
     }
     case TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_FAIL: {
+LOG_TAG(logger_);
       const DeviceHandle device_handle = converter_.UidToHandle(event.device_uid);
       RaiseEvent(&TransportManagerListener::OnDisconnectFailed,
                  device_handle, DisconnectDeviceError());
@@ -681,6 +700,7 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
       break;
     }
     case TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_DONE: {
+LOG_TAG(logger_);
 #ifdef TELEMETRY_MONITOR
       if (metric_observer_) {
         metric_observer_->StopRawMsg(event.event_data.get());
@@ -707,6 +727,7 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
       break;
     }
     case TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_FAIL: {
+LOG_TAG(logger_);
 #ifdef TELEMETRY_MONITOR
       if (metric_observer_) {
         metric_observer_->StopRawMsg(event.event_data.get());
@@ -740,6 +761,7 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
       break;
     }
     case TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE: {
+LOG_TAG(logger_);
       {
       sync_primitives::AutoReadLock lock(connections_lock_);
       ConnectionInternal* connection =
@@ -764,6 +786,7 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
       break;
     }
     case TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_FAIL: {
+LOG_TAG(logger_);
       LOG4CXX_DEBUG(logger_, "Event ON_RECEIVED_FAIL");
       connections_lock_.AcquireForReading();
       ConnectionInternal* connection =
@@ -783,10 +806,12 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
       break;
     }
     case TransportAdapterListenerImpl::EventTypeEnum::ON_COMMUNICATION_ERROR: {
+LOG_TAG(logger_);
       LOG4CXX_DEBUG(logger_, "event_type = ON_COMMUNICATION_ERROR");
       break;
     }
     case TransportAdapterListenerImpl::EventTypeEnum::ON_UNEXPECTED_DISCONNECT: {
+LOG_TAG(logger_);
       connections_lock_.AcquireForReading();
       ConnectionInternal* connection =
           GetConnection(event.device_uid, event.application_id);
@@ -806,6 +831,9 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
       LOG4CXX_DEBUG(logger_, "eevent_type = ON_UNEXPECTED_DISCONNECT");
       break;
     }
+default:
+LOG_TAG(logger_);
+break;
   }  // switch
   LOG4CXX_TRACE(logger_, "exit");
 }

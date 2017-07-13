@@ -101,7 +101,7 @@ OutTransferCallback(libusb_transfer* transfer) {
 }
 
 bool UsbConnection::PostInTransfer() {
-  LOG4CXX_TRACE(logger_, "enter");
+  //LOG4CXX_ERROR(logger_, "enter");
   libusb_fill_bulk_transfer(in_transfer_, device_handle_, in_endpoint_,
                             in_buffer_, in_endpoint_max_packet_size_,
                             InTransferCallback, this, 0);
@@ -113,7 +113,7 @@ bool UsbConnection::PostInTransfer() {
                   "exit with FALSE. Condition: LIBUSB_SUCCESS != libusb_submit_transfer");
     return false;
   }
-  LOG4CXX_TRACE(logger_, "exit with TRUE");
+  //LOG4CXX_ERROR(logger_, "exit with TRUE");
   return true;
 }
 
@@ -277,6 +277,7 @@ void UsbConnection::Finalise() {
 
 void UsbConnection::AbortConnection() {
   LOG4CXX_TRACE(logger_, "enter");
+LOG_TAG(logger_);
   controller_->ConnectionAborted(device_uid_, app_handle_, CommunicationError());
   Disconnect();
   LOG4CXX_TRACE(logger_, "exit");

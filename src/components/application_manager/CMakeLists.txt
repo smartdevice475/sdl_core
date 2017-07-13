@@ -414,7 +414,8 @@ target_link_libraries("ApplicationManager" ${LIBRARIES} AMHMICommandsLibrary
                                                         AMPolicyLibrary)
 
 if(ENABLE_LOG)
-if(!CUSTOM_LOG)
+if(CUSTOM_LOG)
+else()
   target_link_libraries("ApplicationManager" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 endif()

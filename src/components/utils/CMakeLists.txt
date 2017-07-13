@@ -103,7 +103,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
 endif()
 
 if(ENABLE_LOG)
-if(!CUSTOM_LOG)
+if(CUSTOM_LOG)
+else()
   list(APPEND SOURCES
     ${UTILS_SRC_DIR}/push_log.cc
     ${UTILS_SRC_DIR}/log_message_loop_thread.cc
@@ -141,11 +142,13 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 endif()
 
 if(ENABLE_LOG)
+if(CUSTOM_LOG)
+else()
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
   list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
   list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
   list(APPEND LIBRARIES ConfigProfile)
-
+endif()
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
 else()
   add_dependencies(Utils install-3rd_party_logger)

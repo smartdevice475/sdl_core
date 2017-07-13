@@ -171,6 +171,7 @@ class TransportAdapter {
    */
   virtual bool IsServerOriginatedConnectSupported() const = 0;
 
+
   /**
    * @brief Connect to the specified application discovered on device.
    *
@@ -209,6 +210,15 @@ class TransportAdapter {
    * @return Error information about possible reason of failure.
    */
   virtual Error StopClientListening() = 0;
+
+  /**
+   * @brief Remove marked as FINALISING connection from accounting.
+   *
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   */
+  virtual void RemoveFinalizedConnection(
+      const DeviceUID& device_handle, const ApplicationHandle& app_handle) = 0;
 
   /**
    * @brief Disconnect from specified session.
