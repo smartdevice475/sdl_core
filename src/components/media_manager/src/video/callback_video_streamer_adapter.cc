@@ -34,6 +34,8 @@
 
 namespace media_manager {
 
+CREATE_LOGGERPTR_GLOBAL(logger_, "CallbackVideoStreamerAdapter")
+
 CallbackVideoStreamerAdapter::CallbackVideoStreamerAdapter() {
 
 }
@@ -45,9 +47,11 @@ void CallbackVideoStreamerAdapter::SendData(int32_t application_key,
 		return;
 	}
 #ifdef BUILD_TARGET_LIB
-	s_mediaVideoStreamSendCallback((const char *)msg->data(), msg.get()->data_size());
+	if(s_mediaVideoStreamSendCallback != NULL){
+		s_mediaVideoStreamSendCallback((const char *)msg->data(), msg.get()->data_size());
+	}
 #endif
-	printf("%s, Line:%d, Streamer::sent %d\n", __FUNCTION__, __LINE__, msg->data_size());
+	//printf("%s, Line:%d, Streamer::sent %d\n", __FUNCTION__, __LINE__, msg->data_size());
 }
 
 CallbackVideoStreamerAdapter::~CallbackVideoStreamerAdapter() {
