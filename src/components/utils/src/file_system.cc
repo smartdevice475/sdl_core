@@ -260,46 +260,27 @@ std::string file_system::CreateDirectory(const std::string& name) {
 bool file_system::CreateDirectoryRecursively(const std::string& path) {
   size_t pos = 0;
   bool ret_val = true;
-  std::string fp = path;
 
-  // Replace all symbol '/' with '\'
-  for (std::string::iterator it = fp.begin(); it != fp.end(); it++) {
-      if (*it == '/') *it = '\\';
-  }
-
+  while (ret_val == true && pos <= path.length()) {
+#if defined(OS_WIN32) || defined(OS_WINCE)
+	pos = path.find('\\', pos + 1);
+#else
+    pos = path.find('/', pos + 1);
+#endif
+    if (!DirectoryExists(path.substr(0, pos))) {
 #if defined(OS_WIN32)
-  if (fp.substr(fp.length() - 1, 1) != "\\") fp = fp + "\\";
-  while (ret_val == true && pos <= fp.length()) {
-      pos = fp.find('\\', pos + 1);
-      if (!DirectoryExists(fp.substr(0, pos))) {
-          if (0 == ::CreateDirectory(fp.substr(0, pos).c_str(), NULL)) {
+	if (0 != ::CreateDirectory(path.substr(0, pos).c_str(), NULL)) {
+#elif defined(OS_WINCE)
+	wchar_string strUnicodeData;
+	Global::toUnicode(path.substr(0, pos), CP_ACP, strUnicodeData);
+	if (0 != ::CreateDirectory(strUnicodeData.c_str(), NULL)) {
+#else
+      if (0 != mkdir(path.substr(0, pos).c_str(), S_IRWXU)) {
+#endif
         ret_val = false;
       }
     }
   }
-#elif defined(OS_WINCE)
-  if (fp.substr(fp.length() - 1, 1) != "\\") fp = fp + "\\";
-  while (ret_val == true && pos <= fp.length()) {
-      pos = fp.find('/', pos + 1);
-      if (!DirectoryExists(fp.substr(0, pos))) {
-          wchar_string strUnicodeData;
-          Global::toUnicode(fp.substr(0, pos), CP_ACP, strUnicodeData);
-          if (0 == ::CreateDirectory(strUnicodeData.c_str(), NULL)) {
-              ret_val = false;
-          }
-      }
-  }
-#else
-  if (fp.substr(fp.length() - 1, 1) != "/") fp = fp + "/";
-  while (ret_val == true && pos <= fp.length()) {
-      pos = fp.find('/', pos + 1);
-      if (!DirectoryExists(fp.substr(0, pos))) {
-          if (0 != mkdir(fp.substr(0, pos).c_str(), S_IRWXU)) {
-              ret_val = false;
-          }
-      }
-  }
-#endif
 
   return ret_val;
 }
@@ -493,12 +474,22 @@ std::string file_system::GetAbsolutePath(const std::string& path) {
   //PathCombine(AbsolutePath, RelativePath.c_str(), RootPath);
 
   return Global::WStringToString(AbsolutePath);
+#elif defined(OS_ANDROID)
+  char abs_path[PATH_MAX];
+  realpath(path.c_str(), abs_path);
+	if (!DirectoryExists(abs_path))
+	{
+		return "";
+	}
+	else
+	{
+  	return std::string(abs_path);
+	}
 #else
   char abs_path[PATH_MAX];
   if (NULL == realpath(path.c_str(), abs_path)) {
     return std::string();
   }
-
   return std::string(abs_path);
 #endif
 }
