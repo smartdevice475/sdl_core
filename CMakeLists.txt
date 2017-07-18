@@ -65,9 +65,7 @@ option(ENABLE_SANITIZE "Sanitize tool" OFF)
 option(ENABLE_SECURITY "Security Ford protocol protection" ON)
 option(ENABLE_HMI_PTU_DECRYPTION "Policy table update parsed by hmi" ON)
 option(MODIFY_FUNCTION_FLAGS "modify function" ON)
-if(MODIFY_FUNCTION_FLAGS)
 option(BUILD_TARGET_LIBRARY    "build target as library" ON)
-endif()
 
 set(OS_TYPE_OPTION 	"$ENV{OS_TYPE}")
 set(DEBUG_OPTION 	"$ENV{DEBUG}")
@@ -313,7 +311,7 @@ add_definitions(-DMODIFY_FUNCTION_SIGN)
 endif()
 
 if(BUILD_TARGET_LIBRARY)
-add_definitions(-DBUILD_TARGET_LIB)
+add_definitions(-DBUILD_TARGET_LIBRARY)
 endif()
 
 if (BUILD_USB_SUPPORT)

@@ -50,11 +50,11 @@ if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
 add_subdirectory(./sdk_ext)
 endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-  # --- sqlite3
-  add_subdirectory(./sqlite3-3.11.1)
-  set(SQLITE3_INCLUDE_DIRECTORY ${SQLITE3_INCLUDE_DIRECTORY} PARENT_SCOPE)
-  
+# --- sqlite3
+add_subdirectory(./sqlite3-3.11.1)
+set(SQLITE3_INCLUDE_DIRECTORY ${SQLITE3_INCLUDE_DIRECTORY} PARENT_SCOPE)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")  
   # --- pthread-win32
   add_subdirectory(./pthread-win32-2.9.1)
 endif()
