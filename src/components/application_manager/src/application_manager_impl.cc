@@ -1025,7 +1025,7 @@ mobile_apis::HMILevel::eType ApplicationManagerImpl::GetDefaultHmiLevel(
 
   if (policy_handler_.PolicyEnabled()) {
     const std::string policy_app_id = application->mobile_app_id();
-    std::string default_hmi_string = "";
+    std::string default_hmi_string = "NONE";
     if (policy_handler_.GetDefaultHmi(policy_app_id,
                                                          &default_hmi_string)) {
       if ("BACKGROUND" == default_hmi_string) {
@@ -2607,8 +2607,10 @@ void ApplicationManagerImpl::UnregisterApplication(
     }
   }
 
-  if (is_resuming) {
+	if (is_resuming) {
+		app_to_remove->CurrentHmiState()->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
     resume_ctrl_.SaveApplication(app_to_remove);
+		resume_ctrl_.Persist();
   } else {
     resume_ctrl_.RemoveApplicationFromSaved(app_to_remove);
   }

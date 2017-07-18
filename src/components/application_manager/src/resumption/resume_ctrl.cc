@@ -434,6 +434,14 @@ void ResumeCtrl::SaveDataOnTimer() {
   }
 }
 
+void ResumeCtrl::Persist()
+{
+	LOG4CXX_AUTO_TRACE(logger_);
+	if (resumption_storage_) {
+		resumption_storage_->Persist();
+	}
+}
+
 bool ResumeCtrl::IsDeviceMacAddressEqual(ApplicationSharedPtr application,
                                          const std::string& saved_device_mac) {
   const std::string device_mac = application->mac_address();

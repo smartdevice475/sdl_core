@@ -229,6 +229,12 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    *  N gets from property
    */
   void SaveDataOnTimer();
+	
+	/**
+	* @brief Persist :
+	*  Persist saves resumption data on file system
+	*/
+	void Persist();
 
   /**
    * @brief Updates flag for saving application data
